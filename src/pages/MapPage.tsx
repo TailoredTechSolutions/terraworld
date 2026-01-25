@@ -1,24 +1,56 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
 import FarmCard from "@/components/FarmCard";
-import { farms } from "@/data/products";
+import FarmMap from "@/components/maps/FarmMap";
+import DeliveryTracker from "@/components/maps/DeliveryTracker";
+import { farms, Farm } from "@/data/products";
+import { useUserLocation, calculateDistance, calculateDeliveryFee, calculateETA } from "@/hooks/useUserLocation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, Filter, List, Map as MapIcon } from "lucide-react";
-import { useState } from "react";
+import { Search, MapPin, Filter, List, Map as MapIcon, Navigation, Clock, Truck, AlertCircle } from "lucide-react";
 
 const MapPage = () => {
-  const [view, setView] = useState<"list" | "map">("list");
+  const [view, setView] = useState<"list" | "map">("map");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
+  const [showTracker, setShowTracker] = useState(false);
+  
+  const { location, error: locationError, loading: locationLoading, requestLocation } = useUserLocation();
 
-  const filteredFarms = farms.filter(
+  // Calculate distances and sort farms
+  const farmsWithDistance = farms.map(farm => {
+    if (location) {
+      const distance = calculateDistance(
+        location.lat,
+        location.lng,
+        farm.latitude,
+        farm.longitude
+      );
+      return { ...farm, distance: Math.round(distance * 10) / 10 };
+    }
+    return farm;
+  }).sort((a, b) => (a.distance || 0) - (b.distance || 0));
+
+  const filteredFarms = farmsWithDistance.filter(
     (farm) =>
       farm.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       farm.products.some((p) =>
         p.toLowerCase().includes(searchQuery.toLowerCase())
       )
   );
+
+  const handleFarmSelect = (farm: Farm) => {
+    setSelectedFarm(farm);
+  };
+
+  const getDeliveryInfo = (farm: Farm) => {
+    const distance = farm.distance || 5;
+    const fee = calculateDeliveryFee(distance);
+    const eta = calculateETA(distance);
+    return { fee, eta };
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -76,25 +108,128 @@ const MapPage = () => {
           </div>
         </div>
 
-        {/* Location Banner */}
+        {/* Location Status Banner */}
         <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary mb-8">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary">
-            <MapPin className="h-5 w-5 text-primary-foreground" />
+            {locationLoading ? (
+              <div className="h-5 w-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <MapPin className="h-5 w-5 text-primary-foreground" />
+            )}
           </div>
           <div className="flex-1">
-            <p className="font-medium text-foreground">
-              Showing farms near Manila, Philippines
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Based on your location
-            </p>
+            {locationError ? (
+              <>
+                <p className="font-medium text-foreground flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-yellow-500" />
+                  Using default location (Manila)
+                </p>
+                <p className="text-sm text-muted-foreground">{locationError}</p>
+              </>
+            ) : (
+              <>
+                <p className="font-medium text-foreground">
+                  {location ? "Showing farms near you" : "Getting your location..."}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {location ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` : "Please wait..."}
+                </p>
+              </>
+            )}
           </div>
-          <Button variant="outline" className="rounded-xl">
-            Change Location
+          <Button variant="outline" className="rounded-xl" onClick={requestLocation}>
+            <Navigation className="h-4 w-4 mr-2" />
+            Update Location
           </Button>
         </div>
 
-        {view === "list" ? (
+        {/* Demo Tracker Toggle */}
+        <div className="flex justify-end mb-4">
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="rounded-xl"
+            onClick={() => setShowTracker(!showTracker)}
+          >
+            <Truck className="h-4 w-4 mr-2" />
+            {showTracker ? "Hide" : "Show"} Demo Tracker
+          </Button>
+        </div>
+
+        {/* Delivery Tracker Demo */}
+        {showTracker && (
+          <div className="mb-8">
+            <DeliveryTracker orderId="FD-DEMO123" estimatedMinutes={45} />
+          </div>
+        )}
+
+        {view === "map" ? (
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Map */}
+            <div className="lg:col-span-2 aspect-[4/3] lg:aspect-auto lg:h-[600px]">
+              <FarmMap
+                farms={filteredFarms}
+                userLocation={location || undefined}
+                onFarmSelect={handleFarmSelect}
+                selectedFarm={selectedFarm}
+                showRoute={true}
+              />
+            </div>
+
+            {/* Farm List Sidebar */}
+            <div className="space-y-4 max-h-[600px] overflow-y-auto">
+              <div className="flex items-center justify-between sticky top-0 bg-background py-2">
+                <span className="text-sm text-muted-foreground">
+                  {filteredFarms.length} farms found
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  Sorted by distance
+                </span>
+              </div>
+
+              {filteredFarms.map((farm) => {
+                const { fee, eta } = getDeliveryInfo(farm);
+                return (
+                  <div
+                    key={farm.id}
+                    className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                      selectedFarm?.id === farm.id
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                    onClick={() => setSelectedFarm(farm)}
+                  >
+                    <div className="flex gap-3">
+                      <img
+                        src={farm.image}
+                        alt={farm.name}
+                        className="h-16 w-16 rounded-lg object-cover"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-foreground truncate">
+                          {farm.name}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          {farm.distance} km away
+                        </p>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {eta.min}-{eta.max} min
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Truck className="h-3 w-3" />
+                            ₱{fee}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
           <>
             {/* Farm Stats */}
             <div className="flex items-center gap-4 mb-6">
@@ -128,34 +263,6 @@ const MapPage = () => {
               </div>
             )}
           </>
-        ) : (
-          /* Map View Placeholder */
-          <div className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-secondary border border-border">
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
-              <MapIcon className="h-16 w-16 text-muted-foreground/50 mb-4" />
-              <h3 className="font-display text-xl font-semibold text-foreground mb-2">
-                Interactive Map Coming Soon
-              </h3>
-              <p className="text-muted-foreground max-w-md">
-                We're integrating Google Maps to show you exact farm locations with
-                real-time routing and delivery estimates.
-              </p>
-              <Button className="mt-6 btn-primary-gradient rounded-xl">
-                Enable Location Services
-              </Button>
-            </div>
-            {/* Map Placeholder Pattern */}
-            <div className="absolute inset-0 opacity-5">
-              <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
-                    <path d="M 50 0 L 0 0 0 50" fill="none" stroke="currentColor" strokeWidth="1"/>
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#grid)" />
-              </svg>
-            </div>
-          </div>
         )}
       </main>
 
