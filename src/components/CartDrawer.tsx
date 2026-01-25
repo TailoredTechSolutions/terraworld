@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useCartStore, CartItem } from "@/store/cartStore";
@@ -70,6 +71,7 @@ const CartItemRow = ({ item }: { item: CartItem }) => {
 };
 
 const CartDrawer = () => {
+  const navigate = useNavigate();
   const { isOpen, setCartOpen, items, getTotalPrice, clearCart } = useCartStore();
   const subtotal = getTotalPrice();
   const deliveryFee = subtotal > 0 ? 45 : 0;
@@ -146,7 +148,13 @@ const CartDrawer = () => {
 
               {/* Actions */}
               <div className="space-y-2">
-                <Button className="w-full btn-primary-gradient h-12 rounded-xl text-base font-semibold">
+                <Button 
+                  className="w-full btn-primary-gradient h-12 rounded-xl text-base font-semibold"
+                  onClick={() => {
+                    setCartOpen(false);
+                    navigate("/checkout");
+                  }}
+                >
                   Checkout
                 </Button>
                 <Button
