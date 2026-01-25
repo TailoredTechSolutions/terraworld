@@ -1,5 +1,6 @@
-import { Leaf, Facebook, Instagram, Twitter } from "lucide-react";
+import { Facebook, Instagram, Twitter } from "lucide-react";
 import { Link } from "react-router-dom";
+import terraLogo from "@/assets/terra-logo.png";
 
 const Footer = () => {
   return (
@@ -9,12 +10,19 @@ const Footer = () => {
           {/* Brand */}
           <div className="md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
-                <Leaf className="h-5 w-5 text-primary-foreground" />
+              <img 
+                src={terraLogo} 
+                alt="Terra" 
+                className="h-10 w-10 rounded-lg"
+              />
+              <div className="flex flex-col">
+                <span className="font-display text-xl font-bold text-foreground leading-tight">
+                  Terra
+                </span>
+                <span className="text-[10px] text-muted-foreground leading-none">
+                  From Dirt to Dessert
+                </span>
               </div>
-              <span className="font-display text-xl font-semibold text-foreground">
-                FarmDirect
-              </span>
             </Link>
             <p className="text-sm text-muted-foreground mb-4">
               Connecting local farmers with conscious consumers. Fresh, organic, sustainable.
@@ -77,7 +85,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Sell on FarmDirect
+                  Sell on Terra
                 </Link>
               </li>
               <li>
@@ -129,7 +137,7 @@ const Footer = () => {
 
         <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2025 FarmDirect. All rights reserved.
+            © 2025 Terra. All rights reserved.
           </p>
           <div className="flex gap-6">
             <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">

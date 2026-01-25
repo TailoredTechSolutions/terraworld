@@ -6,109 +6,113 @@
 
 @layer base {
   :root {
-    /* Earthy, organic color palette */
-    --background: 45 30% 97%;
-    --foreground: 150 25% 15%;
+    /* Terra color palette - inspired by earth, nature, and the globe */
+    --background: 35 25% 96%;
+    --foreground: 20 45% 15%;
 
-    --card: 45 25% 95%;
-    --card-foreground: 150 25% 15%;
+    --card: 35 20% 94%;
+    --card-foreground: 20 45% 15%;
 
-    --popover: 45 30% 97%;
-    --popover-foreground: 150 25% 15%;
+    --popover: 35 25% 96%;
+    --popover-foreground: 20 45% 15%;
 
-    /* Forest green primary */
-    --primary: 152 45% 28%;
-    --primary-foreground: 45 30% 97%;
+    /* Rich chocolate brown primary */
+    --primary: 20 50% 18%;
+    --primary-foreground: 40 30% 95%;
 
-    /* Warm cream secondary */
-    --secondary: 40 35% 90%;
-    --secondary-foreground: 150 25% 20%;
+    /* Warm tan/beige secondary */
+    --secondary: 32 35% 75%;
+    --secondary-foreground: 20 45% 18%;
 
-    --muted: 45 20% 92%;
-    --muted-foreground: 150 15% 45%;
+    --muted: 35 20% 88%;
+    --muted-foreground: 20 20% 45%;
 
-    /* Terracotta accent */
-    --accent: 18 65% 55%;
-    --accent-foreground: 45 30% 97%;
+    /* Teal/turquoise accent (from globe) */
+    --accent: 187 55% 62%;
+    --accent-foreground: 20 45% 12%;
 
     --destructive: 0 72% 51%;
-    --destructive-foreground: 45 30% 97%;
+    --destructive-foreground: 40 30% 95%;
 
-    --border: 45 20% 85%;
-    --input: 45 20% 88%;
-    --ring: 152 45% 28%;
+    --border: 32 25% 82%;
+    --input: 35 20% 85%;
+    --ring: 20 50% 18%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --success: 152 60% 40%;
+    --success: 95 45% 45%;
     --warning: 38 92% 50%;
-    --farm-green: 152 45% 28%;
-    --farm-green-light: 152 35% 45%;
-    --terracotta: 18 65% 55%;
-    --terracotta-light: 18 55% 70%;
-    --cream: 45 30% 97%;
-    --cream-dark: 45 25% 92%;
-    --earth-brown: 30 35% 25%;
+    --terra-brown: 20 50% 18%;
+    --terra-brown-light: 20 35% 35%;
+    --terra-tan: 32 35% 75%;
+    --terra-tan-dark: 32 30% 60%;
+    --teal: 187 55% 62%;
+    --teal-light: 187 45% 75%;
+    --leaf-green: 95 45% 45%;
+    --cream: 40 30% 95%;
+    --cream-dark: 35 25% 90%;
+    --earth-dark: 20 45% 12%;
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(152 45% 28%) 0%, hsl(152 35% 38%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(18 65% 55%) 0%, hsl(28 70% 60%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(45 30% 97%) 0%, hsl(45 25% 94%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(20 50% 18%) 0%, hsl(20 35% 28%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(187 55% 62%) 0%, hsl(187 45% 72%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(35 25% 96%) 0%, hsl(35 20% 92%) 100%);
+    --gradient-tan: linear-gradient(135deg, hsl(32 35% 75%) 0%, hsl(32 30% 65%) 100%);
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(150 25% 15% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(150 25% 15% / 0.08), 0 2px 4px -2px hsl(150 25% 15% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(150 25% 15% / 0.1), 0 4px 6px -4px hsl(150 25% 15% / 0.08);
-    --shadow-card: 0 4px 20px -4px hsl(150 25% 15% / 0.12);
+    --shadow-sm: 0 1px 2px 0 hsl(20 45% 15% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(20 45% 15% / 0.08), 0 2px 4px -2px hsl(20 45% 15% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(20 45% 15% / 0.1), 0 4px 6px -4px hsl(20 45% 15% / 0.08);
+    --shadow-card: 0 4px 20px -4px hsl(20 45% 15% / 0.12);
 
-    --sidebar-background: 45 25% 95%;
-    --sidebar-foreground: 150 25% 15%;
-    --sidebar-primary: 152 45% 28%;
-    --sidebar-primary-foreground: 45 30% 97%;
-    --sidebar-accent: 40 35% 90%;
-    --sidebar-accent-foreground: 150 25% 20%;
-    --sidebar-border: 45 20% 85%;
-    --sidebar-ring: 152 45% 28%;
+    --sidebar-background: 35 20% 94%;
+    --sidebar-foreground: 20 45% 15%;
+    --sidebar-primary: 20 50% 18%;
+    --sidebar-primary-foreground: 40 30% 95%;
+    --sidebar-accent: 32 35% 75%;
+    --sidebar-accent-foreground: 20 45% 18%;
+    --sidebar-border: 32 25% 82%;
+    --sidebar-ring: 20 50% 18%;
   }
 
   .dark {
-    --background: 150 20% 8%;
-    --foreground: 45 25% 95%;
+    --background: 20 30% 8%;
+    --foreground: 35 25% 95%;
 
-    --card: 150 18% 12%;
-    --card-foreground: 45 25% 95%;
+    --card: 20 25% 12%;
+    --card-foreground: 35 25% 95%;
 
-    --popover: 150 20% 10%;
-    --popover-foreground: 45 25% 95%;
+    --popover: 20 30% 10%;
+    --popover-foreground: 35 25% 95%;
 
-    --primary: 152 50% 45%;
-    --primary-foreground: 150 20% 8%;
+    --primary: 187 55% 55%;
+    --primary-foreground: 20 30% 8%;
 
-    --secondary: 150 15% 18%;
-    --secondary-foreground: 45 25% 90%;
+    --secondary: 20 20% 18%;
+    --secondary-foreground: 35 25% 90%;
 
-    --muted: 150 15% 20%;
-    --muted-foreground: 45 15% 65%;
+    --muted: 20 20% 20%;
+    --muted-foreground: 35 15% 65%;
 
-    --accent: 18 60% 55%;
-    --accent-foreground: 45 30% 97%;
+    --accent: 187 50% 50%;
+    --accent-foreground: 20 30% 8%;
 
     --destructive: 0 62% 45%;
-    --destructive-foreground: 45 30% 97%;
+    --destructive-foreground: 35 25% 95%;
 
-    --border: 150 15% 20%;
-    --input: 150 15% 22%;
-    --ring: 152 50% 45%;
+    --border: 20 20% 22%;
+    --input: 20 20% 24%;
+    --ring: 187 55% 55%;
 
-    --sidebar-background: 150 18% 10%;
-    --sidebar-foreground: 45 25% 95%;
-    --sidebar-primary: 152 50% 45%;
-    --sidebar-primary-foreground: 150 20% 8%;
-    --sidebar-accent: 150 15% 18%;
-    --sidebar-accent-foreground: 45 25% 90%;
-    --sidebar-border: 150 15% 20%;
-    --sidebar-ring: 152 50% 45%;
+    --sidebar-background: 20 25% 10%;
+    --sidebar-foreground: 35 25% 95%;
+    --sidebar-primary: 187 55% 55%;
+    --sidebar-primary-foreground: 20 30% 8%;
+    --sidebar-accent: 20 20% 18%;
+    --sidebar-accent-foreground: 35 25% 90%;
+    --sidebar-border: 20 20% 22%;
+    --sidebar-ring: 187 55% 55%;
   }
 }
 
@@ -176,6 +180,16 @@
   }
 
   .btn-accent-gradient:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+  }
+
+  .btn-tan-gradient {
+    background: var(--gradient-tan);
+    @apply text-secondary-foreground font-medium transition-all duration-200;
+  }
+
+  .btn-tan-gradient:hover {
     filter: brightness(1.05);
     transform: translateY(-1px);
   }

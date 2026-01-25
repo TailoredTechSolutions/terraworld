@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { ShoppingCart, MapPin, Menu, X, Leaf, User } from "lucide-react";
+import { ShoppingCart, MapPin, Menu, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import terraLogo from "@/assets/terra-logo.png";
 
 const Header = () => {
   const location = useLocation();
@@ -22,12 +23,19 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary transition-transform group-hover:scale-105">
-            <Leaf className="h-5 w-5 text-primary-foreground" />
+          <img 
+            src={terraLogo} 
+            alt="Terra" 
+            className="h-10 w-10 rounded-lg transition-transform group-hover:scale-105"
+          />
+          <div className="flex flex-col">
+            <span className="font-display text-xl font-bold text-foreground leading-tight">
+              Terra
+            </span>
+            <span className="text-[10px] text-muted-foreground leading-none hidden sm:block">
+              From Dirt to Dessert
+            </span>
           </div>
-          <span className="font-display text-xl font-semibold text-foreground">
-            FarmDirect
-          </span>
         </Link>
 
         {/* Desktop Navigation */}
