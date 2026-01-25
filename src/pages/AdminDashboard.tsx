@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Users,
@@ -11,15 +11,14 @@ import {
   MoreHorizontal,
   Eye,
   Edit,
-  Trash2,
   Check,
   X,
   MapPin,
   Phone,
   Mail,
   Star,
-  Clock,
-  AlertCircle,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -69,8 +68,18 @@ import {
   Cell,
   ResponsiveContainer,
 } from "recharts";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import type { Tables } from "@/integrations/supabase/types";
 
-// Mock data for analytics
+type Farmer = Tables<"farmers">;
+type Driver = Tables<"drivers">;
+type Order = Tables<"orders"> & {
+  farmers?: { name: string } | null;
+  drivers?: { name: string } | null;
+};
+
+// Static analytics data (would be calculated from real orders in production)
 const revenueData = [
   { month: "Jan", revenue: 45000, orders: 120 },
   { month: "Feb", revenue: 52000, orders: 145 },
@@ -90,187 +99,52 @@ const categoryData = [
 
 const COLORS = ["hsl(152, 45%, 28%)", "hsl(18, 65%, 55%)", "hsl(38, 92%, 50%)", "hsl(152, 35%, 45%)", "hsl(45, 20%, 60%)"];
 
-// Mock farmers data
-const mockFarmers = [
-  {
-    id: "f1",
-    name: "Green Valley Farm",
-    owner: "Maria Santos",
-    email: "maria@greenvalley.ph",
-    phone: "+63 912 345 6789",
-    location: "Tagaytay, Cavite",
-    rating: 4.8,
-    products: 24,
-    totalSales: 156000,
-    status: "active",
-    joinedDate: "2024-01-15",
-  },
-  {
-    id: "f2",
-    name: "Sunrise Organic",
-    owner: "Juan Cruz",
-    email: "juan@sunriseorganic.ph",
-    phone: "+63 917 654 3210",
-    location: "Baguio City",
-    rating: 4.9,
-    products: 18,
-    totalSales: 234000,
-    status: "active",
-    joinedDate: "2023-11-20",
-  },
-  {
-    id: "f3",
-    name: "Mountain Fresh",
-    owner: "Ana Reyes",
-    email: "ana@mountainfresh.ph",
-    phone: "+63 922 111 2233",
-    location: "La Trinidad, Benguet",
-    rating: 4.6,
-    products: 31,
-    totalSales: 189000,
-    status: "pending",
-    joinedDate: "2024-06-01",
-  },
-  {
-    id: "f4",
-    name: "Happy Hens Farm",
-    owner: "Pedro Garcia",
-    email: "pedro@happyhens.ph",
-    phone: "+63 933 444 5566",
-    location: "Batangas City",
-    rating: 4.7,
-    products: 8,
-    totalSales: 87000,
-    status: "active",
-    joinedDate: "2024-02-28",
-  },
-];
-
-// Mock drivers data
-const mockDrivers = [
-  {
-    id: "d1",
-    name: "Carlo Mendoza",
-    email: "carlo@driver.ph",
-    phone: "+63 945 678 9012",
-    vehicle: "Motorcycle",
-    licensePlate: "ABC 1234",
-    rating: 4.9,
-    deliveries: 342,
-    earnings: 45600,
-    status: "online",
-    currentLocation: "Makati City",
-  },
-  {
-    id: "d2",
-    name: "Luis Bautista",
-    email: "luis@driver.ph",
-    phone: "+63 956 789 0123",
-    vehicle: "Van",
-    licensePlate: "XYZ 5678",
-    rating: 4.7,
-    deliveries: 289,
-    earnings: 52300,
-    status: "delivering",
-    currentLocation: "Quezon City",
-  },
-  {
-    id: "d3",
-    name: "Ramon dela Cruz",
-    email: "ramon@driver.ph",
-    phone: "+63 967 890 1234",
-    vehicle: "Motorcycle",
-    licensePlate: "DEF 9012",
-    rating: 4.5,
-    deliveries: 156,
-    earnings: 23400,
-    status: "offline",
-    currentLocation: "Pasig City",
-  },
-  {
-    id: "d4",
-    name: "Mark Villanueva",
-    email: "mark@driver.ph",
-    phone: "+63 978 901 2345",
-    vehicle: "Motorcycle",
-    licensePlate: "GHI 3456",
-    rating: 4.8,
-    deliveries: 421,
-    earnings: 61200,
-    status: "online",
-    currentLocation: "Taguig City",
-  },
-];
-
-// Mock orders data
-const mockOrders = [
-  {
-    id: "ORD-2024-001",
-    customer: "Elena Rodriguez",
-    customerPhone: "+63 912 111 2222",
-    farm: "Green Valley Farm",
-    driver: "Carlo Mendoza",
-    items: 4,
-    total: 1250,
-    status: "delivered",
-    date: "2024-06-15",
-    deliveryAddress: "123 Ayala Ave, Makati City",
-  },
-  {
-    id: "ORD-2024-002",
-    customer: "Miguel Santos",
-    customerPhone: "+63 917 333 4444",
-    farm: "Sunrise Organic",
-    driver: "Luis Bautista",
-    items: 2,
-    total: 680,
-    status: "in_transit",
-    date: "2024-06-15",
-    deliveryAddress: "456 EDSA, Quezon City",
-  },
-  {
-    id: "ORD-2024-003",
-    customer: "Sofia Lim",
-    customerPhone: "+63 922 555 6666",
-    farm: "Mountain Fresh",
-    driver: null,
-    items: 6,
-    total: 2100,
-    status: "pending",
-    date: "2024-06-15",
-    deliveryAddress: "789 Ortigas Ave, Pasig City",
-  },
-  {
-    id: "ORD-2024-004",
-    customer: "David Cruz",
-    customerPhone: "+63 933 777 8888",
-    farm: "Happy Hens Farm",
-    driver: "Mark Villanueva",
-    items: 3,
-    total: 890,
-    status: "preparing",
-    date: "2024-06-14",
-    deliveryAddress: "321 BGC, Taguig City",
-  },
-  {
-    id: "ORD-2024-005",
-    customer: "Angela Torres",
-    customerPhone: "+63 945 999 0000",
-    farm: "Green Valley Farm",
-    driver: "Carlo Mendoza",
-    items: 5,
-    total: 1780,
-    status: "delivered",
-    date: "2024-06-14",
-    deliveryAddress: "654 Alabang, Muntinlupa City",
-  },
-];
-
 const AdminDashboard = () => {
-  const [selectedFarmer, setSelectedFarmer] = useState<typeof mockFarmers[0] | null>(null);
-  const [selectedDriver, setSelectedDriver] = useState<typeof mockDrivers[0] | null>(null);
-  const [selectedOrder, setSelectedOrder] = useState<typeof mockOrders[0] | null>(null);
+  const { toast } = useToast();
+  const [farmers, setFarmers] = useState<Farmer[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedFarmer, setSelectedFarmer] = useState<Farmer | null>(null);
+  const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderFilter, setOrderFilter] = useState<string>("all");
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [farmersRes, driversRes, ordersRes] = await Promise.all([
+        supabase.from("farmers").select("*").order("created_at", { ascending: false }),
+        supabase.from("drivers").select("*").order("created_at", { ascending: false }),
+        supabase.from("orders").select(`
+          *,
+          farmers:farmer_id(name),
+          drivers:driver_id(name)
+        `).order("created_at", { ascending: false }),
+      ]);
+
+      if (farmersRes.error) throw farmersRes.error;
+      if (driversRes.error) throw driversRes.error;
+      if (ordersRes.error) throw ordersRes.error;
+
+      setFarmers(farmersRes.data || []);
+      setDrivers(driversRes.data || []);
+      setOrders(ordersRes.data || []);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load dashboard data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
@@ -283,45 +157,62 @@ const AdminDashboard = () => {
       delivered: { variant: "default", label: "Delivered" },
       in_transit: { variant: "outline", label: "In Transit" },
       preparing: { variant: "secondary", label: "Preparing" },
+      cancelled: { variant: "destructive", label: "Cancelled" },
     };
     const config = variants[status] || { variant: "secondary", label: status };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
   const filteredOrders = orderFilter === "all" 
-    ? mockOrders 
-    : mockOrders.filter(o => o.status === orderFilter);
+    ? orders 
+    : orders.filter(o => o.status === orderFilter);
+
+  // Calculate stats from real data
+  const totalRevenue = orders.reduce((sum, o) => sum + Number(o.total), 0);
+  const activeFarmers = farmers.filter(f => f.status === "active").length;
+  const activeDrivers = drivers.filter(d => d.status === "online" || d.status === "delivering").length;
 
   const stats = [
     {
       title: "Total Revenue",
-      value: "₱328,000",
+      value: `₱${totalRevenue.toLocaleString()}`,
       change: "+12.5%",
       icon: DollarSign,
       color: "text-primary",
     },
     {
       title: "Total Orders",
-      value: "920",
+      value: orders.length.toString(),
       change: "+8.2%",
       icon: ShoppingBag,
       color: "text-accent",
     },
     {
       title: "Active Farmers",
-      value: "42",
-      change: "+3",
+      value: activeFarmers.toString(),
+      change: `+${farmers.filter(f => f.status === "pending").length} pending`,
       icon: Users,
       color: "text-primary",
     },
     {
       title: "Active Drivers",
-      value: "18",
-      change: "+2",
+      value: activeDrivers.toString(),
+      change: `${drivers.length} total`,
       icon: Truck,
       color: "text-accent",
     },
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -340,12 +231,10 @@ const AdminDashboard = () => {
                 <p className="text-sm text-muted-foreground">Manage your marketplace</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="gap-1">
-                <AlertCircle className="h-3 w-3" />
-                Demo Mode
-              </Badge>
-            </div>
+            <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Refresh
+            </Button>
           </div>
         </div>
       </header>
@@ -360,7 +249,7 @@ const AdminDashboard = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">{stat.title}</p>
                     <p className="text-2xl font-bold mt-1">{stat.value}</p>
-                    <p className="text-xs text-primary mt-1">{stat.change} this month</p>
+                    <p className="text-xs text-primary mt-1">{stat.change}</p>
                   </div>
                   <div className={`p-3 rounded-full bg-secondary ${stat.color}`}>
                     <stat.icon className="h-5 w-5" />
@@ -476,28 +365,23 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
 
-              {/* Recent Activity */}
+              {/* Recent Orders */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
-                  <CardDescription>Latest platform activities</CardDescription>
+                  <CardTitle>Recent Orders</CardTitle>
+                  <CardDescription>Latest orders from the platform</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {[
-                    { action: "New order placed", detail: "ORD-2024-003 - ₱2,100", time: "2 min ago", icon: ShoppingBag },
-                    { action: "Farmer approved", detail: "Mountain Fresh joined", time: "1 hour ago", icon: Check },
-                    { action: "Delivery completed", detail: "ORD-2024-001 delivered", time: "2 hours ago", icon: Truck },
-                    { action: "New driver registered", detail: "Mark Villanueva", time: "5 hours ago", icon: Users },
-                  ].map((activity, idx) => (
-                    <div key={idx} className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                  {orders.slice(0, 4).map((order) => (
+                    <div key={order.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors">
                       <div className="p-2 rounded-full bg-secondary">
-                        <activity.icon className="h-4 w-4 text-primary" />
+                        <ShoppingBag className="h-4 w-4 text-primary" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium">{activity.action}</p>
-                        <p className="text-xs text-muted-foreground">{activity.detail}</p>
+                        <p className="text-sm font-medium">{order.order_number}</p>
+                        <p className="text-xs text-muted-foreground">{order.customer_name} - ₱{Number(order.total).toLocaleString()}</p>
                       </div>
-                      <p className="text-xs text-muted-foreground">{activity.time}</p>
+                      {getStatusBadge(order.status || "pending")}
                     </div>
                   ))}
                 </CardContent>
@@ -512,7 +396,7 @@ const AdminDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Registered Farmers</CardTitle>
-                    <CardDescription>Manage farmer accounts and approvals</CardDescription>
+                    <CardDescription>Manage farmer accounts and approvals ({farmers.length} total)</CardDescription>
                   </div>
                   <Button className="btn-primary-gradient">Add Farmer</Button>
                 </div>
@@ -532,7 +416,7 @@ const AdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mockFarmers.map((farmer) => (
+                    {farmers.map((farmer) => (
                       <TableRow key={farmer.id}>
                         <TableCell className="font-medium">{farmer.name}</TableCell>
                         <TableCell>{farmer.owner}</TableCell>
@@ -540,12 +424,12 @@ const AdminDashboard = () => {
                         <TableCell>
                           <div className="flex items-center gap-1">
                             <Star className="h-4 w-4 fill-warning text-warning" />
-                            {farmer.rating}
+                            {Number(farmer.rating).toFixed(1)}
                           </div>
                         </TableCell>
-                        <TableCell>{farmer.products}</TableCell>
-                        <TableCell>₱{farmer.totalSales.toLocaleString()}</TableCell>
-                        <TableCell>{getStatusBadge(farmer.status)}</TableCell>
+                        <TableCell>{farmer.products_count}</TableCell>
+                        <TableCell>₱{Number(farmer.total_sales).toLocaleString()}</TableCell>
+                        <TableCell>{getStatusBadge(farmer.status || "pending")}</TableCell>
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -586,7 +470,7 @@ const AdminDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Registered Drivers</CardTitle>
-                    <CardDescription>Manage driver accounts and assignments</CardDescription>
+                    <CardDescription>Manage driver accounts and assignments ({drivers.length} total)</CardDescription>
                   </div>
                   <Button className="btn-primary-gradient">Add Driver</Button>
                 </div>
@@ -606,25 +490,25 @@ const AdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mockDrivers.map((driver) => (
+                    {drivers.map((driver) => (
                       <TableRow key={driver.id}>
                         <TableCell className="font-medium">{driver.name}</TableCell>
                         <TableCell>
                           <div>
-                            <p>{driver.vehicle}</p>
-                            <p className="text-xs text-muted-foreground">{driver.licensePlate}</p>
+                            <p className="capitalize">{driver.vehicle}</p>
+                            <p className="text-xs text-muted-foreground">{driver.license_plate}</p>
                           </div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">{driver.currentLocation}</TableCell>
+                        <TableCell className="text-muted-foreground">{driver.current_location || "Unknown"}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
                             <Star className="h-4 w-4 fill-warning text-warning" />
-                            {driver.rating}
+                            {Number(driver.rating).toFixed(1)}
                           </div>
                         </TableCell>
-                        <TableCell>{driver.deliveries}</TableCell>
-                        <TableCell>₱{driver.earnings.toLocaleString()}</TableCell>
-                        <TableCell>{getStatusBadge(driver.status)}</TableCell>
+                        <TableCell>{driver.deliveries_count}</TableCell>
+                        <TableCell>₱{Number(driver.total_earnings).toLocaleString()}</TableCell>
+                        <TableCell>{getStatusBadge(driver.status || "offline")}</TableCell>
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -638,9 +522,6 @@ const AdminDashboard = () => {
                               </DropdownMenuItem>
                               <DropdownMenuItem>
                                 <Edit className="h-4 w-4 mr-2" /> Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">
-                                <Trash2 className="h-4 w-4 mr-2" /> Remove
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -660,7 +541,7 @@ const AdminDashboard = () => {
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div>
                     <CardTitle>All Orders</CardTitle>
-                    <CardDescription>View and manage customer orders</CardDescription>
+                    <CardDescription>View and manage customer orders ({orders.length} total)</CardDescription>
                   </div>
                   <Select value={orderFilter} onValueChange={setOrderFilter}>
                     <SelectTrigger className="w-[180px]">
@@ -694,18 +575,22 @@ const AdminDashboard = () => {
                   <TableBody>
                     {filteredOrders.map((order) => (
                       <TableRow key={order.id}>
-                        <TableCell className="font-mono text-sm">{order.id}</TableCell>
-                        <TableCell className="font-medium">{order.customer}</TableCell>
-                        <TableCell className="text-muted-foreground">{order.farm}</TableCell>
+                        <TableCell className="font-mono text-sm">{order.order_number}</TableCell>
+                        <TableCell className="font-medium">{order.customer_name}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {order.farmers?.name || "Unknown"}
+                        </TableCell>
                         <TableCell>
-                          {order.driver || (
+                          {order.drivers?.name || (
                             <span className="text-muted-foreground italic">Unassigned</span>
                           )}
                         </TableCell>
-                        <TableCell>{order.items}</TableCell>
-                        <TableCell>₱{order.total.toLocaleString()}</TableCell>
-                        <TableCell className="text-muted-foreground">{order.date}</TableCell>
-                        <TableCell>{getStatusBadge(order.status)}</TableCell>
+                        <TableCell>{order.items_count}</TableCell>
+                        <TableCell>₱{Number(order.total).toLocaleString()}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {new Date(order.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>{getStatusBadge(order.status || "pending")}</TableCell>
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -717,7 +602,7 @@ const AdminDashboard = () => {
                               <DropdownMenuItem onClick={() => setSelectedOrder(order)}>
                                 <Eye className="h-4 w-4 mr-2" /> View Details
                               </DropdownMenuItem>
-                              {!order.driver && (
+                              {!order.driver_id && (
                                 <DropdownMenuItem>
                                   <Truck className="h-4 w-4 mr-2" /> Assign Driver
                                 </DropdownMenuItem>
@@ -771,24 +656,24 @@ const AdminDashboard = () => {
               </div>
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="p-3 bg-secondary rounded-lg">
-                  <p className="text-xl font-bold text-primary">{selectedFarmer.products}</p>
+                  <p className="text-xl font-bold text-primary">{selectedFarmer.products_count}</p>
                   <p className="text-xs text-muted-foreground">Products</p>
                 </div>
                 <div className="p-3 bg-secondary rounded-lg">
-                  <p className="text-xl font-bold text-primary">₱{(selectedFarmer.totalSales / 1000).toFixed(0)}k</p>
+                  <p className="text-xl font-bold text-primary">₱{(Number(selectedFarmer.total_sales) / 1000).toFixed(0)}k</p>
                   <p className="text-xs text-muted-foreground">Sales</p>
                 </div>
                 <div className="p-3 bg-secondary rounded-lg">
                   <div className="flex items-center justify-center gap-1">
                     <Star className="h-4 w-4 fill-warning text-warning" />
-                    <p className="text-xl font-bold">{selectedFarmer.rating}</p>
+                    <p className="text-xl font-bold">{Number(selectedFarmer.rating).toFixed(1)}</p>
                   </div>
                   <p className="text-xs text-muted-foreground">Rating</p>
                 </div>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Joined:</span>
-                <span>{selectedFarmer.joinedDate}</span>
+                <span>{new Date(selectedFarmer.created_at).toLocaleDateString()}</span>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1">Edit Profile</Button>
@@ -812,11 +697,11 @@ const AdminDashboard = () => {
                   <Truck className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <p className="font-medium">{selectedDriver.vehicle}</p>
-                  <p className="text-sm text-muted-foreground">{selectedDriver.licensePlate}</p>
+                  <p className="font-medium capitalize">{selectedDriver.vehicle}</p>
+                  <p className="text-sm text-muted-foreground">{selectedDriver.license_plate}</p>
                 </div>
                 <div className="ml-auto">
-                  {getStatusBadge(selectedDriver.status)}
+                  {getStatusBadge(selectedDriver.status || "offline")}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -830,22 +715,22 @@ const AdminDashboard = () => {
                 </div>
                 <div className="flex items-center gap-2 text-sm col-span-2">
                   <MapPin className="h-4 w-4 text-muted-foreground" />
-                  {selectedDriver.currentLocation}
+                  {selectedDriver.current_location || "Unknown"}
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="p-3 bg-secondary rounded-lg">
-                  <p className="text-xl font-bold text-primary">{selectedDriver.deliveries}</p>
+                  <p className="text-xl font-bold text-primary">{selectedDriver.deliveries_count}</p>
                   <p className="text-xs text-muted-foreground">Deliveries</p>
                 </div>
                 <div className="p-3 bg-secondary rounded-lg">
-                  <p className="text-xl font-bold text-primary">₱{(selectedDriver.earnings / 1000).toFixed(1)}k</p>
+                  <p className="text-xl font-bold text-primary">₱{(Number(selectedDriver.total_earnings) / 1000).toFixed(1)}k</p>
                   <p className="text-xs text-muted-foreground">Earnings</p>
                 </div>
                 <div className="p-3 bg-secondary rounded-lg">
                   <div className="flex items-center justify-center gap-1">
                     <Star className="h-4 w-4 fill-warning text-warning" />
-                    <p className="text-xl font-bold">{selectedDriver.rating}</p>
+                    <p className="text-xl font-bold">{Number(selectedDriver.rating).toFixed(1)}</p>
                   </div>
                   <p className="text-xs text-muted-foreground">Rating</p>
                 </div>
@@ -863,47 +748,47 @@ const AdminDashboard = () => {
       <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Order {selectedOrder?.id}</DialogTitle>
+            <DialogTitle>Order {selectedOrder?.order_number}</DialogTitle>
           </DialogHeader>
           {selectedOrder && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Status:</span>
-                {getStatusBadge(selectedOrder.status)}
+                {getStatusBadge(selectedOrder.status || "pending")}
               </div>
               <div className="p-3 bg-secondary rounded-lg space-y-2">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">{selectedOrder.customer}</span>
+                  <span className="font-medium">{selectedOrder.customer_name}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Phone className="h-4 w-4" />
-                  {selectedOrder.customerPhone}
+                  {selectedOrder.customer_phone}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4" />
-                  {selectedOrder.deliveryAddress}
+                  {selectedOrder.delivery_address}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 bg-secondary rounded-lg">
                   <p className="text-sm text-muted-foreground">Farm</p>
-                  <p className="font-medium">{selectedOrder.farm}</p>
+                  <p className="font-medium">{selectedOrder.farmers?.name || "Unknown"}</p>
                 </div>
                 <div className="p-3 bg-secondary rounded-lg">
                   <p className="text-sm text-muted-foreground">Driver</p>
-                  <p className="font-medium">{selectedOrder.driver || "Unassigned"}</p>
+                  <p className="font-medium">{selectedOrder.drivers?.name || "Unassigned"}</p>
                 </div>
               </div>
               <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg">
                 <div>
-                  <p className="text-sm text-muted-foreground">{selectedOrder.items} items</p>
-                  <p className="text-sm text-muted-foreground">{selectedOrder.date}</p>
+                  <p className="text-sm text-muted-foreground">{selectedOrder.items_count} items</p>
+                  <p className="text-sm text-muted-foreground">{new Date(selectedOrder.created_at).toLocaleDateString()}</p>
                 </div>
-                <p className="text-2xl font-bold text-primary">₱{selectedOrder.total.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-primary">₱{Number(selectedOrder.total).toLocaleString()}</p>
               </div>
               <div className="flex gap-2">
-                {!selectedOrder.driver && (
+                {!selectedOrder.driver_id && (
                   <Button variant="outline" className="flex-1">Assign Driver</Button>
                 )}
                 <Button className="flex-1 btn-primary-gradient">Update Status</Button>
