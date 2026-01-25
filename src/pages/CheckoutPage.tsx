@@ -17,33 +17,124 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { items, getTotalPrice, clearCart } = useCartStore();
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    zip: "",
+  });
 
   const subtotal = getTotalPrice();
   const deliveryFee = subtotal > 0 ? 45 : 0;
   const total = subtotal + deliveryFee;
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
     
-    // Simulate payment processing
-    setTimeout(() => {
+    try {
+      // Prepare order items as JSON
+      const orderItems = items.map((item) => ({
+        id: item.product.id,
+        name: item.product.name,
+        quantity: item.quantity,
+        price: item.product.price,
+        farmId: item.product.farmId,
+        farmName: item.product.farmName,
+      }));
+
+      // Get farmer_id from the first item (in a real app, you might split orders by farm)
+      const firstFarmId = items[0]?.product.farmId;
+      
+      // Look up farmer UUID from name (since our products use string IDs)
+      let farmerId: string | null = null;
+      if (firstFarmId) {
+        const { data: farmerData } = await supabase
+          .from("farmers")
+          .select("id")
+          .limit(1)
+          .maybeSingle();
+        
+        if (farmerData) {
+          farmerId = farmerData.id;
+        }
+      }
+
+      // Create the order in database
+      const { data: order, error } = await supabase
+        .from("orders")
+        .insert([{
+          customer_name: `${formData.firstName} ${formData.lastName}`.trim(),
+          customer_phone: formData.phone,
+          customer_email: formData.email,
+          delivery_address: `${formData.address}, ${formData.city} ${formData.zip}`.trim(),
+          farmer_id: farmerId,
+          items: JSON.parse(JSON.stringify(orderItems)),
+          items_count: items.reduce((sum, item) => sum + item.quantity, 0),
+          subtotal: subtotal,
+          delivery_fee: deliveryFee,
+          total: total,
+          status: "pending" as const,
+          notes: `Payment method: ${paymentMethod}`,
+          order_number: `ORD-${Date.now().toString(36).toUpperCase()}`,
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      // Simulate payment processing delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // Clear cart and navigate to confirmation
       clearCart();
       navigate("/order-confirmation", { 
         state: { 
-          orderId: `FD-${Date.now().toString(36).toUpperCase()}`,
+          orderId: order.order_number,
           total,
           paymentMethod,
-          items: items.length 
+          items: items.length,
+          customerName: `${formData.firstName} ${formData.lastName}`,
+          deliveryAddress: `${formData.address}, ${formData.city} ${formData.zip}`,
         } 
       });
-    }, 2000);
+
+      toast({
+        title: "Order placed successfully!",
+        description: `Your order ${order.order_number} has been confirmed.`,
+      });
+
+    } catch (error) {
+      console.error("Error creating order:", error);
+      toast({
+        title: "Error",
+        description: "Failed to place order. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (items.length === 0) {
@@ -99,37 +190,81 @@ const CheckoutPage = () => {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" placeholder="Juan" required />
+                    <Input 
+                      id="firstName" 
+                      placeholder="Juan" 
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" placeholder="Dela Cruz" required />
+                    <Input 
+                      id="lastName" 
+                      placeholder="Dela Cruz" 
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      required 
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="juan@example.com" required />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="juan@example.com" 
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required 
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" type="tel" placeholder="+63 917 123 4567" required />
+                  <Input 
+                    id="phone" 
+                    type="tel" 
+                    placeholder="+63 917 123 4567" 
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    required 
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="address">Delivery Address</Label>
-                  <Input id="address" placeholder="123 Main Street, Barangay..." required />
+                  <Input 
+                    id="address" 
+                    placeholder="123 Main Street, Barangay..." 
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    required 
+                  />
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="city">City</Label>
-                    <Input id="city" placeholder="Manila" required />
+                    <Input 
+                      id="city" 
+                      placeholder="Manila" 
+                      value={formData.city}
+                      onChange={handleInputChange}
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="zip">Postal Code</Label>
-                    <Input id="zip" placeholder="1000" required />
+                    <Input 
+                      id="zip" 
+                      placeholder="1000" 
+                      value={formData.zip}
+                      onChange={handleInputChange}
+                      required 
+                    />
                   </div>
                 </div>
               </div>
