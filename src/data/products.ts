@@ -13,6 +13,13 @@ import cauliflowerImg from "@/assets/products/cauliflower.jpg";
 import sayoteImg from "@/assets/products/sayote.jpg";
 import leeksImg from "@/assets/products/leeks.jpg";
 import pechayImg from "@/assets/products/pechay.jpg";
+// Meat imports
+import porkBellyImg from "@/assets/products/pork-belly.jpg";
+import porkKasimImg from "@/assets/products/pork-kasim.jpg";
+import beefBrisketImg from "@/assets/products/beef-brisket.jpg";
+import dressedChickenImg from "@/assets/products/dressed-chicken.jpg";
+import nativeChickenImg from "@/assets/products/native-chicken.jpg";
+import groundBeefImg from "@/assets/products/ground-beef.jpg";
 
 export interface Product {
   id: string;
@@ -241,6 +248,85 @@ export const products: Product[] = [
     organic: true,
     description: "Sweet La Trinidad strawberries. Seasonal highland fruit, locally grown.",
   },
+  // Meat & Poultry - Baguio City Slaughterhouse & Benguet Native Livestock
+  {
+    id: "16",
+    name: "Pork Belly (Liempo)",
+    price: 390.00,
+    unit: "kg",
+    farmId: "baguio-slaughterhouse",
+    farmName: "Baguio City Slaughterhouse",
+    image: porkBellyImg,
+    category: "Meat",
+    stock: 50,
+    organic: false,
+    description: "Fresh pork belly from NMIS-accredited Baguio City Slaughterhouse. Perfect for grilling, lechon kawali, or sinigang. DA-regulated price: ₱370-₱430/kg.",
+  },
+  {
+    id: "17",
+    name: "Pork Kasim (Shoulder)",
+    price: 330.00,
+    unit: "kg",
+    farmId: "baguio-slaughterhouse",
+    farmName: "Baguio City Slaughterhouse",
+    image: porkKasimImg,
+    category: "Meat",
+    stock: 40,
+    organic: false,
+    description: "Lean pork shoulder cut. Ideal for adobo, menudo, and braising. DA-regulated price: ₱320-₱350/kg.",
+  },
+  {
+    id: "18",
+    name: "Beef Brisket",
+    price: 420.00,
+    unit: "kg",
+    farmId: "baguio-slaughterhouse",
+    farmName: "Baguio City Slaughterhouse",
+    image: beefBrisketImg,
+    category: "Meat",
+    stock: 25,
+    organic: false,
+    description: "Fresh beef brisket from local cattle. Perfect for bulalo, nilaga, and slow-cooking. Retail price: ₱380-₱450/kg.",
+  },
+  {
+    id: "19",
+    name: "Ground Beef",
+    price: 380.00,
+    unit: "kg",
+    farmId: "baguio-slaughterhouse",
+    farmName: "Baguio City Slaughterhouse",
+    image: groundBeefImg,
+    category: "Meat",
+    stock: 30,
+    organic: false,
+    description: "Freshly ground beef. Great for burgers, meatballs, and pasta sauce. Retail price: ₱350-₱400/kg.",
+  },
+  {
+    id: "20",
+    name: "Dressed Chicken",
+    price: 200.00,
+    unit: "kg",
+    farmId: "benguet-native-livestock",
+    farmName: "Benguet Native Livestock",
+    image: dressedChickenImg,
+    category: "Poultry",
+    stock: 60,
+    organic: false,
+    description: "Fresh dressed commercial chicken. Clean and ready to cook. Wholesale price: ₱162/kg, Retail: ₱180-₱220/kg.",
+  },
+  {
+    id: "21",
+    name: "Native Chicken (Manok Bisaya)",
+    price: 320.00,
+    unit: "kg",
+    farmId: "benguet-native-livestock",
+    farmName: "Benguet Native Livestock",
+    image: nativeChickenImg,
+    category: "Poultry",
+    stock: 20,
+    organic: true,
+    description: "Free-range native chicken from Benguet. Richer flavor, ideal for tinola and pinikpikan. Retail: ₱280-₱350/kg.",
+  },
 ];
 
 // Verified Baguio/Benguet farms from agricultural registries
@@ -341,12 +427,39 @@ export const farms: Farm[] = [
     description: "Community agriculture model farm in Tublay. Sustainable highland vegetable production.",
     products: ["Highland Vegetables", "Leafy Greens"],
   },
+  // Meat & Poultry Suppliers
+  {
+    id: "baguio-slaughterhouse",
+    name: "Baguio City Slaughterhouse",
+    owner: "Baguio City Government",
+    latitude: 16.4145,
+    longitude: 120.5960,
+    rating: 4.5,
+    reviewCount: 86,
+    image: "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800",
+    description: "NMIS-accredited government slaughterhouse in Sto. Niño, Baguio City. Source of fresh pork and beef with DA-regulated pricing.",
+    products: ["Pork Belly", "Pork Kasim", "Pork Pigue", "Beef Brisket", "Ground Beef"],
+  },
+  {
+    id: "benguet-native-livestock",
+    name: "Benguet Native Livestock",
+    owner: "Benguet State University",
+    latitude: 16.4618,
+    longitude: 120.5874,
+    rating: 4.7,
+    reviewCount: 45,
+    image: "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=800",
+    description: "BSU Animal Genetic Resource Project. Raises Benguet Native Pig and free-range native chickens. Contact: Dr. Sonwright B. Maddul.",
+    products: ["Native Chicken", "Dressed Chicken", "Benguet Native Pig"],
+  },
 ];
 
 export const categories = [
   { id: "all", name: "All Products", icon: "Grid3X3" },
   { id: "vegetables", name: "Vegetables", icon: "Leaf" },
   { id: "fruits", name: "Fruits", icon: "Apple" },
+  { id: "meat", name: "Meat", icon: "Beef" },
+  { id: "poultry", name: "Poultry", icon: "Bird" },
   { id: "dairy", name: "Dairy & Eggs", icon: "Egg" },
   { id: "pantry", name: "Pantry", icon: "Package" },
 ];

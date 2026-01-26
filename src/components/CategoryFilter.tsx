@@ -1,11 +1,13 @@
 import { categories } from "@/data/products";
-import { Grid3X3, Leaf, Apple, Egg, Package } from "lucide-react";
+import { Grid3X3, Leaf, Apple, Egg, Package, Beef, Bird } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, React.ReactNode> = {
   Grid3X3: <Grid3X3 className="h-5 w-5" />,
   Leaf: <Leaf className="h-5 w-5" />,
   Apple: <Apple className="h-5 w-5" />,
+  Beef: <Beef className="h-5 w-5" />,
+  Bird: <Bird className="h-5 w-5" />,
   Egg: <Egg className="h-5 w-5" />,
   Package: <Package className="h-5 w-5" />,
 };
