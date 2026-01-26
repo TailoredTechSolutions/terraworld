@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   Crown,
@@ -15,6 +15,7 @@ import {
   ShoppingBag,
   Award,
   RefreshCw,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -34,6 +35,10 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WalletCard from "@/components/wallet/WalletCard";
 import RankProgress from "@/components/rank/RankProgress";
+import KYCStatusBadge from "@/components/kyc/KYCStatusBadge";
+import KYCVerificationForm from "@/components/kyc/KYCVerificationForm";
+import KYCDocumentUpload from "@/components/kyc/KYCDocumentUpload";
+import KYCDocumentsList from "@/components/kyc/KYCDocumentsList";
 
 interface Membership {
   id: string;
@@ -93,13 +98,27 @@ const BONUS_TYPE_LABELS: Record<string, string> = {
   matching: "Matching Bonus",
 };
 
+type KYCStatus = 'not_started' | 'pending' | 'in_review' | 'approved' | 'rejected';
+
+interface KYCProfile {
+  id: string;
+  user_id: string;
+  account_type: 'individual' | 'company';
+  status: KYCStatus;
+}
+
 const MemberDashboard = () => {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'overview';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [membership, setMembership] = useState<Membership | null>(null);
   const [bvRecords, setBVRecords] = useState<BVRecord[]>([]);
   const [payouts, setPayouts] = useState<PayoutRecord[]>([]);
+  const [kycProfile, setKycProfile] = useState<KYCProfile | null>(null);
+  const [kycRefreshTrigger, setKycRefreshTrigger] = useState(0);
   const [binaryStats, setBinaryStats] = useState<BinaryStats>({
     left_bv: 0,
     right_bv: 0,
@@ -191,6 +210,15 @@ const MemberDashboard = () => {
       if (payoutError) throw payoutError;
       setPayouts(payoutData || []);
 
+      // Fetch KYC profile
+      const { data: kycData } = await supabase
+        .from("kyc_profiles")
+        .select("id, user_id, account_type, status")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      setKycProfile(kycData);
+
     } catch (error) {
       console.error("Error fetching member data:", error);
       toast({
@@ -199,6 +227,16 @@ const MemberDashboard = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleKYCFormSuccess = () => {
+    if (user) {
+      fetchMemberData(user.id);
+    }
+  };
+
+  const handleKYCDocumentUpload = () => {
+    setKycRefreshTrigger(prev => prev + 1);
   };
 
   const totalBV = bvRecords.reduce((sum, r) => sum + Number(r.bv_amount), 0);
@@ -283,6 +321,9 @@ const MemberDashboard = () => {
                         <Users className="h-3 w-3" />
                         Sponsored
                       </Badge>
+                    )}
+                    {kycProfile && (
+                      <KYCStatusBadge status={kycProfile.status} />
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -432,20 +473,24 @@ const MemberDashboard = () => {
         </div>
 
         {/* Tabs for History */}
-        <Tabs defaultValue="bv" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 max-w-md">
-            <TabsTrigger value="bv" className="gap-2">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 max-w-lg">
+            <TabsTrigger value="overview" className="gap-2">
               <TrendingUp className="h-4 w-4" />
-              BV History
+              Overview
             </TabsTrigger>
             <TabsTrigger value="payouts" className="gap-2">
               <Wallet className="h-4 w-4" />
               Payouts
             </TabsTrigger>
+            <TabsTrigger value="kyc" className="gap-2">
+              <Shield className="h-4 w-4" />
+              Verification
+            </TabsTrigger>
           </TabsList>
 
-          {/* BV History Tab */}
-          <TabsContent value="bv">
+          {/* Overview Tab - BV History */}
+          <TabsContent value="overview">
             <Card>
               <CardHeader>
                 <CardTitle>Business Volume History</CardTitle>
@@ -583,6 +628,66 @@ const MemberDashboard = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* KYC Verification Tab */}
+          <TabsContent value="kyc">
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div>
+                <KYCVerificationForm
+                  userId={user.id}
+                  existingProfile={kycProfile}
+                  onSubmitSuccess={handleKYCFormSuccess}
+                />
+              </div>
+              <div className="space-y-6">
+                {kycProfile && (kycProfile.status === 'not_started' || kycProfile.status === 'pending' || kycProfile.status === 'rejected') && (
+                  <KYCDocumentUpload
+                    kycProfileId={kycProfile.id}
+                    userId={user.id}
+                    accountType={kycProfile.account_type}
+                    onUploadComplete={handleKYCDocumentUpload}
+                  />
+                )}
+                <KYCDocumentsList
+                  userId={user.id}
+                  kycProfileId={kycProfile?.id || null}
+                  refreshTrigger={kycRefreshTrigger}
+                />
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Document Requirements</CardTitle>
+                    <CardDescription>
+                      Please ensure your documents meet the following criteria
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <span className="text-primary">•</span>
+                        Documents must be clear and readable
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-primary">•</span>
+                        All corners of the document must be visible
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-primary">•</span>
+                        Files must be under 5MB (JPEG, PNG, WebP, or PDF)
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-primary">•</span>
+                        Government IDs must not be expired
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-primary">•</span>
+                        Proof of address must be dated within 3 months
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </main>

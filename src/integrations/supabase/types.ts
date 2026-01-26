@@ -250,6 +250,140 @@ export type Database = {
         }
         Relationships: []
       }
+      kyc_documents: {
+        Row: {
+          created_at: string
+          document_type: Database["public"]["Enums"]["kyc_document_type"]
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          kyc_profile_id: string
+          mime_type: string | null
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["kyc_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_type: Database["public"]["Enums"]["kyc_document_type"]
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          kyc_profile_id: string
+          mime_type?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["kyc_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_type?: Database["public"]["Enums"]["kyc_document_type"]
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          kyc_profile_id?: string
+          mime_type?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["kyc_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kyc_documents_kyc_profile_id_fkey"
+            columns: ["kyc_profile_id"]
+            isOneToOne: false
+            referencedRelation: "kyc_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kyc_profiles: {
+        Row: {
+          account_type: Database["public"]["Enums"]["account_type"]
+          address_line1: string | null
+          address_line2: string | null
+          city: string | null
+          company_name: string | null
+          country: string | null
+          created_at: string
+          date_of_birth: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          middle_name: string | null
+          nationality: string | null
+          postal_code: string | null
+          registration_number: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          state_province: string | null
+          status: Database["public"]["Enums"]["kyc_status"]
+          submitted_at: string | null
+          tax_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_type?: Database["public"]["Enums"]["account_type"]
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          middle_name?: string | null
+          nationality?: string | null
+          postal_code?: string | null
+          registration_number?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          state_province?: string | null
+          status?: Database["public"]["Enums"]["kyc_status"]
+          submitted_at?: string | null
+          tax_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_type?: Database["public"]["Enums"]["account_type"]
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          middle_name?: string | null
+          nationality?: string | null
+          postal_code?: string | null
+          registration_number?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          state_province?: string | null
+          status?: Database["public"]["Enums"]["kyc_status"]
+          submitted_at?: string | null
+          tax_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       memberships: {
         Row: {
           created_at: string
@@ -737,9 +871,25 @@ export type Database = {
       }
     }
     Enums: {
+      account_type: "individual" | "company"
       app_role: "farmer" | "business_buyer" | "member" | "driver" | "admin"
       driver_status: "online" | "offline" | "delivering"
       farmer_status: "active" | "pending" | "suspended"
+      kyc_document_type:
+        | "government_id"
+        | "passport"
+        | "drivers_license"
+        | "proof_of_address"
+        | "selfie"
+        | "business_registration"
+        | "articles_of_incorporation"
+        | "tax_certificate"
+      kyc_status:
+        | "not_started"
+        | "pending"
+        | "in_review"
+        | "approved"
+        | "rejected"
       membership_tier: "free" | "starter" | "basic" | "pro" | "elite"
       order_status:
         | "pending"
@@ -875,9 +1025,27 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_type: ["individual", "company"],
       app_role: ["farmer", "business_buyer", "member", "driver", "admin"],
       driver_status: ["online", "offline", "delivering"],
       farmer_status: ["active", "pending", "suspended"],
+      kyc_document_type: [
+        "government_id",
+        "passport",
+        "drivers_license",
+        "proof_of_address",
+        "selfie",
+        "business_registration",
+        "articles_of_incorporation",
+        "tax_certificate",
+      ],
+      kyc_status: [
+        "not_started",
+        "pending",
+        "in_review",
+        "approved",
+        "rejected",
+      ],
       membership_tier: ["free", "starter", "basic", "pro", "elite"],
       order_status: [
         "pending",
