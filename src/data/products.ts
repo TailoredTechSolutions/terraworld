@@ -13,6 +13,11 @@ import cauliflowerImg from "@/assets/products/cauliflower.jpg";
 import sayoteImg from "@/assets/products/sayote.jpg";
 import leeksImg from "@/assets/products/leeks.jpg";
 import pechayImg from "@/assets/products/pechay.jpg";
+// Fruit imports
+import mangoesImg from "@/assets/products/mangoes.jpg";
+import papayasImg from "@/assets/products/papayas.jpg";
+import bananasImg from "@/assets/products/bananas.jpg";
+import calamansiImg from "@/assets/products/calamansi.jpg";
 // Meat imports
 import porkBellyImg from "@/assets/products/pork-belly.jpg";
 import porkKasimImg from "@/assets/products/pork-kasim.jpg";
@@ -247,6 +252,58 @@ export const products: Product[] = [
     stock: 25,
     organic: true,
     description: "Sweet La Trinidad strawberries. Seasonal highland fruit, locally grown.",
+  },
+  {
+    id: "22",
+    name: "Carabao Mango",
+    price: 120.00,
+    unit: "kg",
+    farmId: "happy-house-farm",
+    farmName: "Happy House Organic Farm",
+    image: mangoesImg,
+    category: "Fruits",
+    stock: 80,
+    organic: true,
+    description: "Sweet Philippine Carabao mangoes from Cordillera farms. Known as the world's sweetest mango variety.",
+  },
+  {
+    id: "23",
+    name: "Papaya",
+    price: 45.00,
+    unit: "kg",
+    farmId: "happy-house-farm",
+    farmName: "Happy House Organic Farm",
+    image: papayasImg,
+    category: "Fruits",
+    stock: 60,
+    organic: true,
+    description: "Fresh ripe papayas. Rich in vitamins A and C, perfect for breakfast or smoothies.",
+  },
+  {
+    id: "24",
+    name: "Lakatan Bananas",
+    price: 65.00,
+    unit: "kg",
+    farmId: "jamie-macky-farm",
+    farmName: "Jamie & Macky's Berries",
+    image: bananasImg,
+    category: "Fruits",
+    stock: 150,
+    organic: true,
+    description: "Sweet Lakatan bananas from local farms. Golden yellow with aromatic flavor, perfect snack fruit.",
+  },
+  {
+    id: "25",
+    name: "Calamansi",
+    price: 80.00,
+    unit: "kg",
+    farmId: "jamie-macky-farm",
+    farmName: "Jamie & Macky's Berries",
+    image: calamansiImg,
+    category: "Fruits",
+    stock: 100,
+    organic: true,
+    description: "Fresh Philippine calamansi limes. Essential for Filipino cooking, juices, and marinades.",
   },
   // Meat & Poultry - Baguio City Slaughterhouse & Benguet Native Livestock
   {
