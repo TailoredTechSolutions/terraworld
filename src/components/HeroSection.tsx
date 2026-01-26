@@ -12,9 +12,12 @@ import {
   Clock, 
   Users, 
   Wallet,
-  BadgeCheck
+  BadgeCheck,
+  Volume2,
+  VolumeX
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState, useRef } from "react";
 
 const trustBadges = [
   {
@@ -47,18 +50,57 @@ const stats = [
 ];
 
 const HeroSection = () => {
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
   return (
     <section className="relative overflow-hidden bg-grain min-h-[90vh] flex items-center">
-      {/* Background Image with Overlay */}
+      {/* Video Background */}
       <div className="absolute inset-0">
-        <img
-          src={heroImage}
-          alt="Farm at sunrise"
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster={heroImage}
           className="h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-primary/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
+        >
+          <source src="/videos/hero-background.mp4" type="video/mp4" />
+          {/* Fallback to image if video fails */}
+          <img
+            src={heroImage}
+            alt="Farm at sunrise"
+            className="h-full w-full object-cover"
+          />
+        </video>
+        {/* Overlay gradients */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/75 to-primary/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-transparent to-primary/20" />
       </div>
+
+      {/* Mute/Unmute Button */}
+      <motion.button
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 1.5, duration: 0.3 }}
+        onClick={toggleMute}
+        className="absolute bottom-6 right-6 z-20 p-3 rounded-full bg-background/20 backdrop-blur-md border border-primary-foreground/20 hover:bg-background/30 transition-all group"
+        aria-label={isMuted ? "Unmute video" : "Mute video"}
+      >
+        {isMuted ? (
+          <VolumeX className="h-5 w-5 text-primary-foreground group-hover:text-accent transition-colors" />
+        ) : (
+          <Volume2 className="h-5 w-5 text-primary-foreground group-hover:text-accent transition-colors" />
+        )}
+      </motion.button>
 
       {/* Decorative elements */}
       <motion.div 
