@@ -83,12 +83,15 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
           {farm.description}
         </p>
 
-        {/* Contact */}
+        {/* Contact - Click to Call */}
         {farm.contact && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-            <Phone className="h-3.5 w-3.5 text-primary" />
-            <span>{farm.contact}</span>
-          </div>
+          <a 
+            href={`tel:${farm.contact.replace(/-/g, '')}`}
+            className="flex items-center gap-2 text-sm text-muted-foreground mb-3 hover:text-primary transition-colors group/phone"
+          >
+            <Phone className="h-3.5 w-3.5 text-primary group-hover/phone:scale-110 transition-transform" />
+            <span className="underline-offset-2 group-hover/phone:underline">{farm.contact}</span>
+          </a>
         )}
 
         <div className="flex flex-wrap gap-2 mb-5">
