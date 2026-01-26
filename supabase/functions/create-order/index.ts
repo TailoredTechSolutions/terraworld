@@ -6,6 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// ============ FIXED CONSTANTS (NON-NEGOTIABLE) ============
+const TERRA_FEE_RATE = 0.30; // 30% Terra service fee
+
 // Validation schema for order input
 const orderItemSchema = z.object({
   id: z.string(),
@@ -24,6 +27,7 @@ const orderSchema = z.object({
   items: z.array(orderItemSchema).min(1).max(50),
   payment_method: z.enum(['card', 'gcash', 'crypto']),
   notes: z.string().max(500).optional().nullable(),
+  referrer_id: z.string().uuid().optional().nullable(), // For affiliate tracking
 });
 
 Deno.serve(async (req) => {
@@ -68,28 +72,31 @@ Deno.serve(async (req) => {
     const orderData = validationResult.data;
 
     // Server-side price calculation - NEVER trust client prices
-    // In production, you would fetch actual prices from the products table
-    // For now, we validate the structure and recalculate totals
     const { data: products, error: productsError } = await supabase
       .from('products')
-      .select('id, price, stock, name')
+      .select('id, price, stock, name, farmer_id')
       .in('id', orderData.items.map(i => i.id));
 
     // Build a price lookup map from database
-    const productPrices: Record<string, { price: number; stock: number; name: string }> = {};
+    const productPrices: Record<string, { price: number; stock: number; name: string; farmer_id: string }> = {};
     if (products) {
       products.forEach(p => {
-        productPrices[p.id] = { price: Number(p.price), stock: p.stock, name: p.name };
+        productPrices[p.id] = { price: Number(p.price), stock: p.stock, name: p.name, farmer_id: p.farmer_id };
       });
     }
 
     // Validate items and calculate server-side totals
-    let subtotal = 0;
+    // Farmer price = base price (what farmer gets)
+    // Customer pays = Farmer price + 30% Terra fee
+    let totalFarmerPrice = 0;
+    let farmerId: string | null = null;
     const validatedItems: Array<{
       id: string;
       name: string;
       quantity: number;
-      price: number;
+      farmer_price: number;
+      terra_fee: number;
+      total_price: number;
       farmId?: string;
       farmName?: string;
     }> = [];
@@ -97,40 +104,54 @@ Deno.serve(async (req) => {
     for (const item of orderData.items) {
       const dbProduct = productPrices[item.id];
       
+      // Farmer price is the base product price
+      const farmerPricePerUnit = dbProduct ? dbProduct.price : item.price;
+      const terraFeePerUnit = farmerPricePerUnit * TERRA_FEE_RATE;
+      const totalPricePerUnit = farmerPricePerUnit + terraFeePerUnit;
+      
       if (dbProduct) {
-        // Use database price, not client-provided price
         validatedItems.push({
-          ...item,
-          name: dbProduct.name, // Use DB name
-          price: dbProduct.price, // Use DB price
+          id: item.id,
+          name: dbProduct.name,
+          quantity: item.quantity,
+          farmer_price: farmerPricePerUnit,
+          terra_fee: terraFeePerUnit,
+          total_price: totalPricePerUnit,
+          farmId: item.farmId,
+          farmName: item.farmName,
         });
-        subtotal += dbProduct.price * item.quantity;
+        totalFarmerPrice += farmerPricePerUnit * item.quantity;
+        
+        // Get farmer ID from first product
+        if (!farmerId && dbProduct.farmer_id) {
+          farmerId = dbProduct.farmer_id;
+        }
       } else {
-        // If product not found in DB, use client price (for static products)
-        // In production, you might reject unknown products
-        validatedItems.push(item);
-        subtotal += item.price * item.quantity;
+        validatedItems.push({
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          farmer_price: farmerPricePerUnit,
+          terra_fee: terraFeePerUnit,
+          total_price: totalPricePerUnit,
+          farmId: item.farmId,
+          farmName: item.farmName,
+        });
+        totalFarmerPrice += farmerPricePerUnit * item.quantity;
       }
     }
 
-    // Calculate fees server-side
+    // Calculate Terra fee and totals
+    const terraFee = totalFarmerPrice * TERRA_FEE_RATE;
+    const subtotal = totalFarmerPrice + terraFee; // Customer subtotal includes Terra fee
     const deliveryFee = subtotal > 0 ? 45 : 0;
     const total = subtotal + deliveryFee;
     const itemsCount = validatedItems.reduce((sum, item) => sum + item.quantity, 0);
+    
+    // Business Volume = Terra fee (₱1 = 1 BV)
+    const terraFeeBV = terraFee;
 
-    // Look up a farmer ID if available (simplified for now)
-    let farmerId: string | null = null;
-    if (orderData.items[0]?.farmId) {
-      const { data: farmerData } = await supabase
-        .from('farmers')
-        .select('id')
-        .limit(1)
-        .maybeSingle();
-      
-      if (farmerData) {
-        farmerId = farmerData.id;
-      }
-    }
+    console.log(`[create-order] Farmer price: ₱${totalFarmerPrice}, Terra fee: ₱${terraFee} (${terraFeeBV} BV)`);
 
     // Create the order using service role (bypasses RLS)
     const { data: order, error: insertError } = await supabase
@@ -143,13 +164,17 @@ Deno.serve(async (req) => {
         farmer_id: farmerId,
         items: validatedItems,
         items_count: itemsCount,
+        farmer_price: totalFarmerPrice,
+        terra_fee: terraFee,
+        terra_fee_bv: terraFeeBV,
+        referrer_id: orderData.referrer_id || null,
         subtotal: subtotal,
         delivery_fee: deliveryFee,
         total: total,
         status: 'pending',
         notes: orderData.notes ? `Payment: ${orderData.payment_method}. ${orderData.notes}` : `Payment: ${orderData.payment_method}`,
       }])
-      .select('id, order_number, total, status, created_at')
+      .select('id, order_number, total, status, created_at, terra_fee, terra_fee_bv')
       .single();
 
     if (insertError) {
@@ -162,13 +187,48 @@ Deno.serve(async (req) => {
 
     console.log('[create-order] Order created successfully:', order.order_number);
 
-    // Return success with order details (no sensitive data)
+    // Record BV in the ledger if there's a referrer
+    if (orderData.referrer_id && terraFeeBV > 0) {
+      // Get referrer's membership to determine placement leg
+      const { data: membership } = await supabase
+        .from('memberships')
+        .select('placement_side')
+        .eq('user_id', orderData.referrer_id)
+        .maybeSingle();
+
+      const leg = membership?.placement_side || 'left';
+
+      const { error: bvError } = await supabase
+        .from('bv_ledger')
+        .insert({
+          user_id: orderData.referrer_id,
+          order_id: order.id,
+          bv_type: 'product',
+          leg: leg,
+          bv_amount: terraFeeBV,
+          terra_fee: terraFee,
+          source_description: `Order ${order.order_number} - Product BV`,
+        });
+
+      if (bvError) {
+        console.error('[create-order] BV ledger error:', bvError);
+        // Don't fail the order if BV recording fails
+      } else {
+        console.log(`[create-order] BV recorded: ${terraFeeBV} to ${leg} leg for referrer ${orderData.referrer_id}`);
+      }
+    }
+
+    // Return success with order details including Terra fee breakdown
     return new Response(
       JSON.stringify({
         success: true,
         order: {
           id: order.id,
           order_number: order.order_number,
+          farmer_price: totalFarmerPrice,
+          terra_fee: terraFee,
+          terra_fee_bv: terraFeeBV,
+          delivery_fee: deliveryFee,
           total: order.total,
           status: order.status,
           created_at: order.created_at,

@@ -38,7 +38,9 @@ const CheckoutPage = () => {
     zip: "",
   });
 
-  const subtotal = getTotalPrice();
+  const farmerSubtotal = getTotalPrice(); // Base farmer prices
+  const terraFee = farmerSubtotal * 0.30; // 30% Terra service fee (non-negotiable)
+  const subtotal = farmerSubtotal + terraFee;
   const deliveryFee = subtotal > 0 ? 45 : 0;
   const total = subtotal + deliveryFee;
 
@@ -394,8 +396,15 @@ const CheckoutPage = () => {
 
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">₱{subtotal.toFixed(2)}</span>
+                  <span className="text-muted-foreground">Farm Products</span>
+                  <span className="font-medium">₱{farmerSubtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    Terra Service Fee
+                    <span className="text-xs text-accent">(30%)</span>
+                  </span>
+                  <span className="font-medium text-accent">₱{terraFee.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Delivery Fee</span>
