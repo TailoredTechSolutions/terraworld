@@ -5,6 +5,7 @@ import { useCartStore } from "@/store/cartStore";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import terraLogo from "@/assets/terra-logo.png";
 import {
   DropdownMenu,
@@ -16,21 +17,43 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin';
+
+interface NavLink {
+  path: string;
+  label: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  authRequired?: boolean;
+  roles?: AppRole[];
+}
+
 const Header = () => {
   const location = useLocation();
   const { toggleCart, getTotalItems } = useCartStore();
   const { user, profile, signOut, loading } = useAuth();
+  const { roles, isAdmin, isDriver } = useUserRoles();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const totalItems = getTotalItems();
 
-  const navLinks = [
+  const navLinks: NavLink[] = [
     { path: "/", label: "Marketplace" },
     { path: "/map", label: "Find Farms" },
     { path: "/affiliate", label: "Earn" },
     { path: "/member", label: "Member", icon: Crown, authRequired: true },
-    { path: "/driver", label: "Driver", icon: Truck, authRequired: true },
-    { path: "/admin", label: "Admin", icon: Shield, authRequired: true },
+    { path: "/driver", label: "Driver", icon: Truck, authRequired: true, roles: ['driver', 'admin'] },
+    { path: "/admin", label: "Admin", icon: Shield, authRequired: true, roles: ['admin'] },
   ];
+
+  const canAccessLink = (link: NavLink): boolean => {
+    // Public links
+    if (!link.authRequired) return true;
+    // Auth required but not logged in
+    if (!user) return false;
+    // No specific roles required, just auth
+    if (!link.roles) return true;
+    // Check if user has any of the required roles (admins always have access)
+    return isAdmin || link.roles.some(role => roles.includes(role));
+  };
 
   const getInitials = (name: string | null | undefined) => {
     if (!name) return "U";
@@ -66,7 +89,7 @@ const Header = () => {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">
           {navLinks
-            .filter(link => !link.authRequired || user)
+            .filter(canAccessLink)
             .map((link) => (
               <Link
                 key={link.path}
@@ -183,7 +206,7 @@ const Header = () => {
         <div className="md:hidden border-t border-border bg-background animate-fade-in">
           <nav className="container py-4 flex flex-col gap-2">
             {navLinks
-              .filter(link => !link.authRequired || user)
+              .filter(canAccessLink)
               .map((link) => (
                 <Link
                   key={link.path}
