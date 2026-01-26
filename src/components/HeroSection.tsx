@@ -11,7 +11,8 @@ import {
   Clock, 
   Users, 
   Wallet,
-  BadgeCheck
+  BadgeCheck,
+  MapPin
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -123,7 +124,7 @@ const HeroSection = () => {
               Shop organic, earn commissions, and support local Benguet farmers directly.
             </motion.p>
 
-            {/* CTA Button */}
+            {/* CTA Buttons */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -137,6 +138,16 @@ const HeroSection = () => {
                 >
                   Explore Marketplace
                   <ArrowRight className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link to="/map">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-14 px-8 rounded-xl text-lg font-semibold border-2 border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10 hover:border-primary-foreground/60 gap-2 transition-all"
+                >
+                  <MapPin className="h-5 w-5" />
+                  Find Nearby Farms
                 </Button>
               </Link>
             </motion.div>
