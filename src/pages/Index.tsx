@@ -1,3 +1,4 @@
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
@@ -17,7 +18,10 @@ import {
   Handshake,
   type LucideIcon,
   Star,
-  Quote
+  Quote,
+  Volume2,
+  VolumeX,
+  Play
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -196,6 +200,150 @@ const FeatureCard = ({ feature }: { feature: Feature }) => {
         <ArrowRight className={`h-5 w-5 ${feature.iconColor}`} />
       </motion.div>
     </motion.div>
+  );
+};
+
+// Video Showcase Section Component
+const VideoShowcaseSection = () => {
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  return (
+    <section className="py-20 bg-background overflow-hidden">
+      <div className="container">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-10"
+        >
+          <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-semibold mb-4">
+            See It In Action
+          </span>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Experience the Terra Difference
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+            Watch how we bring fresh produce from Benguet highlands directly to your table
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="relative max-w-5xl mx-auto"
+        >
+          {/* Video Container with decorative frame */}
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-primary/20 border-4 border-primary/20">
+            {/* Decorative corners */}
+            <div className="absolute top-0 left-0 w-20 h-20 border-t-4 border-l-4 border-accent rounded-tl-3xl z-10" />
+            <div className="absolute top-0 right-0 w-20 h-20 border-t-4 border-r-4 border-accent rounded-tr-3xl z-10" />
+            <div className="absolute bottom-0 left-0 w-20 h-20 border-b-4 border-l-4 border-accent rounded-bl-3xl z-10" />
+            <div className="absolute bottom-0 right-0 w-20 h-20 border-b-4 border-r-4 border-accent rounded-br-3xl z-10" />
+
+            <video
+              ref={videoRef}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full aspect-video object-cover"
+            >
+              <source src="/videos/hero-background.mp4" type="video/mp4" />
+            </video>
+
+            {/* Overlay gradient for branding */}
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/30 via-transparent to-transparent pointer-events-none" />
+
+            {/* Mute/Unmute Button */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleMute}
+              className="absolute bottom-4 right-4 z-20 p-3 rounded-full bg-background/80 backdrop-blur-md border border-border hover:bg-background transition-all group shadow-lg"
+              aria-label={isMuted ? "Unmute video" : "Mute video"}
+            >
+              {isMuted ? (
+                <VolumeX className="h-5 w-5 text-foreground group-hover:text-accent transition-colors" />
+              ) : (
+                <Volume2 className="h-5 w-5 text-foreground group-hover:text-accent transition-colors" />
+              )}
+            </motion.button>
+
+            {/* Play indicator overlay */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <motion.div
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 0 }}
+                transition={{ delay: 1, duration: 0.5 }}
+                className="p-6 rounded-full bg-accent/90 shadow-xl"
+              >
+                <Play className="h-12 w-12 text-accent-foreground fill-current" />
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Floating badges around video */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="absolute -left-4 top-1/4 hidden lg:flex items-center gap-2 p-3 rounded-xl bg-card border border-border shadow-lg"
+          >
+            <div className="p-2 rounded-lg bg-emerald-500/10">
+              <Leaf className="h-5 w-5 text-emerald-500" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">100% Organic</p>
+              <p className="text-xs text-muted-foreground">Certified Fresh</p>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="absolute -right-4 top-1/3 hidden lg:flex items-center gap-2 p-3 rounded-xl bg-card border border-border shadow-lg"
+          >
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Truck className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Same-Day Delivery</p>
+              <p className="text-xs text-muted-foreground">Farm to Door</p>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+            className="absolute -bottom-6 left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-2 p-3 rounded-xl bg-card border border-border shadow-lg"
+          >
+            <div className="p-2 rounded-lg bg-accent/10">
+              <Users className="h-5 w-5 text-accent" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Join 1,000+ Customers</p>
+              <p className="text-xs text-muted-foreground">Growing Community</p>
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
   );
 };
 
@@ -441,6 +589,9 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        {/* Video Showcase Section */}
+        <VideoShowcaseSection />
 
         {/* How It Works Section */}
         <section className="py-20 bg-background">
