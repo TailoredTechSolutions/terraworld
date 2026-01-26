@@ -11,6 +11,7 @@ import DriverDashboard from "@/pages/DriverDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import MemberDashboard from "@/pages/MemberDashboard";
 import AuthPage from "@/pages/AuthPage";
+import KYCPage from "@/pages/KYCPage";
 import NotFound from "@/pages/NotFound";
 
 const AnimatedRoutes = () => {
@@ -96,6 +97,14 @@ const AnimatedRoutes = () => {
           element={
             <PageTransition>
               <AuthPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/kyc"
+          element={
+            <PageTransition>
+              <KYCPage />
             </PageTransition>
           }
         />
