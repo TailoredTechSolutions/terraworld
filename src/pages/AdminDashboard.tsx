@@ -113,23 +113,30 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [farmersRes, driversRes, ordersRes] = await Promise.all([
+      // Fetch farmers and drivers directly (public read access)
+      const [farmersRes, driversRes] = await Promise.all([
         supabase.from("farmers").select("*").order("created_at", { ascending: false }),
         supabase.from("drivers").select("*").order("created_at", { ascending: false }),
-        supabase.from("orders").select(`
-          *,
-          farmers:farmer_id(name),
-          drivers:driver_id(name)
-        `).order("created_at", { ascending: false }),
       ]);
 
       if (farmersRes.error) throw farmersRes.error;
       if (driversRes.error) throw driversRes.error;
-      if (ordersRes.error) throw ordersRes.error;
 
       setFarmers(farmersRes.data || []);
       setDrivers(driversRes.data || []);
-      setOrders(ordersRes.data || []);
+
+      // Fetch orders via secure edge function (orders table no longer publicly readable)
+      const { data: ordersData, error: ordersError } = await supabase.functions.invoke('get-orders', {
+        method: 'GET',
+      });
+
+      if (ordersError) {
+        console.error("Error fetching orders via edge function:", ordersError);
+        // Don't throw - orders might fail but we can still show other data
+        setOrders([]);
+      } else {
+        setOrders(ordersData?.orders || []);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
       toast({

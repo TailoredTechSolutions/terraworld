@@ -52,7 +52,7 @@ const CheckoutPage = () => {
     setIsProcessing(true);
     
     try {
-      // Prepare order items as JSON
+      // Prepare order items for backend validation
       const orderItems = items.map((item) => ({
         id: item.product.id,
         name: item.product.name,
@@ -62,57 +62,33 @@ const CheckoutPage = () => {
         farmName: item.product.farmName,
       }));
 
-      // Get farmer_id from the first item (in a real app, you might split orders by farm)
-      const firstFarmId = items[0]?.product.farmId;
-      
-      // Look up farmer UUID from name (since our products use string IDs)
-      let farmerId: string | null = null;
-      if (firstFarmId) {
-        const { data: farmerData } = await supabase
-          .from("farmers")
-          .select("id")
-          .limit(1)
-          .maybeSingle();
-        
-        if (farmerData) {
-          farmerId = farmerData.id;
-        }
-      }
-
-      // Create the order in database
-      const { data: order, error } = await supabase
-        .from("orders")
-        .insert([{
+      // Send order to secure backend edge function for server-side validation
+      const { data, error } = await supabase.functions.invoke('create-order', {
+        body: {
           customer_name: `${formData.firstName} ${formData.lastName}`.trim(),
           customer_phone: formData.phone,
-          customer_email: formData.email,
+          customer_email: formData.email || null,
           delivery_address: `${formData.address}, ${formData.city} ${formData.zip}`.trim(),
-          farmer_id: farmerId,
-          items: JSON.parse(JSON.stringify(orderItems)),
-          items_count: items.reduce((sum, item) => sum + item.quantity, 0),
-          subtotal: subtotal,
-          delivery_fee: deliveryFee,
-          total: total,
-          status: "pending" as const,
-          notes: `Payment method: ${paymentMethod}`,
-          order_number: `ORD-${Date.now().toString(36).toUpperCase()}`,
-        }])
-        .select()
-        .single();
+          items: orderItems,
+          payment_method: paymentMethod,
+          notes: null,
+        },
+      });
 
       if (error) {
-        throw error;
+        throw new Error(error.message || 'Failed to create order');
       }
 
-      // Simulate payment processing delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      if (!data?.success || !data?.order) {
+        throw new Error(data?.error || 'Order creation failed');
+      }
 
       // Clear cart and navigate to confirmation
       clearCart();
       navigate("/order-confirmation", { 
         state: { 
-          orderId: order.order_number,
-          total,
+          orderId: data.order.order_number,
+          total: data.order.total,
           paymentMethod,
           items: items.length,
           customerName: `${formData.firstName} ${formData.lastName}`,
@@ -122,14 +98,14 @@ const CheckoutPage = () => {
 
       toast({
         title: "Order placed successfully!",
-        description: `Your order ${order.order_number} has been confirmed.`,
+        description: `Your order ${data.order.order_number} has been confirmed.`,
       });
 
     } catch (error) {
       console.error("Error creating order:", error);
       toast({
         title: "Error",
-        description: "Failed to place order. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to place order. Please try again.",
         variant: "destructive",
       });
     } finally {
