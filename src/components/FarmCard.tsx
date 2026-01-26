@@ -12,7 +12,7 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
   return (
     <div
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-2xl bg-card border-2 border-secondary/50 hover:border-accent/50 shadow-sm hover:shadow-lg hover:shadow-accent/10 transition-all duration-300",
+        "group relative flex flex-col overflow-hidden glass-card glass-hover",
         className
       )}
     >
@@ -27,13 +27,13 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
         <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-primary/20 to-transparent" />
         
         {/* Rating badge */}
-        <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-background/95 px-3 py-1.5 shadow-md backdrop-blur-sm">
-          <Star className="h-4 w-4 fill-accent text-accent" />
-          <span className="text-sm font-bold text-foreground">{farm.rating}</span>
+        <div className="absolute top-3 right-3 glass-badge-gold flex items-center gap-1.5 shadow-md">
+          <Star className="h-4 w-4 fill-current" />
+          <span className="font-bold">{farm.rating}</span>
         </div>
 
         {farm.distance && (
-          <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground shadow-md">
+          <div className="absolute bottom-3 left-3 glass-badge-primary flex items-center gap-1.5 shadow-md">
             <MapPin className="h-3.5 w-3.5" />
             {farm.distance} km away
           </div>
@@ -41,9 +41,9 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
       </div>
 
       {/* Content */}
-      <div className="flex flex-col p-5 bg-gradient-to-b from-card to-secondary/20">
+      <div className="flex flex-col p-5 bg-gradient-to-b from-transparent to-secondary/10">
         <div className="flex items-start gap-3 mb-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
             <Tractor className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
@@ -62,13 +62,13 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
           {farm.products.slice(0, 3).map((product) => (
             <span
               key={product}
-              className="rounded-full bg-accent/15 border border-accent/30 px-3 py-1 text-xs font-semibold text-accent"
+              className="glass-badge-accent"
             >
               {product}
             </span>
           ))}
           {farm.products.length > 3 && (
-            <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-muted-foreground">
+            <span className="glass-badge">
               +{farm.products.length - 3} more
             </span>
           )}
@@ -76,7 +76,7 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
 
         <Button
           variant="outline"
-          className="w-full mt-auto rounded-xl border-2 border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 gap-2 font-semibold h-11 group/btn"
+          className="w-full mt-auto btn-liquid-outline h-11 gap-2 font-semibold group/btn"
         >
           View Farm
           <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />

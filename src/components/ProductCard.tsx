@@ -26,12 +26,12 @@ const ProductCard = ({ product, className }: ProductCardProps) => {
   return (
     <div
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-2xl bg-card border-2 border-secondary/50 hover:border-accent/50 shadow-sm hover:shadow-lg hover:shadow-accent/10 transition-all duration-300",
+        "group relative flex flex-col overflow-hidden glass-card glass-hover",
         className
       )}
     >
       {/* Image Container */}
-      <Link to={`/product/${product.id}`} className="relative aspect-square overflow-hidden bg-secondary/30">
+      <Link to={`/product/${product.id}`} className="relative aspect-square overflow-hidden">
         <img
           src={product.image}
           alt={product.name}
@@ -41,7 +41,7 @@ const ProductCard = ({ product, className }: ProductCardProps) => {
         <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
         {product.organic && (
-          <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground shadow-md">
+          <div className="absolute top-3 left-3 glass-badge-accent flex items-center gap-1.5 shadow-md">
             <Leaf className="h-3.5 w-3.5" />
             Organic
           </div>
@@ -49,7 +49,7 @@ const ProductCard = ({ product, className }: ProductCardProps) => {
       </Link>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col p-5 bg-gradient-to-b from-card to-secondary/20">
+      <div className="flex flex-1 flex-col p-5 bg-gradient-to-b from-transparent to-secondary/10">
         <Link to={`/product/${product.id}`} className="flex-1">
           <div className="flex items-center gap-1.5 mb-2">
             <Sprout className="h-3.5 w-3.5 text-accent" />
@@ -62,7 +62,7 @@ const ProductCard = ({ product, className }: ProductCardProps) => {
           </h3>
         </Link>
 
-        <div className="flex items-center justify-between mt-auto pt-4 border-t border-secondary">
+        <div className="flex items-center justify-between mt-auto pt-4 border-t border-glass-border">
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-bold text-primary font-display">
               ₱{product.price.toFixed(0)}
@@ -74,12 +74,12 @@ const ProductCard = ({ product, className }: ProductCardProps) => {
 
           {/* Quantity Selector and Add Button */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center bg-secondary/50 rounded-xl overflow-hidden">
+            <div className="flex items-center bg-glass backdrop-blur-sm rounded-xl overflow-hidden border border-glass-border">
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={decrementQuantity}
-                className="h-8 w-8 rounded-none hover:bg-secondary"
+                className="h-8 w-8 rounded-none hover:bg-secondary/50"
               >
                 <Minus className="h-3.5 w-3.5" />
               </Button>
@@ -90,7 +90,7 @@ const ProductCard = ({ product, className }: ProductCardProps) => {
                 size="icon"
                 variant="ghost"
                 onClick={incrementQuantity}
-                className="h-8 w-8 rounded-none hover:bg-secondary"
+                className="h-8 w-8 rounded-none hover:bg-secondary/50"
               >
                 <Plus className="h-3.5 w-3.5" />
               </Button>
@@ -99,7 +99,7 @@ const ProductCard = ({ product, className }: ProductCardProps) => {
             <Button
               size="icon"
               onClick={handleAddToCart}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-10 w-10 transition-all hover:-translate-y-0.5"
+              className="btn-liquid h-10 w-10 p-0 rounded-xl"
             >
               <Plus className="h-5 w-5" />
             </Button>

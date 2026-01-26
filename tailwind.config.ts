@@ -84,6 +84,12 @@ export default {
         },
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
+        // Glass colors
+        glass: {
+          DEFAULT: "hsl(var(--glass))",
+          border: "hsl(var(--glass-border))",
+          highlight: "hsl(var(--glass-highlight))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -91,12 +97,21 @@ export default {
         sm: "calc(var(--radius) - 4px)",
         xl: "calc(var(--radius) + 4px)",
         "2xl": "calc(var(--radius) + 8px)",
+        "3xl": "20px",
+        glass: "var(--glass-radius)",
+      },
+      backdropBlur: {
+        glass: "var(--glass-blur)",
       },
       boxShadow: {
         sm: "var(--shadow-sm)",
         md: "var(--shadow-md)",
         lg: "var(--shadow-lg)",
         card: "var(--shadow-card)",
+        glass: "var(--shadow-glass)",
+        "glow-primary": "var(--shadow-glow-primary)",
+        "glow-accent": "var(--shadow-glow-accent)",
+        "glow-gold": "var(--shadow-glow-gold)",
       },
       keyframes: {
         "accordion-down": {
@@ -123,6 +138,14 @@ export default {
           "0%, 100%": { transform: "translateY(0px)" },
           "50%": { transform: "translateY(-10px)" },
         },
+        "glow-pulse": {
+          "0%, 100%": { boxShadow: "var(--shadow-glow-primary)" },
+          "50%": { boxShadow: "0 0 36px hsl(220 75% 35% / 0.6)" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -131,6 +154,8 @@ export default {
         "slide-up": "slide-up 0.6s ease-out forwards",
         "scale-in": "scale-in 0.3s ease-out forwards",
         float: "float 3s ease-in-out infinite",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+        shimmer: "shimmer 2s linear infinite",
       },
     },
   },
