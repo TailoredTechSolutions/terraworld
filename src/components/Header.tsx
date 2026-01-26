@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { ShoppingCart, MapPin, Menu, X, User, Truck, Crown, Shield, LogOut, LogIn } from "lucide-react";
+import { ShoppingCart, MapPin, Menu, X, User, Truck, Crown, Shield, LogOut, LogIn, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { useState } from "react";
@@ -36,7 +36,8 @@ const Header = () => {
   const totalItems = getTotalItems();
 
   const navLinks: NavLink[] = [
-    { path: "/", label: "Marketplace" },
+    { path: "/", label: "Home" },
+    { path: "/shop", label: "Shop", icon: Store },
     { path: "/map", label: "Find Farms" },
     { path: "/affiliate", label: "Earn" },
     { path: "/member", label: "Member", icon: Crown, authRequired: true },

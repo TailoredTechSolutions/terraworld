@@ -4,6 +4,7 @@ import PageTransition from "./PageTransition";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleProtectedRoute from "./RoleProtectedRoute";
 import Index from "@/pages/Index";
+import ShopPage from "@/pages/ShopPage";
 import ProductDetail from "@/pages/ProductDetail";
 import MapPage from "@/pages/MapPage";
 import AffiliatePage from "@/pages/AffiliatePage";
@@ -28,6 +29,14 @@ const AnimatedRoutes = () => {
           element={
             <PageTransition>
               <Index />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/shop"
+          element={
+            <PageTransition>
+              <ShopPage />
             </PageTransition>
           }
         />
