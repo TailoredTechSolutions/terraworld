@@ -94,11 +94,11 @@ const AnimatedRoutes = () => {
         <Route
           path="/member"
           element={
-            <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['member']}>
               <PageTransition>
                 <MemberDashboard />
               </PageTransition>
-            </ProtectedRoute>
+            </RoleProtectedRoute>
           }
         />
         <Route
