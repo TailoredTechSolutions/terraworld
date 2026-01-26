@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.get-orders]
 verify_jwt = false
+
+[functions.run-payout-cycle]
+verify_jwt = false
