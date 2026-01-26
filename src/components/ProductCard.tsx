@@ -37,19 +37,6 @@ const ProductCard = ({ product, className }: ProductCardProps) => {
           </div>
         )}
 
-        {/* Quick add button on hover */}
-        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-          <Button
-            size="sm"
-            onClick={(e) => {
-              e.preventDefault();
-              addItem(product);
-            }}
-            className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-full h-10 w-10 p-0 shadow-lg"
-          >
-            <Plus className="h-5 w-5" />
-          </Button>
-        </div>
       </Link>
 
       {/* Content */}
