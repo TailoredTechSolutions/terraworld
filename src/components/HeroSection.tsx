@@ -195,12 +195,12 @@ const HeroSection = () => {
             </motion.div>
           </div>
 
-          {/* Right Column - Trust Badges Grid */}
+          {/* Right Column - Trust Badges Grid (Smaller) */}
           <motion.div 
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
-            className="hidden lg:grid grid-cols-2 gap-4"
+            className="hidden lg:grid grid-cols-2 gap-3"
           >
             {trustBadges.map((badge, index) => (
               <motion.div
@@ -208,18 +208,18 @@ const HeroSection = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="p-5 glass-card glass-hover"
+                whileHover={{ scale: 1.03, y: -3 }}
+                className="p-3.5 glass-card glass-hover"
               >
-                <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/20 border border-accent/30 backdrop-blur-sm shadow-glow-accent">
-                    <badge.icon className="h-6 w-6 text-accent" />
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/20 border border-accent/30 backdrop-blur-sm shadow-glow-accent">
+                    <badge.icon className="h-4 w-4 text-accent" />
                   </div>
                   <div>
-                    <p className="font-semibold text-primary-foreground mb-1">
+                    <p className="font-semibold text-sm text-primary-foreground mb-0.5">
                       {badge.title}
                     </p>
-                    <p className="text-sm text-primary-foreground/70">
+                    <p className="text-xs text-primary-foreground/70">
                       {badge.subtitle}
                     </p>
                   </div>
@@ -227,56 +227,55 @@ const HeroSection = () => {
               </motion.div>
             ))}
 
-            {/* Additional Feature Cards */}
+            {/* Additional Feature Card (Smaller) */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.9 }}
-              whileHover={{ scale: 1.02, y: -3 }}
-              className="col-span-2 p-5 glass-card-gold"
+              whileHover={{ scale: 1.02, y: -2 }}
+              className="col-span-2 p-3.5 glass-card-gold"
             >
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-accent/30 border border-accent/40 backdrop-blur-sm shadow-glow-gold">
-                  <Wallet className="h-7 w-7 text-accent" />
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/30 border border-accent/40 backdrop-blur-sm shadow-glow-gold">
+                  <Wallet className="h-5 w-5 text-accent" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-semibold text-primary-foreground mb-1">
+                  <p className="font-semibold text-sm text-primary-foreground mb-0.5">
                     Earn While You Shop
                   </p>
-                  <p className="text-sm text-primary-foreground/70">
-                    Join our affiliate program and earn commissions on every referral. 
-                    Build passive income while supporting local farmers.
+                  <p className="text-xs text-primary-foreground/70">
+                    Join our affiliate program and earn commissions on every referral.
                   </p>
                 </div>
                 <Link to="/affiliate">
-                  <Button size="sm" className="btn-liquid text-sm py-2 px-4 h-auto rounded-xl gap-1.5">
+                  <Button size="sm" className="btn-liquid text-xs py-1.5 px-3 h-auto rounded-lg gap-1">
                     Learn More
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-3.5 w-3.5" />
                   </Button>
                 </Link>
               </div>
             </motion.div>
 
-            {/* Verification Badge */}
+            {/* Verification Badge (Smaller) */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 1 }}
-              className="col-span-2 flex items-center justify-center gap-6 py-4"
+              className="col-span-2 flex items-center justify-center gap-4 py-3"
             >
-              <div className="flex items-center gap-2 text-primary-foreground/70">
-                <BadgeCheck className="h-5 w-5 text-accent" />
-                <span className="text-sm">DA Registered</span>
+              <div className="flex items-center gap-1.5 text-primary-foreground/70">
+                <BadgeCheck className="h-4 w-4 text-accent" />
+                <span className="text-xs">DA Registered</span>
               </div>
-              <div className="h-4 w-px bg-primary-foreground/30" />
-              <div className="flex items-center gap-2 text-primary-foreground/70">
-                <BadgeCheck className="h-5 w-5 text-accent" />
-                <span className="text-sm">SEC Compliant</span>
+              <div className="h-3 w-px bg-primary-foreground/30" />
+              <div className="flex items-center gap-1.5 text-primary-foreground/70">
+                <BadgeCheck className="h-4 w-4 text-accent" />
+                <span className="text-xs">SEC Compliant</span>
               </div>
-              <div className="h-4 w-px bg-primary-foreground/30" />
-              <div className="flex items-center gap-2 text-primary-foreground/70">
-                <BadgeCheck className="h-5 w-5 text-accent" />
-                <span className="text-sm">KYC Verified</span>
+              <div className="h-3 w-px bg-primary-foreground/30" />
+              <div className="flex items-center gap-1.5 text-primary-foreground/70">
+                <BadgeCheck className="h-4 w-4 text-accent" />
+                <span className="text-xs">KYC Verified</span>
               </div>
             </motion.div>
           </motion.div>
