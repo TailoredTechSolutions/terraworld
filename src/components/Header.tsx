@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { ShoppingCart, MapPin, Menu, X, User, Truck, Crown, Shield } from "lucide-react";
+import { ShoppingCart, MapPin, Menu, X, User, Truck, Crown, Shield, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 import terraLogo from "@/assets/terra-logo.png";
 import {
   DropdownMenu,
@@ -13,10 +14,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Header = () => {
   const location = useLocation();
   const { toggleCart, getTotalItems } = useCartStore();
+  const { user, profile, signOut, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const totalItems = getTotalItems();
 
@@ -25,6 +28,16 @@ const Header = () => {
     { path: "/map", label: "Find Farms" },
     { path: "/affiliate", label: "Earn" },
   ];
+
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return "U";
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -71,35 +84,67 @@ const Header = () => {
             <MapPin className="h-5 w-5" />
           </Button>
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="hidden md:flex">
-                <User className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Dashboards</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/member" className="flex items-center gap-2 cursor-pointer">
-                  <Crown className="h-4 w-4" />
-                  Member Dashboard
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/driver" className="flex items-center gap-2 cursor-pointer">
-                  <Truck className="h-4 w-4" />
-                  Driver Dashboard
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
-                  <Shield className="h-4 w-4" />
-                  Admin Dashboard
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {!loading && (
+            user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="hidden md:flex rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={profile?.avatar_url || undefined} />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                        {getInitials(profile?.full_name || user.email)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">{profile?.full_name || "Member"}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                      {profile?.referral_code && (
+                        <p className="text-xs text-accent font-mono">
+                          Code: {profile.referral_code}
+                        </p>
+                      )}
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel className="text-xs text-muted-foreground">Dashboards</DropdownMenuLabel>
+                  <DropdownMenuItem asChild>
+                    <Link to="/member" className="flex items-center gap-2 cursor-pointer">
+                      <Crown className="h-4 w-4" />
+                      Member Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/driver" className="flex items-center gap-2 cursor-pointer">
+                      <Truck className="h-4 w-4" />
+                      Driver Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
+                      <Shield className="h-4 w-4" />
+                      Admin Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="sm" className="hidden md:flex gap-2">
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </Button>
+              </Link>
+            )
+          )}
 
           <Button
             variant="ghost"
@@ -146,32 +191,62 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
+            
             <div className="border-t border-border pt-2 mt-2">
-              <p className="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">Dashboards</p>
-              <Link
-                to="/member"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-4 py-3 text-sm font-medium rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground flex items-center gap-2"
-              >
-                <Crown className="h-4 w-4" />
-                Member Dashboard
-              </Link>
-              <Link
-                to="/driver"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-4 py-3 text-sm font-medium rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground flex items-center gap-2"
-              >
-                <Truck className="h-4 w-4" />
-                Driver Dashboard
-              </Link>
-              <Link
-                to="/admin"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-4 py-3 text-sm font-medium rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground flex items-center gap-2"
-              >
-                <Shield className="h-4 w-4" />
-                Admin Dashboard
-              </Link>
+              {user ? (
+                <>
+                  <div className="px-4 py-2 mb-2">
+                    <p className="text-sm font-medium">{profile?.full_name || "Member"}</p>
+                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                    {profile?.referral_code && (
+                      <p className="text-xs text-accent font-mono mt-1">
+                        Referral: {profile.referral_code}
+                      </p>
+                    )}
+                  </div>
+                  <p className="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">Dashboards</p>
+                  <Link
+                    to="/member"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-3 text-sm font-medium rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground flex items-center gap-2"
+                  >
+                    <Crown className="h-4 w-4" />
+                    Member Dashboard
+                  </Link>
+                  <Link
+                    to="/driver"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-3 text-sm font-medium rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground flex items-center gap-2"
+                  >
+                    <Truck className="h-4 w-4" />
+                    Driver Dashboard
+                  </Link>
+                  <Link
+                    to="/admin"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-3 text-sm font-medium rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground flex items-center gap-2"
+                  >
+                    <Shield className="h-4 w-4" />
+                    Admin Dashboard
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full px-4 py-3 text-sm font-medium rounded-lg text-destructive hover:bg-destructive/10 flex items-center gap-2 mt-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="px-4 py-3 text-sm font-medium rounded-lg bg-primary text-primary-foreground flex items-center justify-center gap-2"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Sign In / Sign Up
+                </Link>
+              )}
             </div>
           </nav>
         </div>
