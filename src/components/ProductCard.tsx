@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Product } from "@/data/products";
 import { useCartStore } from "@/store/cartStore";
 import { Button } from "@/components/ui/button";
-import { Plus, Leaf, Sprout } from "lucide-react";
+import { Plus, Minus, Leaf, Sprout } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,15 @@ interface ProductCardProps {
 
 const ProductCard = ({ product, className }: ProductCardProps) => {
   const { addItem } = useCartStore();
+  const [quantity, setQuantity] = useState(1);
+
+  const incrementQuantity = () => setQuantity(prev => prev + 1);
+  const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+
+  const handleAddToCart = () => {
+    addItem(product, quantity);
+    setQuantity(1); // Reset quantity after adding
+  };
 
   return (
     <div
@@ -36,7 +46,6 @@ const ProductCard = ({ product, className }: ProductCardProps) => {
             Organic
           </div>
         )}
-
       </Link>
 
       {/* Content */}
@@ -63,14 +72,38 @@ const ProductCard = ({ product, className }: ProductCardProps) => {
             </span>
           </div>
 
-          <Button
-            size="sm"
-            onClick={() => addItem(product)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-10 px-4 gap-2 font-semibold transition-all hover:-translate-y-0.5"
-          >
-            <Plus className="h-4 w-4" />
-            Add
-          </Button>
+          {/* Quantity Selector and Add Button */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center bg-secondary/50 rounded-xl overflow-hidden">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={decrementQuantity}
+                className="h-8 w-8 rounded-none hover:bg-secondary"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </Button>
+              <span className="w-8 text-center text-sm font-semibold">
+                {quantity}
+              </span>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={incrementQuantity}
+                className="h-8 w-8 rounded-none hover:bg-secondary"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+
+            <Button
+              size="icon"
+              onClick={handleAddToCart}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-10 w-10 transition-all hover:-translate-y-0.5"
+            >
+              <Plus className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
