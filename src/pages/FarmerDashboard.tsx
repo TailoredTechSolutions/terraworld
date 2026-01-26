@@ -1,0 +1,235 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import FarmerProductsPanel from "@/components/farmer/FarmerProductsPanel";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Tractor, 
+  Package, 
+  DollarSign, 
+  Star, 
+  MapPin, 
+  Phone, 
+  Mail,
+  AlertCircle,
+  Loader2
+} from "lucide-react";
+import type { Tables } from "@/integrations/supabase/types";
+
+type Farmer = Tables<"farmers">;
+
+const FarmerDashboard = () => {
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const [activeTab, setActiveTab] = useState("products");
+
+  // Fetch the farmer profile linked to this user (by matching email)
+  const { data: farmer, isLoading: farmerLoading, error: farmerError } = useQuery({
+    queryKey: ["farmer-profile", user?.email],
+    queryFn: async () => {
+      if (!user?.email) return null;
+      
+      const { data, error } = await supabase
+        .from("farmers")
+        .select("*")
+        .eq("email", user.email)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data as Farmer | null;
+    },
+    enabled: !!user?.email,
+  });
+
+  // Fetch product count
+  const { data: productCount } = useQuery({
+    queryKey: ["farmer-product-count", farmer?.id],
+    queryFn: async () => {
+      if (!farmer?.id) return 0;
+      
+      const { count, error } = await supabase
+        .from("products")
+        .select("*", { count: "exact", head: true })
+        .eq("farmer_id", farmer.id);
+
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!farmer?.id,
+  });
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || farmerLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!farmer) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 py-8">
+          <Card className="max-w-lg mx-auto">
+            <CardHeader className="text-center">
+              <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <CardTitle>Farmer Profile Not Found</CardTitle>
+              <CardDescription>
+                Your account is not linked to a farmer profile. Please contact support
+                to register as a farmer on Terra.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Button onClick={() => navigate("/")}>Back to Home</Button>
+            </CardContent>
+          </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const statusColor = {
+    active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+    pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+    suspended: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1 container mx-auto px-4 py-8">
+        {/* Farm Header */}
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row md:items-start gap-6">
+            {farmer.image_url ? (
+              <img
+                src={farmer.image_url}
+                alt={farmer.name}
+                className="w-24 h-24 rounded-xl object-cover"
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Tractor className="h-10 w-10 text-primary" />
+              </div>
+            )}
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-2xl font-bold">{farmer.name}</h1>
+                <Badge className={statusColor[farmer.status || "pending"]}>
+                  {farmer.status || "pending"}
+                </Badge>
+              </div>
+              <p className="text-muted-foreground mb-4">
+                {farmer.description || "Welcome to your farmer dashboard"}
+              </p>
+              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-4 w-4" />
+                  {farmer.location}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Phone className="h-4 w-4" />
+                  {farmer.phone}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Mail className="h-4 w-4" />
+                  {farmer.email}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Products</p>
+                  <p className="text-2xl font-bold">{productCount ?? farmer.products_count ?? 0}</p>
+                </div>
+                <Package className="h-8 w-8 text-primary/60" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Sales</p>
+                  <p className="text-2xl font-bold">₱{(farmer.total_sales ?? 0).toLocaleString()}</p>
+                </div>
+                <DollarSign className="h-8 w-8 text-green-600/60" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Rating</p>
+                  <p className="text-2xl font-bold flex items-center gap-1">
+                    {farmer.rating ?? 5.0}
+                    <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                  </p>
+                </div>
+                <Star className="h-8 w-8 text-yellow-500/60" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Owner</p>
+                  <p className="text-lg font-medium truncate">{farmer.owner}</p>
+                </div>
+                <Tractor className="h-8 w-8 text-primary/60" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-6">
+            <TabsTrigger value="products" className="gap-2">
+              <Package className="h-4 w-4" />
+              Products
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="products">
+            <FarmerProductsPanel farmerId={farmer.id} />
+          </TabsContent>
+        </Tabs>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default FarmerDashboard;
