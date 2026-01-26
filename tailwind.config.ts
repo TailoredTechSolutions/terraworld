@@ -66,21 +66,21 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Custom farm colors
-        farm: {
-          green: "hsl(var(--farm-green))",
-          "green-light": "hsl(var(--farm-green-light))",
-        },
-        terracotta: {
-          DEFAULT: "hsl(var(--terracotta))",
-          light: "hsl(var(--terracotta-light))",
+        // Philippine flag colors
+        ph: {
+          blue: "hsl(var(--ph-blue))",
+          "blue-light": "hsl(var(--ph-blue-light))",
+          red: "hsl(var(--ph-red))",
+          "red-light": "hsl(var(--ph-red-light))",
+          gold: "hsl(var(--ph-gold))",
+          white: "hsl(var(--ph-white))",
         },
         cream: {
           DEFAULT: "hsl(var(--cream))",
           dark: "hsl(var(--cream-dark))",
         },
         earth: {
-          brown: "hsl(var(--earth-brown))",
+          dark: "hsl(var(--earth-dark))",
         },
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
