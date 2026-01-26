@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import FarmCard from "@/components/FarmCard";
@@ -13,61 +14,188 @@ import {
   MapPin, 
   ShieldCheck,
   TrendingUp,
-  Handshake
+  Handshake,
+  type LucideIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
-const features = [
+interface Feature {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  gradient: string;
+  iconColor: string;
+  delay: number;
+}
+
+const features: Feature[] = [
   {
     icon: Leaf,
     title: "Farm-Fresh Marketplace",
     description: "Shop directly from verified local farmers. Fresh organic produce delivered from the highlands of Benguet to your doorstep.",
-    color: "text-green-600 bg-green-100",
+    gradient: "from-emerald-500/20 via-green-500/10 to-transparent",
+    iconColor: "text-emerald-500",
+    delay: 0,
   },
   {
     icon: MapPin,
     title: "Find Farms Near You",
     description: "Discover farms in your area with real-time availability. See what's fresh and ready for harvest today.",
-    color: "text-primary bg-primary/10",
+    gradient: "from-primary/20 via-primary/10 to-transparent",
+    iconColor: "text-primary",
+    delay: 0.1,
   },
   {
     icon: Truck,
     title: "Real-Time Delivery Tracking",
     description: "Track your order from farm to table. Our drivers ensure your produce arrives fresh with live GPS updates.",
-    color: "text-orange-600 bg-orange-100",
+    gradient: "from-orange-500/20 via-amber-500/10 to-transparent",
+    iconColor: "text-orange-500",
+    delay: 0.2,
   },
   {
     icon: Users,
     title: "Affiliate Network",
     description: "Build your network and earn commissions. Our binary compensation plan rewards you for sharing the farm-fresh movement.",
-    color: "text-purple-600 bg-purple-100",
+    gradient: "from-violet-500/20 via-purple-500/10 to-transparent",
+    iconColor: "text-violet-500",
+    delay: 0.3,
   },
   {
     icon: Wallet,
     title: "Integrated Wallet System",
     description: "Manage your earnings, track commissions, and request withdrawals seamlessly from your member dashboard.",
-    color: "text-accent bg-accent/10",
+    gradient: "from-accent/20 via-accent/10 to-transparent",
+    iconColor: "text-accent",
+    delay: 0.4,
   },
   {
     icon: TrendingUp,
     title: "Rank Progression",
     description: "Climb through 7 achievement tiers from Member to Crown Director. Unlock higher earning potential as you grow.",
-    color: "text-yellow-600 bg-yellow-100",
+    gradient: "from-yellow-500/20 via-amber-500/10 to-transparent",
+    iconColor: "text-yellow-500",
+    delay: 0.5,
   },
   {
     icon: Handshake,
     title: "Fair Farmer Partnerships",
     description: "We eliminate middlemen so farmers earn more. Transparent pricing ensures everyone benefits fairly.",
-    color: "text-teal-600 bg-teal-100",
+    gradient: "from-teal-500/20 via-cyan-500/10 to-transparent",
+    iconColor: "text-teal-500",
+    delay: 0.6,
   },
   {
     icon: ShieldCheck,
     title: "Verified & Secure",
     description: "KYC-verified members, secure transactions, and quality-assured products from trusted farm partners.",
-    color: "text-blue-600 bg-blue-100",
+    gradient: "from-blue-500/20 via-sky-500/10 to-transparent",
+    iconColor: "text-blue-500",
+    delay: 0.7,
   },
 ];
+
+const FeatureCard = ({ feature }: { feature: Feature }) => {
+  const IconComponent = feature.icon;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, delay: feature.delay }}
+      whileHover={{ y: -8, transition: { duration: 0.3 } }}
+      className="group relative p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 overflow-hidden"
+    >
+      {/* Animated gradient background */}
+      <motion.div 
+        className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+        initial={false}
+      />
+      
+      {/* Floating particles effect */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(3)].map((_, i) => (
+          <motion.div
+            key={i}
+            className={`absolute w-1 h-1 rounded-full ${feature.iconColor} opacity-0 group-hover:opacity-40`}
+            initial={{ x: "50%", y: "100%" }}
+            animate={{ 
+              x: ["50%", `${30 + i * 20}%`, `${40 + i * 15}%`],
+              y: ["100%", "20%", "-10%"],
+            }}
+            transition={{
+              duration: 3 + i,
+              repeat: Infinity,
+              delay: i * 0.5,
+              ease: "easeOut"
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Icon container with animations */}
+      <motion.div 
+        className={`relative inline-flex p-4 rounded-2xl bg-gradient-to-br ${feature.gradient} mb-5`}
+        whileHover={{ 
+          scale: 1.1,
+          rotate: [0, -5, 5, 0],
+          transition: { duration: 0.5 }
+        }}
+      >
+        {/* Pulse ring effect */}
+        <motion.div
+          className={`absolute inset-0 rounded-2xl border-2 ${feature.iconColor} opacity-0 group-hover:opacity-30`}
+          initial={false}
+          animate={{
+            scale: [1, 1.3, 1.5],
+            opacity: [0.3, 0.1, 0],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeOut"
+          }}
+        />
+        
+        <motion.div
+          animate={{ 
+            y: [0, -3, 0],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: feature.delay
+          }}
+        >
+          <IconComponent className={`h-7 w-7 ${feature.iconColor}`} />
+        </motion.div>
+      </motion.div>
+
+      {/* Content */}
+      <div className="relative">
+        <h3 className="font-display text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+          {feature.title}
+        </h3>
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          {feature.description}
+        </p>
+      </div>
+
+      {/* Hover arrow indicator */}
+      <motion.div
+        className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100"
+        initial={{ x: -10, opacity: 0 }}
+        whileHover={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        <ArrowRight className={`h-5 w-5 ${feature.iconColor}`} />
+      </motion.div>
+    </motion.div>
+  );
+};
 
 const Index = () => {
   return (
@@ -97,22 +225,8 @@ const Index = () => {
 
             {/* Features Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {features.map((feature, index) => (
-                <div
-                  key={feature.title}
-                  className="group p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 animate-slide-up"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <div className={`inline-flex p-3 rounded-xl ${feature.color} mb-4 group-hover:scale-110 transition-transform`}>
-                    <feature.icon className="h-6 w-6" />
-                  </div>
-                  <h3 className="font-display text-lg font-semibold text-foreground mb-2">
-                    {feature.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {feature.description}
-                  </p>
-                </div>
+              {features.map((feature) => (
+                <FeatureCard key={feature.title} feature={feature} />
               ))}
             </div>
           </div>
