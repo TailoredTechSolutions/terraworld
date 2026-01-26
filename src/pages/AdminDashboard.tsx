@@ -81,6 +81,7 @@ import { PayoutCyclePanel } from "@/components/admin/PayoutCyclePanel";
 import { MembershipsPanel } from "@/components/admin/MembershipsPanel";
 import { BVLedgerPanel } from "@/components/admin/BVLedgerPanel";
 import { PayoutsLedgerPanel } from "@/components/admin/PayoutsLedgerPanel";
+import UserManagementPanel from "@/components/admin/UserManagementPanel";
 
 type Farmer = Tables<"farmers">;
 type Driver = Tables<"drivers">;
@@ -279,27 +280,31 @@ const AdminDashboard = () => {
 
         {/* Main Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="flex flex-wrap gap-1 h-auto p-1 w-full max-w-4xl">
-            <TabsTrigger value="overview" className="flex-1 min-w-[80px]">Overview</TabsTrigger>
-            <TabsTrigger value="compensation" className="flex-1 min-w-[80px] gap-1">
+          <TabsList className="flex flex-wrap gap-1 h-auto p-1 w-full max-w-5xl">
+            <TabsTrigger value="overview" className="flex-1 min-w-[70px]">Overview</TabsTrigger>
+            <TabsTrigger value="users" className="flex-1 min-w-[70px] gap-1">
+              <Users className="h-3 w-3" />
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="compensation" className="flex-1 min-w-[70px] gap-1">
               <Play className="h-3 w-3" />
               Payouts
             </TabsTrigger>
-            <TabsTrigger value="memberships" className="flex-1 min-w-[80px] gap-1">
+            <TabsTrigger value="memberships" className="flex-1 min-w-[70px] gap-1">
               <Crown className="h-3 w-3" />
               Members
             </TabsTrigger>
-            <TabsTrigger value="bv-ledger" className="flex-1 min-w-[80px] gap-1">
+            <TabsTrigger value="bv-ledger" className="flex-1 min-w-[70px] gap-1">
               <Activity className="h-3 w-3" />
               BV
             </TabsTrigger>
-            <TabsTrigger value="payout-ledger" className="flex-1 min-w-[80px] gap-1">
+            <TabsTrigger value="payout-ledger" className="flex-1 min-w-[70px] gap-1">
               <Wallet className="h-3 w-3" />
               Ledger
             </TabsTrigger>
-            <TabsTrigger value="farmers" className="flex-1 min-w-[80px]">Farmers</TabsTrigger>
-            <TabsTrigger value="drivers" className="flex-1 min-w-[80px]">Drivers</TabsTrigger>
-            <TabsTrigger value="orders" className="flex-1 min-w-[80px]">Orders</TabsTrigger>
+            <TabsTrigger value="farmers" className="flex-1 min-w-[70px]">Farmers</TabsTrigger>
+            <TabsTrigger value="drivers" className="flex-1 min-w-[70px]">Drivers</TabsTrigger>
+            <TabsTrigger value="orders" className="flex-1 min-w-[70px]">Orders</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -420,6 +425,11 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Users Management Tab */}
+          <TabsContent value="users">
+            <UserManagementPanel />
           </TabsContent>
 
           {/* Compensation Engine Tab */}
