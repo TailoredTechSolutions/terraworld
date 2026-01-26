@@ -20,8 +20,10 @@ import {
   Phone, 
   Mail,
   AlertCircle,
-  Loader2
+  Loader2,
+  ShoppingBag,
 } from "lucide-react";
+import FarmerOrdersPanel from "@/components/farmer/FarmerOrdersPanel";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Farmer = Tables<"farmers">;
@@ -220,10 +222,18 @@ const FarmerDashboard = () => {
               <Package className="h-4 w-4" />
               Products
             </TabsTrigger>
+            <TabsTrigger value="orders" className="gap-2">
+              <ShoppingBag className="h-4 w-4" />
+              Orders
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="products">
             <FarmerProductsPanel farmerId={farmer.id} />
+          </TabsContent>
+
+          <TabsContent value="orders">
+            <FarmerOrdersPanel farmerId={farmer.id} />
           </TabsContent>
         </Tabs>
       </main>
