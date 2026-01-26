@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import FarmCard from "@/components/FarmCard";
@@ -199,28 +200,51 @@ const FeatureCard = ({ feature }: { feature: Feature }) => {
   );
 };
 
-// Video Background Section Component
+// Video Background Section Component with Parallax
 const VideoBackgroundSection = () => {
+  const containerRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"]
+  });
+
+  // Parallax transforms
+  const videoY = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
+  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.6, 1, 1, 0.6]);
+
   return (
-    <section className="relative h-[60vh] min-h-[400px] overflow-hidden">
-      {/* Background Video */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover"
+    <section 
+      ref={containerRef}
+      className="relative h-[70vh] min-h-[500px] overflow-hidden"
+    >
+      {/* Background Video with Parallax */}
+      <motion.div
+        style={{ y: videoY }}
+        className="absolute inset-0 w-full h-[130%] -top-[15%]"
       >
-        <source src="/videos/terra-background.mp4" type="video/mp4" />
-      </video>
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+        >
+          <source src="/videos/terra-background.mp4" type="video/mp4" />
+        </video>
+      </motion.div>
 
       {/* Overlay gradient for readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+      <motion.div 
+        style={{ opacity }}
+        className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" 
+      />
       <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-background" />
 
-      {/* Content overlay */}
+      {/* Content overlay with inverse parallax */}
       <div className="relative h-full flex items-center justify-center">
         <motion.div
+          style={{ y: textY }}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
