@@ -1,10 +1,18 @@
 import { Link, useLocation } from "react-router-dom";
-import { ShoppingCart, MapPin, Menu, X, User } from "lucide-react";
+import { ShoppingCart, MapPin, Menu, X, User, Truck, Crown, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import terraLogo from "@/assets/terra-logo.png";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Header = () => {
   const location = useLocation();
@@ -63,9 +71,35 @@ const Header = () => {
             <MapPin className="h-5 w-5" />
           </Button>
           
-          <Button variant="ghost" size="icon" className="hidden md:flex">
-            <User className="h-5 w-5" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="hidden md:flex">
+                <User className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel>Dashboards</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/member" className="flex items-center gap-2 cursor-pointer">
+                  <Crown className="h-4 w-4" />
+                  Member Dashboard
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/driver" className="flex items-center gap-2 cursor-pointer">
+                  <Truck className="h-4 w-4" />
+                  Driver Dashboard
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
+                  <Shield className="h-4 w-4" />
+                  Admin Dashboard
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Button
             variant="ghost"
@@ -112,13 +146,33 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
-            <Link
-              to="/login"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="px-4 py-3 text-sm font-medium rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground"
-            >
-              Sign In
-            </Link>
+            <div className="border-t border-border pt-2 mt-2">
+              <p className="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">Dashboards</p>
+              <Link
+                to="/member"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-4 py-3 text-sm font-medium rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground flex items-center gap-2"
+              >
+                <Crown className="h-4 w-4" />
+                Member Dashboard
+              </Link>
+              <Link
+                to="/driver"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-4 py-3 text-sm font-medium rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground flex items-center gap-2"
+              >
+                <Truck className="h-4 w-4" />
+                Driver Dashboard
+              </Link>
+              <Link
+                to="/admin"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-4 py-3 text-sm font-medium rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground flex items-center gap-2"
+              >
+                <Shield className="h-4 w-4" />
+                Admin Dashboard
+              </Link>
+            </div>
           </nav>
         </div>
       )}
