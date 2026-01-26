@@ -48,7 +48,19 @@ import {
   Loader2,
   RefreshCw,
 } from "lucide-react";
-import type { Tables, Enums } from "@/integrations/supabase/types";
+import type { Tables, Enums, Json } from "@/integrations/supabase/types";
+
+// Order item structure from cart
+interface OrderItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  unit: string;
+  image?: string;
+  farmerId?: string;
+  farmName?: string;
+}
 
 type Order = Tables<"orders"> & {
   drivers?: { name: string } | null;
@@ -59,6 +71,15 @@ type OrderStatus = Enums<"order_status">;
 interface FarmerOrdersPanelProps {
   farmerId: string;
 }
+
+// Helper to parse order items from JSON
+const parseOrderItems = (items: Json): OrderItem[] => {
+  if (!items) return [];
+  if (Array.isArray(items)) {
+    return items as unknown as OrderItem[];
+  }
+  return [];
+};
 
 const STATUS_CONFIG: Record<OrderStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ElementType }> = {
   pending: { label: "Pending", variant: "secondary", icon: Clock },
@@ -354,19 +375,66 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
                 )}
               </Card>
 
-              {/* Order Summary */}
-              <div className="flex items-center justify-between p-4 bg-primary/10 rounded-lg">
-                <div>
-                  <p className="text-sm text-muted-foreground">{selectedOrder.items_count} items</p>
-                  <p className="text-sm text-muted-foreground">
-                    Driver: {selectedOrder.drivers?.name || "Unassigned"}
-                  </p>
+              {/* Order Items */}
+              <Card className="p-4 space-y-3">
+                <h4 className="font-medium flex items-center gap-2">
+                  <ShoppingBag className="h-4 w-4" /> Order Items
+                </h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {parseOrderItems(selectedOrder.items).length > 0 ? (
+                    parseOrderItems(selectedOrder.items).map((item, index) => (
+                      <div
+                        key={item.id || index}
+                        className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50"
+                      >
+                        {item.image && (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-10 h-10 rounded object-cover"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{item.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {item.quantity} × ₱{Number(item.price).toLocaleString()} / {item.unit}
+                          </p>
+                        </div>
+                        <p className="font-medium text-sm">
+                          ₱{(item.quantity * item.price).toLocaleString()}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-2">
+                      No item details available
+                    </p>
+                  )}
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Total</p>
-                  <p className="text-2xl font-bold text-primary">
-                    ₱{Number(selectedOrder.total).toLocaleString()}
-                  </p>
+                
+                {/* Subtotals */}
+                <div className="border-t pt-3 space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span>₱{Number(selectedOrder.subtotal).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Delivery Fee</span>
+                    <span>₱{Number(selectedOrder.delivery_fee).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between font-medium pt-1 border-t">
+                    <span>Total</span>
+                    <span className="text-primary">₱{Number(selectedOrder.total).toLocaleString()}</span>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Driver Info */}
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-2 text-sm">
+                  <Truck className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Driver:</span>
+                  <span className="font-medium">{selectedOrder.drivers?.name || "Unassigned"}</span>
                 </div>
               </div>
 
