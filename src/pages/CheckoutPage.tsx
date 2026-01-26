@@ -120,11 +120,13 @@ const CheckoutPage = () => {
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
         <main className="flex-1 container mx-auto px-4 py-16 text-center">
-          <h1 className="font-display text-2xl font-bold mb-4">Your cart is empty</h1>
-          <p className="text-muted-foreground mb-6">Add some products before checking out.</p>
-          <Button onClick={() => navigate("/")} className="btn-primary-gradient">
-            Continue Shopping
-          </Button>
+          <div className="glass-card p-12 rounded-2xl max-w-md mx-auto">
+            <h1 className="font-display text-2xl font-bold mb-4">Your cart is empty</h1>
+            <p className="text-muted-foreground mb-6">Add some products before checking out.</p>
+            <Button onClick={() => navigate("/")} className="btn-liquid">
+              Continue Shopping
+            </Button>
+          </div>
         </main>
         <Footer />
       </div>
@@ -159,7 +161,7 @@ const CheckoutPage = () => {
 
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Delivery Information */}
-              <div className="space-y-4">
+              <div className="glass-card p-6 rounded-2xl space-y-4">
                 <h2 className="font-display text-lg font-semibold flex items-center gap-2">
                   <Truck className="h-5 w-5 text-primary" />
                   Delivery Information
@@ -173,6 +175,7 @@ const CheckoutPage = () => {
                       placeholder="Juan" 
                       value={formData.firstName}
                       onChange={handleInputChange}
+                      className="glass-card border-glass-border focus:border-primary"
                       required 
                     />
                   </div>
@@ -183,6 +186,7 @@ const CheckoutPage = () => {
                       placeholder="Dela Cruz" 
                       value={formData.lastName}
                       onChange={handleInputChange}
+                      className="glass-card border-glass-border focus:border-primary"
                       required 
                     />
                   </div>
@@ -196,6 +200,7 @@ const CheckoutPage = () => {
                     placeholder="juan@example.com" 
                     value={formData.email}
                     onChange={handleInputChange}
+                    className="glass-card border-glass-border focus:border-primary"
                     required 
                   />
                 </div>
@@ -208,6 +213,7 @@ const CheckoutPage = () => {
                     placeholder="+63 917 123 4567" 
                     value={formData.phone}
                     onChange={handleInputChange}
+                    className="glass-card border-glass-border focus:border-primary"
                     required 
                   />
                 </div>
@@ -219,6 +225,7 @@ const CheckoutPage = () => {
                     placeholder="123 Main Street, Barangay..." 
                     value={formData.address}
                     onChange={handleInputChange}
+                    className="glass-card border-glass-border focus:border-primary"
                     required 
                   />
                 </div>
@@ -231,6 +238,7 @@ const CheckoutPage = () => {
                       placeholder="Manila" 
                       value={formData.city}
                       onChange={handleInputChange}
+                      className="glass-card border-glass-border focus:border-primary"
                       required 
                     />
                   </div>
@@ -241,16 +249,15 @@ const CheckoutPage = () => {
                       placeholder="1000" 
                       value={formData.zip}
                       onChange={handleInputChange}
+                      className="glass-card border-glass-border focus:border-primary"
                       required 
                     />
                   </div>
                 </div>
               </div>
 
-              <Separator />
-
               {/* Payment Method */}
-              <div className="space-y-4">
+              <div className="glass-card p-6 rounded-2xl space-y-4">
                 <h2 className="font-display text-lg font-semibold flex items-center gap-2">
                   <CreditCard className="h-5 w-5 text-primary" />
                   Payment Method
@@ -258,10 +265,10 @@ const CheckoutPage = () => {
 
                 <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
                   <label 
-                    className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover ${
                       paymentMethod === "card" 
-                        ? "border-primary bg-primary/5" 
-                        : "border-border hover:border-primary/50"
+                        ? "border-2 border-primary bg-primary/10 shadow-glow-primary" 
+                        : "border border-glass-border glass-card"
                     }`}
                   >
                     <RadioGroupItem value="card" id="card" />
@@ -282,10 +289,10 @@ const CheckoutPage = () => {
                   </label>
 
                   <label 
-                    className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover ${
                       paymentMethod === "gcash" 
-                        ? "border-primary bg-primary/5" 
-                        : "border-border hover:border-primary/50"
+                        ? "border-2 border-primary bg-primary/10 shadow-glow-primary" 
+                        : "border border-glass-border glass-card"
                     }`}
                   >
                     <RadioGroupItem value="gcash" id="gcash" />
@@ -298,10 +305,10 @@ const CheckoutPage = () => {
                   </label>
 
                   <label 
-                    className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover ${
                       paymentMethod === "crypto" 
-                        ? "border-primary bg-primary/5" 
-                        : "border-border hover:border-primary/50"
+                        ? "border-2 border-primary bg-primary/10 shadow-glow-primary" 
+                        : "border border-glass-border glass-card"
                     }`}
                   >
                     <RadioGroupItem value="crypto" id="crypto" />
@@ -317,24 +324,25 @@ const CheckoutPage = () => {
 
               {/* Card Details (shown only for card payment) */}
               {paymentMethod === "card" && (
-                <div className="space-y-4 p-4 rounded-xl bg-secondary/50 border border-border">
+                <div className="space-y-4 p-5 rounded-xl glass-card border border-glass-border">
                   <div className="space-y-2">
                     <Label htmlFor="cardNumber">Card Number</Label>
                     <Input 
                       id="cardNumber" 
                       placeholder="4242 4242 4242 4242" 
                       maxLength={19}
+                      className="glass-card border-glass-border focus:border-primary"
                       required 
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="expiry">Expiry Date</Label>
-                      <Input id="expiry" placeholder="MM/YY" maxLength={5} required />
+                      <Input id="expiry" placeholder="MM/YY" maxLength={5} className="glass-card border-glass-border focus:border-primary" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="cvc">CVC</Label>
-                      <Input id="cvc" placeholder="123" maxLength={4} required />
+                      <Input id="cvc" placeholder="123" maxLength={4} className="glass-card border-glass-border focus:border-primary" required />
                     </div>
                   </div>
                 </div>
@@ -342,7 +350,7 @@ const CheckoutPage = () => {
 
               <Button 
                 type="submit" 
-                className="w-full btn-primary-gradient h-14 rounded-xl text-lg font-semibold"
+                className="w-full btn-liquid-accent h-14 rounded-xl text-lg font-semibold"
                 disabled={isProcessing}
               >
                 {isProcessing ? (
@@ -358,7 +366,7 @@ const CheckoutPage = () => {
                 )}
               </Button>
 
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground glass-badge-primary px-4 py-2 rounded-full mx-auto w-fit">
                 <ShieldCheck className="h-4 w-4 text-primary" />
                 Secure checkout powered by Stripe
               </div>
@@ -367,13 +375,13 @@ const CheckoutPage = () => {
 
           {/* Order Summary */}
           <div className="lg:sticky lg:top-24 h-fit">
-            <div className="rounded-2xl border border-border bg-card p-6 space-y-6">
+            <div className="glass-card rounded-2xl border border-glass-border p-6 space-y-6 shadow-glass">
               <h2 className="font-display text-lg font-semibold">Order Summary</h2>
 
               <div className="space-y-4 max-h-[300px] overflow-y-auto">
                 {items.map((item) => (
-                  <div key={item.product.id} className="flex gap-3">
-                    <div className="h-16 w-16 rounded-lg overflow-hidden border border-border flex-shrink-0">
+                  <div key={item.product.id} className="flex gap-3 glass-card p-3 rounded-xl">
+                    <div className="h-16 w-16 rounded-lg overflow-hidden border border-glass-border flex-shrink-0">
                       <img 
                         src={item.product.image} 
                         alt={item.product.name}
@@ -385,14 +393,14 @@ const CheckoutPage = () => {
                       <p className="text-xs text-muted-foreground">{item.product.farmName}</p>
                       <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
                     </div>
-                    <p className="font-semibold text-sm">
+                    <p className="font-semibold text-sm text-primary">
                       ₱{(item.product.price * item.quantity).toFixed(2)}
                     </p>
                   </div>
                 ))}
               </div>
 
-              <Separator />
+              <Separator className="bg-glass-border" />
 
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
@@ -402,7 +410,7 @@ const CheckoutPage = () => {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground flex items-center gap-1">
                     Terra Service Fee
-                    <span className="text-xs text-accent">(30%)</span>
+                    <span className="text-xs glass-badge-accent px-1.5 py-0.5 rounded-full">30%</span>
                   </span>
                   <span className="font-medium text-accent">₱{terraFee.toFixed(2)}</span>
                 </div>
@@ -410,14 +418,14 @@ const CheckoutPage = () => {
                   <span className="text-muted-foreground">Delivery Fee</span>
                   <span className="font-medium">₱{deliveryFee.toFixed(2)}</span>
                 </div>
-                <Separator />
+                <Separator className="bg-glass-border" />
                 <div className="flex justify-between text-base pt-2">
                   <span className="font-semibold">Total</span>
                   <span className="font-bold text-primary text-lg">₱{total.toFixed(2)}</span>
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-primary/10 text-sm">
+              <div className="p-4 rounded-xl glass-card-accent border border-primary/30 text-sm shadow-glow-primary">
                 <div className="flex items-center gap-2 text-primary font-medium mb-1">
                   <Truck className="h-4 w-4" />
                   Estimated Delivery
