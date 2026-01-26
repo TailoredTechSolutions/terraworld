@@ -135,157 +135,160 @@ const ShopPage = () => {
       <Header />
       <CartDrawer />
 
-      <main className="py-8">
-        <div className="container">
-          <div className="mb-8">
-            <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">
+      <main className="py-4 sm:py-8">
+        <div className="container px-3 sm:px-4 lg:px-8">
+          <div className="mb-4 sm:mb-8">
+            <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1 sm:mb-2">
               Shop Fresh Produce
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm sm:text-base text-muted-foreground">
               Browse {products.length} products from local highland farms
             </p>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4 sm:mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search products, farms..."
+                placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-11 rounded-xl"
+                className="pl-9 h-10 sm:h-11 rounded-xl text-sm"
               />
             </div>
 
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-              <SelectTrigger className="w-full md:w-48 h-11 rounded-xl">
-                <ArrowUpDown className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover z-50">
-                <SelectItem value="name-asc">Name: A to Z</SelectItem>
-                <SelectItem value="name-desc">Name: Z to A</SelectItem>
-                <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                <SelectItem value="farm">Farm Name</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                <SelectTrigger className="w-28 sm:w-36 h-10 sm:h-11 rounded-xl text-xs sm:text-sm">
+                  <ArrowUpDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" />
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  <SelectItem value="name-asc">Name: A-Z</SelectItem>
+                  <SelectItem value="name-desc">Name: Z-A</SelectItem>
+                  <SelectItem value="price-asc">Price: Low</SelectItem>
+                  <SelectItem value="price-desc">Price: High</SelectItem>
+                  <SelectItem value="farm">Farm</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="md:hidden h-11 rounded-xl gap-2">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  Filters
-                  {activeFiltersCount > 0 && (
-                    <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center">
-                      {activeFiltersCount}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-80">
-                <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
-                  <SheetDescription>
-                    Narrow down your product search
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 space-y-6">
-                  <div className="flex items-center gap-3">
-                    <Checkbox
-                      id="organic-mobile"
-                      checked={organicOnly}
-                      onCheckedChange={(checked) => setOrganicOnly(checked === true)}
-                    />
-                    <Label htmlFor="organic-mobile" className="flex items-center gap-2 cursor-pointer">
-                      <Leaf className="h-4 w-4 text-accent" />
-                      Organic Only
-                    </Label>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label>Price Range: ₱{priceRange[0]} - ₱{priceRange[1]}</Label>
-                    <Slider
-                      value={priceRange}
-                      onValueChange={setPriceRange}
-                      max={maxPrice}
-                      step={10}
-                      className="w-full"
-                    />
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label>Farms</Label>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {farms.map((farm) => (
-                        <div key={farm} className="flex items-center gap-2">
-                          <Checkbox
-                            id={`farm-mobile-${farm}`}
-                            checked={selectedFarms.includes(farm)}
-                            onCheckedChange={() => toggleFarm(farm)}
-                          />
-                          <Label htmlFor={`farm-mobile-${farm}`} className="text-sm cursor-pointer">
-                            {farm}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Button variant="outline" onClick={clearFilters} className="w-full">
-                    Clear All Filters
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="md:hidden h-10 sm:h-11 px-3 rounded-xl gap-1.5 text-xs sm:text-sm">
+                    <SlidersHorizontal className="h-3.5 w-3.5" />
+                    <span className="hidden xs:inline">Filters</span>
+                    {activeFiltersCount > 0 && (
+                      <Badge variant="secondary" className="ml-0.5 h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-[10px]">
+                        {activeFiltersCount}
+                      </Badge>
+                    )}
                   </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-72 sm:w-80">
+                  <SheetHeader>
+                    <SheetTitle>Filters</SheetTitle>
+                    <SheetDescription>
+                      Narrow down your product search
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6 space-y-6">
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        id="organic-mobile"
+                        checked={organicOnly}
+                        onCheckedChange={(checked) => setOrganicOnly(checked === true)}
+                      />
+                      <Label htmlFor="organic-mobile" className="flex items-center gap-2 cursor-pointer">
+                        <Leaf className="h-4 w-4 text-accent" />
+                        Organic Only
+                      </Label>
+                    </div>
 
-            <div className="hidden md:flex items-center gap-1 border rounded-xl p-1">
-              <Button
-                variant={gridSize === "large" ? "secondary" : "ghost"}
-                size="icon"
-                className="h-9 w-9"
-                onClick={() => setGridSize("large")}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={gridSize === "small" ? "secondary" : "ghost"}
-                size="icon"
-                className="h-9 w-9"
-                onClick={() => setGridSize("small")}
-              >
-                <Grid3X3 className="h-4 w-4" />
-              </Button>
+                    <div className="space-y-3">
+                      <Label>Price Range: ₱{priceRange[0]} - ₱{priceRange[1]}</Label>
+                      <Slider
+                        value={priceRange}
+                        onValueChange={setPriceRange}
+                        max={maxPrice}
+                        step={10}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label>Farms</Label>
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {farms.map((farm) => (
+                          <div key={farm} className="flex items-center gap-2">
+                            <Checkbox
+                              id={`farm-mobile-${farm}`}
+                              checked={selectedFarms.includes(farm)}
+                              onCheckedChange={() => toggleFarm(farm)}
+                            />
+                            <Label htmlFor={`farm-mobile-${farm}`} className="text-sm cursor-pointer">
+                              {farm}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Button variant="outline" onClick={clearFilters} className="w-full">
+                      Clear All Filters
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
+
+              <div className="hidden md:flex items-center gap-1 border rounded-xl p-1">
+                <Button
+                  variant={gridSize === "large" ? "secondary" : "ghost"}
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setGridSize("large")}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={gridSize === "small" ? "secondary" : "ghost"}
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setGridSize("small")}
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
 
-          <div className="flex gap-8">
-            <aside className="hidden md:block w-64 flex-shrink-0">
-              <div className="sticky top-24 space-y-6">
-                <div className="p-4 rounded-2xl bg-card border border-border">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold">Filters</h3>
+          <div className="flex gap-4 lg:gap-6">
+            <aside className="hidden lg:block w-56 xl:w-64 flex-shrink-0">
+              <div className="sticky top-24 space-y-4">
+                <div className="p-3 sm:p-4 rounded-xl bg-card border border-border">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-sm">Filters</h3>
                     {activeFiltersCount > 0 && (
-                      <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 text-xs">
-                        Clear All
+                      <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-xs px-2">
+                        Clear
                       </Button>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3 pb-4 border-b border-border">
+                  <div className="flex items-center gap-2 pb-3 border-b border-border">
                     <Checkbox
                       id="organic-desktop"
                       checked={organicOnly}
                       onCheckedChange={(checked) => setOrganicOnly(checked === true)}
+                      className="h-4 w-4"
                     />
-                    <Label htmlFor="organic-desktop" className="flex items-center gap-2 cursor-pointer">
-                      <Leaf className="h-4 w-4 text-accent" />
+                    <Label htmlFor="organic-desktop" className="flex items-center gap-1.5 cursor-pointer text-sm">
+                      <Leaf className="h-3.5 w-3.5 text-accent" />
                       Organic Only
                     </Label>
                   </div>
 
-                  <div className="py-4 border-b border-border space-y-3">
-                    <Label className="text-sm font-medium">
+                  <div className="py-3 border-b border-border space-y-2">
+                    <Label className="text-xs font-medium">
                       Price: ₱{priceRange[0]} - ₱{priceRange[1]}
                     </Label>
                     <Slider
@@ -297,19 +300,20 @@ const ShopPage = () => {
                     />
                   </div>
 
-                  <div className="pt-4 space-y-3">
-                    <Label className="text-sm font-medium">Farms</Label>
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                  <div className="pt-3 space-y-2">
+                    <Label className="text-xs font-medium">Farms</Label>
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto">
                       {farms.map((farm) => (
                         <div key={farm} className="flex items-center gap-2">
                           <Checkbox
                             id={`farm-desktop-${farm}`}
                             checked={selectedFarms.includes(farm)}
                             onCheckedChange={() => toggleFarm(farm)}
+                            className="h-3.5 w-3.5"
                           />
                           <Label 
                             htmlFor={`farm-desktop-${farm}`} 
-                            className="text-sm cursor-pointer truncate"
+                            className="text-xs cursor-pointer truncate"
                             title={farm}
                           >
                             {farm}
@@ -322,19 +326,19 @@ const ShopPage = () => {
               </div>
             </aside>
 
-            <div className="flex-1">
-              <div className="mb-6">
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="flex-1 min-w-0">
+              <div className="mb-3 sm:mb-4">
+                <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
                   <button
                     onClick={() => setSelectedCategory("all")}
                     className={cn(
-                      "flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all",
+                      "flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs sm:text-sm font-medium transition-all",
                       selectedCategory === "all"
-                        ? "bg-primary text-primary-foreground shadow-md"
+                        ? "bg-primary text-primary-foreground shadow-sm"
                         : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
                     )}
                   >
-                    All Products
+                    All
                   </button>
                   <CategoryFilter
                     selectedCategory={selectedCategory}
@@ -343,20 +347,20 @@ const ShopPage = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-sm text-muted-foreground">
-                  Showing {filteredProducts.length} of {products.length} products
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  {filteredProducts.length} of {products.length} products
                 </p>
                 {activeFiltersCount > 0 && (
-                  <div className="flex gap-2">
+                  <div className="flex gap-1.5">
                     {organicOnly && (
-                      <Badge variant="secondary" className="gap-1">
-                        <Leaf className="h-3 w-3 text-accent" />
-                        Organic
+                      <Badge variant="secondary" className="gap-1 text-xs px-2 py-0.5">
+                        <Leaf className="h-2.5 w-2.5 text-accent" />
+                        <span className="hidden sm:inline">Organic</span>
                       </Badge>
                     )}
                     {selectedFarms.length > 0 && (
-                      <Badge variant="secondary">
+                      <Badge variant="secondary" className="text-xs px-2 py-0.5">
                         {selectedFarms.length} farm{selectedFarms.length > 1 ? "s" : ""}
                       </Badge>
                     )}
@@ -365,33 +369,33 @@ const ShopPage = () => {
               </div>
 
               <div className={cn(
-                "grid gap-6",
+                "grid gap-3 sm:gap-4",
                 gridSize === "large" 
-                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" 
-                  : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+                  ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
+                  : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
               )}>
                 {filteredProducts.map((product, index) => (
                   <div
                     key={product.id}
                     className="animate-fade-in"
-                    style={{ animationDelay: `${index * 30}ms` }}
+                    style={{ animationDelay: `${Math.min(index, 12) * 30}ms` }}
                   >
-                    <ProductCard product={product} />
+                    <ProductCard product={product} compact={gridSize === "small"} />
                   </div>
                 ))}
               </div>
 
               {filteredProducts.length === 0 && (
-                <div className="text-center py-16">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary mb-4">
-                    <Search className="h-8 w-8 text-muted-foreground" />
+                <div className="text-center py-10 sm:py-16">
+                  <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-secondary mb-3 sm:mb-4">
+                    <Search className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">No products found</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Try adjusting your filters or search query
+                  <h3 className="text-base sm:text-lg font-semibold mb-2">No products found</h3>
+                  <p className="text-sm text-muted-foreground mb-3 sm:mb-4">
+                    Try adjusting your filters
                   </p>
-                  <Button onClick={clearFilters} variant="outline">
-                    Clear All Filters
+                  <Button onClick={clearFilters} variant="outline" size="sm">
+                    Clear Filters
                   </Button>
                 </div>
               )}
