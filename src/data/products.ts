@@ -23,6 +23,11 @@ import freshEggsImg from "@/assets/products/fresh-eggs.jpg";
 import carabaoMilkImg from "@/assets/products/carabao-milk.jpg";
 import kesongPutiImg from "@/assets/products/kesong-puti.jpg";
 import saltedEggsImg from "@/assets/products/salted-eggs.jpg";
+// Pantry imports
+import arabicaCoffeeImg from "@/assets/products/arabica-coffee.jpg";
+import wildHoneyImg from "@/assets/products/wild-honey.jpg";
+import driedHerbsImg from "@/assets/products/dried-herbs.jpg";
+import muscovadoImg from "@/assets/products/muscovado.jpg";
 // Meat imports
 import porkBellyImg from "@/assets/products/pork-belly.jpg";
 import porkKasimImg from "@/assets/products/pork-kasim.jpg";
@@ -441,6 +446,59 @@ export const products: Product[] = [
     stock: 200,
     organic: false,
     description: "Itlog na maalat - traditional salted duck eggs. Rich orange yolk, perfect with tomatoes or as ulam.",
+  },
+  // Pantry
+  {
+    id: "30",
+    name: "Benguet Arabica Coffee",
+    price: 450.00,
+    unit: "250g",
+    farmId: "4e067b8e-a788-461b-b83e-234f750bc9bb",
+    farmName: "Agnep Heritage Farm",
+    image: arabicaCoffeeImg,
+    category: "Pantry",
+    stock: 40,
+    organic: true,
+    description: "Premium Cordillera Arabica coffee beans. Grown at high altitude, featuring Typica and Catimor varieties with rich, smooth flavor.",
+  },
+  {
+    id: "31",
+    name: "Wild Honey",
+    price: 380.00,
+    unit: "500ml",
+    farmId: "58f7fccf-63af-4c79-b402-0c086dfbcab3",
+    farmName: "Sanagi Agri-Tourism Farm",
+    image: wildHoneyImg,
+    category: "Pantry",
+    stock: 25,
+    organic: true,
+    description: "Pure wild honey from Benguet highlands. Raw and unfiltered, collected from forest bees. Rich in natural enzymes.",
+  },
+  {
+    id: "32",
+    name: "Dried Herbs Mix",
+    price: 120.00,
+    unit: "50g",
+    farmId: "happy-house-farm",
+    farmName: "Happy House Organic Farm",
+    image: driedHerbsImg,
+    category: "Pantry",
+    stock: 60,
+    organic: true,
+    description: "Organic dried herb blend from highland farms. Includes basil, oregano, and thyme. Perfect for seasoning.",
+  },
+  {
+    id: "33",
+    name: "Muscovado Sugar",
+    price: 95.00,
+    unit: "500g",
+    farmId: "baengan-farmers",
+    farmName: "Baengan Farmers Association",
+    image: muscovadoImg,
+    category: "Pantry",
+    stock: 80,
+    organic: true,
+    description: "Unrefined muscovado sugar. Dark, rich molasses flavor, traditionally processed. Great for baking and beverages.",
   },
 ];
 
