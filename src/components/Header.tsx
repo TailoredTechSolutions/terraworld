@@ -27,6 +27,9 @@ const Header = () => {
     { path: "/", label: "Marketplace" },
     { path: "/map", label: "Find Farms" },
     { path: "/affiliate", label: "Earn" },
+    { path: "/member", label: "Member", icon: Crown, authRequired: true },
+    { path: "/driver", label: "Driver", icon: Truck, authRequired: true },
+    { path: "/admin", label: "Admin", icon: Shield, authRequired: true },
   ];
 
   const getInitials = (name: string | null | undefined) => {
@@ -62,20 +65,23 @@ const Header = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={cn(
-                "px-4 py-2 text-sm font-medium rounded-lg transition-colors",
-                location.pathname === link.path
-                  ? "bg-secondary text-foreground"
-                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks
+            .filter(link => !link.authRequired || user)
+            .map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={cn(
+                  "px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5",
+                  location.pathname === link.path
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                )}
+              >
+                {link.icon && <link.icon className="h-4 w-4" />}
+                {link.label}
+              </Link>
+            ))}
         </nav>
 
         {/* Actions */}
@@ -176,21 +182,24 @@ const Header = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-border bg-background animate-fade-in">
           <nav className="container py-4 flex flex-col gap-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={cn(
-                  "px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-                  location.pathname === link.path
-                    ? "bg-secondary text-foreground"
-                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks
+              .filter(link => !link.authRequired || user)
+              .map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={cn(
+                    "px-4 py-3 text-sm font-medium rounded-lg transition-colors flex items-center gap-2",
+                    location.pathname === link.path
+                      ? "bg-secondary text-foreground"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  )}
+                >
+                  {link.icon && <link.icon className="h-4 w-4" />}
+                  {link.label}
+                </Link>
+              ))}
             
             <div className="border-t border-border pt-2 mt-2">
               {user ? (
