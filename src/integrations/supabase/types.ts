@@ -14,6 +14,131 @@ export type Database = {
   }
   public: {
     Tables: {
+      binary_ledger: {
+        Row: {
+          binary_income: number
+          cap_applied: number
+          carryforward_left: number
+          carryforward_right: number
+          created_at: string
+          id: string
+          left_bv: number
+          matched_bv: number
+          payout_period: string
+          right_bv: number
+          user_id: string
+        }
+        Insert: {
+          binary_income?: number
+          cap_applied?: number
+          carryforward_left?: number
+          carryforward_right?: number
+          created_at?: string
+          id?: string
+          left_bv?: number
+          matched_bv?: number
+          payout_period: string
+          right_bv?: number
+          user_id: string
+        }
+        Update: {
+          binary_income?: number
+          cap_applied?: number
+          carryforward_left?: number
+          carryforward_right?: number
+          created_at?: string
+          id?: string
+          left_bv?: number
+          matched_bv?: number
+          payout_period?: string
+          right_bv?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bv_ledger: {
+        Row: {
+          bv_amount: number
+          bv_type: string
+          created_at: string
+          id: string
+          leg: string | null
+          order_id: string | null
+          source_description: string | null
+          terra_fee: number | null
+          user_id: string
+        }
+        Insert: {
+          bv_amount: number
+          bv_type: string
+          created_at?: string
+          id?: string
+          leg?: string | null
+          order_id?: string | null
+          source_description?: string | null
+          terra_fee?: number | null
+          user_id: string
+        }
+        Update: {
+          bv_amount?: number
+          bv_type?: string
+          created_at?: string
+          id?: string
+          leg?: string | null
+          order_id?: string | null
+          source_description?: string | null
+          terra_fee?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bv_ledger_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compensation_pools: {
+        Row: {
+          created_at: string
+          cycle_value_adjustment: number | null
+          failsafe_ratio: number | null
+          id: string
+          is_processed: boolean | null
+          membership_bv_payout: number
+          payout_period: string
+          pool_amount: number
+          processed_at: string | null
+          total_terra_fees: number
+        }
+        Insert: {
+          created_at?: string
+          cycle_value_adjustment?: number | null
+          failsafe_ratio?: number | null
+          id?: string
+          is_processed?: boolean | null
+          membership_bv_payout?: number
+          payout_period: string
+          pool_amount?: number
+          processed_at?: string | null
+          total_terra_fees?: number
+        }
+        Update: {
+          created_at?: string
+          cycle_value_adjustment?: number | null
+          failsafe_ratio?: number | null
+          id?: string
+          is_processed?: boolean | null
+          membership_bv_payout?: number
+          payout_period?: string
+          pool_amount?: number
+          processed_at?: string | null
+          total_terra_fees?: number
+        }
+        Relationships: []
+      }
       drivers: {
         Row: {
           created_at: string
@@ -125,6 +250,48 @@ export type Database = {
         }
         Relationships: []
       }
+      memberships: {
+        Row: {
+          created_at: string
+          id: string
+          left_leg_id: string | null
+          membership_bv: number
+          package_price: number
+          placement_side: string | null
+          right_leg_id: string | null
+          sponsor_id: string | null
+          tier: Database["public"]["Enums"]["membership_tier"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          left_leg_id?: string | null
+          membership_bv?: number
+          package_price?: number
+          placement_side?: string | null
+          right_leg_id?: string | null
+          sponsor_id?: string | null
+          tier?: Database["public"]["Enums"]["membership_tier"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          left_leg_id?: string | null
+          membership_bv?: number
+          package_price?: number
+          placement_side?: string | null
+          right_leg_id?: string | null
+          sponsor_id?: string | null
+          tier?: Database["public"]["Enums"]["membership_tier"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
@@ -137,13 +304,17 @@ export type Database = {
           delivery_longitude: number | null
           driver_id: string | null
           farmer_id: string | null
+          farmer_price: number | null
           id: string
           items: Json
           items_count: number
           notes: string | null
           order_number: string
+          referrer_id: string | null
           status: Database["public"]["Enums"]["order_status"] | null
           subtotal: number
+          terra_fee: number | null
+          terra_fee_bv: number | null
           total: number
           updated_at: string
         }
@@ -158,13 +329,17 @@ export type Database = {
           delivery_longitude?: number | null
           driver_id?: string | null
           farmer_id?: string | null
+          farmer_price?: number | null
           id?: string
           items?: Json
           items_count?: number
           notes?: string | null
           order_number: string
+          referrer_id?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           subtotal?: number
+          terra_fee?: number | null
+          terra_fee_bv?: number | null
           total?: number
           updated_at?: string
         }
@@ -179,13 +354,17 @@ export type Database = {
           delivery_longitude?: number | null
           driver_id?: string | null
           farmer_id?: string | null
+          farmer_price?: number | null
           id?: string
           items?: Json
           items_count?: number
           notes?: string | null
           order_number?: string
+          referrer_id?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           subtotal?: number
+          terra_fee?: number | null
+          terra_fee_bv?: number | null
           total?: number
           updated_at?: string
         }
@@ -202,6 +381,56 @@ export type Database = {
             columns: ["farmer_id"]
             isOneToOne: false
             referencedRelation: "farmers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payout_ledger: {
+        Row: {
+          bonus_type: string
+          created_at: string
+          gross_amount: number
+          id: string
+          level_depth: number | null
+          net_amount: number
+          notes: string | null
+          payout_period: string
+          source_order_id: string | null
+          source_user_id: string | null
+          user_id: string
+        }
+        Insert: {
+          bonus_type: string
+          created_at?: string
+          gross_amount: number
+          id?: string
+          level_depth?: number | null
+          net_amount: number
+          notes?: string | null
+          payout_period: string
+          source_order_id?: string | null
+          source_user_id?: string | null
+          user_id: string
+        }
+        Update: {
+          bonus_type?: string
+          created_at?: string
+          gross_amount?: number
+          id?: string
+          level_depth?: number | null
+          net_amount?: number
+          notes?: string | null
+          payout_period?: string
+          source_order_id?: string | null
+          source_user_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_ledger_source_order_id_fkey"
+            columns: ["source_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -259,16 +488,75 @@ export type Database = {
           },
         ]
       }
+      token_ledger: {
+        Row: {
+          created_at: string
+          id: string
+          php_reward_value: number
+          source_description: string | null
+          token_market_price: number
+          tokens_issued: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          php_reward_value: number
+          source_description?: string | null
+          token_market_price: number
+          tokens_issued: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          php_reward_value?: number
+          source_description?: string | null
+          token_market_price?: number
+          tokens_issued?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "farmer" | "business_buyer" | "member" | "driver" | "admin"
       driver_status: "online" | "offline" | "delivering"
       farmer_status: "active" | "pending" | "suspended"
+      membership_tier: "free" | "starter" | "basic" | "pro" | "elite"
       order_status:
         | "pending"
         | "preparing"
@@ -403,8 +691,10 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["farmer", "business_buyer", "member", "driver", "admin"],
       driver_status: ["online", "offline", "delivering"],
       farmer_status: ["active", "pending", "suspended"],
+      membership_tier: ["free", "starter", "basic", "pro", "elite"],
       order_status: [
         "pending",
         "preparing",
