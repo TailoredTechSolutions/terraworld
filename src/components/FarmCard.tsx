@@ -1,5 +1,5 @@
 import { Farm } from "@/data/products";
-import { Star, MapPin, ArrowRight, Tractor } from "lucide-react";
+import { Star, MapPin, ArrowRight, Tractor, Phone, Award, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +32,14 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
           <span className="font-bold">{farm.rating}</span>
         </div>
 
+        {/* Program badge */}
+        {farm.program && (
+          <div className="absolute top-3 left-3 glass-badge-accent flex items-center gap-1.5 shadow-md">
+            <Award className="h-3.5 w-3.5" />
+            <span className="text-xs font-medium">{farm.program === "ATI Learning Site" ? "ATI Certified" : "PhilGAP"}</span>
+          </div>
+        )}
+
         {farm.distance && (
           <div className="absolute bottom-3 left-3 glass-badge-primary flex items-center gap-1.5 shadow-md">
             <MapPin className="h-3.5 w-3.5" />
@@ -54,9 +62,34 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
           </div>
         </div>
 
+        {/* Farm Type & Certificate */}
+        {(farm.farmType || farm.certificate) && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {farm.farmType && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
+                <Leaf className="h-3 w-3" />
+                {farm.farmType}
+              </span>
+            )}
+            {farm.certificate && (
+              <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+                {farm.certificate}
+              </span>
+            )}
+          </div>
+        )}
+
         <p className="text-sm text-muted-foreground line-clamp-2 mb-4 leading-relaxed">
           {farm.description}
         </p>
+
+        {/* Contact */}
+        {farm.contact && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+            <Phone className="h-3.5 w-3.5 text-primary" />
+            <span>{farm.contact}</span>
+          </div>
+        )}
 
         <div className="flex flex-wrap gap-2 mb-5">
           {farm.products.slice(0, 3).map((product) => (
