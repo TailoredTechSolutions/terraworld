@@ -19,6 +19,10 @@ import {
   Star,
   Loader2,
   RefreshCw,
+  Crown,
+  Activity,
+  Wallet,
+  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -71,6 +75,12 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
+
+// Terra Compensation Components
+import { PayoutCyclePanel } from "@/components/admin/PayoutCyclePanel";
+import { MembershipsPanel } from "@/components/admin/MembershipsPanel";
+import { BVLedgerPanel } from "@/components/admin/BVLedgerPanel";
+import { PayoutsLedgerPanel } from "@/components/admin/PayoutsLedgerPanel";
 
 type Farmer = Tables<"farmers">;
 type Driver = Tables<"drivers">;
@@ -269,11 +279,27 @@ const AdminDashboard = () => {
 
         {/* Main Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 max-w-lg">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="farmers">Farmers</TabsTrigger>
-            <TabsTrigger value="drivers">Drivers</TabsTrigger>
-            <TabsTrigger value="orders">Orders</TabsTrigger>
+          <TabsList className="flex flex-wrap gap-1 h-auto p-1 w-full max-w-4xl">
+            <TabsTrigger value="overview" className="flex-1 min-w-[80px]">Overview</TabsTrigger>
+            <TabsTrigger value="compensation" className="flex-1 min-w-[80px] gap-1">
+              <Play className="h-3 w-3" />
+              Payouts
+            </TabsTrigger>
+            <TabsTrigger value="memberships" className="flex-1 min-w-[80px] gap-1">
+              <Crown className="h-3 w-3" />
+              Members
+            </TabsTrigger>
+            <TabsTrigger value="bv-ledger" className="flex-1 min-w-[80px] gap-1">
+              <Activity className="h-3 w-3" />
+              BV
+            </TabsTrigger>
+            <TabsTrigger value="payout-ledger" className="flex-1 min-w-[80px] gap-1">
+              <Wallet className="h-3 w-3" />
+              Ledger
+            </TabsTrigger>
+            <TabsTrigger value="farmers" className="flex-1 min-w-[80px]">Farmers</TabsTrigger>
+            <TabsTrigger value="drivers" className="flex-1 min-w-[80px]">Drivers</TabsTrigger>
+            <TabsTrigger value="orders" className="flex-1 min-w-[80px]">Orders</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -394,6 +420,26 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Compensation Engine Tab */}
+          <TabsContent value="compensation">
+            <PayoutCyclePanel />
+          </TabsContent>
+
+          {/* Memberships Tab */}
+          <TabsContent value="memberships">
+            <MembershipsPanel />
+          </TabsContent>
+
+          {/* BV Ledger Tab */}
+          <TabsContent value="bv-ledger">
+            <BVLedgerPanel />
+          </TabsContent>
+
+          {/* Payouts Ledger Tab */}
+          <TabsContent value="payout-ledger">
+            <PayoutsLedgerPanel />
           </TabsContent>
 
           {/* Farmers Tab */}
