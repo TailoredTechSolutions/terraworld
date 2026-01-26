@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -18,6 +18,9 @@ import {
   Activity,
   Play,
   FileText,
+  LogOut,
+  User,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -28,6 +31,17 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface NavItem {
   title: string;
@@ -107,9 +121,43 @@ interface AdminSidebarProps {
   onTabChange: (tab: string) => void;
 }
 
+interface UserProfile {
+  full_name: string | null;
+  email: string;
+  avatar_url: string | null;
+}
+
 const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const isMobile = useIsMobile();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('full_name, email, avatar_url')
+        .eq('user_id', user.id)
+        .single();
+      if (data) setProfile(data);
+    };
+    fetchProfile();
+  }, [user]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  const getInitials = (name: string | null, email: string) => {
+    if (name) {
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+    return email.slice(0, 2).toUpperCase();
+  };
 
   const SidebarContent = ({ inSheet = false }: { inSheet?: boolean }) => (
     <div className={cn(
@@ -211,9 +259,55 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
         </div>
       </ScrollArea>
 
+      {/* Profile Section */}
+      <div className="p-3 border-t border-border">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className={cn(
+              "flex items-center gap-3 w-full p-2 rounded-lg hover:bg-secondary transition-colors",
+              collapsed && !inSheet && "justify-center"
+            )}>
+              <Avatar className="h-9 w-9">
+                <AvatarImage src={profile?.avatar_url || undefined} />
+                <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                  {getInitials(profile?.full_name || null, profile?.email || user?.email || '')}
+                </AvatarFallback>
+              </Avatar>
+              {(!collapsed || inSheet) && (
+                <div className="flex-1 text-left overflow-hidden">
+                  <p className="text-sm font-medium truncate">
+                    {profile?.full_name || 'Admin User'}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {profile?.email || user?.email}
+                  </p>
+                </div>
+              )}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => onTabChange('users')}>
+              <UserCog className="h-4 w-4 mr-2" />
+              Manage Users & Roles
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/member')}>
+              <User className="h-4 w-4 mr-2" />
+              Member Dashboard
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       {/* Footer */}
       {(!collapsed || inSheet) && (
-        <div className="p-4 border-t border-border">
+        <div className="px-4 pb-3">
           <p className="text-xs text-muted-foreground text-center">
             Terra Admin v1.0
           </p>
