@@ -32,6 +32,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import WalletCard from "@/components/wallet/WalletCard";
+import RankProgress from "@/components/rank/RankProgress";
 
 interface Membership {
   id: string;
@@ -43,6 +45,7 @@ interface Membership {
   left_leg_id: string | null;
   right_leg_id: string | null;
   placement_side: string | null;
+  current_rank_id: string | null;
   created_at: string;
 }
 
@@ -414,6 +417,19 @@ const MemberDashboard = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Wallet & Rank Section */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <WalletCard userId={user.id} />
+          <RankProgress
+            userId={user.id}
+            currentRankId={membership?.current_rank_id || undefined}
+            personalBV={totalBV}
+            leftLegBV={binaryStats.left_bv}
+            rightLegBV={binaryStats.right_bv}
+            directReferrals={0} // TODO: Calculate from profiles table
+          />
+        </div>
 
         {/* Tabs for History */}
         <Tabs defaultValue="bv" className="space-y-6">

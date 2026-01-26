@@ -253,11 +253,13 @@ export type Database = {
       memberships: {
         Row: {
           created_at: string
+          current_rank_id: string | null
           id: string
           left_leg_id: string | null
           membership_bv: number
           package_price: number
           placement_side: string | null
+          rank_achieved_at: string | null
           right_leg_id: string | null
           sponsor_id: string | null
           tier: Database["public"]["Enums"]["membership_tier"]
@@ -266,11 +268,13 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          current_rank_id?: string | null
           id?: string
           left_leg_id?: string | null
           membership_bv?: number
           package_price?: number
           placement_side?: string | null
+          rank_achieved_at?: string | null
           right_leg_id?: string | null
           sponsor_id?: string | null
           tier?: Database["public"]["Enums"]["membership_tier"]
@@ -279,18 +283,28 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          current_rank_id?: string | null
           id?: string
           left_leg_id?: string | null
           membership_bv?: number
           package_price?: number
           placement_side?: string | null
+          rank_achieved_at?: string | null
           right_leg_id?: string | null
           sponsor_id?: string | null
           tier?: Database["public"]["Enums"]["membership_tier"]
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "memberships_current_rank_id_fkey"
+            columns: ["current_rank_id"]
+            isOneToOne: false
+            referencedRelation: "ranks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       orders: {
         Row: {
@@ -535,6 +549,51 @@ export type Database = {
           },
         ]
       }
+      ranks: {
+        Row: {
+          badge_color: string
+          binary_match_percent: number
+          created_at: string
+          daily_cap: number
+          id: string
+          matching_bonus_depth: number
+          name: string
+          rank_order: number
+          required_direct_referrals: number
+          required_left_leg_bv: number
+          required_personal_bv: number
+          required_right_leg_bv: number
+        }
+        Insert: {
+          badge_color?: string
+          binary_match_percent?: number
+          created_at?: string
+          daily_cap?: number
+          id?: string
+          matching_bonus_depth?: number
+          name: string
+          rank_order: number
+          required_direct_referrals?: number
+          required_left_leg_bv?: number
+          required_personal_bv?: number
+          required_right_leg_bv?: number
+        }
+        Update: {
+          badge_color?: string
+          binary_match_percent?: number
+          created_at?: string
+          daily_cap?: number
+          id?: string
+          matching_bonus_depth?: number
+          name?: string
+          rank_order?: number
+          required_direct_referrals?: number
+          required_left_leg_bv?: number
+          required_personal_bv?: number
+          required_right_leg_bv?: number
+        }
+        Relationships: []
+      }
       token_ledger: {
         Row: {
           created_at: string
@@ -582,6 +641,83 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          created_at: string
+          description: string | null
+          id: string
+          reference_id: string | null
+          status: string
+          transaction_type: string
+          user_id: string
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          status?: string
+          transaction_type: string
+          user_id: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          status?: string
+          transaction_type?: string
+          user_id?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wallets: {
+        Row: {
+          available_balance: number
+          created_at: string
+          id: string
+          pending_balance: number
+          total_withdrawn: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available_balance?: number
+          created_at?: string
+          id?: string
+          pending_balance?: number
+          total_withdrawn?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available_balance?: number
+          created_at?: string
+          id?: string
+          pending_balance?: number
+          total_withdrawn?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
