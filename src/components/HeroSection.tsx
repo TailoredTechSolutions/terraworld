@@ -74,22 +74,51 @@ const HeroSection = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Column - Main Content */}
           <div>
-            {/* Logo badge */}
+            {/* Animated Video Badge */}
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-3 rounded-full border border-accent/30 bg-background/10 px-4 py-2 backdrop-blur-md mb-6"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, type: "spring" }}
+              className="mb-8"
             >
-              <img src={terraLogo} alt="Terra" className="h-8 w-8" />
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
-                </span>
-                <span className="text-sm font-medium text-primary-foreground">
-                  Fresh harvest available now
-                </span>
+              <div className="relative inline-flex items-center gap-4 rounded-2xl border-2 border-accent/50 bg-background/20 backdrop-blur-md p-3 pr-6 shadow-xl shadow-accent/20">
+                {/* Video Icon */}
+                <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden border-2 border-accent shadow-lg">
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                  >
+                    <source src="/videos/harvest-badge.mp4" type="video/mp4" />
+                  </video>
+                  {/* Pulsing ring */}
+                  <motion.div
+                    className="absolute inset-0 border-2 border-accent rounded-xl"
+                    animate={{ scale: [1, 1.15, 1], opacity: [0.8, 0, 0.8] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                </div>
+                
+                {/* Text content */}
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-accent"></span>
+                    </span>
+                    <span className="text-xs font-semibold text-accent uppercase tracking-wide">
+                      Live Now
+                    </span>
+                  </div>
+                  <span className="text-lg md:text-xl font-bold text-primary-foreground">
+                    Fresh Harvest Available
+                  </span>
+                  <span className="text-sm text-primary-foreground/70">
+                    Direct from Benguet highlands
+                  </span>
+                </div>
               </div>
             </motion.div>
 
