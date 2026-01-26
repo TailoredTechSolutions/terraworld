@@ -10,6 +10,7 @@ import OrderConfirmation from "@/pages/OrderConfirmation";
 import DriverDashboard from "@/pages/DriverDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import MemberDashboard from "@/pages/MemberDashboard";
+import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/NotFound";
 
 const AnimatedRoutes = () => {
@@ -87,6 +88,14 @@ const AnimatedRoutes = () => {
           element={
             <PageTransition>
               <MemberDashboard />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/auth"
+          element={
+            <PageTransition>
+              <AuthPage />
             </PageTransition>
           }
         />
