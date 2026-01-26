@@ -12,13 +12,11 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const Index = () => {
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("vegetables");
 
-  const filteredProducts = selectedCategory === "all"
-    ? products
-    : products.filter(p => 
-        p.category.toLowerCase().replace(/\s+&\s+/g, "-").includes(selectedCategory)
-      );
+  const filteredProducts = products.filter(p => 
+    p.category.toLowerCase().replace(/\s+&\s+/g, "-").includes(selectedCategory)
+  );
 
   return (
     <div className="min-h-screen bg-background">

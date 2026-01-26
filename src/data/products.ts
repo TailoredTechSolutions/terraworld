@@ -455,7 +455,6 @@ export const farms: Farm[] = [
 ];
 
 export const categories = [
-  { id: "all", name: "All Products", icon: "Grid3X3" },
   { id: "vegetables", name: "Vegetables", icon: "Leaf" },
   { id: "fruits", name: "Fruits", icon: "Apple" },
   { id: "meat", name: "Meat", icon: "Beef" },
