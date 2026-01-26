@@ -67,7 +67,7 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className="sticky top-0 z-50 w-full glass-navbar">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
@@ -168,7 +168,7 @@ const Header = () => {
               </DropdownMenu>
             ) : (
               <Link to="/auth">
-                <Button variant="outline" size="sm" className="hidden md:flex gap-2">
+                <Button size="sm" className="hidden md:flex gap-2 btn-liquid text-sm py-2 px-4 h-auto">
                   <LogIn className="h-4 w-4" />
                   Sign In
                 </Button>
@@ -184,7 +184,7 @@ const Header = () => {
           >
             <ShoppingCart className="h-5 w-5" />
             {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-medium text-accent-foreground">
+              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-medium text-accent-foreground shadow-glow-accent">
                 {totalItems}
               </span>
             )}
@@ -204,7 +204,7 @@ const Header = () => {
 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-border bg-background animate-fade-in">
+        <div className="md:hidden border-t border-glass-border bg-glass backdrop-blur-glass animate-fade-in">
           <nav className="container py-4 flex flex-col gap-2">
             {navLinks
               .filter(canAccessLink)
