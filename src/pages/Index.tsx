@@ -1,5 +1,4 @@
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import FarmCard from "@/components/FarmCard";
@@ -200,68 +199,6 @@ const FeatureCard = ({ feature }: { feature: Feature }) => {
   );
 };
 
-// Video Background Section Component with Parallax
-const VideoBackgroundSection = () => {
-  const containerRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  });
-
-  // Parallax transforms
-  const videoY = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
-  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.6, 1, 1, 0.6]);
-
-  return (
-    <section 
-      ref={containerRef}
-      className="relative h-[70vh] min-h-[500px] overflow-hidden"
-    >
-      {/* Background Video with Parallax */}
-      <motion.div
-        style={{ y: videoY }}
-        className="absolute inset-0 w-full h-[130%] -top-[15%]"
-      >
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover"
-        >
-          <source src="/videos/terra-background.mp4" type="video/mp4" />
-        </video>
-      </motion.div>
-
-      {/* Overlay gradient for readability */}
-      <motion.div 
-        style={{ opacity }}
-        className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" 
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-background" />
-
-      {/* Content overlay with inverse parallax */}
-      <div className="relative h-full flex items-center justify-center">
-        <motion.div
-          style={{ y: textY }}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center px-4"
-        >
-          <h2 className="font-display text-3xl md:text-5xl font-bold text-white drop-shadow-lg mb-4">
-            Fresh From the Highlands
-          </h2>
-          <p className="text-white/90 text-lg md:text-xl max-w-2xl mx-auto drop-shadow-md">
-            Connecting Benguet farmers directly to your table
-          </p>
-        </motion.div>
-      </div>
-    </section>
-  );
-};
 
 // Testimonials data
 const testimonials = [
@@ -506,8 +443,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Video Background Section */}
-        <VideoBackgroundSection />
 
         {/* How It Works Section */}
         <section className="py-20 bg-background">
@@ -558,6 +493,42 @@ const Index = () => {
           </div>
         </section>
 
+        {/* CTA Section - Moved up after How It Works */}
+        <section className="py-20 bg-primary relative overflow-hidden">
+          {/* Glass overlay decorations */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 rounded-full bg-accent/10 blur-3xl" />
+            <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 rounded-full bg-primary-foreground/5 blur-3xl" />
+          </div>
+          
+          <div className="container text-center relative">
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
+              Ready to Join the Movement?
+            </h2>
+            <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto mb-8">
+              Whether you're a farmer looking to reach more customers, or a consumer seeking fresh organic produce — Terra has a place for you.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link to="/auth">
+                <Button
+                  size="lg"
+                  className="btn-liquid-accent h-12 px-8 text-base font-semibold"
+                >
+                  Get Started Free
+                </Button>
+              </Link>
+              <Link to="/affiliate">
+                <Button
+                  size="lg"
+                  className="btn-liquid-outline h-12 px-8 text-base font-semibold border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                >
+                  Learn About Affiliates
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Testimonials Section */}
         <TestimonialsSection />
 
@@ -591,42 +562,6 @@ const Index = () => {
                   <FarmCard farm={farm} />
                 </div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-20 bg-primary relative overflow-hidden">
-          {/* Glass overlay decorations */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 rounded-full bg-accent/10 blur-3xl" />
-            <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 rounded-full bg-primary-foreground/5 blur-3xl" />
-          </div>
-          
-          <div className="container text-center relative">
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
-              Ready to Join the Movement?
-            </h2>
-            <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto mb-8">
-              Whether you're a farmer looking to reach more customers, or a consumer seeking fresh organic produce — Terra has a place for you.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/auth">
-                <Button
-                  size="lg"
-                  className="btn-liquid-accent h-12 px-8 text-base font-semibold"
-                >
-                  Get Started Free
-                </Button>
-              </Link>
-              <Link to="/affiliate">
-                <Button
-                  size="lg"
-                  className="btn-liquid-outline h-12 px-8 text-base font-semibold border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-                >
-                  Learn About Affiliates
-                </Button>
-              </Link>
             </div>
           </div>
         </section>
