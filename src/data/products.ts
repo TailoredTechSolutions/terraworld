@@ -1,6 +1,18 @@
 import lettuceImg from "@/assets/products/lettuce.jpg";
 import carrotsImg from "@/assets/products/carrots.jpg";
 import strawberriesImg from "@/assets/products/strawberries.jpg";
+import cabbageImg from "@/assets/products/cabbage.jpg";
+import chineseCabbageImg from "@/assets/products/chinese-cabbage.jpg";
+import baguioBeansImg from "@/assets/products/baguio-beans.jpg";
+import broccoliImg from "@/assets/products/broccoli.jpg";
+import celeryImg from "@/assets/products/celery.jpg";
+import potatoesImg from "@/assets/products/potatoes.jpg";
+import radishImg from "@/assets/products/radish.jpg";
+import koreanRadishImg from "@/assets/products/korean-radish.jpg";
+import cauliflowerImg from "@/assets/products/cauliflower.jpg";
+import sayoteImg from "@/assets/products/sayote.jpg";
+import leeksImg from "@/assets/products/leeks.jpg";
+import pechayImg from "@/assets/products/pechay.jpg";
 
 export interface Product {
   id: string;
@@ -40,7 +52,7 @@ export const products: Product[] = [
     unit: "kg",
     farmId: "02acf12e-516a-4865-87ae-581c3d47dae7",
     farmName: "Sunrise Organic",
-    image: "https://images.unsplash.com/photo-1594282486552-05b4d80fbb9f?w=800",
+    image: cabbageImg,
     category: "Vegetables",
     stock: 150,
     organic: true,
@@ -53,7 +65,7 @@ export const products: Product[] = [
     unit: "kg",
     farmId: "02acf12e-516a-4865-87ae-581c3d47dae7",
     farmName: "Sunrise Organic",
-    image: "https://images.unsplash.com/photo-1598030343246-eec71cb44cb6?w=800",
+    image: chineseCabbageImg,
     category: "Vegetables",
     stock: 80,
     organic: true,
@@ -66,7 +78,7 @@ export const products: Product[] = [
     unit: "kg",
     farmId: "02acf12e-516a-4865-87ae-581c3d47dae7",
     farmName: "Sunrise Organic",
-    image: "https://images.unsplash.com/photo-1567375698348-5d9d5ae99de0?w=800",
+    image: baguioBeansImg,
     category: "Vegetables",
     stock: 60,
     organic: true,
@@ -79,7 +91,7 @@ export const products: Product[] = [
     unit: "kg",
     farmId: "02acf12e-516a-4865-87ae-581c3d47dae7",
     farmName: "Sunrise Organic",
-    image: "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=800",
+    image: broccoliImg,
     category: "Vegetables",
     stock: 45,
     organic: true,
@@ -92,7 +104,7 @@ export const products: Product[] = [
     unit: "kg",
     farmId: "02acf12e-516a-4865-87ae-581c3d47dae7",
     farmName: "Sunrise Organic",
-    image: "https://images.unsplash.com/photo-1580391564590-aeca65c5e2d3?w=800",
+    image: celeryImg,
     category: "Vegetables",
     stock: 70,
     organic: true,
@@ -105,7 +117,7 @@ export const products: Product[] = [
     unit: "kg",
     farmId: "02acf12e-516a-4865-87ae-581c3d47dae7",
     farmName: "Sunrise Organic",
-    image: "https://images.unsplash.com/photo-1518977676601-b53f82ber89?w=800",
+    image: potatoesImg,
     category: "Vegetables",
     stock: 200,
     organic: true,
@@ -119,7 +131,7 @@ export const products: Product[] = [
     unit: "kg",
     farmId: "22dc8b21-8400-4de0-8bd0-014641004dec",
     farmName: "Mountain Fresh",
-    image: "https://images.unsplash.com/photo-1447175008436-054170c2e979?w=800",
+    image: radishImg,
     category: "Vegetables",
     stock: 90,
     organic: true,
@@ -132,7 +144,7 @@ export const products: Product[] = [
     unit: "kg",
     farmId: "22dc8b21-8400-4de0-8bd0-014641004dec",
     farmName: "Mountain Fresh",
-    image: "https://images.unsplash.com/photo-1585243416340-d90c1f09f8b3?w=800",
+    image: koreanRadishImg,
     category: "Vegetables",
     stock: 55,
     organic: true,
@@ -145,7 +157,7 @@ export const products: Product[] = [
     unit: "kg",
     farmId: "22dc8b21-8400-4de0-8bd0-014641004dec",
     farmName: "Mountain Fresh",
-    image: "https://images.unsplash.com/photo-1568584711075-3d021a7c3ca3?w=800",
+    image: cauliflowerImg,
     category: "Vegetables",
     stock: 65,
     organic: true,
@@ -158,7 +170,7 @@ export const products: Product[] = [
     unit: "kg",
     farmId: "22dc8b21-8400-4de0-8bd0-014641004dec",
     farmName: "Mountain Fresh",
-    image: "https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?w=800",
+    image: sayoteImg,
     category: "Vegetables",
     stock: 180,
     organic: true,
@@ -171,7 +183,7 @@ export const products: Product[] = [
     unit: "kg",
     farmId: "22dc8b21-8400-4de0-8bd0-014641004dec",
     farmName: "Mountain Fresh",
-    image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800",
+    image: leeksImg,
     category: "Vegetables",
     stock: 50,
     organic: true,
@@ -184,7 +196,7 @@ export const products: Product[] = [
     unit: "kg",
     farmId: "22dc8b21-8400-4de0-8bd0-014641004dec",
     farmName: "Mountain Fresh",
-    image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800",
+    image: pechayImg,
     category: "Vegetables",
     stock: 100,
     organic: true,
