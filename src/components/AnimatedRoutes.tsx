@@ -1,6 +1,8 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "./PageTransition";
+import ProtectedRoute from "./ProtectedRoute";
+import RoleProtectedRoute from "./RoleProtectedRoute";
 import Index from "@/pages/Index";
 import ProductDetail from "@/pages/ProductDetail";
 import MapPage from "@/pages/MapPage";
@@ -71,25 +73,31 @@ const AnimatedRoutes = () => {
         <Route
           path="/driver"
           element={
-            <PageTransition>
-              <DriverDashboard />
-            </PageTransition>
+            <RoleProtectedRoute allowedRoles={['driver']}>
+              <PageTransition>
+                <DriverDashboard />
+              </PageTransition>
+            </RoleProtectedRoute>
           }
         />
         <Route
           path="/admin"
           element={
-            <PageTransition>
-              <AdminDashboard />
-            </PageTransition>
+            <RoleProtectedRoute allowedRoles={['admin']}>
+              <PageTransition>
+                <AdminDashboard />
+              </PageTransition>
+            </RoleProtectedRoute>
           }
         />
         <Route
           path="/member"
           element={
-            <PageTransition>
-              <MemberDashboard />
-            </PageTransition>
+            <ProtectedRoute>
+              <PageTransition>
+                <MemberDashboard />
+              </PageTransition>
+            </ProtectedRoute>
           }
         />
         <Route
