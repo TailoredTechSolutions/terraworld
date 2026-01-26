@@ -8,7 +8,7 @@ import { farms } from "@/data/products";
 import { 
   ArrowRight, 
   Leaf, 
-  Truck, 
+  Truck,
   Users, 
   Wallet, 
   MapPin, 
@@ -512,17 +512,19 @@ const Index = () => {
               <Link to="/auth">
                 <Button
                   size="lg"
-                  className="btn-liquid-accent h-12 px-8 text-base font-semibold"
+                  className="btn-liquid-accent h-12 px-8 text-base font-semibold gap-2"
                 >
-                  Get Started Free
+                  <Users className="h-5 w-5" />
+                  Become a Member
                 </Button>
               </Link>
-              <Link to="/affiliate">
+              <Link to="/auth">
                 <Button
                   size="lg"
-                  className="btn-liquid-outline h-12 px-8 text-base font-semibold border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                  className="btn-liquid-outline h-12 px-8 text-base font-semibold border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 gap-2"
                 >
-                  Learn About Affiliates
+                  <Truck className="h-5 w-5" />
+                  Become a Driver
                 </Button>
               </Link>
             </div>
