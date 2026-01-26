@@ -15,7 +15,9 @@ import {
   ShieldCheck,
   TrendingUp,
   Handshake,
-  type LucideIcon
+  type LucideIcon,
+  Star,
+  Quote
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -197,6 +199,214 @@ const FeatureCard = ({ feature }: { feature: Feature }) => {
   );
 };
 
+// Testimonials data
+const testimonials = [
+  {
+    id: 1,
+    name: "Maria Santos",
+    role: "Home Cook",
+    location: "Quezon City",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    quote: "The vegetables from Terra are incredibly fresh! You can really taste the difference. My family loves the Baguio lettuce and strawberries.",
+    delay: 0,
+  },
+  {
+    id: 2,
+    name: "Juan Dela Cruz",
+    role: "Restaurant Owner",
+    location: "Makati City",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    quote: "As a chef, quality ingredients are everything. Terra connects me directly with highland farmers. The produce is farm-fresh and my customers notice!",
+    delay: 0.15,
+  },
+  {
+    id: 3,
+    name: "Ana Reyes",
+    role: "Terra Affiliate",
+    location: "Baguio City",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    quote: "I started as a customer and now I'm earning passive income as an affiliate. The commission structure is transparent and payouts are always on time.",
+    delay: 0.3,
+  },
+  {
+    id: 4,
+    name: "Pedro Gomez",
+    role: "Organic Farmer",
+    location: "La Trinidad, Benguet",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    quote: "Terra has transformed my farm business. I now reach customers directly without middlemen. My income has increased by 40% since joining!",
+    delay: 0.45,
+  },
+];
+
+// Animated Star Rating Component
+const AnimatedStarRating = ({ rating, delay }: { rating: number; delay: number }) => {
+  return (
+    <div className="flex gap-1">
+      {[...Array(5)].map((_, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, scale: 0, rotate: -180 }}
+          whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+          viewport={{ once: true }}
+          transition={{
+            duration: 0.4,
+            delay: delay + i * 0.1,
+            type: "spring",
+            stiffness: 200,
+          }}
+        >
+          <Star
+            className={`h-4 w-4 ${
+              i < rating
+                ? "fill-yellow-400 text-yellow-400"
+                : "fill-muted text-muted"
+            }`}
+          />
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
+// Testimonial Card Component
+const TestimonialCard = ({ testimonial }: { testimonial: typeof testimonials[0] }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, delay: testimonial.delay }}
+      whileHover={{ y: -5, transition: { duration: 0.3 } }}
+      className="group relative p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-xl transition-all duration-300"
+    >
+      {/* Quote icon */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4, delay: testimonial.delay + 0.2 }}
+        className="absolute -top-3 -left-3 p-2 rounded-full bg-primary shadow-lg"
+      >
+        <Quote className="h-4 w-4 text-primary-foreground" />
+      </motion.div>
+
+      {/* Stars */}
+      <div className="mb-4">
+        <AnimatedStarRating rating={testimonial.rating} delay={testimonial.delay + 0.3} />
+      </div>
+
+      {/* Quote */}
+      <p className="text-foreground/90 leading-relaxed mb-6 italic">
+        "{testimonial.quote}"
+      </p>
+
+      {/* Author */}
+      <div className="flex items-center gap-3">
+        <motion.div
+          initial={{ opacity: 0, scale: 0 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4, delay: testimonial.delay + 0.4, type: "spring" }}
+          className="relative"
+        >
+          <img
+            src={testimonial.avatar}
+            alt={testimonial.name}
+            className="h-12 w-12 rounded-full object-cover border-2 border-primary/20"
+          />
+          {/* Online indicator */}
+          <motion.div
+            className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-card"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+        </motion.div>
+        <div>
+          <p className="font-semibold text-foreground">{testimonial.name}</p>
+          <p className="text-sm text-muted-foreground">
+            {testimonial.role} • {testimonial.location}
+          </p>
+        </div>
+      </div>
+
+      {/* Decorative gradient */}
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+    </motion.div>
+  );
+};
+
+// Testimonials Section Component
+const TestimonialsSection = () => {
+  return (
+    <section className="py-20 bg-grain overflow-hidden">
+      <div className="container">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-semibold mb-4">
+            Testimonials
+          </span>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Loved by Farmers & Customers
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+            Don't just take our word for it. Here's what our community has to say about Terra.
+          </p>
+        </motion.div>
+
+        {/* Testimonials Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {testimonials.map((testimonial) => (
+            <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+          ))}
+        </div>
+
+        {/* Trust indicators */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="mt-12 flex flex-wrap justify-center items-center gap-8 text-muted-foreground"
+        >
+          <div className="flex items-center gap-2">
+            <div className="flex -space-x-2">
+              {testimonials.slice(0, 4).map((t, i) => (
+                <img
+                  key={t.id}
+                  src={t.avatar}
+                  alt=""
+                  className="h-8 w-8 rounded-full border-2 border-background object-cover"
+                  style={{ zIndex: 4 - i }}
+                />
+              ))}
+            </div>
+            <span className="text-sm font-medium">1,000+ happy customers</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              ))}
+            </div>
+            <span className="text-sm font-medium">4.9/5 average rating</span>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
@@ -280,6 +490,9 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        {/* Testimonials Section */}
+        <TestimonialsSection />
 
         {/* Featured Farms Section */}
         <section className="py-16 bg-secondary">
