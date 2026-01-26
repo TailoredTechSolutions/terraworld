@@ -23,10 +23,10 @@ import {
   Activity,
   Wallet,
   Play,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -71,6 +71,8 @@ import {
   Pie,
   Cell,
   ResponsiveContainer,
+  AreaChart,
+  Area,
 } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -82,6 +84,9 @@ import { MembershipsPanel } from "@/components/admin/MembershipsPanel";
 import { BVLedgerPanel } from "@/components/admin/BVLedgerPanel";
 import { PayoutsLedgerPanel } from "@/components/admin/PayoutsLedgerPanel";
 import UserManagementPanel from "@/components/admin/UserManagementPanel";
+import AdminSidebar from "@/components/admin/AdminSidebar";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 type Farmer = Tables<"farmers">;
 type Driver = Tables<"drivers">;
@@ -90,14 +95,15 @@ type Order = Tables<"orders"> & {
   drivers?: { name: string } | null;
 };
 
-// Static analytics data (would be calculated from real orders in production)
-const revenueData = [
-  { month: "Jan", revenue: 45000, orders: 120 },
-  { month: "Feb", revenue: 52000, orders: 145 },
-  { month: "Mar", revenue: 48000, orders: 132 },
-  { month: "Apr", revenue: 61000, orders: 178 },
-  { month: "May", revenue: 55000, orders: 156 },
-  { month: "Jun", revenue: 67000, orders: 189 },
+// Sales and Activations chart data
+const salesData = [
+  { date: "Mon", sales: 28, activations: 12 },
+  { date: "Tue", sales: 35, activations: 18 },
+  { date: "Wed", sales: 42, activations: 15 },
+  { date: "Thu", sales: 30, activations: 22 },
+  { date: "Fri", sales: 48, activations: 28 },
+  { date: "Sat", sales: 52, activations: 32 },
+  { date: "Sun", sales: 38, activations: 20 },
 ];
 
 const categoryData = [
@@ -108,10 +114,11 @@ const categoryData = [
   { name: "Other", value: 7 },
 ];
 
-const COLORS = ["hsl(152, 45%, 28%)", "hsl(18, 65%, 55%)", "hsl(38, 92%, 50%)", "hsl(152, 35%, 45%)", "hsl(45, 20%, 60%)"];
+const COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(var(--secondary))", "hsl(var(--muted))", "hsl(var(--border))"];
 
 const AdminDashboard = () => {
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("overview");
   const [farmers, setFarmers] = useState<Farmer[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -120,14 +127,16 @@ const AdminDashboard = () => {
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderFilter, setOrderFilter] = useState<string>("all");
+  const [membersCount, setMembersCount] = useState(0);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch farmers and drivers directly (public read access)
-      const [farmersRes, driversRes] = await Promise.all([
+      // Fetch farmers, drivers, and profiles count
+      const [farmersRes, driversRes, profilesRes] = await Promise.all([
         supabase.from("farmers").select("*").order("created_at", { ascending: false }),
         supabase.from("drivers").select("*").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("*", { count: "exact", head: true }),
       ]);
 
       if (farmersRes.error) throw farmersRes.error;
@@ -135,15 +144,15 @@ const AdminDashboard = () => {
 
       setFarmers(farmersRes.data || []);
       setDrivers(driversRes.data || []);
+      setMembersCount(profilesRes.count || 0);
 
-      // Fetch orders via secure edge function (orders table no longer publicly readable)
+      // Fetch orders via secure edge function
       const { data: ordersData, error: ordersError } = await supabase.functions.invoke('get-orders', {
         method: 'GET',
       });
 
       if (ordersError) {
         console.error("Error fetching orders via edge function:", ordersError);
-        // Don't throw - orders might fail but we can still show other data
         setOrders([]);
       } else {
         setOrders(ordersData?.orders || []);
@@ -190,36 +199,8 @@ const AdminDashboard = () => {
   const activeFarmers = farmers.filter(f => f.status === "active").length;
   const activeDrivers = drivers.filter(d => d.status === "online" || d.status === "delivering").length;
 
-  const stats = [
-    {
-      title: "Total Revenue",
-      value: `₱${totalRevenue.toLocaleString()}`,
-      change: "+12.5%",
-      icon: DollarSign,
-      color: "text-primary",
-    },
-    {
-      title: "Total Orders",
-      value: orders.length.toString(),
-      change: "+8.2%",
-      icon: ShoppingBag,
-      color: "text-accent",
-    },
-    {
-      title: "Active Farmers",
-      value: activeFarmers.toString(),
-      change: `+${farmers.filter(f => f.status === "pending").length} pending`,
-      icon: Users,
-      color: "text-primary",
-    },
-    {
-      title: "Active Drivers",
-      value: activeDrivers.toString(),
-      change: `${drivers.length} total`,
-      icon: Truck,
-      color: "text-accent",
-    },
-  ];
+  // Calculate payout this week (simulated)
+  const payoutThisWeek = Math.floor(totalRevenue * 0.15);
 
   if (loading) {
     return (
@@ -232,459 +213,432 @@ const AdminDashboard = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur border-b border-border">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to="/">
-                <Button variant="ghost" size="icon">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-              </Link>
+  const renderOverviewTab = () => (
+    <div className="space-y-6">
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Admin Dashboard</h1>
-                <p className="text-sm text-muted-foreground">Manage your marketplace</p>
+                <p className="text-sm text-muted-foreground">Total Members/Export</p>
+                <p className="text-3xl font-bold">{membersCount.toLocaleString()}</p>
+              </div>
+              <div className="p-3 rounded-full bg-primary/20">
+                <Users className="h-6 w-6 text-primary" />
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
-              <RefreshCw className="h-4 w-4" />
-              Refresh
-            </Button>
-          </div>
-        </div>
-      </header>
+          </CardContent>
+        </Card>
 
-      <main className="container mx-auto px-4 py-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          {stats.map((stat) => (
-            <Card key={stat.title} className="card-hover">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.title}</p>
-                    <p className="text-2xl font-bold mt-1">{stat.value}</p>
-                    <p className="text-xs text-primary mt-1">{stat.change}</p>
-                  </div>
-                  <div className={`p-3 rounded-full bg-secondary ${stat.color}`}>
-                    <stat.icon className="h-5 w-5" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Main Tabs */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="flex flex-wrap gap-1 h-auto p-1 w-full max-w-5xl">
-            <TabsTrigger value="overview" className="flex-1 min-w-[70px]">Overview</TabsTrigger>
-            <TabsTrigger value="users" className="flex-1 min-w-[70px] gap-1">
-              <Users className="h-3 w-3" />
-              Users
-            </TabsTrigger>
-            <TabsTrigger value="compensation" className="flex-1 min-w-[70px] gap-1">
-              <Play className="h-3 w-3" />
-              Payouts
-            </TabsTrigger>
-            <TabsTrigger value="memberships" className="flex-1 min-w-[70px] gap-1">
-              <Crown className="h-3 w-3" />
-              Members
-            </TabsTrigger>
-            <TabsTrigger value="bv-ledger" className="flex-1 min-w-[70px] gap-1">
-              <Activity className="h-3 w-3" />
-              BV
-            </TabsTrigger>
-            <TabsTrigger value="payout-ledger" className="flex-1 min-w-[70px] gap-1">
-              <Wallet className="h-3 w-3" />
-              Ledger
-            </TabsTrigger>
-            <TabsTrigger value="farmers" className="flex-1 min-w-[70px]">Farmers</TabsTrigger>
-            <TabsTrigger value="drivers" className="flex-1 min-w-[70px]">Drivers</TabsTrigger>
-            <TabsTrigger value="orders" className="flex-1 min-w-[70px]">Orders</TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Revenue Chart */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                    Revenue Trend
-                  </CardTitle>
-                  <CardDescription>Monthly revenue over the past 6 months</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      revenue: { label: "Revenue", color: "hsl(152, 45%, 28%)" },
-                    }}
-                    className="h-[250px]"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={revenueData}>
-                        <XAxis dataKey="month" />
-                        <YAxis />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Line
-                          type="monotone"
-                          dataKey="revenue"
-                          stroke="hsl(152, 45%, 28%)"
-                          strokeWidth={2}
-                          dot={{ fill: "hsl(152, 45%, 28%)" }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-
-              {/* Orders Chart */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Package className="h-5 w-5 text-accent" />
-                    Orders by Month
-                  </CardTitle>
-                  <CardDescription>Total orders processed each month</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      orders: { label: "Orders", color: "hsl(18, 65%, 55%)" },
-                    }}
-                    className="h-[250px]"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={revenueData}>
-                        <XAxis dataKey="month" />
-                        <YAxis />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="orders" fill="hsl(18, 65%, 55%)" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-
-              {/* Category Distribution */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Sales by Category</CardTitle>
-                  <CardDescription>Product category distribution</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[250px] flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={categoryData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={90}
-                          paddingAngle={2}
-                          dataKey="value"
-                          label={({ name, value }) => `${name}: ${value}%`}
-                        >
-                          {categoryData.map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <ChartTooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Recent Orders */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Orders</CardTitle>
-                  <CardDescription>Latest orders from the platform</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {orders.slice(0, 4).map((order) => (
-                    <div key={order.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary/50 transition-colors">
-                      <div className="p-2 rounded-full bg-secondary">
-                        <ShoppingBag className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{order.order_number}</p>
-                        <p className="text-xs text-muted-foreground">{order.customer_name} - ₱{Number(order.total).toLocaleString()}</p>
-                      </div>
-                      {getStatusBadge(order.status || "pending")}
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+        <Card className="bg-gradient-to-br from-accent/10 to-accent/5">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Pending UFC Members (TCB)</p>
+                <p className="text-3xl font-bold">320</p>
+              </div>
+              <div className="p-3 rounded-full bg-accent/20">
+                <Crown className="h-6 w-6 text-accent" />
+              </div>
             </div>
-          </TabsContent>
+          </CardContent>
+        </Card>
 
-          {/* Users Management Tab */}
-          <TabsContent value="users">
-            <UserManagementPanel />
-          </TabsContent>
+        <Card className="bg-gradient-to-br from-secondary to-secondary/50">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Payout This Week</p>
+                <p className="text-3xl font-bold">₱{payoutThisWeek.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">Pending payout</p>
+              </div>
+              <div className="p-3 rounded-full bg-primary/20">
+                <Wallet className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-          {/* Compensation Engine Tab */}
-          <TabsContent value="compensation">
-            <PayoutCyclePanel />
-          </TabsContent>
+      {/* Sales & Activations Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            Sales & Activations This Week
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer
+            config={{
+              sales: { label: "Sales", color: "hsl(var(--primary))" },
+              activations: { label: "Activations", color: "hsl(var(--accent))" },
+            }}
+            className="h-[300px]"
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={salesData}>
+                <defs>
+                  <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="activationsGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="date" />
+                <YAxis />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Area
+                  type="monotone"
+                  dataKey="sales"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  fill="url(#salesGradient)"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="activations"
+                  stroke="hsl(var(--accent))"
+                  strokeWidth={2}
+                  fill="url(#activationsGradient)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        </CardContent>
+      </Card>
 
-          {/* Memberships Tab */}
-          <TabsContent value="memberships">
-            <MembershipsPanel />
-          </TabsContent>
+      {/* Recent Members Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Members</CardTitle>
+          <CardDescription>Newest members on the platform</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Member</TableHead>
+                <TableHead>Sponsor</TableHead>
+                <TableHead>Package</TableHead>
+                <TableHead>Bisted</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[
+                { member: "17203.000", sponsor: "Coperniser", package: "Sarto1", bisted: "Promozxtiou", status: "Resumed" },
+                { member: "17216.000", sponsor: "Coperniser", package: "Somxrt", bisted: "Promozxtiou", status: "Rollnner" },
+                { member: "17305.000", sponsor: "Coperniser", package: "1465,L64", bisted: "Promozxtiou", status: "Rollane" },
+                { member: "17108.000", sponsor: "Coperniser", package: "sarto1", bisted: "Promozxtiou", status: "Rollaner" },
+              ].map((row, i) => (
+                <TableRow key={i}>
+                  <TableCell className="font-medium">{row.member}</TableCell>
+                  <TableCell>{row.sponsor}</TableCell>
+                  <TableCell>{row.package}</TableCell>
+                  <TableCell>{row.bisted}</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">{row.status}</Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
 
-          {/* BV Ledger Tab */}
-          <TabsContent value="bv-ledger">
-            <BVLedgerPanel />
-          </TabsContent>
-
-          {/* Payouts Ledger Tab */}
-          <TabsContent value="payout-ledger">
-            <PayoutsLedgerPanel />
-          </TabsContent>
-
-          {/* Farmers Tab */}
-          <TabsContent value="farmers">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Registered Farmers</CardTitle>
-                    <CardDescription>Manage farmer accounts and approvals ({farmers.length} total)</CardDescription>
+  const renderFarmersTab = () => (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Registered Farmers</CardTitle>
+            <CardDescription>Manage farmer accounts and approvals ({farmers.length} total)</CardDescription>
+          </div>
+          <Button className="btn-primary-gradient">Add Farmer</Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Farm Name</TableHead>
+              <TableHead>Owner</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead>Rating</TableHead>
+              <TableHead>Products</TableHead>
+              <TableHead>Total Sales</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-[50px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {farmers.map((farmer) => (
+              <TableRow key={farmer.id}>
+                <TableCell className="font-medium">{farmer.name}</TableCell>
+                <TableCell>{farmer.owner}</TableCell>
+                <TableCell className="text-muted-foreground">{farmer.location}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                    {Number(farmer.rating).toFixed(1)}
                   </div>
-                  <Button className="btn-primary-gradient">Add Farmer</Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Farm Name</TableHead>
-                      <TableHead>Owner</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Rating</TableHead>
-                      <TableHead>Products</TableHead>
-                      <TableHead>Total Sales</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="w-[50px]"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {farmers.map((farmer) => (
-                      <TableRow key={farmer.id}>
-                        <TableCell className="font-medium">{farmer.name}</TableCell>
-                        <TableCell>{farmer.owner}</TableCell>
-                        <TableCell className="text-muted-foreground">{farmer.location}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-warning text-warning" />
-                            {Number(farmer.rating).toFixed(1)}
-                          </div>
-                        </TableCell>
-                        <TableCell>{farmer.products_count}</TableCell>
-                        <TableCell>₱{Number(farmer.total_sales).toLocaleString()}</TableCell>
-                        <TableCell>{getStatusBadge(farmer.status || "pending")}</TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setSelectedFarmer(farmer)}>
-                                <Eye className="h-4 w-4 mr-2" /> View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Edit className="h-4 w-4 mr-2" /> Edit
-                              </DropdownMenuItem>
-                              {farmer.status === "pending" && (
-                                <DropdownMenuItem className="text-primary">
-                                  <Check className="h-4 w-4 mr-2" /> Approve
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem className="text-destructive">
-                                <X className="h-4 w-4 mr-2" /> Suspend
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                </TableCell>
+                <TableCell>{farmer.products_count}</TableCell>
+                <TableCell>₱{Number(farmer.total_sales).toLocaleString()}</TableCell>
+                <TableCell>{getStatusBadge(farmer.status || "pending")}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setSelectedFarmer(farmer)}>
+                        <Eye className="h-4 w-4 mr-2" /> View Details
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Edit className="h-4 w-4 mr-2" /> Edit
+                      </DropdownMenuItem>
+                      {farmer.status === "pending" && (
+                        <DropdownMenuItem className="text-primary">
+                          <Check className="h-4 w-4 mr-2" /> Approve
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem className="text-destructive">
+                        <X className="h-4 w-4 mr-2" /> Suspend
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
 
-          {/* Drivers Tab */}
-          <TabsContent value="drivers">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
+  const renderDriversTab = () => (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Registered Drivers</CardTitle>
+            <CardDescription>Manage driver accounts and assignments ({drivers.length} total)</CardDescription>
+          </div>
+          <Button className="btn-primary-gradient">Add Driver</Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Vehicle</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead>Rating</TableHead>
+              <TableHead>Deliveries</TableHead>
+              <TableHead>Earnings</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-[50px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {drivers.map((driver) => (
+              <TableRow key={driver.id}>
+                <TableCell className="font-medium">{driver.name}</TableCell>
+                <TableCell>
                   <div>
-                    <CardTitle>Registered Drivers</CardTitle>
-                    <CardDescription>Manage driver accounts and assignments ({drivers.length} total)</CardDescription>
+                    <p className="capitalize">{driver.vehicle}</p>
+                    <p className="text-xs text-muted-foreground">{driver.license_plate}</p>
                   </div>
-                  <Button className="btn-primary-gradient">Add Driver</Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Vehicle</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Rating</TableHead>
-                      <TableHead>Deliveries</TableHead>
-                      <TableHead>Earnings</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="w-[50px]"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {drivers.map((driver) => (
-                      <TableRow key={driver.id}>
-                        <TableCell className="font-medium">{driver.name}</TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="capitalize">{driver.vehicle}</p>
-                            <p className="text-xs text-muted-foreground">{driver.license_plate}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">{driver.current_location || "Unknown"}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-warning text-warning" />
-                            {Number(driver.rating).toFixed(1)}
-                          </div>
-                        </TableCell>
-                        <TableCell>{driver.deliveries_count}</TableCell>
-                        <TableCell>₱{Number(driver.total_earnings).toLocaleString()}</TableCell>
-                        <TableCell>{getStatusBadge(driver.status || "offline")}</TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setSelectedDriver(driver)}>
-                                <Eye className="h-4 w-4 mr-2" /> View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Edit className="h-4 w-4 mr-2" /> Edit
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                </TableCell>
+                <TableCell className="text-muted-foreground">{driver.current_location || "Unknown"}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                    {Number(driver.rating).toFixed(1)}
+                  </div>
+                </TableCell>
+                <TableCell>{driver.deliveries_count}</TableCell>
+                <TableCell>₱{Number(driver.total_earnings).toLocaleString()}</TableCell>
+                <TableCell>{getStatusBadge(driver.status || "offline")}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setSelectedDriver(driver)}>
+                        <Eye className="h-4 w-4 mr-2" /> View Details
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Edit className="h-4 w-4 mr-2" /> Edit
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
 
-          {/* Orders Tab */}
-          <TabsContent value="orders">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between flex-wrap gap-4">
+  const renderOrdersTab = () => (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Orders</CardTitle>
+            <CardDescription>Track and manage all marketplace orders ({orders.length} total)</CardDescription>
+          </div>
+          <Select value={orderFilter} onValueChange={setOrderFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Orders</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="preparing">Preparing</SelectItem>
+              <SelectItem value="in_transit">In Transit</SelectItem>
+              <SelectItem value="delivered">Delivered</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Order #</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Farm</TableHead>
+              <TableHead>Driver</TableHead>
+              <TableHead>Items</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-[50px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredOrders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell className="font-medium">{order.order_number}</TableCell>
+                <TableCell>
                   <div>
-                    <CardTitle>All Orders</CardTitle>
-                    <CardDescription>View and manage customer orders ({orders.length} total)</CardDescription>
+                    <p>{order.customer_name}</p>
+                    <p className="text-xs text-muted-foreground">{order.customer_phone}</p>
                   </div>
-                  <Select value={orderFilter} onValueChange={setOrderFilter}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Orders</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="preparing">Preparing</SelectItem>
-                      <SelectItem value="in_transit">In Transit</SelectItem>
-                      <SelectItem value="delivered">Delivered</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Order ID</TableHead>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Farm</TableHead>
-                      <TableHead>Driver</TableHead>
-                      <TableHead>Items</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="w-[50px]"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredOrders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell className="font-mono text-sm">{order.order_number}</TableCell>
-                        <TableCell className="font-medium">{order.customer_name}</TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {order.farmers?.name || "Unknown"}
-                        </TableCell>
-                        <TableCell>
-                          {order.drivers?.name || (
-                            <span className="text-muted-foreground italic">Unassigned</span>
-                          )}
-                        </TableCell>
-                        <TableCell>{order.items_count}</TableCell>
-                        <TableCell>₱{Number(order.total).toLocaleString()}</TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {new Date(order.created_at).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(order.status || "pending")}</TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => setSelectedOrder(order)}>
-                                <Eye className="h-4 w-4 mr-2" /> View Details
-                              </DropdownMenuItem>
-                              {!order.driver_id && (
-                                <DropdownMenuItem>
-                                  <Truck className="h-4 w-4 mr-2" /> Assign Driver
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem className="text-destructive">
-                                <X className="h-4 w-4 mr-2" /> Cancel Order
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </main>
+                </TableCell>
+                <TableCell>{order.farmers?.name || "Unknown"}</TableCell>
+                <TableCell>{order.drivers?.name || "Unassigned"}</TableCell>
+                <TableCell>{order.items_count}</TableCell>
+                <TableCell className="font-medium">₱{Number(order.total).toLocaleString()}</TableCell>
+                <TableCell>{getStatusBadge(order.status || "pending")}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setSelectedOrder(order)}>
+                        <Eye className="h-4 w-4 mr-2" /> View Details
+                      </DropdownMenuItem>
+                      {!order.driver_id && (
+                        <DropdownMenuItem className="text-primary">
+                          <Truck className="h-4 w-4 mr-2" /> Assign Driver
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return renderOverviewTab();
+      case 'users':
+        return <UserManagementPanel />;
+      case 'compensation':
+        return <PayoutCyclePanel />;
+      case 'memberships':
+        return <MembershipsPanel />;
+      case 'bv-ledger':
+        return <BVLedgerPanel />;
+      case 'payout-ledger':
+        return <PayoutsLedgerPanel />;
+      case 'farmers':
+        return renderFarmersTab();
+      case 'drivers':
+        return renderDriversTab();
+      case 'orders':
+        return renderOrdersTab();
+      default:
+        return (
+          <Card className="p-12 text-center">
+            <p className="text-muted-foreground">This section is coming soon.</p>
+          </Card>
+        );
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <Header />
+      
+      <div className="flex-1 flex">
+        {/* Sidebar */}
+        <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto">
+          <div className="container max-w-6xl mx-auto px-4 py-6">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+                <p className="text-sm text-muted-foreground">Manage your marketplace</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Refresh
+              </Button>
+            </div>
+
+            {/* Page Title */}
+            <h2 className="text-xl font-semibold mb-6 capitalize">
+              {activeTab === 'overview' ? 'Dashboard' : activeTab.replace('-', ' ')}
+            </h2>
+
+            {/* Content */}
+            {renderContent()}
+          </div>
+        </main>
+      </div>
+
+      <Footer />
 
       {/* Farmer Details Dialog */}
       <Dialog open={!!selectedFarmer} onOpenChange={() => setSelectedFarmer(null)}>
@@ -694,49 +648,52 @@ const AdminDashboard = () => {
           </DialogHeader>
           {selectedFarmer && (
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-secondary rounded-lg">
-                <div className="p-2 rounded-full bg-primary/10">
-                  <Users className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium">{selectedFarmer.owner}</p>
-                  <p className="text-sm text-muted-foreground">Owner</p>
-                </div>
+              {selectedFarmer.image_url && (
+                <img 
+                  src={selectedFarmer.image_url} 
+                  alt={selectedFarmer.name}
+                  className="w-full h-48 object-cover rounded-lg"
+                />
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Status:</span>
+                {getStatusBadge(selectedFarmer.status || "pending")}
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <p className="text-sm text-muted-foreground">{selectedFarmer.description}</p>
+              <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  {selectedFarmer.email}
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span>Owner: {selectedFarmer.owner}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span>{selectedFarmer.location}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Phone className="h-4 w-4 text-muted-foreground" />
-                  {selectedFarmer.phone}
+                  <span>{selectedFarmer.phone}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm col-span-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  {selectedFarmer.location}
+                <div className="flex items-center gap-2 text-sm">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span>{selectedFarmer.email}</span>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="p-3 bg-secondary rounded-lg">
-                  <p className="text-xl font-bold text-primary">{selectedFarmer.products_count}</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3 bg-secondary rounded-lg text-center">
+                  <p className="text-2xl font-bold">{selectedFarmer.products_count}</p>
                   <p className="text-xs text-muted-foreground">Products</p>
                 </div>
-                <div className="p-3 bg-secondary rounded-lg">
-                  <p className="text-xl font-bold text-primary">₱{(Number(selectedFarmer.total_sales) / 1000).toFixed(0)}k</p>
-                  <p className="text-xs text-muted-foreground">Sales</p>
-                </div>
-                <div className="p-3 bg-secondary rounded-lg">
-                  <div className="flex items-center justify-center gap-1">
-                    <Star className="h-4 w-4 fill-warning text-warning" />
-                    <p className="text-xl font-bold">{Number(selectedFarmer.rating).toFixed(1)}</p>
-                  </div>
+                <div className="p-3 bg-secondary rounded-lg text-center">
+                  <p className="text-2xl font-bold flex items-center justify-center gap-1">
+                    <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                    {Number(selectedFarmer.rating).toFixed(1)}
+                  </p>
                   <p className="text-xs text-muted-foreground">Rating</p>
                 </div>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Joined:</span>
-                <span>{new Date(selectedFarmer.created_at).toLocaleDateString()}</span>
+                <div className="p-3 bg-secondary rounded-lg text-center">
+                  <p className="text-lg font-bold">₱{Number(selectedFarmer.total_sales).toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Sales</p>
+                </div>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1">Edit Profile</Button>
@@ -755,47 +712,46 @@ const AdminDashboard = () => {
           </DialogHeader>
           {selectedDriver && (
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-secondary rounded-lg">
-                <div className="p-2 rounded-full bg-accent/10">
-                  <Truck className="h-5 w-5 text-accent" />
-                </div>
-                <div>
-                  <p className="font-medium capitalize">{selectedDriver.vehicle}</p>
-                  <p className="text-sm text-muted-foreground">{selectedDriver.license_plate}</p>
-                </div>
-                <div className="ml-auto">
-                  {getStatusBadge(selectedDriver.status || "offline")}
-                </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Status:</span>
+                {getStatusBadge(selectedDriver.status || "offline")}
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-secondary rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Truck className="h-4 w-4 text-muted-foreground" />
+                  <span className="capitalize">{selectedDriver.vehicle}</span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">Plate: {selectedDriver.license_plate}</p>
+              </div>
+              <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  {selectedDriver.email}
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span>{selectedDriver.current_location || "Location unknown"}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Phone className="h-4 w-4 text-muted-foreground" />
-                  {selectedDriver.phone}
+                  <span>{selectedDriver.phone}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm col-span-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  {selectedDriver.current_location || "Unknown"}
+                <div className="flex items-center gap-2 text-sm">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span>{selectedDriver.email}</span>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="p-3 bg-secondary rounded-lg">
-                  <p className="text-xl font-bold text-primary">{selectedDriver.deliveries_count}</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3 bg-secondary rounded-lg text-center">
+                  <p className="text-2xl font-bold">{selectedDriver.deliveries_count}</p>
                   <p className="text-xs text-muted-foreground">Deliveries</p>
                 </div>
-                <div className="p-3 bg-secondary rounded-lg">
-                  <p className="text-xl font-bold text-primary">₱{(Number(selectedDriver.total_earnings) / 1000).toFixed(1)}k</p>
-                  <p className="text-xs text-muted-foreground">Earnings</p>
-                </div>
-                <div className="p-3 bg-secondary rounded-lg">
-                  <div className="flex items-center justify-center gap-1">
-                    <Star className="h-4 w-4 fill-warning text-warning" />
-                    <p className="text-xl font-bold">{Number(selectedDriver.rating).toFixed(1)}</p>
-                  </div>
+                <div className="p-3 bg-secondary rounded-lg text-center">
+                  <p className="text-2xl font-bold flex items-center justify-center gap-1">
+                    <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                    {Number(selectedDriver.rating).toFixed(1)}
+                  </p>
                   <p className="text-xs text-muted-foreground">Rating</p>
+                </div>
+                <div className="p-3 bg-secondary rounded-lg text-center">
+                  <p className="text-lg font-bold">₱{Number(selectedDriver.total_earnings).toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Earnings</p>
                 </div>
               </div>
               <div className="flex gap-2">
