@@ -18,6 +18,11 @@ import mangoesImg from "@/assets/products/mangoes.jpg";
 import papayasImg from "@/assets/products/papayas.jpg";
 import bananasImg from "@/assets/products/bananas.jpg";
 import calamansiImg from "@/assets/products/calamansi.jpg";
+// Dairy & Eggs imports
+import freshEggsImg from "@/assets/products/fresh-eggs.jpg";
+import carabaoMilkImg from "@/assets/products/carabao-milk.jpg";
+import kesongPutiImg from "@/assets/products/kesong-puti.jpg";
+import saltedEggsImg from "@/assets/products/salted-eggs.jpg";
 // Meat imports
 import porkBellyImg from "@/assets/products/pork-belly.jpg";
 import porkKasimImg from "@/assets/products/pork-kasim.jpg";
@@ -383,6 +388,59 @@ export const products: Product[] = [
     stock: 20,
     organic: true,
     description: "Free-range native chicken from Benguet. Richer flavor, ideal for tinola and pinikpikan. Retail: ₱280-₱350/kg.",
+  },
+  // Dairy & Eggs
+  {
+    id: "26",
+    name: "Fresh Farm Eggs",
+    price: 8.00,
+    unit: "pc",
+    farmId: "benguet-native-livestock",
+    farmName: "Benguet Native Livestock",
+    image: freshEggsImg,
+    category: "Dairy & Eggs",
+    stock: 500,
+    organic: true,
+    description: "Free-range farm eggs from Benguet. Rich golden yolks, freshly collected daily. Sold per piece.",
+  },
+  {
+    id: "27",
+    name: "Carabao Milk",
+    price: 120.00,
+    unit: "L",
+    farmId: "benguet-native-livestock",
+    farmName: "Benguet Native Livestock",
+    image: carabaoMilkImg,
+    category: "Dairy & Eggs",
+    stock: 30,
+    organic: true,
+    description: "Fresh carabao milk from local farms. Creamier and richer than cow's milk, perfect for desserts and drinking.",
+  },
+  {
+    id: "28",
+    name: "Kesong Puti",
+    price: 180.00,
+    unit: "250g",
+    farmId: "happy-house-farm",
+    farmName: "Happy House Organic Farm",
+    image: kesongPutiImg,
+    category: "Dairy & Eggs",
+    stock: 25,
+    organic: true,
+    description: "Traditional Filipino white cheese made from carabao milk. Soft, slightly salty, perfect with pandesal.",
+  },
+  {
+    id: "29",
+    name: "Salted Duck Eggs",
+    price: 15.00,
+    unit: "pc",
+    farmId: "benguet-native-livestock",
+    farmName: "Benguet Native Livestock",
+    image: saltedEggsImg,
+    category: "Dairy & Eggs",
+    stock: 200,
+    organic: false,
+    description: "Itlog na maalat - traditional salted duck eggs. Rich orange yolk, perfect with tomatoes or as ulam.",
   },
 ];
 
