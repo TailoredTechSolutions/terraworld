@@ -79,9 +79,9 @@ const HeroSection = () => {
               transition={{ duration: 0.6, type: "spring" }}
               className="mb-8"
             >
-              <div className="relative inline-flex items-center gap-4 rounded-2xl border-2 border-accent/50 bg-background/20 backdrop-blur-md p-3 pr-6 shadow-xl shadow-accent/20">
+              <div className="relative inline-flex items-center gap-4 glass-card-accent p-3 pr-6">
                 {/* Video Icon */}
-                <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden border-2 border-accent shadow-lg">
+                <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden border-2 border-accent shadow-lg shadow-glow-accent">
                   <video
                     autoPlay
                     loop
@@ -161,7 +161,7 @@ const HeroSection = () => {
               <Link to="/shop">
                 <Button
                   size="lg"
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground h-14 px-8 rounded-xl text-lg font-semibold gap-2 shadow-lg shadow-accent/30 transition-all hover:shadow-xl hover:shadow-accent/40 hover:-translate-y-0.5"
+                  className="btn-liquid-accent h-14 px-8 text-lg font-semibold gap-2"
                 >
                   Explore Marketplace
                   <ArrowRight className="h-5 w-5" />
@@ -182,7 +182,7 @@ const HeroSection = () => {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
-                  className="text-center"
+                  className="text-center glass-card px-4 py-3"
                 >
                   <p className="text-2xl md:text-3xl font-bold text-accent font-display">
                     {stat.value}
@@ -209,10 +209,10 @@ const HeroSection = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
                 whileHover={{ scale: 1.05, y: -5 }}
-                className="p-5 rounded-2xl bg-background/10 backdrop-blur-md border border-primary-foreground/20 hover:border-accent/50 transition-all"
+                className="p-5 glass-card glass-hover"
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/20 border border-accent/30">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/20 border border-accent/30 backdrop-blur-sm shadow-glow-accent">
                     <badge.icon className="h-6 w-6 text-accent" />
                   </div>
                   <div>
@@ -232,11 +232,11 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.9 }}
-              whileHover={{ scale: 1.05, y: -5 }}
-              className="col-span-2 p-5 rounded-2xl bg-gradient-to-r from-accent/20 to-accent/10 backdrop-blur-md border border-accent/30"
+              whileHover={{ scale: 1.02, y: -3 }}
+              className="col-span-2 p-5 glass-card-gold"
             >
               <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-accent/30 border border-accent/40">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-accent/30 border border-accent/40 backdrop-blur-sm shadow-glow-gold">
                   <Wallet className="h-7 w-7 text-accent" />
                 </div>
                 <div className="flex-1">
@@ -249,7 +249,7 @@ const HeroSection = () => {
                   </p>
                 </div>
                 <Link to="/affiliate">
-                  <Button size="sm" variant="secondary" className="rounded-xl gap-1.5">
+                  <Button size="sm" className="btn-liquid text-sm py-2 px-4 h-auto rounded-xl gap-1.5">
                     Learn More
                     <ArrowRight className="h-4 w-4" />
                   </Button>
@@ -292,9 +292,9 @@ const HeroSection = () => {
           {trustBadges.map((badge, index) => (
             <div
               key={badge.title}
-              className="flex items-center gap-3 p-3 rounded-xl bg-background/10 backdrop-blur-sm border border-primary-foreground/20"
+              className="flex items-center gap-3 p-3 glass-card"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20 backdrop-blur-sm">
                 <badge.icon className="h-5 w-5 text-accent" />
               </div>
               <div>

@@ -112,7 +112,7 @@ const FeatureCard = ({ feature }: { feature: Feature }) => {
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5, delay: feature.delay }}
       whileHover={{ y: -8, transition: { duration: 0.3 } }}
-      className="group relative p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 overflow-hidden"
+      className="group relative p-6 glass-card glass-hover overflow-hidden"
     >
       {/* Animated gradient background */}
       <motion.div 
@@ -143,7 +143,7 @@ const FeatureCard = ({ feature }: { feature: Feature }) => {
 
       {/* Icon container with animations */}
       <motion.div 
-        className={`relative inline-flex p-4 rounded-2xl bg-gradient-to-br ${feature.gradient} mb-5`}
+        className={`relative inline-flex p-4 rounded-2xl bg-gradient-to-br ${feature.gradient} backdrop-blur-sm mb-5 border border-glass-border`}
         whileHover={{ 
           scale: 1.1,
           rotate: [0, -5, 5, 0],
@@ -299,9 +299,9 @@ const VideoShowcaseSection = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.5 }}
-            className="absolute -left-4 top-1/4 hidden lg:flex items-center gap-2 p-3 rounded-xl bg-card border border-border shadow-lg"
+            className="absolute -left-4 top-1/4 hidden lg:flex items-center gap-2 p-3 glass-card shadow-lg"
           >
-            <div className="p-2 rounded-lg bg-emerald-500/10">
+            <div className="p-2 rounded-lg bg-emerald-500/10 backdrop-blur-sm">
               <Leaf className="h-5 w-5 text-emerald-500" />
             </div>
             <div>
@@ -315,9 +315,9 @@ const VideoShowcaseSection = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="absolute -right-4 top-1/3 hidden lg:flex items-center gap-2 p-3 rounded-xl bg-card border border-border shadow-lg"
+            className="absolute -right-4 top-1/3 hidden lg:flex items-center gap-2 p-3 glass-card shadow-lg"
           >
-            <div className="p-2 rounded-lg bg-primary/10">
+            <div className="p-2 rounded-lg bg-primary/10 backdrop-blur-sm">
               <Truck className="h-5 w-5 text-primary" />
             </div>
             <div>
@@ -331,9 +331,9 @@ const VideoShowcaseSection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.7 }}
-            className="absolute -bottom-6 left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-2 p-3 rounded-xl bg-card border border-border shadow-lg"
+            className="absolute -bottom-6 left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-2 p-3 glass-card shadow-lg"
           >
-            <div className="p-2 rounded-lg bg-accent/10">
+            <div className="p-2 rounded-lg bg-accent/10 backdrop-blur-sm">
               <Users className="h-5 w-5 text-accent" />
             </div>
             <div>
@@ -430,7 +430,7 @@ const TestimonialCard = ({ testimonial }: { testimonial: typeof testimonials[0] 
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, delay: testimonial.delay }}
       whileHover={{ y: -5, transition: { duration: 0.3 } }}
-      className="group relative p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-xl transition-all duration-300"
+      className="group relative p-6 glass-card glass-hover"
     >
       {/* Quote icon */}
       <motion.div
@@ -569,9 +569,9 @@ const Index = () => {
         <section className="py-20 bg-grain">
           <div className="container">
             <div className="text-center mb-12">
-              <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
-                Why Choose Terra
-              </span>
+            <span className="glass-badge-primary inline-block mb-4">
+              Why Choose Terra
+            </span>
               <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
                 Everything You Need, From Dirt to Dessert
               </h2>
@@ -623,8 +623,8 @@ const Index = () => {
                   description: "Share your referral code, build your network, and watch your earnings grow with every order.",
                 },
               ].map((item, index) => (
-                <div key={item.step} className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground font-display text-2xl font-bold mb-4">
+                <div key={item.step} className="text-center glass-card p-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground font-display text-2xl font-bold mb-4 shadow-glow-primary">
                     {item.step}
                   </div>
                   <h3 className="font-display text-xl font-semibold text-foreground mb-2">
@@ -658,7 +658,7 @@ const Index = () => {
                 </p>
               </div>
               <Link to="/map">
-                <Button variant="outline" className="rounded-xl gap-2">
+                <Button className="btn-liquid-outline gap-2">
                   Explore All Farms
                   <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -680,8 +680,14 @@ const Index = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-primary">
-          <div className="container text-center">
+        <section className="py-20 bg-primary relative overflow-hidden">
+          {/* Glass overlay decorations */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 rounded-full bg-accent/10 blur-3xl" />
+            <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 rounded-full bg-primary-foreground/5 blur-3xl" />
+          </div>
+          
+          <div className="container text-center relative">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
               Ready to Join the Movement?
             </h2>
@@ -692,7 +698,7 @@ const Index = () => {
               <Link to="/auth">
                 <Button
                   size="lg"
-                  className="btn-accent-gradient h-12 px-8 rounded-xl text-base font-semibold"
+                  className="btn-liquid-accent h-12 px-8 text-base font-semibold"
                 >
                   Get Started Free
                 </Button>
@@ -700,8 +706,7 @@ const Index = () => {
               <Link to="/affiliate">
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="h-12 px-8 rounded-xl text-base font-semibold border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                  className="btn-liquid-outline h-12 px-8 text-base font-semibold border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
                 >
                   Learn About Affiliates
                 </Button>
@@ -713,14 +718,14 @@ const Index = () => {
         {/* Stats Section */}
         <section className="py-16 bg-background">
           <div className="container">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
                 { value: "50+", label: "Partner Farms" },
                 { value: "1,000+", label: "Happy Customers" },
                 { value: "₱2M+", label: "Farmer Earnings" },
                 { value: "7", label: "Achievement Ranks" },
               ].map((stat) => (
-                <div key={stat.label} className="text-center">
+                <div key={stat.label} className="text-center glass-card p-6">
                   <p className="font-display text-4xl md:text-5xl font-bold text-primary mb-2">
                     {stat.value}
                   </p>
@@ -734,9 +739,9 @@ const Index = () => {
         {/* Affiliate Banner */}
         <section className="py-16 bg-gradient-to-r from-accent/10 via-accent/5 to-transparent">
           <div className="container">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8 p-8 rounded-2xl bg-card border border-border">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 p-8 glass-card-accent">
               <div>
-                <span className="inline-block px-3 py-1 rounded-full bg-accent/10 text-accent text-sm font-medium mb-3">
+                <span className="glass-badge-accent inline-block mb-3">
                   Affiliate Program
                 </span>
                 <h3 className="font-display text-2xl font-bold text-foreground mb-2">
@@ -747,7 +752,7 @@ const Index = () => {
                 </p>
               </div>
               <Link to="/affiliate">
-                <Button className="btn-accent-gradient h-12 px-8 rounded-xl text-base font-semibold whitespace-nowrap">
+                <Button className="btn-liquid-accent h-12 px-8 text-base font-semibold whitespace-nowrap">
                   Join Affiliate Program
                 </Button>
               </Link>
