@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import terraLogo from "@/assets/terra-logo.png";
+import ThemeToggle from "@/components/ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -110,7 +111,10 @@ const Header = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="hidden md:flex">
+          {/* Theme Toggle */}
+          <ThemeToggle />
+          
+          <Button variant="ghost" size="icon" className="hidden md:flex glass-hover">
             <MapPin className="h-5 w-5" />
           </Button>
           
