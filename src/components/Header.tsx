@@ -22,17 +22,18 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group">
+        <Link to="/" className="flex items-center gap-3 group">
           <img 
             src={terraLogo} 
             alt="Terra" 
-            className="h-10 w-10 rounded-lg transition-transform group-hover:scale-105"
+            className="h-9 w-9 object-contain transition-transform group-hover:scale-105"
           />
-          <div className="flex flex-col">
-            <span className="font-display text-xl font-bold text-foreground leading-tight">
+          <div className="flex items-center gap-2">
+            <span className="font-display text-xl font-bold text-foreground tracking-tight">
               Terra
             </span>
-            <span className="text-[10px] text-muted-foreground leading-none hidden sm:block">
+            <span className="hidden sm:block h-4 w-px bg-border" />
+            <span className="hidden sm:block text-xs font-medium tracking-wide text-muted-foreground uppercase">
               From Dirt to Dessert
             </span>
           </div>
