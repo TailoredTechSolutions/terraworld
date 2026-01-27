@@ -24,7 +24,7 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
     <>
       <div
         className={cn(
-          "group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:border-primary/30",
+          "group relative flex flex-col overflow-hidden rounded-2xl glass-card glass-hover",
           className
         )}
       >
@@ -39,22 +39,22 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           
           {/* Rating badge */}
-          <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-black/40 backdrop-blur-md text-white px-2.5 py-1.5 rounded-full border border-white/20">
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 glass-badge backdrop-blur-md">
             <Star className="h-4 w-4 fill-ph-gold text-ph-gold" />
             <span className="font-bold text-sm">{farm.rating}</span>
-            <span className="text-xs text-white/70">({farm.reviewCount})</span>
+            <span className="text-xs text-muted-foreground">({farm.reviewCount})</span>
           </div>
 
           {/* Certification Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {isATICertified && (
-              <div className="flex items-center gap-1.5 bg-accent/90 backdrop-blur-md text-accent-foreground px-2.5 py-1.5 rounded-full shadow-lg border border-accent/50">
+              <div className="glass-badge-accent backdrop-blur-md flex items-center gap-1.5">
                 <Shield className="h-3.5 w-3.5" />
                 <span className="text-xs font-semibold">ATI Certified</span>
               </div>
             )}
             {isPhilGAP && (
-              <div className="flex items-center gap-1.5 bg-primary/90 backdrop-blur-md text-primary-foreground px-2.5 py-1.5 rounded-full shadow-lg border border-primary/50">
+              <div className="glass-badge-primary backdrop-blur-md flex items-center gap-1.5">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 <span className="text-xs font-semibold">PhilGAP</span>
               </div>
@@ -63,7 +63,7 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
 
           {/* Distance badge */}
           {farm.distance && (
-            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-white/90 backdrop-blur-md text-foreground px-2.5 py-1.5 rounded-full shadow-md">
+            <div className="absolute bottom-3 left-3 glass-badge backdrop-blur-md flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5 text-primary" />
               <span className="text-xs font-medium">{farm.distance} km away</span>
             </div>
@@ -71,7 +71,7 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
 
           {/* Farm Type badge */}
           {farm.farmType && (
-            <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-primary/90 backdrop-blur-md text-primary-foreground px-2.5 py-1.5 rounded-full shadow-md">
+            <div className="absolute bottom-3 right-3 glass-badge-primary backdrop-blur-md flex items-center gap-1.5">
               <Leaf className="h-3.5 w-3.5" />
               <span className="text-xs font-medium">{farm.farmType}</span>
             </div>
@@ -93,7 +93,7 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
 
           {/* Certificate Info */}
           {farm.certificate && (
-            <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-muted/50 rounded-lg border border-border/50">
+            <div className="flex items-center gap-2 mb-3 px-3 py-2 glass-card rounded-xl">
               <Award className="h-4 w-4 text-ph-gold flex-shrink-0" />
               <span className="text-xs font-mono text-muted-foreground">{farm.certificate}</span>
             </div>
@@ -120,7 +120,7 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
           </div>
 
           {/* Contact & Action */}
-          <div className="mt-auto pt-4 border-t border-border/50">
+          <div className="mt-auto pt-4 border-t border-glass-border">
             <div className="flex items-center justify-between gap-3">
               {farm.contact ? (
                 <a 
@@ -137,10 +137,10 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
               )}
               
               <Button
-                variant="default"
+                variant="liquid"
                 size="sm"
                 onClick={() => setIsOpen(true)}
-                className="gap-2 font-semibold group/btn shadow-md hover:shadow-lg transition-shadow"
+                className="gap-2 font-semibold group/btn"
               >
                 View Farm
                 <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
