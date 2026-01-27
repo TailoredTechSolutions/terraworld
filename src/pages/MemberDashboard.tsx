@@ -105,6 +105,10 @@ const MemberDashboard = () => {
   const [kycProfile, setKycProfile] = useState<KYCProfile | null>(null);
   const [kycRefreshTrigger, setKycRefreshTrigger] = useState(0);
   const [walletData, setWalletData] = useState<WalletData | null>(null);
+  const [profileData, setProfileData] = useState<{
+    agri_token_balance: number | null;
+    external_wallet_address: string | null;
+  } | null>(null);
   const [binaryStats, setBinaryStats] = useState<BinaryStats>({
     left_bv: 0,
     right_bv: 0,
@@ -163,6 +167,15 @@ const MemberDashboard = () => {
         .maybeSingle();
       
       setWalletData(walletResult);
+
+      // Fetch profile for AGRI token balance
+      const { data: profileResult } = await supabase
+        .from("profiles")
+        .select("agri_token_balance, external_wallet_address")
+        .eq("user_id", userId)
+        .maybeSingle();
+      
+      setProfileData(profileResult);
 
       // Fetch BV records
       const { data: bvData, error: bvError } = await supabase
@@ -353,12 +366,14 @@ const MemberDashboard = () => {
       case 'overview':
         return (
           <MemberOverviewPanel
+            userId={user.id}
             membership={membership}
             walletData={walletData}
             binaryStats={binaryStats}
             totalEarnings={totalEarnings}
             payoutThisWeek={payoutThisWeek}
             currentRank="Member"
+            profileData={profileData}
           />
         );
       case 'genealogy':
