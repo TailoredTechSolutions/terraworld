@@ -1,14 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Crown,
-  Users,
   Wallet,
   TrendingUp,
   ArrowLeftCircle,
   ArrowRightCircle,
   DollarSign,
   CreditCard,
-  Coins,
   Clock,
   Award,
   GitBranch,
@@ -30,8 +28,10 @@ import {
   Bar,
 } from "recharts";
 import { Progress } from "@/components/ui/progress";
+import AgriTokenCard from "@/components/wallet/AgriTokenCard";
 
 interface MemberOverviewPanelProps {
+  userId: string;
   membership: {
     tier: string;
     package_price: number;
@@ -52,6 +52,10 @@ interface MemberOverviewPanelProps {
   totalEarnings: number;
   payoutThisWeek: number;
   currentRank?: string;
+  profileData?: {
+    agri_token_balance?: number | null;
+    external_wallet_address?: string | null;
+  } | null;
 }
 
 const TIER_CONFIG: Record<string, { color: string; label: string; cap: number }> = {
@@ -82,12 +86,14 @@ const generateVolumeTrend = () => {
 };
 
 const MemberOverviewPanel = ({
+  userId,
   membership,
   walletData,
   binaryStats,
   totalEarnings,
   payoutThisWeek,
   currentRank = "Member",
+  profileData,
 }: MemberOverviewPanelProps) => {
   const [earningsData] = useState(generateEarningsData);
   const [volumeTrend] = useState(generateVolumeTrend);
@@ -218,61 +224,56 @@ const MemberOverviewPanel = ({
       )}
 
       {/* Wallet Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Wallet className="h-5 w-5 text-primary" />
-            Wallet Overview
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 rounded-xl border bg-card">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-full bg-primary/10">
-                  <DollarSign className="h-5 w-5 text-primary" />
+      <div className="grid md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wallet className="h-5 w-5 text-primary" />
+              Fiat Wallet
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-xl border bg-card">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <DollarSign className="h-5 w-5 text-primary" />
+                  </div>
+                  <span className="text-sm text-muted-foreground">Available</span>
                 </div>
-                <span className="text-sm text-muted-foreground">Commission Wallet</span>
+                <p className="text-2xl font-bold">₱{(walletData?.available_balance || 0).toLocaleString()}</p>
               </div>
-              <p className="text-2xl font-bold">₱{(walletData?.available_balance || 0).toLocaleString()}</p>
-              <p className="text-xs text-muted-foreground">Available</p>
-            </div>
 
-            <div className="p-4 rounded-xl border bg-card">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-full bg-amber-500/10">
-                  <Clock className="h-5 w-5 text-amber-500" />
+              <div className="p-4 rounded-xl border bg-card">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-full bg-amber-500/10">
+                    <Clock className="h-5 w-5 text-amber-500" />
+                  </div>
+                  <span className="text-sm text-muted-foreground">Pending</span>
                 </div>
-                <span className="text-sm text-muted-foreground">Pending Wallet</span>
+                <p className="text-2xl font-bold text-amber-500">₱{(walletData?.pending_balance || 0).toLocaleString()}</p>
               </div>
-              <p className="text-2xl font-bold text-amber-500">₱{(walletData?.pending_balance || 0).toLocaleString()}</p>
-              <p className="text-xs text-muted-foreground">Processing</p>
-            </div>
 
-            <div className="p-4 rounded-xl border bg-card">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-full bg-accent/10">
-                  <Coins className="h-5 w-5 text-accent" />
+              <div className="p-4 rounded-xl border bg-card col-span-2">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-full bg-secondary">
+                    <CreditCard className="h-5 w-5 text-foreground" />
+                  </div>
+                  <span className="text-sm text-muted-foreground">Total Withdrawn</span>
                 </div>
-                <span className="text-sm text-muted-foreground">Token Wallet</span>
+                <p className="text-2xl font-bold">₱{(walletData?.total_withdrawn || 0).toLocaleString()}</p>
               </div>
-              <p className="text-2xl font-bold">0 AGRI</p>
-              <p className="text-xs text-muted-foreground">Reward Tokens</p>
             </div>
+          </CardContent>
+        </Card>
 
-            <div className="p-4 rounded-xl border bg-card">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-full bg-secondary">
-                  <CreditCard className="h-5 w-5 text-foreground" />
-                </div>
-                <span className="text-sm text-muted-foreground">External Wallet</span>
-              </div>
-              <p className="text-2xl font-bold">—</p>
-              <p className="text-xs text-muted-foreground">On-Chain (Read-Only)</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        {/* AGRI Token Card */}
+        <AgriTokenCard 
+          userId={userId}
+          profileBalance={profileData?.agri_token_balance || 0}
+          externalWalletAddress={profileData?.external_wallet_address}
+        />
+      </div>
 
       {/* Performance Snapshot */}
       <div className="grid md:grid-cols-2 gap-6">
