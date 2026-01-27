@@ -20,10 +20,11 @@ import {
   Target,
   Zap,
   HelpCircle,
-  ChevronDown,
-  Leaf,
   Heart,
   Globe,
+  GitBranch,
+  Award,
+  Coins,
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -73,29 +74,63 @@ const AffiliatePage = () => {
 
   const tiers = [
     {
-      name: "Starter",
-      commission: "5%",
-      requirement: "0-10 referrals",
-      perks: ["Basic commission", "Monthly payouts", "Referral tracking"],
+      name: "Free",
+      commission: "0%",
+      requirement: "Sign up only",
+      perks: ["Access marketplace", "Basic dashboard", "Referral link"],
     },
     {
-      name: "Growth",
+      name: "Starter",
+      commission: "5%",
+      requirement: "₱1,500 package",
+      perks: ["Direct bonuses", "Monthly payouts", "₱5,000 daily cap"],
+    },
+    {
+      name: "Basic",
       commission: "7%",
-      requirement: "11-50 referrals",
-      perks: ["Higher commission", "Bi-weekly payouts", "Priority support", "Performance bonuses"],
+      requirement: "₱5,000 package",
+      perks: ["Binary matching", "Bi-weekly payouts", "₱15,000 daily cap"],
       highlighted: true,
     },
     {
-      name: "Partner",
+      name: "Pro",
       commission: "10%",
-      requirement: "51+ referrals",
+      requirement: "₱15,000 package",
+      perks: ["Matching bonus", "Weekly payouts", "₱50,000 daily cap", "Priority support"],
+    },
+    {
+      name: "Elite",
+      commission: "10%+",
+      requirement: "₱50,000 package",
       perks: [
-        "Maximum commission",
-        "Weekly payouts",
+        "Maximum earnings",
+        "₱250,000 daily cap",
         "Dedicated manager",
-        "Exclusive promotions",
         "Custom promo codes",
       ],
+    },
+  ];
+
+  const compensationTypes = [
+    {
+      title: "Direct Product Bonus",
+      description: "Earn commission on every purchase made by your direct referrals from the marketplace.",
+      percentage: "Up to 10%",
+    },
+    {
+      title: "Direct Membership Bonus",
+      description: "One-time bonus when your referrals upgrade their membership tier.",
+      percentage: "Up to 20%",
+    },
+    {
+      title: "Binary Matching",
+      description: "Earn from matched volume between your left and right legs based on your rank.",
+      percentage: "Up to 10%",
+    },
+    {
+      title: "Matching Bonus",
+      description: "Earn from your downline's binary earnings up to multiple levels deep.",
+      percentage: "Up to 5 levels",
     },
   ];
 
@@ -406,6 +441,114 @@ const AffiliatePage = () => {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Binary Structure & Compensation Engine */}
+        <section className="py-12 sm:py-16">
+          <div className="container px-4">
+            <div className="text-center mb-10 sm:mb-12">
+              <div className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-1.5 mb-4">
+                <GitBranch className="h-4 w-4 text-accent" />
+                <span className="text-sm font-medium text-accent">Compensation Engine</span>
+              </div>
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-2">
+                Binary Genealogy System
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Our 1-1 binary structure with left and right legs maximizes your earning potential through balanced network growth.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+              {/* Binary Tree Visualization */}
+              <div className="p-6 rounded-2xl bg-card border border-border">
+                <h3 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <GitBranch className="h-5 w-5 text-primary" />
+                  How Binary Placement Works
+                </h3>
+                <div className="flex flex-col items-center gap-4 py-6">
+                  <div className="h-16 w-16 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center">
+                    <Users className="h-7 w-7 text-primary" />
+                  </div>
+                  <div className="text-xs text-muted-foreground font-medium">YOU</div>
+                  <div className="flex gap-12">
+                    <div className="flex flex-col items-center">
+                      <div className="w-px h-8 bg-border" />
+                      <div className="h-12 w-12 rounded-full bg-secondary border border-border flex items-center justify-center">
+                        <Users className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">Left Leg</div>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-px h-8 bg-border" />
+                      <div className="h-12 w-12 rounded-full bg-secondary border border-border flex items-center justify-center">
+                        <Users className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">Right Leg</div>
+                    </div>
+                  </div>
+                </div>
+                <ul className="space-y-2 text-sm text-muted-foreground mt-4">
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                    <span>Auto-placement or choose your preferred leg position</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                    <span>Binary matching calculated from weaker leg volume</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                    <span>Carryforward volume preserved for next cycle</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Compensation Types */}
+              <div className="space-y-4">
+                {compensationTypes.map((comp, index) => (
+                  <div key={index} className="p-4 rounded-xl bg-card border border-border hover:border-primary/30 transition-colors">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h4 className="font-semibold text-foreground mb-1">{comp.title}</h4>
+                        <p className="text-sm text-muted-foreground">{comp.description}</p>
+                      </div>
+                      <div className="shrink-0 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold">
+                        {comp.percentage}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Rank Progression */}
+            <div className="mt-12 max-w-4xl mx-auto">
+              <h3 className="font-display text-xl font-semibold text-foreground mb-6 text-center flex items-center justify-center gap-2">
+                <Award className="h-5 w-5 text-accent" />
+                7-Tier Rank Progression
+              </h3>
+              <div className="flex flex-wrap justify-center gap-3">
+                {[
+                  { name: "Member", color: "bg-muted" },
+                  { name: "Bronze", color: "bg-amber-600" },
+                  { name: "Silver", color: "bg-slate-400" },
+                  { name: "Gold", color: "bg-yellow-500" },
+                  { name: "Platinum", color: "bg-slate-300" },
+                  { name: "Diamond", color: "bg-blue-400" },
+                  { name: "Crown Director", color: "bg-gradient-to-r from-primary to-accent" },
+                ].map((rank, i) => (
+                  <div key={rank.name} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border">
+                    <div className={`h-3 w-3 rounded-full ${rank.color}`} />
+                    <span className="text-sm font-medium text-foreground">{rank.name}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-center text-sm text-muted-foreground mt-4">
+                Higher ranks unlock deeper matching bonus levels, increased daily caps, and exclusive features.
+              </p>
             </div>
           </div>
         </section>
