@@ -1,62 +1,29 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
-  ArrowLeft,
-  Crown,
-  GitBranch,
-  Users,
-  Wallet,
-  TrendingUp,
-  ArrowLeftCircle,
-  ArrowRightCircle,
   Loader2,
   User,
-  Calendar,
-  ShoppingBag,
-  Award,
   RefreshCw,
   Shield,
-  DollarSign,
-  CreditCard,
-  Coins,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-} from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WalletCard from "@/components/wallet/WalletCard";
-import RankProgress from "@/components/rank/RankProgress";
 import KYCStatusBadge from "@/components/kyc/KYCStatusBadge";
 import KYCVerificationForm from "@/components/kyc/KYCVerificationForm";
 import KYCDocumentUpload from "@/components/kyc/KYCDocumentUpload";
 import KYCDocumentsList from "@/components/kyc/KYCDocumentsList";
 import MemberSidebar from "@/components/member/MemberSidebar";
+import MemberOverviewPanel from "@/components/member/MemberOverviewPanel";
+import MemberGenealogyPanel from "@/components/member/MemberGenealogyPanel";
+import MemberEarningsPanel from "@/components/member/MemberEarningsPanel";
+import MemberWithdrawPanel from "@/components/member/MemberWithdrawPanel";
+import MemberUpgradePanel from "@/components/member/MemberUpgradePanel";
+import MemberSupportPanel from "@/components/member/MemberSupportPanel";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Membership {
@@ -116,13 +83,6 @@ const TIER_CONFIG: Record<string, { color: string; label: string; cap: number }>
   elite: { color: "bg-gradient-to-r from-primary to-accent text-primary-foreground", label: "Elite", cap: 250000 },
 };
 
-const BONUS_TYPE_LABELS: Record<string, string> = {
-  direct_product: "Direct Product",
-  direct_membership: "Direct Membership",
-  binary: "Binary Match",
-  matching: "Matching Bonus",
-};
-
 type KYCStatus = 'not_started' | 'pending' | 'in_review' | 'approved' | 'rejected';
 
 interface KYCProfile {
@@ -131,15 +91,6 @@ interface KYCProfile {
   account_type: 'individual' | 'company';
   status: KYCStatus;
 }
-
-// Generate sample earnings data
-const generateEarningsData = () => {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  return days.map(day => ({
-    day,
-    earnings: Math.floor(Math.random() * 500) + 100,
-  }));
-};
 
 const MemberDashboard = () => {
   const { toast } = useToast();
@@ -154,7 +105,6 @@ const MemberDashboard = () => {
   const [kycProfile, setKycProfile] = useState<KYCProfile | null>(null);
   const [kycRefreshTrigger, setKycRefreshTrigger] = useState(0);
   const [walletData, setWalletData] = useState<WalletData | null>(null);
-  const [earningsData] = useState(generateEarningsData);
   const [binaryStats, setBinaryStats] = useState<BinaryStats>({
     left_bv: 0,
     right_bv: 0,
@@ -357,350 +307,8 @@ const MemberDashboard = () => {
     );
   }
 
-  const renderOverviewTab = () => (
-    <div className="space-y-6">
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Membership</p>
-                <p className="text-3xl font-bold">₱{(membership?.package_price || 0).toLocaleString()}</p>
-              </div>
-              <div className="p-3 rounded-full bg-primary/20">
-                <Crown className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-accent/10 to-accent/5">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Pending UFC Members (TCB)</p>
-                <p className="text-3xl font-bold">320</p>
-              </div>
-              <div className="p-3 rounded-full bg-accent/20">
-                <Users className="h-6 w-6 text-accent" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-secondary to-secondary/50">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Payout This Week</p>
-                <p className="text-3xl font-bold">₱{payoutThisWeek.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">Pending payout</p>
-              </div>
-              <div className="p-3 rounded-full bg-primary/20">
-                <Wallet className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Wallets Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Wallets</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl border bg-card">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-full bg-primary/10">
-                  <DollarSign className="h-5 w-5 text-primary" />
-                </div>
-                <span className="text-sm text-muted-foreground">Commission Wallet</span>
-              </div>
-              <p className="text-2xl font-bold">₱{(walletData?.available_balance || 0).toLocaleString()}</p>
-              <p className="text-xs text-muted-foreground">Active 26d</p>
-            </div>
-
-            <div className="p-4 rounded-xl border bg-card">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-full bg-accent/10">
-                  <CreditCard className="h-5 w-5 text-accent" />
-                </div>
-                <span className="text-sm text-muted-foreground">Main Wallet</span>
-              </div>
-              <p className="text-2xl font-bold">₱{(walletData?.pending_balance || 0).toLocaleString()}</p>
-            </div>
-
-            <div className="p-4 rounded-xl border bg-card">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-full bg-secondary">
-                  <Coins className="h-5 w-5 text-foreground" />
-                </div>
-                <span className="text-sm text-muted-foreground">Vase Wallet</span>
-              </div>
-              <p className="text-2xl font-bold">₱{(walletData?.total_withdrawn || 0).toLocaleString()}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Earnings Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            My Earnings This Week
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer
-            config={{
-              earnings: { label: "Earnings", color: "hsl(var(--primary))" },
-            }}
-            className="h-[250px]"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={earningsData}>
-                <defs>
-                  <linearGradient id="earningsGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="day" />
-                <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Area
-                  type="monotone"
-                  dataKey="earnings"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  fill="url(#earningsGradient)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-
-      {/* Quick Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <ArrowLeftCircle className="h-4 w-4" />
-            Left Leg BV
-          </div>
-          <p className="text-2xl font-bold">{binaryStats.left_bv.toLocaleString()}</p>
-          {binaryStats.carryforward_left > 0 && (
-            <p className="text-xs text-muted-foreground">+{binaryStats.carryforward_left.toLocaleString()} carryforward</p>
-          )}
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <ArrowRightCircle className="h-4 w-4" />
-            Right Leg BV
-          </div>
-          <p className="text-2xl font-bold">{binaryStats.right_bv.toLocaleString()}</p>
-          {binaryStats.carryforward_right > 0 && (
-            <p className="text-xs text-muted-foreground">+{binaryStats.carryforward_right.toLocaleString()} carryforward</p>
-          )}
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <GitBranch className="h-4 w-4" />
-            Matched BV
-          </div>
-          <p className="text-2xl font-bold text-primary">{binaryStats.matched_bv.toLocaleString()}</p>
-          <p className="text-xs text-muted-foreground">Lesser leg × 10%</p>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <Wallet className="h-4 w-4" />
-            Pending Payout
-          </div>
-          <p className="text-2xl font-bold text-accent">
-            ₱{(Math.min(binaryStats.left_bv, binaryStats.right_bv) * 0.10).toLocaleString()}
-          </p>
-          <p className="text-xs text-muted-foreground">Estimated</p>
-        </Card>
-      </div>
-    </div>
-  );
-
-  const renderGenealogyTab = () => (
-    <div className="space-y-6">
-      {/* Binary Stats Header */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Your Downline (Left)</p>
-          <p className="text-2xl font-bold">{binaryStats.left_bv.toLocaleString()}</p>
-          <p className="text-xs text-primary">BV L SIDE</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Your Downline (Right)</p>
-          <p className="text-2xl font-bold">{binaryStats.right_bv.toLocaleString()}</p>
-          <p className="text-xs text-accent">BV R SIDE</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Payout</p>
-          <p className="text-2xl font-bold">₱{totalEarnings.toLocaleString()}</p>
-          <p className="text-xs text-muted-foreground">Total paid</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Your Spillover</p>
-          <p className="text-2xl font-bold">115.0</p>
-          <p className="text-xs text-muted-foreground">Saved_000d</p>
-        </Card>
-      </div>
-
-      {/* Binary Tree Visualization */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <GitBranch className="h-5 w-5 text-primary" />
-            Binary Structure
-          </CardTitle>
-          <CardDescription>Your downline organization tree</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center">
-            {/* You (Root) */}
-            <div className="p-4 rounded-xl bg-primary/10 border-2 border-primary text-center mb-4">
-              <Crown className="h-6 w-6 text-primary mx-auto mb-1" />
-              <p className="font-semibold">You</p>
-              <Badge className={tierConfig.color}>{tierConfig.label}</Badge>
-            </div>
-            
-            {/* Connector Line */}
-            <div className="h-8 w-px bg-border" />
-            
-            {/* Horizontal Connector */}
-            <div className="flex items-center gap-0">
-              <div className="w-24 md:w-32 h-px bg-border" />
-              <div className="h-4 w-px bg-border" />
-              <div className="w-24 md:w-32 h-px bg-border" />
-            </div>
-            
-            {/* Left and Right Legs */}
-            <div className="flex gap-8 md:gap-16 mt-4">
-              {/* Left Leg */}
-              <div className="flex flex-col items-center">
-                <div className="h-4 w-px bg-border" />
-                <div className={`p-4 rounded-xl border-2 text-center min-w-[120px] ${
-                  membership?.left_leg_id ? "bg-secondary/50 border-secondary" : "bg-muted/30 border-dashed border-muted-foreground/30"
-                }`}>
-                  <ArrowLeftCircle className={`h-5 w-5 mx-auto mb-1 ${membership?.left_leg_id ? "text-foreground" : "text-muted-foreground"}`} />
-                  <p className="font-medium text-sm">Left Leg</p>
-                  <p className="text-lg font-bold text-primary">{binaryStats.left_bv.toLocaleString()} BV</p>
-                  {membership?.left_leg_id ? (
-                    <Badge variant="secondary" className="mt-1">Active</Badge>
-                  ) : (
-                    <Badge variant="outline" className="mt-1">Open Slot 0</Badge>
-                  )}
-                </div>
-              </div>
-              
-              {/* Right Leg */}
-              <div className="flex flex-col items-center">
-                <div className="h-4 w-px bg-border" />
-                <div className={`p-4 rounded-xl border-2 text-center min-w-[120px] ${
-                  membership?.right_leg_id ? "bg-secondary/50 border-secondary" : "bg-muted/30 border-dashed border-muted-foreground/30"
-                }`}>
-                  <ArrowRightCircle className={`h-5 w-5 mx-auto mb-1 ${membership?.right_leg_id ? "text-foreground" : "text-muted-foreground"}`} />
-                  <p className="font-medium text-sm">Right Leg</p>
-                  <p className="text-lg font-bold text-primary">{binaryStats.right_bv.toLocaleString()} BV</p>
-                  {membership?.right_leg_id ? (
-                    <Badge variant="secondary" className="mt-1">Active</Badge>
-                  ) : (
-                    <Badge variant="outline" className="mt-1">Open Slot 0</Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  const renderEarningsTab = () => (
-    <div className="space-y-6">
-      <div className="grid md:grid-cols-2 gap-6">
-        <WalletCard userId={user.id} />
-        <RankProgress
-          userId={user.id}
-          currentRankId={membership?.current_rank_id || undefined}
-          personalBV={totalBV}
-          leftLegBV={binaryStats.left_bv}
-          rightLegBV={binaryStats.right_bv}
-          directReferrals={0}
-        />
-      </div>
-
-      {/* Payout History */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Payout History
-          </CardTitle>
-          <CardDescription>Your recent payouts and earnings</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {payouts.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <TrendingUp className="h-10 w-10 mx-auto mb-2 opacity-50" />
-              <p>No payouts yet</p>
-              <p className="text-sm">Complete sales and build your network to earn</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>From</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {payouts.slice(0, 10).map((payout) => (
-                    <TableRow key={payout.id}>
-                      <TableCell className="text-sm">
-                        {new Date(payout.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {BONUS_TYPE_LABELS[payout.bonus_type] || payout.bonus_type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {payout.notes || "Binary"}
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        ₱{Number(payout.net_amount).toLocaleString()}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="default">Credited</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-
   const renderKYCTab = () => (
     <div className="space-y-6">
-      {/* KYC Status Card */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -743,11 +351,49 @@ const MemberDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
-        return renderOverviewTab();
+        return (
+          <MemberOverviewPanel
+            membership={membership}
+            walletData={walletData}
+            binaryStats={binaryStats}
+            totalEarnings={totalEarnings}
+            payoutThisWeek={payoutThisWeek}
+            currentRank="Member"
+          />
+        );
       case 'genealogy':
-        return renderGenealogyTab();
+        return (
+          <MemberGenealogyPanel
+            userId={user.id}
+            membership={membership}
+            binaryStats={binaryStats}
+            totalEarnings={totalEarnings}
+          />
+        );
       case 'earnings':
-        return renderEarningsTab();
+        return (
+          <MemberEarningsPanel
+            userId={user.id}
+            membership={membership}
+            walletData={walletData}
+            payouts={payouts}
+            totalBV={totalBV}
+            binaryStats={binaryStats}
+          />
+        );
+      case 'withdraw':
+        return (
+          <MemberWithdrawPanel
+            userId={user.id}
+            walletData={walletData}
+          />
+        );
+      case 'upgrade':
+        return (
+          <MemberUpgradePanel membership={membership} />
+        );
+      case 'support':
+        return <MemberSupportPanel />;
       case 'settings':
         return renderKYCTab();
       default:
@@ -757,6 +403,19 @@ const MemberDashboard = () => {
           </Card>
         );
     }
+  };
+
+  const getPageTitle = () => {
+    const titles: Record<string, string> = {
+      overview: 'Dashboard',
+      genealogy: 'Binary Genealogy',
+      earnings: 'Earnings & Wallet',
+      withdraw: 'Withdraw Funds',
+      upgrade: 'Upgrade / Activation',
+      support: 'Support & Tickets',
+      settings: 'Settings & KYC',
+    };
+    return titles[activeTab] || 'Dashboard';
   };
 
   return (
@@ -791,9 +450,7 @@ const MemberDashboard = () => {
             </div>
 
             {/* Page Title */}
-            <h2 className="text-2xl font-bold mb-6 capitalize">
-              {activeTab === 'overview' ? 'Dashboard' : activeTab.replace('-', ' ')}
-            </h2>
+            <h2 className="text-2xl font-bold mb-6">{getPageTitle()}</h2>
 
             {/* Content */}
             {renderContent()}
