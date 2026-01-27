@@ -54,8 +54,9 @@ const HeroSection = () => {
           alt="Farm at sunrise"
           className="h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/75 to-primary/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-transparent to-primary/20" />
+        {/* Rich brown to gold gradient overlay */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, hsl(28 45% 18% / 0.95) 0%, hsl(32 40% 30% / 0.85) 40%, hsl(45 70% 45% / 0.75) 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, hsl(28 45% 15% / 0.80) 0%, transparent 50%, hsl(32 40% 25% / 0.40) 100%)' }} />
       </div>
 
       {/* Decorative elements */}
