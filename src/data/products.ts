@@ -670,8 +670,8 @@ export const farms: Farm[] = [
 export const categories = [
   { id: "vegetables", name: "Vegetables", icon: "Leaf" },
   { id: "fruits", name: "Fruits", icon: "Apple" },
-  { id: "meat", name: "Meat", icon: "Beef" },
-  { id: "poultry", name: "Poultry", icon: "Bird" },
   { id: "dairy", name: "Dairy & Eggs", icon: "Egg" },
   { id: "pantry", name: "Pantry", icon: "Package" },
+  { id: "meat", name: "Meat", icon: "Beef" },
+  { id: "poultry", name: "Poultry", icon: "Bird" },
 ];
