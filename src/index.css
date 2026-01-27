@@ -484,6 +484,117 @@
     animation: glowPulse 2s ease-in-out infinite;
   }
 
+  /* Glass shimmer animation */
+  .glass-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass-shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      hsl(0 0% 100% / 0.15) 45%,
+      hsl(0 0% 100% / 0.25) 50%,
+      hsl(0 0% 100% / 0.15) 55%,
+      transparent 60%
+    );
+    background-size: 200% 100%;
+    animation: glassShimmer 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Subtle shimmer variant - less prominent */
+  .glass-shimmer-subtle::after {
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      hsl(0 0% 100% / 0.08) 45%,
+      hsl(0 0% 100% / 0.12) 50%,
+      hsl(0 0% 100% / 0.08) 55%,
+      transparent 60%
+    );
+    animation: glassShimmer 6s ease-in-out infinite;
+  }
+
+  /* Gold shimmer variant */
+  .glass-shimmer-gold::after {
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      hsl(45 95% 50% / 0.1) 45%,
+      hsl(45 95% 50% / 0.2) 50%,
+      hsl(45 95% 50% / 0.1) 55%,
+      transparent 60%
+    );
+    animation: glassShimmer 5s ease-in-out infinite;
+  }
+
+  /* Primary shimmer variant */
+  .glass-shimmer-primary::after {
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      hsl(220 75% 55% / 0.1) 45%,
+      hsl(220 75% 55% / 0.18) 50%,
+      hsl(220 75% 55% / 0.1) 55%,
+      transparent 60%
+    );
+    animation: glassShimmer 5s ease-in-out infinite;
+  }
+
+  @keyframes glassShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Floating glow orbs for hero sections */
+  .hero-glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.4;
+    pointer-events: none;
+    animation: orbFloat 8s ease-in-out infinite;
+  }
+
+  .hero-glow-orb-primary {
+    background: radial-gradient(circle, hsl(220 75% 55% / 0.5) 0%, transparent 70%);
+  }
+
+  .hero-glow-orb-accent {
+    background: radial-gradient(circle, hsl(0 75% 55% / 0.4) 0%, transparent 70%);
+  }
+
+  .hero-glow-orb-gold {
+    background: radial-gradient(circle, hsl(45 95% 55% / 0.4) 0%, transparent 70%);
+  }
+
+  @keyframes orbFloat {
+    0%, 100% { 
+      transform: translate(0, 0) scale(1);
+      opacity: 0.3;
+    }
+    25% { 
+      transform: translate(10px, -15px) scale(1.05);
+      opacity: 0.4;
+    }
+    50% { 
+      transform: translate(-5px, 10px) scale(0.95);
+      opacity: 0.35;
+    }
+    75% { 
+      transform: translate(-15px, -5px) scale(1.02);
+      opacity: 0.4;
+    }
+  }
+
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
