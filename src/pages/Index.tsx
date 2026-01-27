@@ -35,7 +35,7 @@ const features: Feature[] = [
   {
     icon: Leaf,
     title: "Farm-Fresh Marketplace",
-    description: "Shop directly from verified local farmers. Fresh organic produce delivered from the highlands of Benguet to your doorstep.",
+    description: "Shop directly from verified local farmers. Transactions generate volume and rewards according to system rules with full transparency.",
     gradient: "from-emerald-500/20 via-green-500/10 to-transparent",
     iconColor: "text-emerald-500",
     delay: 0,
@@ -58,40 +58,40 @@ const features: Feature[] = [
   },
   {
     icon: Users,
-    title: "Affiliate Network",
-    description: "Build your network and earn commissions. Our binary compensation plan rewards you for sharing the farm-fresh movement.",
+    title: "Binary Genealogy Network",
+    description: "Build your network with a 1-1 binary structure. Choose placement or let the system auto-place new members for optimal growth.",
     gradient: "from-violet-500/20 via-purple-500/10 to-transparent",
     iconColor: "text-violet-500",
     delay: 0.3,
   },
   {
     icon: Wallet,
-    title: "Integrated Wallet System",
-    description: "Manage your earnings, track commissions, and request withdrawals seamlessly from your member dashboard.",
+    title: "Multi-Wallet System",
+    description: "Manage earnings with separate commission, main, and vesting wallets. Support for available and pending balances with full transaction history.",
     gradient: "from-accent/20 via-accent/10 to-transparent",
     iconColor: "text-accent",
     delay: 0.4,
   },
   {
     icon: TrendingUp,
-    title: "Rank Progression",
-    description: "Climb through 7 achievement tiers from Member to Crown Director. Unlock higher earning potential as you grow.",
+    title: "7-Tier Rank Progression",
+    description: "Progress from Member to Crown Director based on performance criteria. Higher ranks unlock deeper matching and advanced features.",
     gradient: "from-yellow-500/20 via-amber-500/10 to-transparent",
     iconColor: "text-yellow-500",
     delay: 0.5,
   },
   {
     icon: Handshake,
-    title: "Fair Farmer Partnerships",
-    description: "We eliminate middlemen so farmers earn more. Transparent pricing ensures everyone benefits fairly.",
+    title: "Full Compensation Engine",
+    description: "Binary MLM engine with direct bonuses, binary matching, rank-based rewards, and capped earnings with fail-safe mechanisms.",
     gradient: "from-teal-500/20 via-cyan-500/10 to-transparent",
     iconColor: "text-teal-500",
     delay: 0.6,
   },
   {
     icon: ShieldCheck,
-    title: "Verified & Secure",
-    description: "KYC-verified members, secure transactions, and quality-assured products from trusted farm partners.",
+    title: "KYC/KYB Compliance",
+    description: "Built-in verification for individuals and corporate entities. Securely upload documents with tracked verification status.",
     gradient: "from-blue-500/20 via-sky-500/10 to-transparent",
     iconColor: "text-blue-500",
     delay: 0.7,
@@ -456,36 +456,41 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
               {[
                 {
                   step: "01",
-                  title: "Sign Up & Verify",
-                  description: "Create your account and complete KYC verification to unlock all features and earning potential.",
+                  title: "Register & Verify",
+                  description: "Create your account as individual or company. Complete KYC/KYB verification to unlock full platform access.",
                 },
                 {
                   step: "02",
-                  title: "Shop or Partner",
-                  description: "Browse fresh produce from local farms, or register as a farmer to start selling directly to consumers.",
+                  title: "Get Placed",
+                  description: "Receive your unique referral link. Get automatically placed in the binary genealogy or choose your preferred position.",
                 },
                 {
                   step: "03",
-                  title: "Earn & Grow",
-                  description: "Share your referral code, build your network, and watch your earnings grow with every order.",
+                  title: "Shop & Earn",
+                  description: "Purchase from verified farms. Transactions generate Business Volume and rewards following transparent system rules.",
+                },
+                {
+                  step: "04",
+                  title: "Grow & Withdraw",
+                  description: "Build your network, progress through ranks, and withdraw earnings via bank, GCash, Maya, or crypto.",
                 },
               ].map((item, index) => (
-                <div key={item.step} className="text-center glass-card p-6">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground font-display text-2xl font-bold mb-4 shadow-glow-primary">
+                <div key={item.step} className="text-center glass-card p-5 relative">
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary text-primary-foreground font-display text-xl font-bold mb-4 shadow-glow-primary">
                     {item.step}
                   </div>
-                  <h3 className="font-display text-xl font-semibold text-foreground mb-2">
+                  <h3 className="font-display text-lg font-semibold text-foreground mb-2">
                     {item.title}
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {item.description}
                   </p>
-                  {index < 2 && (
-                    <ArrowRight className="hidden md:block h-6 w-6 text-muted-foreground/30 absolute right-0 top-1/2 -translate-y-1/2" />
+                  {index < 3 && (
+                    <ArrowRight className="hidden md:block h-5 w-5 text-muted-foreground/30 absolute -right-3 top-1/2 -translate-y-1/2 z-10" />
                   )}
                 </div>
               ))}
@@ -568,8 +573,105 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Stats Section */}
+        {/* Platform Capabilities Section */}
         <section className="py-16 bg-background">
+          <div className="container">
+            <div className="text-center mb-12">
+              <span className="glass-badge-accent inline-block mb-4">
+                Platform Infrastructure
+              </span>
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
+                Built for Scale & Security
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+                Complete affiliate and trading infrastructure supporting fiat and crypto operations, designed to scale across regions.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              <div className="glass-card p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-primary/10">
+                    <Wallet className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="font-display text-lg font-semibold">Fund Management</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Internal wallets store earnings with available and pending balances, transaction history, and vesting schedules. Secure transfers between members enabled by compliance rules.
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                    Commission, Main & Vesting Wallets
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                    GCash, Maya, Bank Transfers
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                    Crypto Payment Support
+                  </li>
+                </ul>
+              </div>
+
+              <div className="glass-card p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-accent/10">
+                    <TrendingUp className="h-6 w-6 text-accent" />
+                  </div>
+                  <h3 className="font-display text-lg font-semibold">Token & Points</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Points-to-token migration path allows earned rewards to convert into tokens. Token rewards calculated on fixed value logic, recorded separately from cash earnings.
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-accent" />
+                    AGRI Token Integration
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-accent" />
+                    Read-Only Blockchain API
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-accent" />
+                    On-Chain Balance Display
+                  </li>
+                </ul>
+              </div>
+
+              <div className="glass-card p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-emerald-500/10">
+                    <ShieldCheck className="h-6 w-6 text-emerald-500" />
+                  </div>
+                  <h3 className="font-display text-lg font-semibold">Security & Audit</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  All financial calculations, reward distributions, and ledger entries recorded in an auditable system with predefined caps and fail-safe mechanisms.
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    75% Fail-Safe Mechanism
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Transparent Ledger System
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Multi-Language Support
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Stats Section */}
+        <section className="py-16 bg-secondary">
           <div className="container">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[

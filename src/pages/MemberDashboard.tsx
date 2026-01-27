@@ -327,8 +327,26 @@ const MemberDashboard = () => {
             </div>
             <h1 className="font-display text-2xl font-bold">Member Dashboard</h1>
             <p className="text-muted-foreground">
-              Sign in to view your membership details, BV tracking, binary structure, and earnings.
+              Access your centralized dashboard displaying performance indicators, binary structure, earnings breakdown, rank progress, wallet balances, and activity history.
             </p>
+            <div className="grid grid-cols-2 gap-3 text-left">
+              <div className="p-3 rounded-lg bg-secondary">
+                <p className="text-xs text-muted-foreground mb-1">Binary Network</p>
+                <p className="text-sm font-medium">Left & Right Legs</p>
+              </div>
+              <div className="p-3 rounded-lg bg-secondary">
+                <p className="text-xs text-muted-foreground mb-1">Wallet System</p>
+                <p className="text-sm font-medium">Multi-Currency</p>
+              </div>
+              <div className="p-3 rounded-lg bg-secondary">
+                <p className="text-xs text-muted-foreground mb-1">Rank Progression</p>
+                <p className="text-sm font-medium">7 Career Tiers</p>
+              </div>
+              <div className="p-3 rounded-lg bg-secondary">
+                <p className="text-xs text-muted-foreground mb-1">Payouts</p>
+                <p className="text-sm font-medium">Bank, GCash, Crypto</p>
+              </div>
+            </div>
             <Button className="btn-primary-gradient" asChild>
               <Link to="/auth">Sign In to Continue</Link>
             </Button>
