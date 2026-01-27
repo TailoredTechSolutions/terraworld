@@ -85,6 +85,10 @@ import { BVLedgerPanel } from "@/components/admin/BVLedgerPanel";
 import { PayoutsLedgerPanel } from "@/components/admin/PayoutsLedgerPanel";
 import UserManagementPanel from "@/components/admin/UserManagementPanel";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminOverviewPanel from "@/components/admin/AdminOverviewPanel";
+import WithdrawalsPanel from "@/components/admin/WithdrawalsPanel";
+import ReportsPanel from "@/components/admin/ReportsPanel";
+import GenealogyPanel from "@/components/admin/GenealogyPanel";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -578,9 +582,11 @@ const AdminDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
-        return renderOverviewTab();
+        return <AdminOverviewPanel membersCount={membersCount} ordersCount={orders.length} totalRevenue={totalRevenue} />;
       case 'users':
         return <UserManagementPanel />;
+      case 'genealogy':
+        return <GenealogyPanel />;
       case 'compensation':
         return <PayoutCyclePanel />;
       case 'memberships':
@@ -588,7 +594,9 @@ const AdminDashboard = () => {
       case 'bv-ledger':
         return <BVLedgerPanel />;
       case 'payout-ledger':
-        return <PayoutsLedgerPanel />;
+        return <WithdrawalsPanel />;
+      case 'reports':
+        return <ReportsPanel />;
       case 'farmers':
         return renderFarmersTab();
       case 'drivers':
