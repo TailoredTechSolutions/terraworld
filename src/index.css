@@ -6,41 +6,41 @@
 
 @layer base {
   :root {
-    /* Terra color palette - Rich Earthy Brown with Yellow hints */
-    --background: 32 35% 82%;
+    /* Terra color palette - Philippine Flag (Blue, Red, Yellow) + Brown for earth */
+    --background: 32 30% 80%;
     --foreground: 28 45% 12%;
 
-    --card: 34 32% 75%;
+    --card: 34 28% 74%;
     --card-foreground: 28 45% 12%;
 
-    --popover: 33 30% 78%;
+    --popover: 33 26% 76%;
     --popover-foreground: 28 45% 12%;
 
     /* Royal Blue primary (Philippine flag blue) */
     --primary: 220 75% 35%;
-    --primary-foreground: 45 100% 96%;
+    --primary-foreground: 0 0% 100%;
 
     /* Warm brown secondary */
-    --secondary: 35 30% 68%;
+    --secondary: 35 28% 65%;
     --secondary-foreground: 28 50% 15%;
 
-    --muted: 34 25% 72%;
+    --muted: 34 22% 70%;
     --muted-foreground: 28 20% 35%;
 
-    /* Gold/Yellow accent */
-    --accent: 45 90% 50%;
-    --accent-foreground: 28 45% 12%;
+    /* Philippine Red accent (restored) */
+    --accent: 0 75% 45%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
-    --destructive-foreground: 45 100% 96%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 32 28% 65%;
-    --input: 34 26% 72%;
-    --ring: 45 90% 50%;
+    --border: 32 25% 62%;
+    --input: 34 24% 70%;
+    --ring: 220 75% 35%;
 
     --radius: 0.75rem;
 
-    /* Custom tokens - Terra Rich Brown theme with yellow */
+    /* Custom tokens - Philippine flag + earth theme */
     --success: 145 60% 40%;
     --warning: 45 95% 50%;
     --ph-blue: 220 75% 35%;
@@ -48,115 +48,114 @@
     --ph-red: 0 75% 45%;
     --ph-red-light: 0 60% 60%;
     --ph-gold: 45 95% 50%;
-    --ph-white: 45 40% 97%;
-    --cream: 38 40% 85%;
-    --cream-dark: 35 35% 78%;
+    --ph-white: 0 0% 100%;
+    --cream: 38 35% 82%;
+    --cream-dark: 35 30% 75%;
     --earth-dark: 28 45% 10%;
-    --tan: 32 35% 60%;
-    --tan-light: 35 30% 72%;
-    --tan-dark: 30 38% 48%;
+    --tan: 32 30% 58%;
+    --tan-light: 35 28% 70%;
+    --tan-dark: 30 32% 45%;
     --brown: 28 40% 35%;
     --brown-light: 30 35% 55%;
     --brown-dark: 26 45% 22%;
     --yellow-hint: 48 85% 58%;
-    --yellow-soft: 50 55% 78%;
+    --yellow-soft: 50 50% 75%;
 
     /* Liquid Glass tokens - Light Mode (warm brown tinted) */
-    --glass: 34 32% 85% / 0.80;
-    --glass-border: 45 40% 70% / 0.6;
-    --glass-highlight: 48 60% 85% / 0.5;
+    --glass: 34 28% 82% / 0.80;
+    --glass-border: 32 30% 65% / 0.6;
+    --glass-highlight: 0 0% 100% / 0.4;
     --glass-blur: 16px;
     --glass-radius: 20px;
     
     /* Glow effects using Terra colors */
     --glow-primary: 220 75% 35% / 0.4;
-    --glow-accent: 45 90% 50% / 0.5;
-    --glow-gold: 45 95% 50% / 0.6;
+    --glow-accent: 0 75% 45% / 0.4;
+    --glow-gold: 45 95% 50% / 0.5;
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(28 40% 25%) 0%, hsl(32 35% 40%) 50%, hsl(45 60% 50%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(45 90% 50%) 0%, hsl(48 85% 55%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(34 32% 78%) 0%, hsl(32 30% 70%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220 75% 35%) 0%, hsl(220 60% 45%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(0 75% 45%) 0%, hsl(0 60% 55%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(34 28% 78%) 0%, hsl(32 26% 72%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(45 95% 50%) 0%, hsl(48 85% 60%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsl(28 40% 30%) 0%, hsl(45 80% 50%) 100%);
-    --gradient-tan: linear-gradient(135deg, hsl(32 35% 65%) 0%, hsl(35 30% 55%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(220 75% 35%) 0%, hsl(0 75% 45%) 100%);
+    --gradient-tan: linear-gradient(135deg, hsl(32 30% 62%) 0%, hsl(35 28% 55%) 100%);
     --gradient-brown: linear-gradient(135deg, hsl(28 40% 30%) 0%, hsl(30 35% 45%) 100%);
     --gradient-brown-gold: linear-gradient(135deg, hsl(28 45% 22%) 0%, hsl(32 40% 35%) 50%, hsl(45 80% 55%) 100%);
-    --gradient-yellow-hint: linear-gradient(135deg, hsl(45 70% 75%) 0%, hsl(50 60% 70%) 100%);
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(28 45% 12% / 0.08);
     --shadow-md: 0 4px 6px -1px hsl(28 45% 12% / 0.12), 0 2px 4px -2px hsl(28 45% 12% / 0.08);
     --shadow-lg: 0 10px 15px -3px hsl(28 45% 12% / 0.15), 0 4px 6px -4px hsl(28 45% 12% / 0.10);
     --shadow-card: 0 4px 20px -4px hsl(28 45% 12% / 0.18);
-    --shadow-glass: 0 8px 32px hsl(28 45% 12% / 0.15), inset 0 1px 0 hsl(48 60% 85% / 0.4);
+    --shadow-glass: 0 8px 32px hsl(28 45% 12% / 0.15), inset 0 1px 0 hsl(0 0% 100% / 0.3);
     --shadow-glow-primary: 0 0 24px hsl(var(--glow-primary));
     --shadow-glow-accent: 0 0 24px hsl(var(--glow-accent));
     --shadow-glow-gold: 0 0 24px hsl(var(--glow-gold));
 
-    --sidebar-background: 33 30% 72%;
+    --sidebar-background: 33 26% 70%;
     --sidebar-foreground: 28 45% 12%;
     --sidebar-primary: 220 75% 35%;
-    --sidebar-primary-foreground: 45 100% 96%;
-    --sidebar-accent: 45 90% 50%;
-    --sidebar-accent-foreground: 28 45% 12%;
-    --sidebar-border: 32 28% 62%;
-    --sidebar-ring: 45 90% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 75% 45%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 32 25% 60%;
+    --sidebar-ring: 220 75% 35%;
   }
 
   .dark {
     --background: 30 25% 10%;
-    --foreground: 42 30% 92%;
+    --foreground: 35 20% 90%;
 
     --card: 32 22% 14%;
-    --card-foreground: 42 30% 92%;
+    --card-foreground: 35 20% 90%;
 
     --popover: 30 25% 12%;
-    --popover-foreground: 42 30% 92%;
+    --popover-foreground: 35 20% 90%;
 
     /* Blue primary in dark mode */
     --primary: 220 70% 55%;
     --primary-foreground: 30 25% 10%;
 
     --secondary: 35 18% 20%;
-    --secondary-foreground: 42 25% 88%;
+    --secondary-foreground: 35 20% 85%;
 
     --muted: 32 15% 22%;
-    --muted-foreground: 40 15% 60%;
+    --muted-foreground: 35 15% 55%;
 
-    /* Gold/Yellow accent in dark mode */
-    --accent: 45 85% 55%;
+    /* Red accent in dark mode (restored) */
+    --accent: 0 70% 55%;
     --accent-foreground: 30 25% 10%;
 
     --destructive: 0 62% 45%;
-    --destructive-foreground: 42 30% 92%;
+    --destructive-foreground: 35 20% 90%;
 
     --border: 35 18% 24%;
     --input: 32 20% 26%;
-    --ring: 45 85% 55%;
+    --ring: 220 70% 55%;
 
     /* Liquid Glass tokens - Dark Mode (warm tinted) */
     --glass: 32 25% 18% / 0.55;
-    --glass-border: 45 40% 50% / 0.2;
-    --glass-highlight: 48 60% 70% / 0.1;
+    --glass-border: 35 20% 40% / 0.3;
+    --glass-highlight: 0 0% 100% / 0.08;
     --glass-blur: 20px;
     
-    /* Glow effects using Terra colors - brighter in dark mode */
+    /* Glow effects */
     --glow-primary: 220 70% 55% / 0.5;
-    --glow-accent: 45 85% 55% / 0.5;
-    --glow-gold: 48 95% 55% / 0.6;
+    --glow-accent: 0 70% 55% / 0.5;
+    --glow-gold: 45 95% 55% / 0.5;
 
     /* Dark mode shadows */
-    --shadow-glass: 0 8px 32px hsl(0 0% 0% / 0.4), inset 0 1px 0 hsl(48 60% 70% / 0.1);
+    --shadow-glass: 0 8px 32px hsl(0 0% 0% / 0.4), inset 0 1px 0 hsl(0 0% 100% / 0.08);
 
     --sidebar-background: 32 22% 12%;
-    --sidebar-foreground: 42 30% 92%;
+    --sidebar-foreground: 35 20% 90%;
     --sidebar-primary: 220 70% 55%;
     --sidebar-primary-foreground: 30 25% 10%;
-    --sidebar-accent: 45 85% 55%;
+    --sidebar-accent: 0 70% 55%;
     --sidebar-accent-foreground: 30 25% 10%;
     --sidebar-border: 35 18% 24%;
-    --sidebar-ring: 45 85% 55%;
+    --sidebar-ring: 220 70% 55%;
   }
 }
 
