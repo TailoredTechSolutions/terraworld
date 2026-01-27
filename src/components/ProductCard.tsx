@@ -27,7 +27,7 @@ const ProductCard = ({ product, className, compact = false }: ProductCardProps) 
   return (
     <div
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm hover:shadow-md transition-all duration-300",
+        "group relative flex flex-col overflow-hidden rounded-xl glass-card glass-hover",
         className
       )}
     >
@@ -48,7 +48,7 @@ const ProductCard = ({ product, className, compact = false }: ProductCardProps) 
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
         {product.organic && (
-          <div className="absolute top-2 left-2 flex items-center gap-1 bg-accent/90 text-accent-foreground text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full shadow-sm">
+          <div className="absolute top-2 left-2 flex items-center gap-1 glass-badge-accent text-[10px] sm:text-xs font-semibold">
             <Leaf className="h-3 w-3" />
             <span className="hidden sm:inline">Organic</span>
           </div>
@@ -57,7 +57,7 @@ const ProductCard = ({ product, className, compact = false }: ProductCardProps) 
 
       {/* Content - Compact layout */}
       <div className={cn(
-        "flex flex-1 flex-col bg-card",
+        "flex flex-1 flex-col bg-card/50 backdrop-blur-sm",
         compact ? "p-3" : "p-3 sm:p-4"
       )}>
         <Link to={`/product/${product.id}`} className="flex-1 min-h-0">
@@ -94,7 +94,7 @@ const ProductCard = ({ product, className, compact = false }: ProductCardProps) 
 
           {/* Compact quantity selector */}
           <div className="flex items-center gap-1.5">
-            <div className="flex items-center bg-secondary/50 rounded-lg overflow-hidden border border-border/50">
+            <div className="flex items-center bg-glass backdrop-blur-sm rounded-lg overflow-hidden border border-glass-border">
               <Button
                 size="icon"
                 variant="ghost"

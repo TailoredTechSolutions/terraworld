@@ -26,10 +26,10 @@ const CategoryFilter = ({ selectedCategory, onSelectCategory }: CategoryFilterPr
             key={category.id}
             onClick={() => onSelectCategory(category.id)}
             className={cn(
-              "flex items-center gap-1 sm:gap-1.5 whitespace-nowrap rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-all",
+              "flex items-center gap-1 sm:gap-1.5 whitespace-nowrap rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-all duration-200",
               isSelected
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                ? "bg-primary text-primary-foreground shadow-glow-primary"
+                : "glass-badge hover:bg-glass/80 backdrop-blur-sm"
             )}
           >
             {iconMap[category.icon]}

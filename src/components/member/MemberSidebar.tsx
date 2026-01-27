@@ -84,13 +84,13 @@ const MemberSidebar = ({ activeTab, onTabChange }: MemberSidebarProps) => {
 
   const SidebarContent = ({ inSheet = false }: { inSheet?: boolean }) => (
     <div className={cn(
-      "flex flex-col h-full bg-card border-r border-border",
+      "flex flex-col h-full glass-card border-r border-glass-border",
       collapsed && !inSheet ? "w-16" : "w-64",
       "transition-all duration-300"
     )}>
       {/* Collapse Toggle - Desktop Only */}
       {!inSheet && (
-        <div className="flex items-center justify-end p-2 border-b border-border">
+        <div className="flex items-center justify-end p-2 border-b border-glass-border">
           <Button
             variant="ghost"
             size="icon"
@@ -118,10 +118,10 @@ const MemberSidebar = ({ activeTab, onTabChange }: MemberSidebarProps) => {
                 key={item.title}
                 onClick={() => onTabChange(tab)}
                 className={cn(
-                  "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                  "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                   isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                    ? "bg-primary text-primary-foreground shadow-glow-primary"
+                    : "text-muted-foreground hover:bg-glass hover:text-foreground",
                   collapsed && !inSheet && "justify-center px-2"
                 )}
               >
@@ -145,7 +145,7 @@ const MemberSidebar = ({ activeTab, onTabChange }: MemberSidebarProps) => {
 
       {/* Footer */}
       {(!collapsed || inSheet) && (
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-glass-border">
           <p className="text-xs text-muted-foreground text-center">
             Terra Member Portal
           </p>
