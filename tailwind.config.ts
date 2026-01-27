@@ -82,6 +82,15 @@ export default {
         earth: {
           dark: "hsl(var(--earth-dark))",
         },
+        tan: {
+          DEFAULT: "hsl(var(--tan))",
+          light: "hsl(var(--tan-light))",
+          dark: "hsl(var(--tan-dark))",
+        },
+        yellow: {
+          hint: "hsl(var(--yellow-hint))",
+          soft: "hsl(var(--yellow-soft))",
+        },
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
         // Glass colors
