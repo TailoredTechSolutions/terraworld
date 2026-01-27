@@ -47,16 +47,16 @@ const stats = [
 const HeroSection = () => {
   return (
     <section className="relative overflow-hidden bg-grain min-h-[90vh] flex items-center">
-      {/* Background Image with Overlay */}
+      {/* Background Image with Overlay - Blue primary with red accent hints */}
       <div className="absolute inset-0">
         <img
           src={heroImage}
           alt="Farm at sunrise"
           className="h-full w-full object-cover"
         />
-        {/* Rich brown to gold gradient overlay */}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, hsl(28 45% 18% / 0.95) 0%, hsl(32 40% 30% / 0.85) 40%, hsl(45 70% 45% / 0.75) 100%)' }} />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, hsl(28 45% 15% / 0.80) 0%, transparent 50%, hsl(32 40% 25% / 0.40) 100%)' }} />
+        {/* Blue to brown gradient with subtle red */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-brown-dark/70" />
+        <div className="absolute inset-0 bg-gradient-to-t from-brown-dark/80 via-transparent to-primary/30" />
       </div>
 
       {/* Decorative elements */}
