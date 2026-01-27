@@ -384,6 +384,48 @@ export type Database = {
         }
         Relationships: []
       }
+      member_transfers: {
+        Row: {
+          amount: number
+          created_at: string
+          fee: number
+          id: string
+          net_amount: number
+          note: string | null
+          receiver_id: string
+          reference_code: string
+          sender_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          fee?: number
+          id?: string
+          net_amount: number
+          note?: string | null
+          receiver_id: string
+          reference_code?: string
+          sender_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          fee?: number
+          id?: string
+          net_amount?: number
+          note?: string | null
+          receiver_id?: string
+          reference_code?: string
+          sender_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       memberships: {
         Row: {
           created_at: string
@@ -638,9 +680,11 @@ export type Database = {
       }
       profiles: {
         Row: {
+          agri_token_balance: number | null
           avatar_url: string | null
           created_at: string
           email: string
+          external_wallet_address: string | null
           full_name: string | null
           id: string
           phone: string | null
@@ -650,9 +694,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          agri_token_balance?: number | null
           avatar_url?: string | null
           created_at?: string
           email: string
+          external_wallet_address?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
@@ -662,9 +708,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          agri_token_balance?: number | null
           avatar_url?: string | null
           created_at?: string
           email?: string
+          external_wallet_address?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null

@@ -59,6 +59,11 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-brown-dark/80 via-transparent to-primary/30" />
       </div>
 
+      {/* Floating glow orbs */}
+      <div className="hero-glow-orb hero-glow-orb-primary w-96 h-96 -top-20 -left-20" style={{ animationDelay: '0s' }} />
+      <div className="hero-glow-orb hero-glow-orb-accent w-64 h-64 top-1/3 right-10" style={{ animationDelay: '2s' }} />
+      <div className="hero-glow-orb hero-glow-orb-gold w-80 h-80 bottom-10 left-1/4" style={{ animationDelay: '4s' }} />
+
       {/* Decorative elements */}
       <motion.div 
         className="absolute top-20 right-10 opacity-20 hidden lg:block"
@@ -80,7 +85,7 @@ const HeroSection = () => {
               transition={{ duration: 0.6, type: "spring" }}
               className="mb-8"
             >
-              <div className="relative inline-flex items-center gap-4 glass-card-accent p-3 pr-6">
+              <div className="relative inline-flex items-center gap-4 glass-card-accent glass-shimmer p-3 pr-6">
                 {/* Video Icon */}
                 <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden border-2 border-accent shadow-lg shadow-glow-accent">
                   <video
@@ -183,7 +188,7 @@ const HeroSection = () => {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
-                  className="text-center glass-card px-4 py-3"
+                  className="text-center glass-card glass-shimmer-subtle px-4 py-3"
                 >
                   <p className="text-2xl md:text-3xl font-bold text-accent font-display">
                     {stat.value}
@@ -210,7 +215,7 @@ const HeroSection = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
                 whileHover={{ scale: 1.03, y: -3 }}
-                className="p-3.5 glass-card glass-hover"
+                className="p-3.5 glass-card glass-hover glass-shimmer-subtle"
               >
                 <div className="flex items-start gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/20 border border-accent/30 backdrop-blur-sm shadow-glow-accent">
@@ -234,7 +239,7 @@ const HeroSection = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.9 }}
               whileHover={{ scale: 1.02, y: -2 }}
-              className="col-span-2 p-3.5 glass-card-gold"
+              className="col-span-2 p-3.5 glass-card-gold glass-shimmer-gold"
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/30 border border-accent/40 backdrop-blur-sm shadow-glow-gold">

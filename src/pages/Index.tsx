@@ -108,7 +108,7 @@ const FeatureCard = ({ feature }: { feature: Feature }) => {
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5, delay: feature.delay }}
       whileHover={{ y: -8, transition: { duration: 0.3 } }}
-      className="group relative p-6 glass-card glass-hover overflow-hidden"
+      className="group relative p-6 glass-card glass-hover glass-shimmer-subtle overflow-hidden"
     >
       {/* Animated gradient background */}
       <motion.div 
@@ -283,7 +283,7 @@ const TestimonialCard = ({ testimonial }: { testimonial: typeof testimonials[0] 
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, delay: testimonial.delay }}
       whileHover={{ y: -5, transition: { duration: 0.3 } }}
-      className="group relative p-6 glass-card glass-hover"
+      className="group relative p-6 glass-card glass-hover glass-shimmer-subtle"
     >
       {/* Quote icon */}
       <motion.div
@@ -479,7 +479,7 @@ const Index = () => {
                   description: "Build your network, progress through ranks, and withdraw earnings via bank, GCash, Maya, or crypto.",
                 },
               ].map((item, index) => (
-                <div key={item.step} className="text-center glass-card p-5 relative">
+                <div key={item.step} className="text-center glass-card glass-shimmer-primary p-5 relative">
                   <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary text-primary-foreground font-display text-xl font-bold mb-4 shadow-glow-primary">
                     {item.step}
                   </div>
