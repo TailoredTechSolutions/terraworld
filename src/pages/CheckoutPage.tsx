@@ -19,6 +19,19 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const checkoutSchema = z.object({
+  firstName: z.string().trim().min(1, "First name is required").max(50, "First name too long"),
+  lastName: z.string().trim().min(1, "Last name is required").max(50, "Last name too long"),
+  email: z.string().trim().email("Invalid email address").max(255, "Email too long"),
+  phone: z.string().trim().min(10, "Phone number must be at least 10 digits").max(20, "Phone number too long")
+    .regex(/^[\d+\s()-]+$/, "Invalid phone number format"),
+  address: z.string().trim().min(5, "Address must be at least 5 characters").max(300, "Address too long"),
+  city: z.string().trim().min(2, "City is required").max(100, "City name too long"),
+  zip: z.string().trim().min(4, "Postal code must be at least 4 digits").max(10, "Postal code too long")
+    .regex(/^\d{4,10}$/, "Invalid postal code"),
+});
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -26,6 +39,7 @@ const CheckoutPage = () => {
   const { items, getTotalPrice, clearCart } = useCartStore();
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   
   // Form state
   const [formData, setFormData] = useState({
@@ -51,6 +65,19 @@ const CheckoutPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormErrors({});
+
+    // Client-side Zod validation
+    const validation = checkoutSchema.safeParse(formData);
+    if (!validation.success) {
+      const errors: Record<string, string> = {};
+      validation.error.errors.forEach((err) => {
+        if (err.path[0]) errors[err.path[0] as string] = err.message;
+      });
+      setFormErrors(errors);
+      return;
+    }
+
     setIsProcessing(true);
     
     try {
@@ -178,6 +205,7 @@ const CheckoutPage = () => {
                       className="glass-card border-glass-border focus:border-primary"
                       required 
                     />
+                    {formErrors.firstName && <p className="text-sm text-destructive">{formErrors.firstName}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name</Label>
@@ -189,7 +217,36 @@ const CheckoutPage = () => {
                       className="glass-card border-glass-border focus:border-primary"
                       required 
                     />
+                    {formErrors.lastName && <p className="text-sm text-destructive">{formErrors.lastName}</p>}
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="juan@example.com" 
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="glass-card border-glass-border focus:border-primary"
+                    required 
+                  />
+                  {formErrors.email && <p className="text-sm text-destructive">{formErrors.email}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input 
+                    id="phone" 
+                    type="tel" 
+                    placeholder="+63 917 123 4567" 
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="glass-card border-glass-border focus:border-primary"
+                    required 
+                  />
+                  {formErrors.phone && <p className="text-sm text-destructive">{formErrors.phone}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -228,6 +285,7 @@ const CheckoutPage = () => {
                     className="glass-card border-glass-border focus:border-primary"
                     required 
                   />
+                  {formErrors.address && <p className="text-sm text-destructive">{formErrors.address}</p>}
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
@@ -241,6 +299,7 @@ const CheckoutPage = () => {
                       className="glass-card border-glass-border focus:border-primary"
                       required 
                     />
+                    {formErrors.city && <p className="text-sm text-destructive">{formErrors.city}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="zip">Postal Code</Label>
@@ -252,6 +311,7 @@ const CheckoutPage = () => {
                       className="glass-card border-glass-border focus:border-primary"
                       required 
                     />
+                    {formErrors.zip && <p className="text-sm text-destructive">{formErrors.zip}</p>}
                   </div>
                 </div>
               </div>
