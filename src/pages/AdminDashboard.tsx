@@ -90,6 +90,7 @@ import WithdrawalsPanel from "@/components/admin/WithdrawalsPanel";
 import ReportsPanel from "@/components/admin/ReportsPanel";
 import GenealogyPanel from "@/components/admin/GenealogyPanel";
 import PlatformSettingsPanel from "@/components/admin/PlatformSettingsPanel";
+import IntegrationManagerPanel from "@/components/admin/IntegrationManagerPanel";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -606,6 +607,8 @@ const AdminDashboard = () => {
         return renderOrdersTab();
       case 'settings':
         return <PlatformSettingsPanel />;
+      case 'integrations':
+        return <IntegrationManagerPanel />;
       default:
         return (
           <Card className="p-12 text-center">
