@@ -91,6 +91,11 @@ const navItems: NavItem[] = [
     tab: "settings",
     icon: Settings,
   },
+  {
+    title: "Integrations",
+    tab: "integrations",
+    icon: Activity,
+  },
 ];
 
 const secondaryNavItems: NavItem[] = [

@@ -23,3 +23,15 @@ verify_jwt = false
 
 [functions.bv-expiry-job]
 verify_jwt = false
+
+[functions.webhook-gcash]
+verify_jwt = false
+
+[functions.webhook-bank]
+verify_jwt = false
+
+[functions.webhook-grab]
+verify_jwt = false
+
+[functions.webhook-lalamove]
+verify_jwt = false
