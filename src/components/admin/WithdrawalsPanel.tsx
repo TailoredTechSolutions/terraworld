@@ -4,193 +4,152 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Search,
-  MoreHorizontal,
-  Check,
-  X,
-  Flag,
-  Eye,
-  Download,
-  Filter,
-  Wallet,
-  AlertTriangle,
+  Search, MoreHorizontal, Check, X, Flag, Eye, Download, Filter, Wallet, AlertTriangle, Loader2,
 } from "lucide-react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-interface WithdrawalRequest {
+interface WithdrawalRow {
   id: string;
-  member_id: string;
-  member_name: string;
-  member_email: string;
+  user_id: string;
   amount: number;
+  fee: number;
+  net_amount: number;
   method: string;
-  kyc_status: string;
-  request_date: string;
-  status: "pending" | "approved" | "rejected" | "flagged";
-  reference_id?: string;
+  status: string;
+  reference_code: string;
+  review_note: string | null;
+  created_at: string;
+  profiles?: { full_name: string | null; email: string } | null;
 }
-
-// Mock data - in production this would come from wallet_transactions with type='withdrawal'
-const mockWithdrawals: WithdrawalRequest[] = [
-  {
-    id: "1",
-    member_id: "M001",
-    member_name: "Maria Santos",
-    member_email: "maria@example.com",
-    amount: 5000,
-    method: "GCash",
-    kyc_status: "approved",
-    request_date: "2026-01-25T10:30:00Z",
-    status: "pending",
-  },
-  {
-    id: "2",
-    member_id: "M002",
-    member_name: "Juan dela Cruz",
-    member_email: "juan@example.com",
-    amount: 15000,
-    method: "Bank Transfer",
-    kyc_status: "approved",
-    request_date: "2026-01-24T14:20:00Z",
-    status: "pending",
-  },
-  {
-    id: "3",
-    member_id: "M003",
-    member_name: "Ana Reyes",
-    member_email: "ana@example.com",
-    amount: 2500,
-    method: "Maya",
-    kyc_status: "pending",
-    request_date: "2026-01-24T09:15:00Z",
-    status: "flagged",
-  },
-  {
-    id: "4",
-    member_id: "M004",
-    member_name: "Pedro Gomez",
-    member_email: "pedro@example.com",
-    amount: 8000,
-    method: "Bank Transfer",
-    kyc_status: "approved",
-    request_date: "2026-01-23T16:45:00Z",
-    status: "approved",
-    reference_id: "REF-2026-0123",
-  },
-];
 
 const WithdrawalsPanel = () => {
   const { toast } = useToast();
-  const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>(mockWithdrawals);
+  const [withdrawals, setWithdrawals] = useState<WithdrawalRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [selectedWithdrawal, setSelectedWithdrawal] = useState<WithdrawalRequest | null>(null);
   const [actionDialog, setActionDialog] = useState<{
-    open: boolean;
-    action: "approve" | "reject" | "flag" | null;
-    withdrawal: WithdrawalRequest | null;
+    open: boolean; action: "approved" | "rejected" | "flagged" | null; withdrawal: WithdrawalRow | null;
   }>({ open: false, action: null, withdrawal: null });
   const [actionNote, setActionNote] = useState("");
+  const [processing, setProcessing] = useState(false);
 
-  const filteredWithdrawals = withdrawals.filter((w) => {
-    const matchesSearch = 
-      w.member_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      w.member_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      w.member_email.toLowerCase().includes(searchQuery.toLowerCase());
+  const fetchWithdrawals = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("withdrawal_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Fetch profile info for each unique user
+      const userIds = [...new Set((data || []).map((w: any) => w.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, email")
+        .in("user_id", userIds);
+
+      const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+
+      setWithdrawals(
+        (data || []).map((w: any) => ({
+          ...w,
+          profiles: profileMap.get(w.user_id) || null,
+        }))
+      );
+    } catch (error) {
+      console.error("Error fetching withdrawals:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWithdrawals();
+  }, []);
+
+  const handleAction = (action: "approved" | "rejected" | "flagged", withdrawal: WithdrawalRow) => {
+    setActionDialog({ open: true, action, withdrawal });
+    setActionNote("");
+  };
+
+  const confirmAction = async () => {
+    if (!actionDialog.action || !actionDialog.withdrawal) return;
+    setProcessing(true);
+    try {
+      const { error } = await supabase.functions.invoke("process-withdrawal", {
+        body: {
+          action: "review",
+          withdrawal_id: actionDialog.withdrawal.id,
+          decision: actionDialog.action,
+          note: actionNote,
+        },
+      });
+      if (error) throw error;
+
+      toast({
+        title: `Withdrawal ${actionDialog.action}`,
+        description: `₱${actionDialog.withdrawal.amount.toLocaleString()} request has been ${actionDialog.action}.`,
+      });
+      setActionDialog({ open: false, action: null, withdrawal: null });
+      fetchWithdrawals();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const filtered = withdrawals.filter((w) => {
+    const name = w.profiles?.full_name || "";
+    const email = w.profiles?.email || "";
+    const matchesSearch =
+      name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      w.reference_code.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || w.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; className?: string }> = {
+    const map: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; className?: string }> = {
       pending: { variant: "secondary" },
       approved: { variant: "default", className: "bg-success" },
+      completed: { variant: "default", className: "bg-success" },
+      processing: { variant: "outline", className: "border-primary text-primary" },
       rejected: { variant: "destructive" },
       flagged: { variant: "outline", className: "border-orange-500 text-orange-500" },
     };
-    const config = variants[status] || { variant: "secondary" };
-    return (
-      <Badge variant={config.variant} className={config.className}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Badge>
-    );
+    const c = map[status] || { variant: "secondary" as const };
+    return <Badge variant={c.variant} className={c.className}>{status.charAt(0).toUpperCase() + status.slice(1)}</Badge>;
   };
 
-  const getKYCBadge = (status: string) => {
-    if (status === "approved") {
-      return <Badge variant="default" className="bg-success text-xs">Verified</Badge>;
-    }
-    return <Badge variant="outline" className="text-orange-500 border-orange-500 text-xs">Pending</Badge>;
-  };
-
-  const handleAction = (action: "approve" | "reject" | "flag", withdrawal: WithdrawalRequest) => {
-    setActionDialog({ open: true, action, withdrawal });
-    setActionNote("");
-  };
-
-  const confirmAction = () => {
-    if (!actionDialog.action || !actionDialog.withdrawal) return;
-
-    setWithdrawals((prev) =>
-      prev.map((w) =>
-        w.id === actionDialog.withdrawal!.id
-          ? { ...w, status: actionDialog.action === "flag" ? "flagged" : actionDialog.action === "approve" ? "approved" : "rejected" }
-          : w
-      )
-    );
-
-    toast({
-      title: `Withdrawal ${actionDialog.action === "approve" ? "Approved" : actionDialog.action === "reject" ? "Rejected" : "Flagged"}`,
-      description: `Withdrawal request for ₱${actionDialog.withdrawal.amount.toLocaleString()} has been ${actionDialog.action}d.`,
-    });
-
-    setActionDialog({ open: false, action: null, withdrawal: null });
-  };
-
-  const pendingTotal = withdrawals.filter(w => w.status === "pending").reduce((sum, w) => sum + w.amount, 0);
+  const pendingTotal = withdrawals.filter(w => w.status === "pending").reduce((s, w) => s + Number(w.amount), 0);
   const pendingCount = withdrawals.filter(w => w.status === "pending").length;
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-orange-500/10">
-                <Wallet className="h-5 w-5 text-orange-500" />
-              </div>
+              <div className="p-2 rounded-lg bg-orange-500/10"><Wallet className="h-5 w-5 text-orange-500" /></div>
               <div>
                 <p className="text-2xl font-bold">₱{pendingTotal.toLocaleString()}</p>
                 <p className="text-xs text-muted-foreground">Pending Amount</p>
@@ -201,9 +160,7 @@ const WithdrawalsPanel = () => {
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-secondary">
-                <AlertTriangle className="h-5 w-5 text-muted-foreground" />
-              </div>
+              <div className="p-2 rounded-lg bg-secondary"><AlertTriangle className="h-5 w-5 text-muted-foreground" /></div>
               <div>
                 <p className="text-2xl font-bold">{pendingCount}</p>
                 <p className="text-xs text-muted-foreground">Pending Requests</p>
@@ -214,12 +171,10 @@ const WithdrawalsPanel = () => {
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-success/10">
-                <Check className="h-5 w-5 text-success" />
-              </div>
+              <div className="p-2 rounded-lg bg-success/10"><Check className="h-5 w-5 text-success" /></div>
               <div>
-                <p className="text-2xl font-bold">{withdrawals.filter(w => w.status === "approved").length}</p>
-                <p className="text-xs text-muted-foreground">Approved Today</p>
+                <p className="text-2xl font-bold">{withdrawals.filter(w => w.status === "approved" || w.status === "completed").length}</p>
+                <p className="text-xs text-muted-foreground">Approved</p>
               </div>
             </div>
           </CardContent>
@@ -227,19 +182,16 @@ const WithdrawalsPanel = () => {
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-destructive/10">
-                <Flag className="h-5 w-5 text-destructive" />
-              </div>
+              <div className="p-2 rounded-lg bg-destructive/10"><Flag className="h-5 w-5 text-destructive" /></div>
               <div>
                 <p className="text-2xl font-bold">{withdrawals.filter(w => w.status === "flagged").length}</p>
-                <p className="text-xs text-muted-foreground">Flagged for Review</p>
+                <p className="text-xs text-muted-foreground">Flagged</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Requests Table */}
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -250,18 +202,10 @@ const WithdrawalsPanel = () => {
             <div className="flex gap-2">
               <div className="relative flex-1 sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search member..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
+                <Input placeholder="Search member..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-32">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="w-32"><Filter className="h-4 w-4 mr-2" /><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
@@ -270,176 +214,101 @@ const WithdrawalsPanel = () => {
                   <SelectItem value="flagged">Flagged</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="icon">
-                <Download className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Member ID</TableHead>
-                <TableHead>Member</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Method</TableHead>
-                <TableHead>KYC Status</TableHead>
-                <TableHead>Request Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[80px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredWithdrawals.map((withdrawal) => (
-                <TableRow key={withdrawal.id}>
-                  <TableCell className="font-mono text-sm">{withdrawal.member_id}</TableCell>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium">{withdrawal.member_name}</p>
-                      <p className="text-xs text-muted-foreground">{withdrawal.member_email}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-semibold">₱{withdrawal.amount.toLocaleString()}</TableCell>
-                  <TableCell>{withdrawal.method}</TableCell>
-                  <TableCell>{getKYCBadge(withdrawal.kyc_status)}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {new Date(withdrawal.request_date).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(withdrawal.status)}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setSelectedWithdrawal(withdrawal)}>
-                          <Eye className="h-4 w-4 mr-2" /> View Details
-                        </DropdownMenuItem>
-                        {withdrawal.status === "pending" && (
-                          <>
-                            <DropdownMenuItem 
-                              onClick={() => handleAction("approve", withdrawal)}
-                              className="text-success"
-                            >
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Wallet className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p>No withdrawal requests found</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Member</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Fee</TableHead>
+                  <TableHead>Net</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[80px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((w) => (
+                  <TableRow key={w.id}>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{w.profiles?.full_name || "Unknown"}</p>
+                        <p className="text-xs text-muted-foreground">{w.profiles?.email}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-semibold">₱{Number(w.amount).toLocaleString()}</TableCell>
+                    <TableCell className="text-muted-foreground">₱{Number(w.fee).toLocaleString()}</TableCell>
+                    <TableCell className="font-medium">₱{Number(w.net_amount).toLocaleString()}</TableCell>
+                    <TableCell className="capitalize">{w.method}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{new Date(w.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>{getStatusBadge(w.status)}</TableCell>
+                    <TableCell>
+                      {w.status === "pending" && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleAction("approved", w)} className="text-success">
                               <Check className="h-4 w-4 mr-2" /> Approve
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleAction("reject", withdrawal)}
-                              className="text-destructive"
-                            >
+                            <DropdownMenuItem onClick={() => handleAction("rejected", w)} className="text-destructive">
                               <X className="h-4 w-4 mr-2" /> Reject
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleAction("flag", withdrawal)}
-                              className="text-orange-500"
-                            >
-                              <Flag className="h-4 w-4 mr-2" /> Flag for Review
+                            <DropdownMenuItem onClick={() => handleAction("flagged", w)} className="text-orange-500">
+                              <Flag className="h-4 w-4 mr-2" /> Flag
                             </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
-      {/* Action Confirmation Dialog */}
       <Dialog open={actionDialog.open} onOpenChange={(open) => setActionDialog({ ...actionDialog, open })}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {actionDialog.action === "approve" && "Approve Withdrawal"}
-              {actionDialog.action === "reject" && "Reject Withdrawal"}
-              {actionDialog.action === "flag" && "Flag for Review"}
+              {actionDialog.action === "approved" && "Approve Withdrawal"}
+              {actionDialog.action === "rejected" && "Reject Withdrawal"}
+              {actionDialog.action === "flagged" && "Flag for Review"}
             </DialogTitle>
             <DialogDescription>
               {actionDialog.withdrawal && (
-                <>
-                  Processing withdrawal of <strong>₱{actionDialog.withdrawal.amount.toLocaleString()}</strong> for{" "}
-                  <strong>{actionDialog.withdrawal.member_name}</strong>
-                </>
+                <>Processing ₱{Number(actionDialog.withdrawal.amount).toLocaleString()} for {actionDialog.withdrawal.profiles?.full_name}</>
               )}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Note (optional)</label>
-              <Textarea
-                placeholder="Add a note for this action..."
-                value={actionNote}
-                onChange={(e) => setActionNote(e.target.value)}
-              />
-            </div>
+            <Textarea placeholder="Add a note..." value={actionNote} onChange={(e) => setActionNote(e.target.value)} />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setActionDialog({ open: false, action: null, withdrawal: null })}>
-              Cancel
-            </Button>
-            <Button
-              onClick={confirmAction}
-              className={
-                actionDialog.action === "approve"
-                  ? "bg-success hover:bg-success/90"
-                  : actionDialog.action === "reject"
-                  ? "bg-destructive hover:bg-destructive/90"
-                  : "bg-orange-500 hover:bg-orange-600"
-              }
-            >
-              Confirm {actionDialog.action?.charAt(0).toUpperCase()}{actionDialog.action?.slice(1)}
+            <Button variant="outline" onClick={() => setActionDialog({ open: false, action: null, withdrawal: null })}>Cancel</Button>
+            <Button onClick={confirmAction} disabled={processing}
+              className={actionDialog.action === "approved" ? "bg-success hover:bg-success/90" : actionDialog.action === "rejected" ? "bg-destructive hover:bg-destructive/90" : "bg-orange-500 hover:bg-orange-600"}>
+              {processing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Confirm
             </Button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Withdrawal Details Dialog */}
-      <Dialog open={!!selectedWithdrawal} onOpenChange={() => setSelectedWithdrawal(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Withdrawal Request Details</DialogTitle>
-          </DialogHeader>
-          {selectedWithdrawal && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Member ID</p>
-                  <p className="font-medium">{selectedWithdrawal.member_id}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Status</p>
-                  {getStatusBadge(selectedWithdrawal.status)}
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Amount</p>
-                  <p className="text-xl font-bold">₱{selectedWithdrawal.amount.toLocaleString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Method</p>
-                  <p className="font-medium">{selectedWithdrawal.method}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">KYC Status</p>
-                  {getKYCBadge(selectedWithdrawal.kyc_status)}
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Request Date</p>
-                  <p className="font-medium">{new Date(selectedWithdrawal.request_date).toLocaleString()}</p>
-                </div>
-              </div>
-              {selectedWithdrawal.reference_id && (
-                <div className="p-3 bg-secondary rounded-lg">
-                  <p className="text-sm text-muted-foreground">Reference ID</p>
-                  <p className="font-mono">{selectedWithdrawal.reference_id}</p>
-                </div>
-              )}
-            </div>
-          )}
         </DialogContent>
       </Dialog>
     </div>
