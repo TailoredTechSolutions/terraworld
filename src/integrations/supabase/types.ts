@@ -16,42 +16,60 @@ export type Database = {
     Tables: {
       binary_ledger: {
         Row: {
+          adjusted_cycle_value: number | null
           binary_income: number
           cap_applied: number
           carryforward_left: number
           carryforward_right: number
           created_at: string
+          fail_safe_triggered: boolean
           id: string
           left_bv: number
+          left_membership_bv: number
+          left_product_bv: number
           matched_bv: number
           payout_period: string
           right_bv: number
+          right_membership_bv: number
+          right_product_bv: number
           user_id: string
         }
         Insert: {
+          adjusted_cycle_value?: number | null
           binary_income?: number
           cap_applied?: number
           carryforward_left?: number
           carryforward_right?: number
           created_at?: string
+          fail_safe_triggered?: boolean
           id?: string
           left_bv?: number
+          left_membership_bv?: number
+          left_product_bv?: number
           matched_bv?: number
           payout_period: string
           right_bv?: number
+          right_membership_bv?: number
+          right_product_bv?: number
           user_id: string
         }
         Update: {
+          adjusted_cycle_value?: number | null
           binary_income?: number
           cap_applied?: number
           carryforward_left?: number
           carryforward_right?: number
           created_at?: string
+          fail_safe_triggered?: boolean
           id?: string
           left_bv?: number
+          left_membership_bv?: number
+          left_product_bv?: number
           matched_bv?: number
           payout_period?: string
           right_bv?: number
+          right_membership_bv?: number
+          right_product_bv?: number
           user_id?: string
         }
         Relationships: []
@@ -138,6 +156,72 @@ export type Database = {
           total_terra_fees?: number
         }
         Relationships: []
+      }
+      digital_assets: {
+        Row: {
+          asset_code: string
+          asset_type: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          issued_at: string
+          metadata: Json | null
+          order_id: string | null
+          qr_data: string | null
+          redeemed_at: string | null
+          redeemed_by: string | null
+          shop_product_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          asset_code: string
+          asset_type: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          issued_at?: string
+          metadata?: Json | null
+          order_id?: string | null
+          qr_data?: string | null
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          shop_product_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          asset_code?: string
+          asset_type?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          issued_at?: string
+          metadata?: Json | null
+          order_id?: string | null
+          qr_data?: string | null
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          shop_product_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "digital_assets_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "digital_assets_shop_product_id_fkey"
+            columns: ["shop_product_id"]
+            isOneToOne: false
+            referencedRelation: "shop_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       drivers: {
         Row: {
@@ -482,8 +566,70 @@ export type Database = {
           },
         ]
       }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          order_id: string
+          product_id: string | null
+          quantity: number
+          shop_product_id: string | null
+          total_price: number
+          unit_price: number
+          variant_info: Json | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          order_id: string
+          product_id?: string | null
+          quantity?: number
+          shop_product_id?: string | null
+          total_price: number
+          unit_price: number
+          variant_info?: Json | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          order_id?: string
+          product_id?: string | null
+          quantity?: number
+          shop_product_id?: string | null
+          total_price?: number
+          unit_price?: number
+          variant_info?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_shop_product_id_fkey"
+            columns: ["shop_product_id"]
+            isOneToOne: false
+            referencedRelation: "shop_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
+          bv_type: string | null
           created_at: string
           customer_email: string | null
           customer_name: string
@@ -492,6 +638,7 @@ export type Database = {
           delivery_fee: number
           delivery_latitude: number | null
           delivery_longitude: number | null
+          discount: number
           driver_id: string | null
           farmer_id: string | null
           farmer_price: number | null
@@ -500,6 +647,8 @@ export type Database = {
           items_count: number
           notes: string | null
           order_number: string
+          order_type: string
+          payment_fee: number
           referrer_id: string | null
           status: Database["public"]["Enums"]["order_status"] | null
           subtotal: number
@@ -509,6 +658,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bv_type?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name: string
@@ -517,6 +667,7 @@ export type Database = {
           delivery_fee?: number
           delivery_latitude?: number | null
           delivery_longitude?: number | null
+          discount?: number
           driver_id?: string | null
           farmer_id?: string | null
           farmer_price?: number | null
@@ -525,6 +676,8 @@ export type Database = {
           items_count?: number
           notes?: string | null
           order_number: string
+          order_type?: string
+          payment_fee?: number
           referrer_id?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           subtotal?: number
@@ -534,6 +687,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bv_type?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string
@@ -542,6 +696,7 @@ export type Database = {
           delivery_fee?: number
           delivery_latitude?: number | null
           delivery_longitude?: number | null
+          discount?: number
           driver_id?: string | null
           farmer_id?: string | null
           farmer_price?: number | null
@@ -550,6 +705,8 @@ export type Database = {
           items_count?: number
           notes?: string | null
           order_number?: string
+          order_type?: string
+          payment_fee?: number
           referrer_id?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           subtotal?: number
@@ -776,6 +933,57 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_products: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          metadata: Json | null
+          name: string
+          price: number
+          product_type: string
+          sku: string
+          status: string
+          stock_quantity: number | null
+          terra_fee_percent: number
+          token_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          metadata?: Json | null
+          name: string
+          price?: number
+          product_type: string
+          sku: string
+          status?: string
+          stock_quantity?: number | null
+          terra_fee_percent?: number
+          token_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          metadata?: Json | null
+          name?: string
+          price?: number
+          product_type?: string
+          sku?: string
+          status?: string
+          stock_quantity?: number | null
+          terra_fee_percent?: number
+          token_price?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       token_ledger: {
         Row: {
           created_at: string
@@ -829,11 +1037,14 @@ export type Database = {
       }
       wallet_transactions: {
         Row: {
+          actor_id: string | null
           amount: number
           balance_after: number
+          balance_before: number | null
           created_at: string
           description: string | null
           id: string
+          metadata: Json | null
           reference_id: string | null
           status: string
           transaction_type: string
@@ -841,11 +1052,14 @@ export type Database = {
           wallet_id: string
         }
         Insert: {
+          actor_id?: string | null
           amount: number
           balance_after: number
+          balance_before?: number | null
           created_at?: string
           description?: string | null
           id?: string
+          metadata?: Json | null
           reference_id?: string | null
           status?: string
           transaction_type: string
@@ -853,11 +1067,14 @@ export type Database = {
           wallet_id: string
         }
         Update: {
+          actor_id?: string | null
           amount?: number
           balance_after?: number
+          balance_before?: number | null
           created_at?: string
           description?: string | null
           id?: string
+          metadata?: Json | null
           reference_id?: string | null
           status?: string
           transaction_type?: string
@@ -909,6 +1126,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_asset_code: { Args: { prefix?: string }; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       has_role: {
         Args: {

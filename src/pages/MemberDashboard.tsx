@@ -24,6 +24,8 @@ import MemberEarningsPanel from "@/components/member/MemberEarningsPanel";
 import MemberWithdrawPanel from "@/components/member/MemberWithdrawPanel";
 import MemberUpgradePanel from "@/components/member/MemberUpgradePanel";
 import MemberSupportPanel from "@/components/member/MemberSupportPanel";
+import MemberShopPanel from "@/components/member/MemberShopPanel";
+import BinaryTreeVisualization from "@/components/member/BinaryTreeVisualization";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Membership {
@@ -378,12 +380,13 @@ const MemberDashboard = () => {
         );
       case 'genealogy':
         return (
-          <MemberGenealogyPanel
-            userId={user.id}
-            membership={membership}
-            binaryStats={binaryStats}
-            totalEarnings={totalEarnings}
-          />
+          <div className="space-y-6">
+            <BinaryTreeVisualization
+              userId={user.id}
+              membership={membership}
+              binaryStats={binaryStats}
+            />
+          </div>
         );
       case 'earnings':
         return (
@@ -409,6 +412,8 @@ const MemberDashboard = () => {
         );
       case 'support':
         return <MemberSupportPanel />;
+      case 'shop':
+        return <MemberShopPanel userId={user.id} />;
       case 'settings':
         return renderKYCTab();
       default:
@@ -428,6 +433,7 @@ const MemberDashboard = () => {
       withdraw: 'Withdraw Funds',
       upgrade: 'Upgrade / Activation',
       support: 'Support & Tickets',
+      shop: 'Shop',
       settings: 'Settings & KYC',
     };
     return titles[activeTab] || 'Dashboard';
