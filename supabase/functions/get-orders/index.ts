@@ -27,32 +27,43 @@ Deno.serve(async (req) => {
     const supabaseService = createClient(supabaseUrl, supabaseServiceKey);
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
-    // Check authorization header for admin access
+    // Verify authentication and admin role
     const authHeader = req.headers.get('authorization');
     
-    // For now, we'll implement a simple check - in production you'd verify JWT claims
-    // This allows the admin dashboard to fetch orders
-    let isAuthorized = false;
-    
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.replace('Bearer ', '');
-      
-      // Verify the JWT
-      const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
-      
-      if (!authError && user) {
-        // In production, check if user has admin role
-        // For now, any authenticated user can access (you should add role check)
-        isAuthorized = true;
-        console.log('[get-orders] Authenticated user:', user.email);
-      }
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // For admin dashboard access without full auth implementation,
-    // we'll allow access but log it. In production, this should require proper admin role.
-    // This is a temporary measure until full auth is implemented.
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
     
-    console.log('[get-orders] Fetching orders, authorized:', isAuthorized);
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify admin role
+    const { data: adminRole } = await supabaseService
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle();
+
+    if (!adminRole) {
+      console.log('[get-orders] Non-admin access denied:', user.email);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - admin access required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('[get-orders] Admin access granted:', user.email);
 
     // Use service role to bypass RLS and fetch orders
     const { data: orders, error } = await supabaseService
