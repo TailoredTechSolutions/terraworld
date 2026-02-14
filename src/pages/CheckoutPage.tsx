@@ -250,32 +250,6 @@ const CheckoutPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="juan@example.com" 
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="glass-card border-glass-border focus:border-primary"
-                    required 
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input 
-                    id="phone" 
-                    type="tel" 
-                    placeholder="+63 917 123 4567" 
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="glass-card border-glass-border focus:border-primary"
-                    required 
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="address">Delivery Address</Label>
                   <Input 
                     id="address" 

@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+        }
+        Relationships: []
+      }
       binary_ledger: {
         Row: {
           adjusted_cycle_value: number | null
@@ -154,6 +187,42 @@ export type Database = {
           pool_amount?: number
           processed_at?: string | null
           total_terra_fees?: number
+        }
+        Relationships: []
+      }
+      delivery_zones: {
+        Row: {
+          base_fee: number
+          created_at: string
+          id: string
+          is_active: boolean
+          max_distance_km: number
+          min_distance_km: number
+          per_km_rate: number
+          updated_at: string
+          zone_name: string
+        }
+        Insert: {
+          base_fee?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_distance_km?: number
+          min_distance_km?: number
+          per_km_rate?: number
+          updated_at?: string
+          zone_name: string
+        }
+        Update: {
+          base_fee?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_distance_km?: number
+          min_distance_km?: number
+          per_km_rate?: number
+          updated_at?: string
+          zone_name?: string
         }
         Relationships: []
       }
@@ -782,6 +851,36 @@ export type Database = {
           },
         ]
       }
+      platform_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string
@@ -1120,6 +1219,68 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      withdrawal_requests: {
+        Row: {
+          account_details: Json | null
+          amount: number
+          created_at: string
+          fee: number
+          id: string
+          method: string
+          net_amount: number
+          reference_code: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          wallet_id: string
+        }
+        Insert: {
+          account_details?: Json | null
+          amount: number
+          created_at?: string
+          fee?: number
+          id?: string
+          method: string
+          net_amount: number
+          reference_code?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          wallet_id: string
+        }
+        Update: {
+          account_details?: Json | null
+          amount?: number
+          created_at?: string
+          fee?: number
+          id?: string
+          method?: string
+          net_amount?: number
+          reference_code?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawal_requests_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
