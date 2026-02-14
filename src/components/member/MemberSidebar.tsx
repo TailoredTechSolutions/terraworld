@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Ticket,
   Menu,
+  ShoppingBag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,11 @@ const navItems: NavItem[] = [
     title: "Withdraw Funds",
     href: "/member?tab=withdraw",
     icon: Wallet,
+  },
+  {
+    title: "Shop",
+    href: "/member?tab=shop",
+    icon: ShoppingBag,
   },
   {
     title: "Support",
