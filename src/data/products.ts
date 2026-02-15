@@ -23,11 +23,22 @@ import freshEggsImg from "@/assets/products/fresh-eggs.jpg";
 import carabaoMilkImg from "@/assets/products/carabao-milk.jpg";
 import kesongPutiImg from "@/assets/products/kesong-puti.jpg";
 import saltedEggsImg from "@/assets/products/salted-eggs.jpg";
+// Fruit imports (additional)
+import guavaImg from "@/assets/products/guava.jpg";
+import watermelonImg from "@/assets/products/watermelon.jpg";
+import pineappleImg from "@/assets/products/pineapple.jpg";
+import dragonFruitImg from "@/assets/products/dragon-fruit.jpg";
+import avocadoImg from "@/assets/products/avocado.jpg";
 // Pantry imports
 import arabicaCoffeeImg from "@/assets/products/arabica-coffee.jpg";
 import wildHoneyImg from "@/assets/products/wild-honey.jpg";
 import driedHerbsImg from "@/assets/products/dried-herbs.jpg";
 import muscovadoImg from "@/assets/products/muscovado.jpg";
+import ubeJamImg from "@/assets/products/ube-jam.jpg";
+import tableaImg from "@/assets/products/tablea.jpg";
+import brownRiceImg from "@/assets/products/brown-rice.jpg";
+import coconutVinegarImg from "@/assets/products/coconut-vinegar.jpg";
+import peanutButterImg from "@/assets/products/peanut-butter.jpg";
 
 export interface Product {
   id: string;
@@ -300,6 +311,71 @@ export const products: Product[] = [
     description: "Sweet Lakatan bananas from La Faustino Farm. Golden yellow with aromatic flavor, perfect snack fruit.",
   },
   {
+    id: "34",
+    name: "Guava",
+    price: 60.00,
+    unit: "kg",
+    farmId: "csb-family-farm",
+    farmName: "CSB Family Farm",
+    image: guavaImg,
+    category: "Fruits",
+    stock: 70,
+    organic: true,
+    description: "Fresh Philippine guava from CSB Family Farm. Sweet and aromatic, rich in Vitamin C. Perfect for juices and eating fresh.",
+  },
+  {
+    id: "35",
+    name: "Watermelon",
+    price: 35.00,
+    unit: "kg",
+    farmId: "mls-harvest-farm",
+    farmName: "ML's Harvest Farm",
+    image: watermelonImg,
+    category: "Fruits",
+    stock: 40,
+    organic: false,
+    description: "Sweet and juicy watermelon from ML's Harvest Farm. Refreshing tropical fruit, perfect for hot days and smoothies.",
+  },
+  {
+    id: "36",
+    name: "Queen Pineapple",
+    price: 55.00,
+    unit: "pc",
+    farmId: "la-faustino-farm",
+    farmName: "La Faustino Farm",
+    image: pineappleImg,
+    category: "Fruits",
+    stock: 50,
+    organic: true,
+    description: "Sweet Queen pineapple from La Faustino Farm. Extra sweet variety with low acidity, grown in the Cordillera highlands.",
+  },
+  {
+    id: "37",
+    name: "Dragon Fruit",
+    price: 180.00,
+    unit: "kg",
+    farmId: "fit-fab-farm",
+    farmName: "Fit and Fab Farm",
+    image: dragonFruitImg,
+    category: "Fruits",
+    stock: 30,
+    organic: true,
+    description: "Fresh dragon fruit (pitaya) from Fit and Fab Farm. Beautiful pink skin with white flesh, rich in antioxidants.",
+  },
+  {
+    id: "38",
+    name: "Avocado",
+    price: 90.00,
+    unit: "kg",
+    farmId: "pcjeam-farm",
+    farmName: "PCJEAM Farm",
+    image: avocadoImg,
+    category: "Fruits",
+    stock: 45,
+    organic: true,
+    description: "Creamy highland avocados from PCJEAM Farm in Atok. Buttery texture, perfect for shakes, salads, and spreads.",
+  },
+  {
     id: "25",
     name: "Calamansi",
     price: 80.00,
@@ -418,6 +494,71 @@ export const products: Product[] = [
     organic: true,
     description: "Unrefined muscovado sugar from CSB Family Farm. Dark, rich molasses flavor, traditionally processed. Great for baking and beverages.",
   },
+  {
+    id: "39",
+    name: "Ube Jam",
+    price: 160.00,
+    unit: "250g",
+    farmId: "csb-family-farm",
+    farmName: "CSB Family Farm",
+    image: ubeJamImg,
+    category: "Pantry",
+    stock: 35,
+    organic: false,
+    description: "Homemade ube (purple yam) jam from CSB Family Farm. Rich, sweet, and vibrant purple. Perfect for bread, pandesal, and desserts.",
+  },
+  {
+    id: "40",
+    name: "Tablea (Cacao Tablets)",
+    price: 200.00,
+    unit: "200g",
+    farmId: "dulche-chocolates",
+    farmName: "Dulche Chocolates Inc.",
+    image: tableaImg,
+    category: "Pantry",
+    stock: 50,
+    organic: true,
+    description: "Traditional Filipino cacao tablea from Dulche Chocolates. Pure roasted cacao discs for tsokolate and champorado.",
+  },
+  {
+    id: "41",
+    name: "Organic Brown Rice",
+    price: 85.00,
+    unit: "kg",
+    farmId: "pcjeam-farm",
+    farmName: "PCJEAM Farm",
+    image: brownRiceImg,
+    category: "Pantry",
+    stock: 100,
+    organic: true,
+    description: "Organic brown rice from PCJEAM Farm in Atok. Unpolished whole grain with high fiber content. Nutty flavor and chewy texture.",
+  },
+  {
+    id: "42",
+    name: "Coconut Vinegar (Sukang Tuba)",
+    price: 65.00,
+    unit: "350ml",
+    farmId: "mls-harvest-farm",
+    farmName: "ML's Harvest Farm",
+    image: coconutVinegarImg,
+    category: "Pantry",
+    stock: 70,
+    organic: true,
+    description: "Traditional coconut sap vinegar from ML's Harvest Farm. Naturally fermented, mild acidity. Essential for Filipino cooking and dipping sauces.",
+  },
+  {
+    id: "43",
+    name: "Farm Peanut Butter",
+    price: 130.00,
+    unit: "250g",
+    farmId: "la-faustino-farm",
+    farmName: "La Faustino Farm",
+    image: peanutButterImg,
+    category: "Pantry",
+    stock: 45,
+    organic: false,
+    description: "Homemade peanut butter from La Faustino Farm. Creamy, all-natural with no preservatives. Made from locally grown peanuts.",
+  },
 ];
 
 // Verified ATI Learning Sites + PhilGAP Certified Farms from Baguio-Benguet
@@ -498,7 +639,7 @@ export const farms: Farm[] = [
     reviewCount: 68,
     image: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=800",
     description: "ATI-certified specialized farm in Tublay, Benguet. Certificate: LSA-2022-04-059. Integrated farm featuring mixed crops and produce.",
-    products: ["Mixed Crops", "Strawberries", "Bananas", "Eggs"],
+    products: ["Mixed Crops", "Strawberries", "Bananas", "Pineapple", "Peanut Butter", "Eggs"],
     contact: "0949-793-4967",
     farmType: "Specialized Farm",
     certificate: "LSA-2022-04-059",
@@ -514,7 +655,7 @@ export const farms: Farm[] = [
     reviewCount: 45,
     image: "https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=800",
     description: "ATI-certified specialized farm in Atok, Benguet. Certificate: LSA-2022-06-108. High-altitude vegetable and dairy production.",
-    products: ["Vegetables", "Potatoes", "Carabao Milk", "Highland Produce"],
+    products: ["Vegetables", "Potatoes", "Carabao Milk", "Avocado", "Brown Rice", "Highland Produce"],
     contact: "0909-201-2105",
     farmType: "Specialized Farm",
     certificate: "LSA-2022-06-108",
@@ -530,7 +671,7 @@ export const farms: Farm[] = [
     reviewCount: 112,
     image: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=800",
     description: "ATI-certified cacao processing facility in Irisan, Baguio City. Certificate: LSA-2023-09-216. Specializes in bean-to-bar chocolate and Benguet Arabica coffee.",
-    products: ["Cacao", "Artisan Chocolate", "Arabica Coffee", "Cacao Products"],
+    products: ["Cacao", "Artisan Chocolate", "Arabica Coffee", "Tablea", "Cacao Products"],
     contact: "0930-296-1654",
     farmType: "Cacao Processing",
     certificate: "LSA-2023-09-216",
@@ -547,7 +688,7 @@ export const farms: Farm[] = [
     reviewCount: 86,
     image: "https://images.unsplash.com/photo-1595855759920-86582396756a?w=800",
     description: "PhilGAP-certified fruit & vegetable farm in Tuba, Benguet. Implements Philippine Good Agricultural Practices for food safety and quality assurance.",
-    products: ["Vegetables & Fruits", "Sayote", "Calamansi", "Kesong Puti", "Muscovado"],
+    products: ["Vegetables & Fruits", "Sayote", "Calamansi", "Guava", "Kesong Puti", "Muscovado", "Ube Jam"],
     farmType: "Fruit & Vegetable Farm",
     program: "PhilGAP Certified",
   },
@@ -561,7 +702,7 @@ export const farms: Farm[] = [
     reviewCount: 64,
     image: "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800",
     description: "PhilGAP-certified organic garden in Lucnab, Baguio City. Produces health-focused organic vegetables with sustainability certification.",
-    products: ["Organic Vegetables", "Pechay", "Lettuce", "Salad Greens", "Herbs"],
+    products: ["Organic Vegetables", "Pechay", "Lettuce", "Dragon Fruit", "Salad Greens", "Herbs"],
     farmType: "Organic Garden",
     program: "PhilGAP Certified",
   },
@@ -575,7 +716,7 @@ export const farms: Farm[] = [
     reviewCount: 58,
     image: "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=800",
     description: "PhilGAP-certified integrated farm in Itogon, Benguet. Features vegetables, fish farming, and fruit production with certified food safety practices.",
-    products: ["Vegetables & Fish", "Mangoes", "Papayas", "Wild Honey", "Salted Eggs"],
+    products: ["Vegetables & Fruits", "Mangoes", "Papayas", "Watermelon", "Wild Honey", "Coconut Vinegar", "Salted Eggs"],
     farmType: "Integrated Farm",
     program: "PhilGAP Certified",
   },
