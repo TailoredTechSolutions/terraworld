@@ -24,10 +24,12 @@ import {
   ShoppingBag,
   Coins,
   Users,
+  Receipt,
 } from "lucide-react";
 import FarmerOrdersPanel from "@/components/farmer/FarmerOrdersPanel";
 import FarmerTokensPanel from "@/components/farmer/FarmerTokensPanel";
 import FarmerReferralsPanel from "@/components/farmer/FarmerReferralsPanel";
+import FarmerPricingPanel from "@/components/farmer/FarmerPricingPanel";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Farmer = Tables<"farmers">;
@@ -240,6 +242,10 @@ const FarmerDashboard = () => {
               <Package className="h-4 w-4" />
               Products
             </TabsTrigger>
+            <TabsTrigger value="pricing" className="gap-2">
+              <Receipt className="h-4 w-4" />
+              Pricing
+            </TabsTrigger>
             <TabsTrigger value="orders" className="gap-2">
               <ShoppingBag className="h-4 w-4" />
               Orders
@@ -256,6 +262,10 @@ const FarmerDashboard = () => {
 
           <TabsContent value="products">
             <FarmerProductsPanel farmerId={farmer.id} />
+          </TabsContent>
+
+          <TabsContent value="pricing">
+            <FarmerPricingPanel farmerId={farmer.id} />
           </TabsContent>
 
           <TabsContent value="orders">
