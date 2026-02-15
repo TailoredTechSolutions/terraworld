@@ -35,3 +35,9 @@ verify_jwt = false
 
 [functions.webhook-lalamove]
 verify_jwt = false
+
+[functions.delivery-estimate]
+verify_jwt = false
+
+[functions.delivery-booking]
+verify_jwt = false

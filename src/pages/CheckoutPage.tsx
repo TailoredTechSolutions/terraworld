@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import DeliveryProviderSelector from "@/components/checkout/DeliveryProviderSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
@@ -33,6 +34,14 @@ const checkoutSchema = z.object({
     .regex(/^\d{4,10}$/, "Invalid postal code"),
 });
 
+interface DeliveryEstimate {
+  provider: string;
+  estimated_fee: number;
+  estimated_eta_minutes: number;
+  distance_km: number;
+  status: string;
+}
+
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -40,6 +49,10 @@ const CheckoutPage = () => {
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  
+  // Delivery provider state
+  const [selectedDeliveryProvider, setSelectedDeliveryProvider] = useState<string>("");
+  const [deliveryEstimate, setDeliveryEstimate] = useState<DeliveryEstimate | null>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -52,27 +65,38 @@ const CheckoutPage = () => {
     zip: "",
   });
 
-  const farmerSubtotal = getTotalPrice(); // Base farmer prices
-  const platformFeePercent = 0.20; // 20% Platform Service Fee
-  const commissionPercent = 0.10; // 10% Commission
-  const vatPercent = 0.12; // Philippine VAT 12%
+  const farmerSubtotal = getTotalPrice();
+  const platformFeePercent = 0.20;
+  const commissionPercent = 0.10;
+  const vatPercent = 0.12;
   const platformFee = farmerSubtotal * platformFeePercent;
   const commission = farmerSubtotal * commissionPercent;
   const subtotalBeforeVAT = farmerSubtotal + platformFee + commission;
   const vat = subtotalBeforeVAT * vatPercent;
-  const deliveryFee = farmerSubtotal > 0 ? 45 : 0; // Transport fee (Lalamove/Grab)
+  const deliveryFee = deliveryEstimate?.estimated_fee ?? 0;
   const total = subtotalBeforeVAT + vat + deliveryFee;
+
+  // Default coordinates for pickup (Manila farm) and delivery
+  const defaultPickupLat = 14.5547;
+  const defaultPickupLng = 121.0244;
+  // Default delivery coordinates (Manila center)
+  const defaultDeliveryLat = 14.5995;
+  const defaultDeliveryLng = 120.9842;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
+  const handleDeliveryProviderSelect = (provider: string, estimate: DeliveryEstimate) => {
+    setSelectedDeliveryProvider(provider);
+    setDeliveryEstimate(estimate);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormErrors({});
 
-    // Client-side Zod validation
     const validation = checkoutSchema.safeParse(formData);
     if (!validation.success) {
       const errors: Record<string, string> = {};
@@ -83,10 +107,18 @@ const CheckoutPage = () => {
       return;
     }
 
+    if (!selectedDeliveryProvider) {
+      toast({
+        title: "Select Delivery Service",
+        description: "Please choose a delivery provider (Lalamove or Grab) before placing your order.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsProcessing(true);
     
     try {
-      // Prepare order items for backend validation
       const orderItems = items.map((item) => ({
         id: item.product.id,
         name: item.product.name,
@@ -96,7 +128,6 @@ const CheckoutPage = () => {
         farmName: item.product.farmName,
       }));
 
-      // Send order to secure backend edge function for server-side validation
       const { data, error } = await supabase.functions.invoke('create-order', {
         body: {
           customer_name: `${formData.firstName} ${formData.lastName}`.trim(),
@@ -105,25 +136,22 @@ const CheckoutPage = () => {
           delivery_address: `${formData.address}, ${formData.city} ${formData.zip}`.trim(),
           items: orderItems,
           payment_method: paymentMethod,
+          delivery_provider: selectedDeliveryProvider,
+          delivery_fee: deliveryFee,
           notes: null,
         },
       });
 
-      if (error) {
-        throw new Error(error.message || 'Failed to create order');
-      }
+      if (error) throw new Error(error.message || 'Failed to create order');
+      if (!data?.success || !data?.order) throw new Error(data?.error || 'Order creation failed');
 
-      if (!data?.success || !data?.order) {
-        throw new Error(data?.error || 'Order creation failed');
-      }
-
-      // Clear cart and navigate to confirmation
       clearCart();
       navigate("/order-confirmation", { 
         state: { 
           orderId: data.order.order_number,
           total: data.order.total,
           paymentMethod,
+          deliveryProvider: selectedDeliveryProvider,
           items: items.length,
           customerName: `${formData.firstName} ${formData.lastName}`,
           deliveryAddress: `${formData.address}, ${formData.city} ${formData.zip}`,
@@ -295,6 +323,16 @@ const CheckoutPage = () => {
                 </div>
               </div>
 
+              {/* Delivery Provider Selection */}
+              <DeliveryProviderSelector
+                pickupLat={defaultPickupLat}
+                pickupLng={defaultPickupLng}
+                deliveryLat={defaultDeliveryLat}
+                deliveryLng={defaultDeliveryLng}
+                onProviderSelect={handleDeliveryProviderSelect}
+                selectedProvider={selectedDeliveryProvider}
+              />
+
               {/* Payment Method */}
               <div className="glass-card p-6 rounded-2xl space-y-4">
                 <h2 className="font-display text-lg font-semibold flex items-center gap-2">
@@ -317,11 +355,11 @@ const CheckoutPage = () => {
                       <p className="text-sm text-muted-foreground">Visa, Mastercard, JCB</p>
                     </div>
                     <div className="flex gap-1">
-                      <div className="h-6 w-10 bg-gradient-to-r from-blue-600 to-blue-800 rounded text-white text-[8px] font-bold flex items-center justify-center">VISA</div>
-                      <div className="h-6 w-10 bg-gradient-to-r from-red-500 to-orange-500 rounded flex items-center justify-center">
+                      <div className="h-6 w-10 bg-gradient-to-r from-primary/80 to-primary rounded text-primary-foreground text-[8px] font-bold flex items-center justify-center">VISA</div>
+                      <div className="h-6 w-10 bg-gradient-to-r from-destructive/80 to-destructive rounded flex items-center justify-center">
                         <div className="flex -space-x-1">
-                          <div className="h-3 w-3 bg-red-600 rounded-full opacity-80" />
-                          <div className="h-3 w-3 bg-yellow-400 rounded-full opacity-80" />
+                          <div className="h-3 w-3 bg-destructive rounded-full opacity-80" />
+                          <div className="h-3 w-3 bg-accent rounded-full opacity-80" />
                         </div>
                       </div>
                     </div>
@@ -335,12 +373,12 @@ const CheckoutPage = () => {
                     }`}
                   >
                     <RadioGroupItem value="gcash" id="gcash" />
-                    <Smartphone className="h-5 w-5 text-blue-500" />
+                    <Smartphone className="h-5 w-5 text-primary" />
                     <div className="flex-1">
                       <p className="font-medium">GCash</p>
                       <p className="text-sm text-muted-foreground">Pay with your GCash wallet</p>
                     </div>
-                    <div className="h-6 w-14 bg-blue-500 rounded text-white text-[10px] font-bold flex items-center justify-center">GCash</div>
+                    <div className="h-6 w-14 bg-primary rounded text-primary-foreground text-[10px] font-bold flex items-center justify-center">GCash</div>
                   </label>
 
                   <label 
@@ -351,17 +389,17 @@ const CheckoutPage = () => {
                     }`}
                   >
                     <RadioGroupItem value="crypto" id="crypto" />
-                    <Bitcoin className="h-5 w-5 text-orange-500" />
+                    <Bitcoin className="h-5 w-5 text-accent" />
                     <div className="flex-1">
                       <p className="font-medium">Cryptocurrency</p>
                       <p className="text-sm text-muted-foreground">BTC, ETH, USDC via Coinbase</p>
                     </div>
-                    <div className="h-6 w-6 bg-orange-500 rounded-full text-white text-[10px] font-bold flex items-center justify-center">₿</div>
+                    <div className="h-6 w-6 bg-accent rounded-full text-accent-foreground text-[10px] font-bold flex items-center justify-center">₿</div>
                   </label>
                 </RadioGroup>
               </div>
 
-              {/* Card Details (shown only for card payment) */}
+              {/* Card Details */}
               {paymentMethod === "card" && (
                 <div className="space-y-4 p-5 rounded-xl glass-card border border-glass-border">
                   <div className="space-y-2">
@@ -390,7 +428,7 @@ const CheckoutPage = () => {
               <Button 
                 type="submit" 
                 className="w-full btn-liquid-accent h-14 rounded-xl text-lg font-semibold"
-                disabled={isProcessing}
+                disabled={isProcessing || !selectedDeliveryProvider}
               >
                 {isProcessing ? (
                   <span className="flex items-center gap-2">
@@ -470,9 +508,15 @@ const CheckoutPage = () => {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground flex items-center gap-1">
                     Transportation Fee
-                    <span className="text-xs text-muted-foreground">(Lalamove/Grab)</span>
+                    {selectedDeliveryProvider && (
+                      <span className="text-xs glass-badge-primary px-1.5 py-0.5 rounded-full capitalize">
+                        {selectedDeliveryProvider}
+                      </span>
+                    )}
                   </span>
-                  <span className="font-medium">₱{deliveryFee.toFixed(2)}</span>
+                  <span className="font-medium">
+                    {deliveryFee > 0 ? `₱${deliveryFee.toFixed(2)}` : "Select provider"}
+                  </span>
                 </div>
                 <Separator className="bg-glass-border" />
                 <div className="flex justify-between text-base pt-2">
@@ -486,7 +530,12 @@ const CheckoutPage = () => {
                   <Truck className="h-4 w-4" />
                   Estimated Delivery
                 </div>
-                <p className="text-muted-foreground">45-60 minutes from order confirmation</p>
+                <p className="text-muted-foreground">
+                  {deliveryEstimate 
+                    ? `~${deliveryEstimate.estimated_eta_minutes} minutes via ${selectedDeliveryProvider}`
+                    : "Select a delivery provider to see estimate"
+                  }
+                </p>
               </div>
             </div>
           </div>

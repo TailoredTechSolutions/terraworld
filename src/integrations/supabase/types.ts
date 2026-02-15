@@ -190,6 +190,98 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_bookings: {
+        Row: {
+          booking_status: Database["public"]["Enums"]["delivery_booking_status"]
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          completed_at: string | null
+          confirmed_at: string | null
+          created_at: string
+          delivery_address: string | null
+          delivery_latitude: number | null
+          delivery_longitude: number | null
+          distance_km: number | null
+          driver_name: string | null
+          driver_phone: string | null
+          driver_plate: string | null
+          estimated_eta_minutes: number | null
+          estimated_fee: number
+          external_booking_id: string | null
+          final_fee: number | null
+          id: string
+          order_id: string
+          pickup_address: string | null
+          pickup_latitude: number | null
+          pickup_longitude: number | null
+          provider_response: Json | null
+          provider_type: Database["public"]["Enums"]["delivery_provider"]
+          updated_at: string
+        }
+        Insert: {
+          booking_status?: Database["public"]["Enums"]["delivery_booking_status"]
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          delivery_address?: string | null
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
+          distance_km?: number | null
+          driver_name?: string | null
+          driver_phone?: string | null
+          driver_plate?: string | null
+          estimated_eta_minutes?: number | null
+          estimated_fee?: number
+          external_booking_id?: string | null
+          final_fee?: number | null
+          id?: string
+          order_id: string
+          pickup_address?: string | null
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
+          provider_response?: Json | null
+          provider_type: Database["public"]["Enums"]["delivery_provider"]
+          updated_at?: string
+        }
+        Update: {
+          booking_status?: Database["public"]["Enums"]["delivery_booking_status"]
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          delivery_address?: string | null
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
+          distance_km?: number | null
+          driver_name?: string | null
+          driver_phone?: string | null
+          driver_plate?: string | null
+          estimated_eta_minutes?: number | null
+          estimated_fee?: number
+          external_booking_id?: string | null
+          final_fee?: number | null
+          id?: string
+          order_id?: string
+          pickup_address?: string | null
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
+          provider_response?: Json | null
+          provider_type?: Database["public"]["Enums"]["delivery_provider"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_bookings_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       delivery_zones: {
         Row: {
           base_fee: number
@@ -704,9 +796,13 @@ export type Database = {
           customer_name: string
           customer_phone: string
           delivery_address: string
+          delivery_booking_status: Database["public"]["Enums"]["delivery_booking_status"]
           delivery_fee: number
           delivery_latitude: number | null
           delivery_longitude: number | null
+          delivery_provider:
+            | Database["public"]["Enums"]["delivery_provider"]
+            | null
           discount: number
           driver_id: string | null
           farmer_id: string | null
@@ -733,9 +829,13 @@ export type Database = {
           customer_name: string
           customer_phone: string
           delivery_address: string
+          delivery_booking_status?: Database["public"]["Enums"]["delivery_booking_status"]
           delivery_fee?: number
           delivery_latitude?: number | null
           delivery_longitude?: number | null
+          delivery_provider?:
+            | Database["public"]["Enums"]["delivery_provider"]
+            | null
           discount?: number
           driver_id?: string | null
           farmer_id?: string | null
@@ -762,9 +862,13 @@ export type Database = {
           customer_name?: string
           customer_phone?: string
           delivery_address?: string
+          delivery_booking_status?: Database["public"]["Enums"]["delivery_booking_status"]
           delivery_fee?: number
           delivery_latitude?: number | null
           delivery_longitude?: number | null
+          delivery_provider?:
+            | Database["public"]["Enums"]["delivery_provider"]
+            | null
           discount?: number
           driver_id?: string | null
           farmer_id?: string | null
@@ -1306,6 +1410,14 @@ export type Database = {
         | "driver"
         | "admin"
         | "buyer"
+      delivery_booking_status:
+        | "none"
+        | "pending"
+        | "confirmed"
+        | "in_transit"
+        | "completed"
+        | "cancelled"
+      delivery_provider: "lalamove" | "grab"
       driver_status: "online" | "offline" | "delivering"
       farmer_status: "active" | "pending" | "suspended"
       kyc_document_type:
@@ -1467,6 +1579,15 @@ export const Constants = {
         "admin",
         "buyer",
       ],
+      delivery_booking_status: [
+        "none",
+        "pending",
+        "confirmed",
+        "in_transit",
+        "completed",
+        "cancelled",
+      ],
+      delivery_provider: ["lalamove", "grab"],
       driver_status: ["online", "offline", "delivering"],
       farmer_status: ["active", "pending", "suspended"],
       kyc_document_type: [
