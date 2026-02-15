@@ -18,7 +18,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName?: string, referralCode?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName?: string, referralCode?: string, registrationRole?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -83,7 +83,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     email: string, 
     password: string, 
     fullName?: string, 
-    referralCode?: string
+    referralCode?: string,
+    registrationRole?: string
   ) => {
     const redirectUrl = `${window.location.origin}/`;
     
@@ -95,6 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         data: {
           full_name: fullName || "",
           referral_code: referralCode || "",
+          registration_role: registrationRole || "buyer",
         },
       },
     });

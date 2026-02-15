@@ -14,6 +14,7 @@ import DriverDashboard from "@/pages/DriverDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import MemberDashboard from "@/pages/MemberDashboard";
 import FarmerDashboard from "@/pages/FarmerDashboard";
+import BuyerDashboard from "@/pages/BuyerDashboard";
 import AuthPage from "@/pages/AuthPage";
 import KYCPage from "@/pages/KYCPage";
 import NotFound from "@/pages/NotFound";
@@ -78,6 +79,16 @@ const AnimatedRoutes = () => {
             <PageTransition>
               <OrderConfirmation />
             </PageTransition>
+          }
+        />
+        <Route
+          path="/buyer"
+          element={
+            <RoleProtectedRoute allowedRoles={['buyer']}>
+              <PageTransition>
+                <BuyerDashboard />
+              </PageTransition>
+            </RoleProtectedRoute>
           }
         />
         <Route
