@@ -64,9 +64,8 @@ const Header = () => {
     if (isFarmer) {
       links.push({ path: "/farmer", label: "Farmer Dashboard", icon: Tractor });
     }
-    if (isDriver) {
-      links.push({ path: "/driver", label: "Driver Dashboard", icon: Truck });
-    }
+    // Driver dashboard hidden — no user-facing driver interface per architecture
+
     if (isAdmin) {
       links.push({ path: "/admin", label: "Admin Dashboard", icon: Shield });
     }
