@@ -22,8 +22,12 @@ import {
   AlertCircle,
   Loader2,
   ShoppingBag,
+  Coins,
+  Users,
 } from "lucide-react";
 import FarmerOrdersPanel from "@/components/farmer/FarmerOrdersPanel";
+import FarmerTokensPanel from "@/components/farmer/FarmerTokensPanel";
+import FarmerReferralsPanel from "@/components/farmer/FarmerReferralsPanel";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Farmer = Tables<"farmers">;
@@ -66,6 +70,20 @@ const FarmerDashboard = () => {
       return count || 0;
     },
     enabled: !!farmer?.id,
+  });
+
+  // Fetch profile for referral code
+  const { data: profile } = useQuery({
+    queryKey: ["farmer-profile-ref", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("referral_code")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
   });
 
   useEffect(() => {
@@ -226,6 +244,14 @@ const FarmerDashboard = () => {
               <ShoppingBag className="h-4 w-4" />
               Orders
             </TabsTrigger>
+            <TabsTrigger value="tokens" className="gap-2">
+              <Coins className="h-4 w-4" />
+              Tokens
+            </TabsTrigger>
+            <TabsTrigger value="referrals" className="gap-2">
+              <Users className="h-4 w-4" />
+              Referrals
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="products">
@@ -234,6 +260,14 @@ const FarmerDashboard = () => {
 
           <TabsContent value="orders">
             <FarmerOrdersPanel farmerId={farmer.id} />
+          </TabsContent>
+
+          <TabsContent value="tokens">
+            <FarmerTokensPanel userId={user!.id} />
+          </TabsContent>
+
+          <TabsContent value="referrals">
+            <FarmerReferralsPanel userId={user!.id} referralCode={profile?.referral_code || ""} />
           </TabsContent>
         </Tabs>
       </main>
