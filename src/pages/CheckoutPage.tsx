@@ -53,10 +53,15 @@ const CheckoutPage = () => {
   });
 
   const farmerSubtotal = getTotalPrice(); // Base farmer prices
-  const terraFee = farmerSubtotal * 0.30; // 30% Terra service fee (non-negotiable)
-  const subtotal = farmerSubtotal + terraFee;
-  const deliveryFee = subtotal > 0 ? 45 : 0;
-  const total = subtotal + deliveryFee;
+  const platformFeePercent = 0.20; // 20% Platform Service Fee
+  const commissionPercent = 0.10; // 10% Commission
+  const vatPercent = 0.12; // Philippine VAT 12%
+  const platformFee = farmerSubtotal * platformFeePercent;
+  const commission = farmerSubtotal * commissionPercent;
+  const subtotalBeforeVAT = farmerSubtotal + platformFee + commission;
+  const vat = subtotalBeforeVAT * vatPercent;
+  const deliveryFee = farmerSubtotal > 0 ? 45 : 0; // Transport fee (Lalamove/Grab)
+  const total = subtotalBeforeVAT + vat + deliveryFee;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -438,23 +443,40 @@ const CheckoutPage = () => {
 
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Farm Products</span>
+                  <span className="text-muted-foreground">Base Product Price</span>
                   <span className="font-medium">₱{farmerSubtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground flex items-center gap-1">
-                    Terra Service Fee
-                    <span className="text-xs glass-badge-accent px-1.5 py-0.5 rounded-full">30%</span>
+                    Platform Service Fee
+                    <span className="text-xs glass-badge-accent px-1.5 py-0.5 rounded-full">20%</span>
                   </span>
-                  <span className="font-medium text-accent">₱{terraFee.toFixed(2)}</span>
+                  <span className="font-medium text-accent">₱{platformFee.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Delivery Fee</span>
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    Commission
+                    <span className="text-xs glass-badge-accent px-1.5 py-0.5 rounded-full">10%</span>
+                  </span>
+                  <span className="font-medium text-accent">₱{commission.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    VAT
+                    <span className="text-xs glass-badge-accent px-1.5 py-0.5 rounded-full">12%</span>
+                  </span>
+                  <span className="font-medium">₱{vat.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    Transportation Fee
+                    <span className="text-xs text-muted-foreground">(Lalamove/Grab)</span>
+                  </span>
                   <span className="font-medium">₱{deliveryFee.toFixed(2)}</span>
                 </div>
                 <Separator className="bg-glass-border" />
                 <div className="flex justify-between text-base pt-2">
-                  <span className="font-semibold">Total</span>
+                  <span className="font-semibold">Total Payable</span>
                   <span className="font-bold text-primary text-lg">₱{total.toFixed(2)}</span>
                 </div>
               </div>

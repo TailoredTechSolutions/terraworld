@@ -21,6 +21,7 @@ import {
   LogOut,
   User,
   UserCog,
+  Ticket,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -51,74 +52,27 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  {
-    title: "Dashboard",
-    tab: "overview",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Members",
-    tab: "users",
-    icon: Users,
-  },
-  {
-    title: "Genealogy",
-    tab: "genealogy",
-    icon: GitBranch,
-  },
-  {
-    title: "Orders",
-    tab: "orders",
-    icon: ShoppingBag,
-  },
-  {
-    title: "Commissions",
-    tab: "compensation",
-    icon: Play,
-  },
-  {
-    title: "Withdrawals",
-    tab: "payout-ledger",
-    icon: Wallet,
-  },
-  {
-    title: "Reports",
-    tab: "reports",
-    icon: BarChart3,
-  },
-  {
-    title: "Settings",
-    tab: "settings",
-    icon: Settings,
-  },
-  {
-    title: "Integrations",
-    tab: "integrations",
-    icon: Activity,
-  },
+  { title: "Dashboard", tab: "overview", icon: LayoutDashboard },
+  { title: "User & Roles", tab: "users", icon: Users },
+  { title: "Marketplace", tab: "marketplace", icon: ShoppingBag },
+  { title: "Orders", tab: "orders", icon: ShoppingBag },
+  { title: "Financial Engine", tab: "financial", icon: Wallet },
+  { title: "Logistics", tab: "logistics", icon: Truck },
+  { title: "MLM System", tab: "mlm", icon: GitBranch },
+  { title: "Token Rewards", tab: "token-rewards", icon: Crown },
+  { title: "Customer Service", tab: "customer-service", icon: Ticket },
+  { title: "Reports", tab: "reports", icon: BarChart3 },
+  { title: "Settings", tab: "settings", icon: Settings },
+  { title: "Integrations", tab: "integrations", icon: Activity },
 ];
 
 const secondaryNavItems: NavItem[] = [
-  {
-    title: "Farmers",
-    tab: "farmers",
-    icon: Tractor,
-  },
-  {
-    title: "Drivers",
-    tab: "drivers",
-    icon: Truck,
-  },
-  {
-    title: "Memberships",
-    tab: "memberships",
-    icon: Crown,
-  },
-  {
-    title: "BV Ledger",
-    tab: "bv-ledger",
-    icon: Activity,
-  },
+  { title: "Farmers", tab: "farmers", icon: Tractor },
+  { title: "Memberships", tab: "memberships", icon: Crown },
+  { title: "Genealogy", tab: "genealogy", icon: GitBranch },
+  { title: "BV Ledger", tab: "bv-ledger", icon: Activity },
+  { title: "Payout Ledger", tab: "payout-ledger", icon: FileText },
+  { title: "Commissions", tab: "compensation", icon: Play },
 ];
 
 interface AdminSidebarProps {

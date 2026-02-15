@@ -581,12 +581,90 @@ const AdminDashboard = () => {
     </Card>
   );
 
+  const renderMarketplaceTab = () => (
+    <div className="space-y-6">
+      <Card><CardHeader><CardTitle>Marketplace Management</CardTitle><CardDescription>Product approvals, category management, inventory oversight, pricing</CardDescription></CardHeader>
+        <CardContent className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="cursor-pointer hover:bg-secondary/50 transition-colors" onClick={() => setActiveTab('farmers')}><CardContent className="pt-6 text-center"><Package className="h-8 w-8 mx-auto mb-2 text-primary" /><p className="font-semibold">Product Approvals</p><p className="text-xs text-muted-foreground">Review & approve farmer products</p></CardContent></Card>
+          <Card><CardContent className="pt-6 text-center"><ShoppingBag className="h-8 w-8 mx-auto mb-2 text-primary" /><p className="font-semibold">Category Management</p><p className="text-xs text-muted-foreground">Manage product categories</p></CardContent></Card>
+          <Card className="cursor-pointer hover:bg-secondary/50 transition-colors" onClick={() => setActiveTab('settings')}><CardContent className="pt-6 text-center"><DollarSign className="h-8 w-8 mx-auto mb-2 text-primary" /><p className="font-semibold">Pricing Rules</p><p className="text-xs text-muted-foreground">Platform fee, commission, VAT config</p></CardContent></Card>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const renderFinancialTab = () => (
+    <div className="space-y-6">
+      <Card><CardHeader><CardTitle>Financial Management Engine</CardTitle><CardDescription>Transaction processing, payment reconciliation, payouts, tax reporting</CardDescription></CardHeader>
+        <CardContent className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="cursor-pointer hover:bg-secondary/50 transition-colors" onClick={() => setActiveTab('orders')}><CardContent className="pt-6 text-center"><DollarSign className="h-8 w-8 mx-auto mb-2 text-primary" /><p className="font-semibold">Transactions</p><p className="text-xs text-muted-foreground">Process & reconcile payments</p></CardContent></Card>
+          <Card className="cursor-pointer hover:bg-secondary/50 transition-colors" onClick={() => setActiveTab('payout-ledger')}><CardContent className="pt-6 text-center"><TrendingUp className="h-8 w-8 mx-auto mb-2 text-primary" /><p className="font-semibold">Payout Tracking</p><p className="text-xs text-muted-foreground">Withdrawals & disbursements</p></CardContent></Card>
+          <Card className="cursor-pointer hover:bg-secondary/50 transition-colors" onClick={() => setActiveTab('reports')}><CardContent className="pt-6 text-center"><Package className="h-8 w-8 mx-auto mb-2 text-primary" /><p className="font-semibold">Tax & Reporting</p><p className="text-xs text-muted-foreground">VAT configuration & reports</p></CardContent></Card>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const renderLogisticsTab = () => (
+    <div className="space-y-6">
+      <Card><CardHeader><CardTitle>Logistics Management</CardTitle><CardDescription>Delivery oversight via Lalamove & Grab APIs — Philippines only</CardDescription></CardHeader>
+        <CardContent className="grid sm:grid-cols-2 gap-4">
+          <Card><CardContent className="pt-6"><div className="flex items-center gap-3 mb-3"><div className="p-2 rounded-lg bg-primary/10"><Truck className="h-6 w-6 text-primary" /></div><div><p className="font-semibold">Lalamove</p><Badge variant="secondary">API Integration</Badge></div></div><p className="text-sm text-muted-foreground">Real-time delivery via Lalamove fleet. Fees calculated per order.</p></CardContent></Card>
+          <Card><CardContent className="pt-6"><div className="flex items-center gap-3 mb-3"><div className="p-2 rounded-lg bg-accent/10"><Truck className="h-6 w-6 text-accent" /></div><div><p className="font-semibold">Grab</p><Badge variant="secondary">API Integration</Badge></div></div><p className="text-sm text-muted-foreground">GrabExpress delivery integration. Zone-based transport fees at checkout.</p></CardContent></Card>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const renderMLMTab = () => (
+    <div className="space-y-6">
+      <Card><CardHeader><CardTitle>MLM System Management</CardTitle><CardDescription>Referral structure rules, commission percentages, earnings adjustments</CardDescription></CardHeader>
+        <CardContent className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="cursor-pointer hover:bg-secondary/50 transition-colors" onClick={() => setActiveTab('genealogy')}><CardContent className="pt-6 text-center"><Users className="h-8 w-8 mx-auto mb-2 text-primary" /><p className="font-semibold">Genealogy Tree</p><p className="text-xs text-muted-foreground">View binary tree structure</p></CardContent></Card>
+          <Card className="cursor-pointer hover:bg-secondary/50 transition-colors" onClick={() => setActiveTab('compensation')}><CardContent className="pt-6 text-center"><DollarSign className="h-8 w-8 mx-auto mb-2 text-primary" /><p className="font-semibold">Commission Rules</p><p className="text-xs text-muted-foreground">Configure payout cycles</p></CardContent></Card>
+          <Card className="cursor-pointer hover:bg-secondary/50 transition-colors" onClick={() => setActiveTab('bv-ledger')}><CardContent className="pt-6 text-center"><TrendingUp className="h-8 w-8 mx-auto mb-2 text-primary" /><p className="font-semibold">BV & Adjustments</p><p className="text-xs text-muted-foreground">Override controls</p></CardContent></Card>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const renderTokenRewardsTab = () => (
+    <div className="space-y-6">
+      <Card><CardHeader><CardTitle>Token Rewards Management</CardTitle><CardDescription>Reward configuration, distribution monitoring, balance adjustments</CardDescription></CardHeader>
+        <CardContent>
+          <div className="grid sm:grid-cols-3 gap-4">
+            <Card className="bg-gradient-to-br from-primary/10 to-primary/5"><CardContent className="pt-6 text-center"><p className="text-sm text-muted-foreground">Total Tokens Issued</p><p className="text-2xl font-bold">0 AGRI</p></CardContent></Card>
+            <Card className="bg-gradient-to-br from-accent/10 to-accent/5"><CardContent className="pt-6 text-center"><p className="text-sm text-muted-foreground">Active Holders</p><p className="text-2xl font-bold">0</p></CardContent></Card>
+            <Card className="bg-gradient-to-br from-secondary to-secondary/50"><CardContent className="pt-6 text-center"><p className="text-sm text-muted-foreground">Pending Distributions</p><p className="text-2xl font-bold">0</p></CardContent></Card>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const renderCustomerServiceTab = () => (
+    <div className="space-y-6">
+      <Card><CardHeader><CardTitle>Customer Service Management</CardTitle><CardDescription>Refund processing, return approvals, case management</CardDescription></CardHeader>
+        <CardContent>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card><CardContent className="pt-6 text-center"><p className="text-sm text-muted-foreground">Open Cases</p><p className="text-2xl font-bold">0</p></CardContent></Card>
+            <Card><CardContent className="pt-6 text-center"><p className="text-sm text-muted-foreground">Pending Refunds</p><p className="text-2xl font-bold">0</p></CardContent></Card>
+            <Card><CardContent className="pt-6 text-center"><p className="text-sm text-muted-foreground">Return Requests</p><p className="text-2xl font-bold">0</p></CardContent></Card>
+            <Card><CardContent className="pt-6 text-center"><p className="text-sm text-muted-foreground">Resolved This Week</p><p className="text-2xl font-bold">0</p></CardContent></Card>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
         return <AdminOverviewPanel membersCount={membersCount} ordersCount={orders.length} totalRevenue={totalRevenue} />;
       case 'users':
         return <UserManagementPanel />;
+      case 'marketplace':
+        return renderMarketplaceTab();
       case 'genealogy':
         return <GenealogyPanel />;
       case 'compensation':
@@ -601,10 +679,18 @@ const AdminDashboard = () => {
         return <ReportsPanel />;
       case 'farmers':
         return renderFarmersTab();
-      case 'drivers':
-        return renderDriversTab();
       case 'orders':
         return renderOrdersTab();
+      case 'financial':
+        return renderFinancialTab();
+      case 'logistics':
+        return renderLogisticsTab();
+      case 'mlm':
+        return renderMLMTab();
+      case 'token-rewards':
+        return renderTokenRewardsTab();
+      case 'customer-service':
+        return renderCustomerServiceTab();
       case 'settings':
         return <PlatformSettingsPanel />;
       case 'integrations':
