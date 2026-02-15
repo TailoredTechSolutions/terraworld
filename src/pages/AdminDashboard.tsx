@@ -24,6 +24,7 @@ import {
   Wallet,
   Play,
   Calendar,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -607,10 +608,58 @@ const AdminDashboard = () => {
 
   const renderLogisticsTab = () => (
     <div className="space-y-6">
-      <Card><CardHeader><CardTitle>Logistics Management</CardTitle><CardDescription>Delivery oversight via Lalamove & Grab APIs — Philippines only</CardDescription></CardHeader>
-        <CardContent className="grid sm:grid-cols-2 gap-4">
-          <Card><CardContent className="pt-6"><div className="flex items-center gap-3 mb-3"><div className="p-2 rounded-lg bg-primary/10"><Truck className="h-6 w-6 text-primary" /></div><div><p className="font-semibold">Lalamove</p><Badge variant="secondary">API Integration</Badge></div></div><p className="text-sm text-muted-foreground">Real-time delivery via Lalamove fleet. Fees calculated per order.</p></CardContent></Card>
-          <Card><CardContent className="pt-6"><div className="flex items-center gap-3 mb-3"><div className="p-2 rounded-lg bg-accent/10"><Truck className="h-6 w-6 text-accent" /></div><div><p className="font-semibold">Grab</p><Badge variant="secondary">API Integration</Badge></div></div><p className="text-sm text-muted-foreground">GrabExpress delivery integration. Zone-based transport fees at checkout.</p></CardContent></Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Logistics Management</CardTitle>
+          <CardDescription>Delivery oversight via Lalamove & Grab APIs — Philippines only</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Provider Cards */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-primary/10"><Truck className="h-6 w-6 text-primary" /></div>
+                  <div><p className="font-semibold">Lalamove</p><Badge variant="secondary">Mock API</Badge></div>
+                </div>
+                <p className="text-sm text-muted-foreground">Real-time delivery via Lalamove fleet. Fees calculated per order.</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-accent/10"><Truck className="h-6 w-6 text-accent" /></div>
+                  <div><p className="font-semibold">Grab</p><Badge variant="secondary">Mock API</Badge></div>
+                </div>
+                <p className="text-sm text-muted-foreground">GrabExpress delivery integration. Zone-based transport fees.</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Safeguards Summary */}
+          <Card>
+            <CardHeader><CardTitle className="text-base">System Safeguards</CardTitle></CardHeader>
+            <CardContent>
+              <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5">
+                  <ShieldCheck className="h-4 w-4 text-primary flex-shrink-0" />
+                  <span>Double booking prevention (DB constraint)</span>
+                </div>
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5">
+                  <ShieldCheck className="h-4 w-4 text-primary flex-shrink-0" />
+                  <span>409 Conflict on duplicate API calls</span>
+                </div>
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5">
+                  <ShieldCheck className="h-4 w-4 text-primary flex-shrink-0" />
+                  <span>Mandatory cancel before provider switch</span>
+                </div>
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5">
+                  <ShieldCheck className="h-4 w-4 text-primary flex-shrink-0" />
+                  <span>Transport fee locked per booking</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </CardContent>
       </Card>
     </div>
