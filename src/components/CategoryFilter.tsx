@@ -31,8 +31,8 @@ const CategoryFilter = ({ selectedCategory, onSelectCategory }: CategoryFilterPr
             )}
           >
             {iconMap[category.icon]}
-            <span className="hidden xs:inline sm:inline">{category.name}</span>
-            <span className="xs:hidden">{category.name.split(' ')[0]}</span>
+            <span className="hidden sm:inline">{category.name}</span>
+            <span className="sm:hidden">{category.name.split(' ')[0]}</span>
           </button>
         );
       })}
