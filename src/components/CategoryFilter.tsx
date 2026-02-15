@@ -1,12 +1,10 @@
 import { categories } from "@/data/products";
-import { Leaf, Apple, Egg, Package, Beef, Bird } from "lucide-react";
+import { Leaf, Apple, Egg, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, React.ReactNode> = {
   Leaf: <Leaf className="h-3.5 w-3.5 sm:h-4 sm:w-4" />,
   Apple: <Apple className="h-3.5 w-3.5 sm:h-4 sm:w-4" />,
-  Beef: <Beef className="h-3.5 w-3.5 sm:h-4 sm:w-4" />,
-  Bird: <Bird className="h-3.5 w-3.5 sm:h-4 sm:w-4" />,
   Egg: <Egg className="h-3.5 w-3.5 sm:h-4 sm:w-4" />,
   Package: <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />,
 };
