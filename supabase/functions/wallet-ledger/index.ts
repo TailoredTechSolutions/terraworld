@@ -2,14 +2,14 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 /**
  * WALLET LEDGER SERVICE
  * Handles: posting entries, reversals, balance queries
  * CRITICAL: All wallet changes go through this endpoint
- * Append-only enforcement is at database level via trigger
+ * Uses atomic post_wallet_entry() DB function with row locking
  */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -22,8 +22,8 @@ Deno.serve(async (req) => {
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
     const supabaseService = createClient(supabaseUrl, supabaseServiceKey);
-    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
+    // Authenticate user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Authentication required" }), {
@@ -33,13 +33,18 @@ Deno.serve(async (req) => {
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
-    if (authError || !user) {
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data, error: claimsError } = await supabaseAuth.auth.getClaims(token);
+    if (claimsError || !data?.claims) {
       return new Response(JSON.stringify({ error: "Invalid token" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const userId = data.claims.sub as string;
+    const userEmail = data.claims.email as string;
 
     const body = await req.json();
     const { action } = body;
@@ -49,7 +54,7 @@ Deno.serve(async (req) => {
       const { data: adminRole } = await supabaseService
         .from("user_roles")
         .select("role")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .eq("role", "admin")
         .maybeSingle();
 
@@ -62,48 +67,30 @@ Deno.serve(async (req) => {
 
       const { target_user_id, transaction_type, amount, description, reference_id } = body;
 
-      // Get wallet
-      const { data: wallet } = await supabaseService
-        .from("wallets")
-        .select("id, available_balance")
-        .eq("user_id", target_user_id)
-        .maybeSingle();
+      // Use atomic DB function with row locking
+      const { data: result, error: rpcError } = await supabaseService.rpc("post_wallet_entry", {
+        p_user_id: target_user_id,
+        p_transaction_type: transaction_type,
+        p_amount: amount,
+        p_description: description || null,
+        p_reference_id: reference_id || null,
+        p_actor_id: userId,
+      });
 
-      if (!wallet) {
-        return new Response(JSON.stringify({ error: "Wallet not found" }), {
-          status: 404,
+      if (rpcError) {
+        console.error("[wallet-ledger] RPC error:", rpcError);
+        return new Response(JSON.stringify({ error: rpcError.message }), {
+          status: rpcError.message.includes("not found") ? 404 : 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      const balanceBefore = Number(wallet.available_balance);
-      const balanceAfter = Math.round((balanceBefore + amount) * 100) / 100;
-
-      // Insert ledger entry with balance_before
-      await supabaseService.from("wallet_transactions").insert({
-        user_id: target_user_id,
-        wallet_id: wallet.id,
-        transaction_type,
-        amount,
-        balance_before: balanceBefore,
-        balance_after: balanceAfter,
-        description,
-        reference_id,
-        actor_id: user.id,
-        metadata: { posted_by: user.email },
-        status: "completed",
-      });
-
-      // Update wallet balance
-      await supabaseService
-        .from("wallets")
-        .update({ available_balance: balanceAfter })
-        .eq("id", wallet.id);
+      const entry = Array.isArray(result) ? result[0] : result;
 
       return new Response(JSON.stringify({
         success: true,
-        balance_before: balanceBefore,
-        balance_after: balanceAfter,
+        balance_before: entry.balance_before,
+        balance_after: entry.balance_after,
       }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -115,7 +102,7 @@ Deno.serve(async (req) => {
       const { data: adminRole } = await supabaseService
         .from("user_roles")
         .select("role")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .eq("role", "admin")
         .maybeSingle();
 
@@ -128,7 +115,7 @@ Deno.serve(async (req) => {
 
       const { original_entry_id, reason } = body;
 
-      // Get original entry (read-only, cannot modify)
+      // Get original entry (read-only)
       const { data: original } = await supabaseService
         .from("wallet_transactions")
         .select("*")
@@ -142,50 +129,33 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Get current wallet balance
-      const { data: wallet } = await supabaseService
-        .from("wallets")
-        .select("id, available_balance")
-        .eq("id", original.wallet_id)
-        .maybeSingle();
+      const reversalAmount = -Number(original.amount);
 
-      if (!wallet) {
-        return new Response(JSON.stringify({ error: "Wallet not found" }), {
-          status: 404,
+      // Use atomic DB function for reversal too
+      const { data: result, error: rpcError } = await supabaseService.rpc("post_wallet_entry", {
+        p_user_id: original.user_id,
+        p_transaction_type: `${original.transaction_type}_REVERSAL`,
+        p_amount: reversalAmount,
+        p_description: `Reversal: ${reason}`,
+        p_reference_id: original_entry_id,
+        p_actor_id: userId,
+      });
+
+      if (rpcError) {
+        console.error("[wallet-ledger] Reversal RPC error:", rpcError);
+        return new Response(JSON.stringify({ error: rpcError.message }), {
+          status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      const reversalAmount = -Number(original.amount);
-      const balanceBefore = Number(wallet.available_balance);
-      const balanceAfter = Math.round((balanceBefore + reversalAmount) * 100) / 100;
-
-      // Post reversal entry (new row, append-only)
-      await supabaseService.from("wallet_transactions").insert({
-        user_id: original.user_id,
-        wallet_id: original.wallet_id,
-        transaction_type: `${original.transaction_type}_REVERSAL`,
-        amount: reversalAmount,
-        balance_before: balanceBefore,
-        balance_after: balanceAfter,
-        description: `Reversal: ${reason}`,
-        reference_id: original_entry_id,
-        actor_id: user.id,
-        metadata: { reversed_entry_id: original_entry_id, reason },
-        status: "completed",
-      });
-
-      // Update wallet balance
-      await supabaseService
-        .from("wallets")
-        .update({ available_balance: balanceAfter })
-        .eq("id", wallet.id);
+      const entry = Array.isArray(result) ? result[0] : result;
 
       return new Response(JSON.stringify({
         success: true,
         reversed_entry_id: original_entry_id,
         reversal_amount: reversalAmount,
-        balance_after: balanceAfter,
+        balance_after: entry.balance_after,
       }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

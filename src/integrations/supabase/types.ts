@@ -1400,6 +1400,21 @@ export type Database = {
         }
         Returns: boolean
       }
+      post_wallet_entry: {
+        Args: {
+          p_actor_id?: string
+          p_amount: number
+          p_description?: string
+          p_reference_id?: string
+          p_transaction_type: string
+          p_user_id: string
+        }
+        Returns: {
+          balance_after: number
+          balance_before: number
+          wallet_id: string
+        }[]
+      }
     }
     Enums: {
       account_type: "individual" | "company"

@@ -3,7 +3,7 @@ import { z } from 'https://esm.sh/zod@3.25.76';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 // ============ FIXED CONSTANTS (NON-NEGOTIABLE) ============
@@ -27,7 +27,7 @@ const orderSchema = z.object({
   items: z.array(orderItemSchema).min(1).max(50),
   payment_method: z.enum(['card', 'gcash', 'crypto']),
   notes: z.string().max(500).optional().nullable(),
-  referrer_id: z.string().uuid().optional().nullable(), // For affiliate tracking
+  referrer_id: z.string().uuid().optional().nullable(),
 });
 
 Deno.serve(async (req) => {
@@ -44,10 +44,35 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Create Supabase client with service role for database operations
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+
+    // ============ AUTHENTICATION ============
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid or expired token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const userId = claimsData.claims.sub as string;
+    console.log(`[create-order] Authenticated user: ${userId}`);
+
+    // Service role client for DB operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Parse and validate request body
@@ -86,8 +111,6 @@ Deno.serve(async (req) => {
     }
 
     // Validate items and calculate server-side totals
-    // Farmer price = base price (what farmer gets)
-    // Customer pays = Farmer price + 30% Terra fee
     let totalFarmerPrice = 0;
     let farmerId: string | null = null;
     const validatedItems: Array<{
@@ -104,56 +127,39 @@ Deno.serve(async (req) => {
     for (const item of orderData.items) {
       const dbProduct = productPrices[item.id];
       
-      // Farmer price is the base product price
       const farmerPricePerUnit = dbProduct ? dbProduct.price : item.price;
       const terraFeePerUnit = farmerPricePerUnit * TERRA_FEE_RATE;
       const totalPricePerUnit = farmerPricePerUnit + terraFeePerUnit;
       
-      if (dbProduct) {
-        validatedItems.push({
-          id: item.id,
-          name: dbProduct.name,
-          quantity: item.quantity,
-          farmer_price: farmerPricePerUnit,
-          terra_fee: terraFeePerUnit,
-          total_price: totalPricePerUnit,
-          farmId: item.farmId,
-          farmName: item.farmName,
-        });
-        totalFarmerPrice += farmerPricePerUnit * item.quantity;
-        
-        // Get farmer ID from first product
-        if (!farmerId && dbProduct.farmer_id) {
-          farmerId = dbProduct.farmer_id;
-        }
-      } else {
-        validatedItems.push({
-          id: item.id,
-          name: item.name,
-          quantity: item.quantity,
-          farmer_price: farmerPricePerUnit,
-          terra_fee: terraFeePerUnit,
-          total_price: totalPricePerUnit,
-          farmId: item.farmId,
-          farmName: item.farmName,
-        });
-        totalFarmerPrice += farmerPricePerUnit * item.quantity;
+      validatedItems.push({
+        id: item.id,
+        name: dbProduct ? dbProduct.name : item.name,
+        quantity: item.quantity,
+        farmer_price: farmerPricePerUnit,
+        terra_fee: terraFeePerUnit,
+        total_price: totalPricePerUnit,
+        farmId: item.farmId,
+        farmName: item.farmName,
+      });
+      totalFarmerPrice += farmerPricePerUnit * item.quantity;
+      
+      if (!farmerId && dbProduct?.farmer_id) {
+        farmerId = dbProduct.farmer_id;
       }
     }
 
     // Calculate Terra fee and totals
     const terraFee = totalFarmerPrice * TERRA_FEE_RATE;
-    const subtotal = totalFarmerPrice + terraFee; // Customer subtotal includes Terra fee
+    const subtotal = totalFarmerPrice + terraFee;
     const deliveryFee = subtotal > 0 ? 45 : 0;
     const total = subtotal + deliveryFee;
     const itemsCount = validatedItems.reduce((sum, item) => sum + item.quantity, 0);
     
-    // Business Volume = Terra fee (₱1 = 1 BV)
     const terraFeeBV = terraFee;
 
     console.log(`[create-order] Farmer price: ₱${totalFarmerPrice}, Terra fee: ₱${terraFee} (${terraFeeBV} BV)`);
 
-    // Create the order using service role (bypasses RLS)
+    // Create the order
     const { data: order, error: insertError } = await supabase
       .from('orders')
       .insert([{
@@ -189,7 +195,6 @@ Deno.serve(async (req) => {
 
     // Record BV in the ledger if there's a referrer
     if (orderData.referrer_id && terraFeeBV > 0) {
-      // Get referrer's membership to determine placement leg
       const { data: membership } = await supabase
         .from('memberships')
         .select('placement_side')
@@ -212,13 +217,11 @@ Deno.serve(async (req) => {
 
       if (bvError) {
         console.error('[create-order] BV ledger error:', bvError);
-        // Don't fail the order if BV recording fails
       } else {
         console.log(`[create-order] BV recorded: ${terraFeeBV} to ${leg} leg for referrer ${orderData.referrer_id}`);
       }
     }
 
-    // Return success with order details including Terra fee breakdown
     return new Response(
       JSON.stringify({
         success: true,
