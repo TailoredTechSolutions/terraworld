@@ -28,13 +28,6 @@ import arabicaCoffeeImg from "@/assets/products/arabica-coffee.jpg";
 import wildHoneyImg from "@/assets/products/wild-honey.jpg";
 import driedHerbsImg from "@/assets/products/dried-herbs.jpg";
 import muscovadoImg from "@/assets/products/muscovado.jpg";
-// Meat imports
-import porkBellyImg from "@/assets/products/pork-belly.jpg";
-import porkKasimImg from "@/assets/products/pork-kasim.jpg";
-import beefBrisketImg from "@/assets/products/beef-brisket.jpg";
-import dressedChickenImg from "@/assets/products/dressed-chicken.jpg";
-import nativeChickenImg from "@/assets/products/native-chicken.jpg";
-import groundBeefImg from "@/assets/products/ground-beef.jpg";
 
 export interface Product {
   id: string;
@@ -319,85 +312,6 @@ export const products: Product[] = [
     organic: true,
     description: "Fresh Philippine calamansi from CSB Family Farm. Essential for Filipino cooking, juices, and marinades.",
   },
-  // Meat & Poultry - from diversified farms
-  {
-    id: "16",
-    name: "Pork Belly (Liempo)",
-    price: 390.00,
-    unit: "kg",
-    farmId: "la-faustino-farm",
-    farmName: "La Faustino Farm",
-    image: porkBellyImg,
-    category: "Meat",
-    stock: 50,
-    organic: false,
-    description: "Fresh pork belly from La Faustino Farm's integrated livestock. Perfect for grilling, lechon kawali, or sinigang. DA-regulated price: ₱370-₱430/kg.",
-  },
-  {
-    id: "17",
-    name: "Pork Kasim (Shoulder)",
-    price: 330.00,
-    unit: "kg",
-    farmId: "la-faustino-farm",
-    farmName: "La Faustino Farm",
-    image: porkKasimImg,
-    category: "Meat",
-    stock: 40,
-    organic: false,
-    description: "Lean pork shoulder cut from integrated farm. Ideal for adobo, menudo, and braising. DA-regulated price: ₱320-₱350/kg.",
-  },
-  {
-    id: "18",
-    name: "Beef Brisket",
-    price: 420.00,
-    unit: "kg",
-    farmId: "pcjeam-farm",
-    farmName: "PCJEAM Farm",
-    image: beefBrisketImg,
-    category: "Meat",
-    stock: 25,
-    organic: false,
-    description: "Fresh beef brisket from PCJEAM Farm. Perfect for bulalo, nilaga, and slow-cooking. Retail price: ₱380-₱450/kg.",
-  },
-  {
-    id: "19",
-    name: "Ground Beef",
-    price: 380.00,
-    unit: "kg",
-    farmId: "pcjeam-farm",
-    farmName: "PCJEAM Farm",
-    image: groundBeefImg,
-    category: "Meat",
-    stock: 30,
-    organic: false,
-    description: "Freshly ground beef from PCJEAM Farm. Great for burgers, meatballs, and pasta sauce. Retail price: ₱350-₱400/kg.",
-  },
-  {
-    id: "20",
-    name: "Dressed Chicken",
-    price: 200.00,
-    unit: "kg",
-    farmId: "la-faustino-farm",
-    farmName: "La Faustino Farm",
-    image: dressedChickenImg,
-    category: "Poultry",
-    stock: 60,
-    organic: false,
-    description: "Fresh dressed chicken from La Faustino integrated farm. Clean and ready to cook. Wholesale price: ₱162/kg, Retail: ₱180-₱220/kg.",
-  },
-  {
-    id: "21",
-    name: "Native Chicken (Manok Bisaya)",
-    price: 320.00,
-    unit: "kg",
-    farmId: "la-faustino-farm",
-    farmName: "La Faustino Farm",
-    image: nativeChickenImg,
-    category: "Poultry",
-    stock: 20,
-    organic: true,
-    description: "Free-range native chicken from La Faustino Farm. Richer flavor, ideal for tinola and pinikpikan. Retail: ₱280-₱350/kg.",
-  },
   // Dairy & Eggs
   {
     id: "26",
@@ -583,8 +497,8 @@ export const farms: Farm[] = [
     rating: 4.8,
     reviewCount: 68,
     image: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=800",
-    description: "ATI-certified specialized farm in Tublay, Benguet. Certificate: LSA-2022-04-059. Integrated farm featuring mixed crops, livestock, and poultry production.",
-    products: ["Mixed Crops", "Strawberries", "Bananas", "Pork", "Chicken", "Eggs"],
+    description: "ATI-certified specialized farm in Tublay, Benguet. Certificate: LSA-2022-04-059. Integrated farm featuring mixed crops and produce.",
+    products: ["Mixed Crops", "Strawberries", "Bananas", "Eggs"],
     contact: "0949-793-4967",
     farmType: "Specialized Farm",
     certificate: "LSA-2022-04-059",
@@ -599,8 +513,8 @@ export const farms: Farm[] = [
     rating: 4.7,
     reviewCount: 45,
     image: "https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=800",
-    description: "ATI-certified specialized farm in Atok, Benguet. Certificate: LSA-2022-06-108. High-altitude vegetable production with integrated livestock farming.",
-    products: ["Vegetables", "Potatoes", "Beef", "Carabao Milk", "Highland Produce"],
+    description: "ATI-certified specialized farm in Atok, Benguet. Certificate: LSA-2022-06-108. High-altitude vegetable and dairy production.",
+    products: ["Vegetables", "Potatoes", "Carabao Milk", "Highland Produce"],
     contact: "0909-201-2105",
     farmType: "Specialized Farm",
     certificate: "LSA-2022-06-108",
@@ -672,6 +586,4 @@ export const categories = [
   { id: "fruits", name: "Fruits", icon: "Apple" },
   { id: "dairy", name: "Dairy & Eggs", icon: "Egg" },
   { id: "pantry", name: "Pantry", icon: "Package" },
-  { id: "meat", name: "Meat", icon: "Beef" },
-  { id: "poultry", name: "Poultry", icon: "Bird" },
 ];
