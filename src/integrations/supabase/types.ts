@@ -1299,7 +1299,13 @@ export type Database = {
     }
     Enums: {
       account_type: "individual" | "company"
-      app_role: "farmer" | "business_buyer" | "member" | "driver" | "admin"
+      app_role:
+        | "farmer"
+        | "business_buyer"
+        | "member"
+        | "driver"
+        | "admin"
+        | "buyer"
       driver_status: "online" | "offline" | "delivering"
       farmer_status: "active" | "pending" | "suspended"
       kyc_document_type:
@@ -1453,7 +1459,14 @@ export const Constants = {
   public: {
     Enums: {
       account_type: ["individual", "company"],
-      app_role: ["farmer", "business_buyer", "member", "driver", "admin"],
+      app_role: [
+        "farmer",
+        "business_buyer",
+        "member",
+        "driver",
+        "admin",
+        "buyer",
+      ],
       driver_status: ["online", "offline", "delivering"],
       farmer_status: ["active", "pending", "suspended"],
       kyc_document_type: [
