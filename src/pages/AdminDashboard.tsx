@@ -92,6 +92,10 @@ import ReportsPanel from "@/components/admin/ReportsPanel";
 import GenealogyPanel from "@/components/admin/GenealogyPanel";
 import PlatformSettingsPanel from "@/components/admin/PlatformSettingsPanel";
 import IntegrationManagerPanel from "@/components/admin/IntegrationManagerPanel";
+import AuditLogPanel from "@/components/admin/AuditLogPanel";
+import CustomerServicePanel from "@/components/admin/CustomerServicePanel";
+import TokenRewardsPanel from "@/components/admin/TokenRewardsPanel";
+import ProductApprovalPanel from "@/components/admin/ProductApprovalPanel";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -713,7 +717,7 @@ const AdminDashboard = () => {
       case 'users':
         return <UserManagementPanel />;
       case 'marketplace':
-        return renderMarketplaceTab();
+        return <ProductApprovalPanel />;
       case 'genealogy':
         return <GenealogyPanel />;
       case 'compensation':
@@ -737,9 +741,11 @@ const AdminDashboard = () => {
       case 'mlm':
         return renderMLMTab();
       case 'token-rewards':
-        return renderTokenRewardsTab();
+        return <TokenRewardsPanel />;
       case 'customer-service':
-        return renderCustomerServiceTab();
+        return <CustomerServicePanel />;
+      case 'audit-logs':
+        return <AuditLogPanel />;
       case 'settings':
         return <PlatformSettingsPanel />;
       case 'integrations':

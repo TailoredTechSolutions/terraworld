@@ -62,6 +62,7 @@ const navItems: NavItem[] = [
   { title: "Token Rewards", tab: "token-rewards", icon: Crown },
   { title: "Customer Service", tab: "customer-service", icon: Ticket },
   { title: "Reports", tab: "reports", icon: BarChart3 },
+  { title: "Audit Logs", tab: "audit-logs", icon: FileText },
   { title: "Settings", tab: "settings", icon: Settings },
   { title: "Integrations", tab: "integrations", icon: Activity },
 ];
