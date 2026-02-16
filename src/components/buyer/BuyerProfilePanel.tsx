@@ -28,6 +28,8 @@ import {
   Loader2,
   Save,
   Building2,
+  Shield,
+  KeyRound,
 } from "lucide-react";
 
 interface BuyerAddress {
@@ -389,103 +391,81 @@ const BuyerProfilePanel = ({ userId }: { userId: string }) => {
         </CardContent>
       </Card>
 
-      {/* Address Dialog */}
-      <Dialog open={addressDialogOpen} onOpenChange={setAddressDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{editingAddress ? "Edit Address" : "Add New Address"}</DialogTitle>
-            <DialogDescription>
-              Save a delivery address for faster checkout.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Label</Label>
-                <Input
-                  value={addressForm.label}
-                  onChange={(e) => setAddressForm({ ...addressForm, label: e.target.value })}
-                  placeholder="Home, Office, etc."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Contact Name</Label>
-                <Input
-                  value={addressForm.full_name}
-                  onChange={(e) => setAddressForm({ ...addressForm, full_name: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Phone</Label>
-              <Input
-                value={addressForm.phone}
-                onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Address Line 1</Label>
-              <Input
-                value={addressForm.address_line1}
-                onChange={(e) => setAddressForm({ ...addressForm, address_line1: e.target.value })}
-                placeholder="Street address"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Address Line 2 <span className="text-muted-foreground text-xs">(optional)</span></Label>
-              <Input
-                value={addressForm.address_line2}
-                onChange={(e) => setAddressForm({ ...addressForm, address_line2: e.target.value })}
-                placeholder="Apt, unit, building"
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>City</Label>
-                <Input
-                  value={addressForm.city}
-                  onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Province</Label>
-                <Input
-                  value={addressForm.state_province}
-                  onChange={(e) => setAddressForm({ ...addressForm, state_province: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Postal Code</Label>
-                <Input
-                  value={addressForm.postal_code}
-                  onChange={(e) => setAddressForm({ ...addressForm, postal_code: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="is-default"
-                checked={addressForm.is_default}
-                onChange={(e) => setAddressForm({ ...addressForm, is_default: e.target.checked })}
-                className="rounded"
-              />
-              <Label htmlFor="is-default" className="text-sm cursor-pointer">Set as default address</Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddressDialogOpen(false)}>Cancel</Button>
-            <Button
-              onClick={() => saveAddress.mutate(addressForm)}
-              disabled={saveAddress.isPending || !addressForm.address_line1 || !addressForm.city || !addressForm.postal_code}
-            >
-              {saveAddress.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
-              {editingAddress ? "Update" : "Save"} Address
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Security Settings */}
+      <SecuritySettingsCard />
     </div>
+  );
+};
+
+const SecuritySettingsCard = () => {
+  const { toast } = useToast();
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+
+  const handleChangePassword = async () => {
+    if (newPassword.length < 6) {
+      toast({ title: "Password too short", description: "Minimum 6 characters.", variant: "destructive" });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Passwords don't match", variant: "destructive" });
+      return;
+    }
+    setChangingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setChangingPassword(false);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Password Updated", description: "Your password has been changed." });
+      setNewPassword("");
+      setConfirmPassword("");
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Shield className="h-5 w-5 text-primary" />
+          Security Settings
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1">
+              <KeyRound className="h-3 w-3" />
+              New Password
+            </Label>
+            <Input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Min. 6 characters"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Confirm Password</Label>
+            <Input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter password"
+            />
+          </div>
+        </div>
+        <Button
+          onClick={handleChangePassword}
+          disabled={changingPassword || !newPassword || !confirmPassword}
+          size="sm"
+        >
+          {changingPassword && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+          Change Password
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 

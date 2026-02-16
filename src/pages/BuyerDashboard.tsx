@@ -10,6 +10,7 @@ import BuyerSidebar from "@/components/buyer/BuyerSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // Lazy panel imports
+import BuyerOverviewPanel from "@/components/buyer/BuyerOverviewPanel";
 import BuyerShopPanel from "@/components/buyer/BuyerShopPanel";
 import BuyerOrdersPanel from "@/components/buyer/BuyerOrdersPanel";
 import BuyerWalletPanel from "@/components/buyer/BuyerWalletPanel";
@@ -21,7 +22,7 @@ import BuyerSupportPanel from "@/components/buyer/BuyerSupportPanel";
 
 const BuyerDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") || "shop";
+  const initialTab = searchParams.get("tab") || "home";
   const [activeTab, setActiveTab] = useState(initialTab);
   const { user, profile, loading } = useAuth();
   const isMobile = useIsMobile();
@@ -68,6 +69,7 @@ const BuyerDashboard = () => {
 
   const getPageTitle = () => {
     const titles: Record<string, string> = {
+      home: "Dashboard",
       shop: "Shop",
       orders: "My Orders",
       wallet: "Wallet & Payments",
@@ -82,6 +84,8 @@ const BuyerDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
+      case "home":
+        return <BuyerOverviewPanel userId={user.id} onTabChange={handleTabChange} />;
       case "shop":
         return <BuyerShopPanel />;
       case "orders":
@@ -99,7 +103,7 @@ const BuyerDashboard = () => {
       case "support":
         return <BuyerSupportPanel />;
       default:
-        return <BuyerShopPanel />;
+        return <BuyerOverviewPanel userId={user.id} onTabChange={handleTabChange} />;
     }
   };
 
