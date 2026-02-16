@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Leaf, ArrowLeft, ShoppingBag, Tractor, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
-import terraLogo from "@/assets/terra-logo.png";
+import terraLogo from "@/assets/terra-logo-full.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -170,19 +170,16 @@ const AuthPage = () => {
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-4">
         <Card className="w-full max-w-md border-2 shadow-xl">
-          <CardHeader className="text-center pb-2">
-            <div className="flex justify-center mb-4">
-              <div className="relative">
-                <img src={terraLogo} alt="Terra" className="h-16 w-16" />
-                <div className="absolute -bottom-1 -right-1 bg-accent rounded-full p-1">
-                  <Leaf className="h-4 w-4 text-accent-foreground" />
-                </div>
-              </div>
+          <CardHeader className="text-center pb-2 relative overflow-hidden">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <img src={terraLogo} alt="Terra" className="w-full h-full object-contain opacity-[0.75]" />
             </div>
-            <CardTitle className="font-display text-2xl">Welcome to Terra</CardTitle>
-            <CardDescription>
-              Join the farm-to-table revolution
-            </CardDescription>
+            <div className="relative z-10 py-8">
+              <CardTitle className="font-display text-4xl md:text-5xl">Welcome to Terra</CardTitle>
+              <CardDescription className="font-bold text-base">
+                Join the farm-to-table revolution
+              </CardDescription>
+            </div>
           </CardHeader>
           
           <CardContent>
@@ -212,12 +209,12 @@ const AuthPage = () => {
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+                    <Label htmlFor="login-email" className="font-bold">Email</Label>
                     <Input id="login-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading} />
                     {emailError && <p className="text-sm text-destructive">{emailError}</p>}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Password</Label>
+                    <Label htmlFor="login-password" className="font-bold">Password</Label>
                     <Input id="login-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading} />
                     {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
                   </div>
@@ -280,22 +277,22 @@ const AuthPage = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="signup-name">Full Name</Label>
+                      <Label htmlFor="signup-name" className="font-bold">Full Name</Label>
                       <Input id="signup-name" type="text" placeholder="Juan dela Cruz" value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={isLoading} />
                       {nameError && <p className="text-sm text-destructive">{nameError}</p>}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email</Label>
+                      <Label htmlFor="signup-email" className="font-bold">Email</Label>
                       <Input id="signup-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading} />
                       {emailError && <p className="text-sm text-destructive">{emailError}</p>}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-password">Password</Label>
+                      <Label htmlFor="signup-password" className="font-bold">Password</Label>
                       <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading} />
                       {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-referral">
+                      <Label htmlFor="signup-referral" className="font-bold">
                         Referral Code <span className="text-muted-foreground">(optional)</span>
                       </Label>
                       <Input id="signup-referral" type="text" placeholder="ABCD1234" value={referralCode} onChange={(e) => setReferralCode(e.target.value.toUpperCase())} disabled={isLoading} className="uppercase" />
