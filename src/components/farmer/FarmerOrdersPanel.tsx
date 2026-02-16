@@ -412,7 +412,7 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
                   )}
                 </div>
                 
-                {/* Subtotals */}
+                {/* Subtotals with earnings breakdown */}
                 <div className="border-t pt-3 space-y-1">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
@@ -425,6 +425,23 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
                   <div className="flex justify-between font-medium pt-1 border-t">
                     <span>Total</span>
                     <span className="text-primary">₱{Number(selectedOrder.total).toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {/* Farmer Earnings Breakdown */}
+                <div className="border-t pt-3 space-y-1 mt-2">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Your Earnings</p>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Farmer Price</span>
+                    <span>₱{Number(selectedOrder.farmer_price ?? 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Terra Service Fee</span>
+                    <span className="text-destructive">-₱{Number(selectedOrder.terra_fee ?? 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between font-medium pt-1 border-t text-green-600 dark:text-green-400">
+                    <span>Net Earnings</span>
+                    <span>₱{(Number(selectedOrder.farmer_price ?? 0) - Number(selectedOrder.terra_fee ?? 0)).toLocaleString()}</span>
                   </div>
                 </div>
               </Card>

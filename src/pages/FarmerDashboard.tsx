@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import FarmerOverviewPanel from "@/components/farmer/FarmerOverviewPanel";
 import FarmerProductsPanel from "@/components/farmer/FarmerProductsPanel";
 import FarmerProfilePanel from "@/components/farmer/FarmerProfilePanel";
 import FarmerEarningsPanel from "@/components/farmer/FarmerEarningsPanel";
@@ -20,7 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Tractor, Package, DollarSign, Star, MapPin, Phone, Mail,
   AlertCircle, Loader2, ShoppingBag, Coins, Users, Receipt,
-  UserCircle, Wallet, Bell, LifeBuoy, Truck,
+  UserCircle, Wallet, Bell, LifeBuoy, Truck, LayoutDashboard,
 } from "lucide-react";
 import FarmerOrdersPanel from "@/components/farmer/FarmerOrdersPanel";
 import FarmerTokensPanel from "@/components/farmer/FarmerTokensPanel";
@@ -33,7 +34,7 @@ type Farmer = Tables<"farmers">;
 const FarmerDashboard = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState("products");
+  const [activeTab, setActiveTab] = useState("overview");
 
   // Fetch the farmer profile linked to this user (by matching email)
   const { data: farmer, isLoading: farmerLoading, error: farmerError } = useQuery({
@@ -234,6 +235,9 @@ const FarmerDashboard = () => {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 flex-wrap h-auto gap-1">
+            <TabsTrigger value="overview" className="gap-2">
+              <LayoutDashboard className="h-4 w-4" /> Home
+            </TabsTrigger>
             <TabsTrigger value="products" className="gap-2">
               <Package className="h-4 w-4" /> Products
             </TabsTrigger>
@@ -268,6 +272,10 @@ const FarmerDashboard = () => {
               <UserCircle className="h-4 w-4" /> Profile
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="overview">
+            <FarmerOverviewPanel farmerId={farmer.id} userId={user!.id} onNavigate={setActiveTab} />
+          </TabsContent>
 
           <TabsContent value="products">
             <FarmerProductsPanel farmerId={farmer.id} />

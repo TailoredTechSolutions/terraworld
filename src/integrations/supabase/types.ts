@@ -1112,13 +1112,18 @@ export type Database = {
       }
       products: {
         Row: {
+          availability_end: string | null
+          availability_start: string | null
           category: string
           created_at: string
+          cutoff_time: string | null
           description: string | null
           farmer_id: string
+          harvest_date: string | null
           id: string
           image_url: string | null
           is_organic: boolean | null
+          is_paused: boolean
           name: string
           price: number
           stock: number
@@ -1126,13 +1131,18 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          availability_end?: string | null
+          availability_start?: string | null
           category: string
           created_at?: string
+          cutoff_time?: string | null
           description?: string | null
           farmer_id: string
+          harvest_date?: string | null
           id?: string
           image_url?: string | null
           is_organic?: boolean | null
+          is_paused?: boolean
           name: string
           price: number
           stock?: number
@@ -1140,13 +1150,18 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          availability_end?: string | null
+          availability_start?: string | null
           category?: string
           created_at?: string
+          cutoff_time?: string | null
           description?: string | null
           farmer_id?: string
+          harvest_date?: string | null
           id?: string
           image_url?: string | null
           is_organic?: boolean | null
+          is_paused?: boolean
           name?: string
           price?: number
           stock?: number
