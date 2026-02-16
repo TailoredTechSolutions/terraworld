@@ -6,25 +6,21 @@ import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FarmerProductsPanel from "@/components/farmer/FarmerProductsPanel";
+import FarmerProfilePanel from "@/components/farmer/FarmerProfilePanel";
+import FarmerEarningsPanel from "@/components/farmer/FarmerEarningsPanel";
+import FarmerWithdrawalPanel from "@/components/farmer/FarmerWithdrawalPanel";
+import FarmerNotificationsPanel from "@/components/farmer/FarmerNotificationsPanel";
+import FarmerSupportPanel from "@/components/farmer/FarmerSupportPanel";
+import FarmerDeliveryPanel from "@/components/farmer/FarmerDeliveryPanel";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Tractor, 
-  Package, 
-  DollarSign, 
-  Star, 
-  MapPin, 
-  Phone, 
-  Mail,
-  AlertCircle,
-  Loader2,
-  ShoppingBag,
-  Coins,
-  Users,
-  Receipt,
+  Tractor, Package, DollarSign, Star, MapPin, Phone, Mail,
+  AlertCircle, Loader2, ShoppingBag, Coins, Users, Receipt,
+  UserCircle, Wallet, Bell, LifeBuoy, Truck,
 } from "lucide-react";
 import FarmerOrdersPanel from "@/components/farmer/FarmerOrdersPanel";
 import FarmerTokensPanel from "@/components/farmer/FarmerTokensPanel";
@@ -237,26 +233,39 @@ const FarmerDashboard = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 flex-wrap h-auto gap-1">
             <TabsTrigger value="products" className="gap-2">
-              <Package className="h-4 w-4" />
-              Products
+              <Package className="h-4 w-4" /> Products
             </TabsTrigger>
             <TabsTrigger value="pricing" className="gap-2">
-              <Receipt className="h-4 w-4" />
-              Pricing
+              <Receipt className="h-4 w-4" /> Pricing
             </TabsTrigger>
             <TabsTrigger value="orders" className="gap-2">
-              <ShoppingBag className="h-4 w-4" />
-              Orders
+              <ShoppingBag className="h-4 w-4" /> Orders
+            </TabsTrigger>
+            <TabsTrigger value="earnings" className="gap-2">
+              <DollarSign className="h-4 w-4" /> Earnings
+            </TabsTrigger>
+            <TabsTrigger value="withdrawals" className="gap-2">
+              <Wallet className="h-4 w-4" /> Withdraw
+            </TabsTrigger>
+            <TabsTrigger value="delivery" className="gap-2">
+              <Truck className="h-4 w-4" /> Delivery
             </TabsTrigger>
             <TabsTrigger value="tokens" className="gap-2">
-              <Coins className="h-4 w-4" />
-              Tokens
+              <Coins className="h-4 w-4" /> Tokens
             </TabsTrigger>
             <TabsTrigger value="referrals" className="gap-2">
-              <Users className="h-4 w-4" />
-              Referrals
+              <Users className="h-4 w-4" /> Referrals
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="gap-2">
+              <Bell className="h-4 w-4" /> Alerts
+            </TabsTrigger>
+            <TabsTrigger value="support" className="gap-2">
+              <LifeBuoy className="h-4 w-4" /> Support
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="gap-2">
+              <UserCircle className="h-4 w-4" /> Profile
             </TabsTrigger>
           </TabsList>
 
@@ -272,12 +281,36 @@ const FarmerDashboard = () => {
             <FarmerOrdersPanel farmerId={farmer.id} />
           </TabsContent>
 
+          <TabsContent value="earnings">
+            <FarmerEarningsPanel farmerId={farmer.id} userId={user!.id} />
+          </TabsContent>
+
+          <TabsContent value="withdrawals">
+            <FarmerWithdrawalPanel userId={user!.id} />
+          </TabsContent>
+
+          <TabsContent value="delivery">
+            <FarmerDeliveryPanel farmerId={farmer.id} />
+          </TabsContent>
+
           <TabsContent value="tokens">
             <FarmerTokensPanel userId={user!.id} />
           </TabsContent>
 
           <TabsContent value="referrals">
             <FarmerReferralsPanel userId={user!.id} referralCode={profile?.referral_code || ""} />
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <FarmerNotificationsPanel userId={user!.id} />
+          </TabsContent>
+
+          <TabsContent value="support">
+            <FarmerSupportPanel userId={user!.id} />
+          </TabsContent>
+
+          <TabsContent value="profile">
+            <FarmerProfilePanel farmer={farmer} />
           </TabsContent>
         </Tabs>
       </main>
