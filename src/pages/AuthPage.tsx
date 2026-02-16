@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Leaf, ArrowLeft, ShoppingBag, Tractor, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import terraLogo from "@/assets/terra-logo-full.png";
+import authBackground from "@/assets/auth-background.jpeg";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -158,17 +159,22 @@ const AuthPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-background flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
+      {/* Illustrated farm background */}
+      <div className="absolute inset-0 z-0">
+        <img src={authBackground} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+      </div>
       {/* Header */}
-      <div className="container py-4">
-        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+      <div className="container py-4 relative z-10">
+        <Link to="/" className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors">
           <ArrowLeft className="h-4 w-4" />
           Back to Marketplace
         </Link>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-4">
+      <div className="flex-1 flex items-center justify-center p-4 relative z-10">
         <Card className="w-full max-w-md border-2 shadow-xl">
           <CardHeader className="text-center pb-2 relative overflow-hidden">
             <div className="absolute inset-0 flex items-center justify-center">
@@ -313,8 +319,8 @@ const AuthPage = () => {
       </div>
       
       {/* Footer */}
-      <div className="container py-4 text-center">
-        <p className="text-sm text-muted-foreground">Terra — From Dirt to Dessert 🌱</p>
+      <div className="container py-4 text-center relative z-10">
+        <p className="text-sm text-white/70">Terra — From Dirt to Dessert 🌱</p>
       </div>
     </div>
   );
