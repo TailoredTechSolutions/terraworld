@@ -186,27 +186,17 @@ const AuthPage = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-4 relative z-10 mt-[5vh] md:mt-0">
-        <Card className="w-[92%] max-w-md border-2 shadow-2xl relative overflow-hidden bg-card/90 dark:bg-[hsl(20,10%,8%)]/85 backdrop-blur-sm dark:backdrop-blur-md">
-          {/* Logo watermark behind the entire card */}
+        <Card 
+          className="w-[92%] max-w-md border-2 shadow-2xl relative overflow-hidden backdrop-blur-sm dark:backdrop-blur-md"
+          style={{
+            background: `linear-gradient(hsla(34,28%,74%,0.92), hsla(34,28%,74%,0.92)), url(${terraLogo}) center / cover no-repeat`,
+          }}
+        >
+          {/* Dark mode override with darker overlay */}
           <div 
-            className="absolute inset-0 z-0 pointer-events-none"
+            className="absolute inset-0 z-0 pointer-events-none hidden dark:block rounded-xl"
             style={{
-              backgroundImage: `url(${terraLogo})`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'center',
-              backgroundSize: 'contain',
-              opacity: 0.10,
-            }}
-          />
-          {/* Dark mode: slightly stronger watermark */}
-          <div 
-            className="absolute inset-0 z-0 pointer-events-none hidden dark:block"
-            style={{
-              backgroundImage: `url(${terraLogo})`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'center',
-              backgroundSize: 'contain',
-              opacity: 0.15,
+              background: `linear-gradient(hsla(20,10%,8%,0.85), hsla(20,10%,8%,0.85)), url(${terraLogo}) center / cover no-repeat`,
             }}
           />
 
