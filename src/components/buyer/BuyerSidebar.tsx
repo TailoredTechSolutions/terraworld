@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  LayoutDashboard,
   ShoppingBag,
   Package,
   Wallet,
@@ -25,6 +26,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  { title: "Home", tab: "home", icon: LayoutDashboard },
   { title: "Shop", tab: "shop", icon: ShoppingBag },
   { title: "My Orders", tab: "orders", icon: Package },
   { title: "Wallet & Payments", tab: "wallet", icon: Wallet },
