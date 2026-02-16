@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Leaf, ArrowLeft, ShoppingBag, Tractor, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import terraLogo from "@/assets/terra-logo-full.png";
-import authBackground from "@/assets/auth-background.jpeg";
+import authFarmBg from "@/assets/auth-farm-bg.jpg";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -159,36 +159,67 @@ const AuthPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative">
-      {/* Illustrated farm background */}
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
+      {/* Realistic Philippine highland farm background */}
       <div className="absolute inset-0 z-0">
-        <img src={authBackground} alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+        <img 
+          src={authFarmBg} 
+          alt="" 
+          className="w-full h-full object-cover object-center md:object-center" 
+          loading="eager"
+        />
+        {/* Light mode overlay: subtle dark gradient for readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/25 to-black/10 dark:hidden" />
+        {/* Dark mode overlay: heavier cinematic overlay */}
+        <div className="absolute inset-0 hidden dark:block bg-gradient-to-t from-black/70 via-black/55 to-black/40" />
+        {/* Mobile extra overlay for readability */}
+        <div className="absolute inset-0 bg-black/10 md:bg-transparent dark:bg-black/5 md:dark:bg-transparent" />
       </div>
+
       {/* Header */}
       <div className="container py-4 relative z-10">
-        <Link to="/" className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors">
+        <Link to="/" className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors drop-shadow-md">
           <ArrowLeft className="h-4 w-4" />
           Back to Marketplace
         </Link>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-4 relative z-10">
-        <Card className="w-full max-w-md border-2 shadow-xl">
-          <CardHeader className="text-center pb-2 relative overflow-hidden">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <img src={terraLogo} alt="Terra" className="w-full h-full object-contain opacity-[0.75]" />
-            </div>
-            <div className="relative z-10 py-8">
-              <CardTitle className="font-display text-4xl md:text-5xl">Welcome to Terra</CardTitle>
-              <CardDescription className="font-bold text-base">
+      <div className="flex-1 flex items-center justify-center p-4 relative z-10 mt-[5vh] md:mt-0">
+        <Card className="w-[92%] max-w-md border-2 shadow-2xl relative overflow-hidden bg-card/90 dark:bg-[hsl(20,10%,8%)]/85 backdrop-blur-sm dark:backdrop-blur-md">
+          {/* Logo watermark behind the entire card */}
+          <div 
+            className="absolute inset-0 z-0 pointer-events-none"
+            style={{
+              backgroundImage: `url(${terraLogo})`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+              backgroundSize: 'contain',
+              opacity: 0.10,
+            }}
+          />
+          {/* Dark mode: slightly stronger watermark */}
+          <div 
+            className="absolute inset-0 z-0 pointer-events-none hidden dark:block"
+            style={{
+              backgroundImage: `url(${terraLogo})`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+              backgroundSize: 'contain',
+              opacity: 0.15,
+            }}
+          />
+
+          <CardHeader className="text-center pb-2 relative z-10">
+            <div className="py-6 md:py-8">
+              <CardTitle className="font-display text-4xl md:text-5xl drop-shadow-sm">Welcome to Terra</CardTitle>
+              <CardDescription className="font-bold text-base mt-2">
                 Join the farm-to-table revolution
               </CardDescription>
             </div>
           </CardHeader>
           
-          <CardContent>
+          <CardContent className="relative z-10">
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "register")}>
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="login">Sign In</TabsTrigger>
@@ -216,21 +247,21 @@ const AuthPage = () => {
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email" className="font-bold">Email</Label>
-                    <Input id="login-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading} />
+                    <Input id="login-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading} className="h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
                     {emailError && <p className="text-sm text-destructive">{emailError}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password" className="font-bold">Password</Label>
-                    <Input id="login-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading} />
+                    <Input id="login-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading} className="h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
                     {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
                   </div>
-                  <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
+                  <Button type="submit" className="w-full h-12 md:h-10 bg-primary hover:bg-primary/90 text-base font-semibold" disabled={isLoading}>
                     {isLoading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing In...</>) : "Sign In"}
                   </Button>
                   <div className="text-center">
                     <button
                       type="button"
-                      className="text-sm text-primary hover:underline"
+                      className="text-sm text-primary hover:underline font-semibold"
                       onClick={async () => {
                         if (!email) { toast({ title: "Enter Email", description: "Please enter your email address first.", variant: "destructive" }); return; }
                         const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
@@ -247,11 +278,11 @@ const AuthPage = () => {
               <TabsContent value="register">
                 {!registrationRole ? (
                   <div className="space-y-4 text-center py-4">
-                    <p className="text-muted-foreground">Choose your account type to get started:</p>
+                    <p className="text-muted-foreground font-bold">Choose your account type to get started:</p>
                     <div className="grid grid-cols-2 gap-4">
                       <button
                         onClick={() => setRegistrationRole("buyer")}
-                        className="p-6 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2"
+                        className="p-6 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
                       >
                         <ShoppingBag className="h-8 w-8 mx-auto text-primary" />
                         <p className="font-semibold">Buyer</p>
@@ -259,7 +290,7 @@ const AuthPage = () => {
                       </button>
                       <button
                         onClick={() => setRegistrationRole("farmer")}
-                        className="p-6 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2"
+                        className="p-6 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
                       >
                         <Tractor className="h-8 w-8 mx-auto text-primary" />
                         <p className="font-semibold">Farmer</p>
@@ -270,7 +301,7 @@ const AuthPage = () => {
                 ) : (
                   <form onSubmit={handleSignup} className="space-y-4">
                     {/* Role indicator */}
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-secondary">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-secondary dark:bg-[hsl(0,0%,15%)]">
                       <div className="flex items-center gap-2">
                         {registrationRole === "buyer" ? <ShoppingBag className="h-4 w-4 text-primary" /> : <Tractor className="h-4 w-4 text-primary" />}
                         <span className="text-sm font-medium">
@@ -284,27 +315,27 @@ const AuthPage = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="signup-name" className="font-bold">Full Name</Label>
-                      <Input id="signup-name" type="text" placeholder="Juan dela Cruz" value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={isLoading} />
+                      <Input id="signup-name" type="text" placeholder="Juan dela Cruz" value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={isLoading} className="h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
                       {nameError && <p className="text-sm text-destructive">{nameError}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-email" className="font-bold">Email</Label>
-                      <Input id="signup-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading} />
+                      <Input id="signup-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading} className="h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
                       {emailError && <p className="text-sm text-destructive">{emailError}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-password" className="font-bold">Password</Label>
-                      <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading} />
+                      <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading} className="h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
                       {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-referral" className="font-bold">
                         Referral Code <span className="text-muted-foreground">(optional)</span>
                       </Label>
-                      <Input id="signup-referral" type="text" placeholder="ABCD1234" value={referralCode} onChange={(e) => setReferralCode(e.target.value.toUpperCase())} disabled={isLoading} className="uppercase" />
+                      <Input id="signup-referral" type="text" placeholder="ABCD1234" value={referralCode} onChange={(e) => setReferralCode(e.target.value.toUpperCase())} disabled={isLoading} className="uppercase h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
                       <p className="text-xs text-muted-foreground">Have a friend on Terra? Enter their code to connect.</p>
                     </div>
-                    <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
+                    <Button type="submit" className="w-full h-12 md:h-10 bg-primary hover:bg-primary/90 text-base font-semibold" disabled={isLoading}>
                       {isLoading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating Account...</>) : "Create Account"}
                     </Button>
                     <p className="text-xs text-center text-muted-foreground">
@@ -320,7 +351,7 @@ const AuthPage = () => {
       
       {/* Footer */}
       <div className="container py-4 text-center relative z-10">
-        <p className="text-sm text-white/70">Terra — From Dirt to Dessert 🌱</p>
+        <p className="text-sm text-white/80 drop-shadow-md font-medium">Terra — From Dirt to Dessert 🌱</p>
       </div>
     </div>
   );
