@@ -107,6 +107,63 @@ export type Database = {
         }
         Relationships: []
       }
+      buyer_addresses: {
+        Row: {
+          address_line1: string
+          address_line2: string | null
+          city: string
+          country: string
+          created_at: string
+          full_name: string | null
+          id: string
+          is_default: boolean
+          label: string
+          latitude: number | null
+          longitude: number | null
+          phone: string | null
+          postal_code: string
+          state_province: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address_line1: string
+          address_line2?: string | null
+          city: string
+          country?: string
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          is_default?: boolean
+          label?: string
+          latitude?: number | null
+          longitude?: number | null
+          phone?: string | null
+          postal_code: string
+          state_province?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address_line1?: string
+          address_line2?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          is_default?: boolean
+          label?: string
+          latitude?: number | null
+          longitude?: number | null
+          phone?: string | null
+          postal_code?: string
+          state_province?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bv_ledger: {
         Row: {
           bv_amount: number
@@ -727,6 +784,42 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          reference_id: string | null
+          reference_type: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          reference_id?: string | null
+          reference_type?: string | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
@@ -1042,6 +1135,7 @@ export type Database = {
         Row: {
           agri_token_balance: number | null
           avatar_url: string | null
+          business_name: string | null
           created_at: string
           email: string
           external_wallet_address: string | null
@@ -1050,12 +1144,14 @@ export type Database = {
           phone: string | null
           referral_code: string
           referred_by: string | null
+          tax_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           agri_token_balance?: number | null
           avatar_url?: string | null
+          business_name?: string | null
           created_at?: string
           email: string
           external_wallet_address?: string | null
@@ -1064,12 +1160,14 @@ export type Database = {
           phone?: string | null
           referral_code: string
           referred_by?: string | null
+          tax_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           agri_token_balance?: number | null
           avatar_url?: string | null
+          business_name?: string | null
           created_at?: string
           email?: string
           external_wallet_address?: string | null
@@ -1078,6 +1176,7 @@ export type Database = {
           phone?: string | null
           referral_code?: string
           referred_by?: string | null
+          tax_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1186,6 +1285,97 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          category: string
+          closed_at: string | null
+          created_at: string
+          id: string
+          order_id: string | null
+          priority: string
+          status: string
+          subject: string
+          ticket_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category: string
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          priority?: string
+          status?: string
+          subject: string
+          ticket_number?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          priority?: string
+          status?: string
+          subject?: string
+          ticket_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_messages: {
+        Row: {
+          attachments: Json | null
+          created_at: string
+          id: string
+          message: string
+          sender_type: string
+          ticket_id: string
+          user_id: string
+        }
+        Insert: {
+          attachments?: Json | null
+          created_at?: string
+          id?: string
+          message: string
+          sender_type?: string
+          ticket_id: string
+          user_id: string
+        }
+        Update: {
+          attachments?: Json | null
+          created_at?: string
+          id?: string
+          message?: string
+          sender_type?: string
+          ticket_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       token_ledger: {
         Row: {

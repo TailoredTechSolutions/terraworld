@@ -15,6 +15,8 @@ import BuyerOrdersPanel from "@/components/buyer/BuyerOrdersPanel";
 import BuyerWalletPanel from "@/components/buyer/BuyerWalletPanel";
 import BuyerTokensPanel from "@/components/buyer/BuyerTokensPanel";
 import BuyerReferralsPanel from "@/components/buyer/BuyerReferralsPanel";
+import BuyerProfilePanel from "@/components/buyer/BuyerProfilePanel";
+import BuyerNotificationsPanel from "@/components/buyer/BuyerNotificationsPanel";
 import BuyerSupportPanel from "@/components/buyer/BuyerSupportPanel";
 
 const BuyerDashboard = () => {
@@ -71,6 +73,8 @@ const BuyerDashboard = () => {
       wallet: "Wallet & Payments",
       tokens: "Token Rewards",
       referrals: "Referral Tracking",
+      profile: "My Profile",
+      notifications: "Notifications",
       support: "Support & Disputes",
     };
     return titles[activeTab] || "Dashboard";
@@ -88,6 +92,10 @@ const BuyerDashboard = () => {
         return <BuyerTokensPanel userId={user.id} />;
       case "referrals":
         return <BuyerReferralsPanel userId={user.id} referralCode={profile?.referral_code || ""} />;
+      case "profile":
+        return <BuyerProfilePanel userId={user.id} />;
+      case "notifications":
+        return <BuyerNotificationsPanel userId={user.id} />;
       case "support":
         return <BuyerSupportPanel />;
       default:
