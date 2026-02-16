@@ -9,6 +9,8 @@ import {
   Menu,
   ChevronLeft,
   ChevronRight,
+  User,
+  Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -28,6 +30,8 @@ const navItems: NavItem[] = [
   { title: "Wallet & Payments", tab: "wallet", icon: Wallet },
   { title: "Token Rewards", tab: "tokens", icon: Coins },
   { title: "Referral Tracking", tab: "referrals", icon: Link2 },
+  { title: "My Profile", tab: "profile", icon: User },
+  { title: "Notifications", tab: "notifications", icon: Bell },
   { title: "Support & Disputes", tab: "support", icon: Ticket },
 ];
 

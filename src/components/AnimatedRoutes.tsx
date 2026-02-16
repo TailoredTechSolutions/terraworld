@@ -16,6 +16,7 @@ import MemberDashboard from "@/pages/MemberDashboard";
 import FarmerDashboard from "@/pages/FarmerDashboard";
 import BuyerDashboard from "@/pages/BuyerDashboard";
 import AuthPage from "@/pages/AuthPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import KYCPage from "@/pages/KYCPage";
 import NotFound from "@/pages/NotFound";
 
@@ -136,6 +137,14 @@ const AnimatedRoutes = () => {
           element={
             <PageTransition>
               <AuthPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <PageTransition>
+              <ResetPasswordPage />
             </PageTransition>
           }
         />
