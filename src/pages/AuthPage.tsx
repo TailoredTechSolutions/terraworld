@@ -165,7 +165,7 @@ const AuthPage = () => {
         <img 
           src={authFarmBg} 
           alt="" 
-          className="w-full h-full object-cover object-center md:object-center" 
+          className="w-full h-full object-cover object-center md:object-center opacity-50" 
           loading="eager"
         />
         {/* Light mode overlay: subtle dark gradient for readability */}
