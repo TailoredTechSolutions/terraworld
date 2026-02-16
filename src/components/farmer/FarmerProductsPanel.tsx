@@ -8,47 +8,24 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Search, Package, Leaf, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Package, Leaf, Loader2, Pause, Play, ImageIcon } from "lucide-react";
+import ProductImageUploader from "./ProductImageUploader";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 
 type Product = Tables<"products">;
@@ -60,11 +37,7 @@ interface FarmerProductsPanelProps {
 }
 
 const CATEGORIES = [
-  "Vegetables",
-  "Fruits",
-  "Meat & Poultry",
-  "Dairy & Eggs",
-  "Pantry",
+  "Vegetables", "Fruits", "Meat & Poultry", "Dairy & Eggs", "Pantry",
 ];
 
 const UNITS = ["kg", "g", "piece", "pack", "bundle", "dozen", "liter", "ml"];
@@ -78,6 +51,10 @@ const initialFormState = {
   stock: "",
   image_url: "",
   is_organic: false,
+  harvest_date: "",
+  availability_start: "",
+  availability_end: "",
+  cutoff_time: "17:00",
 };
 
 const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
@@ -88,8 +65,8 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState(initialFormState);
+  const [showImageUploader, setShowImageUploader] = useState<string | null>(null);
 
-  // Fetch products for this farmer
   const { data: products, isLoading } = useQuery({
     queryKey: ["farmer-products", farmerId],
     queryFn: async () => {
@@ -98,13 +75,11 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
         .select("*")
         .eq("farmer_id", farmerId)
         .order("created_at", { ascending: false });
-
       if (error) throw error;
       return data as Product[];
     },
   });
 
-  // Create product mutation
   const createMutation = useMutation({
     mutationFn: async (product: ProductInsert) => {
       const { data, error } = await supabase
@@ -112,40 +87,29 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
         .insert(product)
         .select()
         .single();
-
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["farmer-products", farmerId] });
       toast({ title: "Product created successfully" });
       handleCloseDialog();
+      // Open image uploader for the new product
+      setShowImageUploader(data.id);
     },
     onError: (error) => {
-      toast({
-        title: "Failed to create product",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Failed to create product", description: error.message, variant: "destructive" });
     },
   });
 
-  // Update product mutation
   const updateMutation = useMutation({
-    mutationFn: async ({
-      id,
-      product,
-    }: {
-      id: string;
-      product: ProductUpdate;
-    }) => {
+    mutationFn: async ({ id, product }: { id: string; product: ProductUpdate }) => {
       const { data, error } = await supabase
         .from("products")
         .update(product)
         .eq("id", id)
         .select()
         .single();
-
       if (error) throw error;
       return data;
     },
@@ -155,15 +119,10 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
       handleCloseDialog();
     },
     onError: (error) => {
-      toast({
-        title: "Failed to update product",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Failed to update product", description: error.message, variant: "destructive" });
     },
   });
 
-  // Delete product mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("products").delete().eq("id", id);
@@ -176,11 +135,36 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
       setDeletingProduct(null);
     },
     onError: (error) => {
-      toast({
-        title: "Failed to delete product",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Failed to delete product", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Toggle pause mutation
+  const togglePauseMutation = useMutation({
+    mutationFn: async ({ id, is_paused }: { id: string; is_paused: boolean }) => {
+      const { error } = await supabase
+        .from("products")
+        .update({ is_paused } as ProductUpdate)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["farmer-products", farmerId] });
+      toast({ title: "Product listing updated" });
+    },
+  });
+
+  // Quick stock update mutation
+  const stockMutation = useMutation({
+    mutationFn: async ({ id, stock }: { id: string; stock: number }) => {
+      const { error } = await supabase
+        .from("products")
+        .update({ stock })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["farmer-products", farmerId] });
     },
   });
 
@@ -201,6 +185,10 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
       stock: product.stock.toString(),
       image_url: product.image_url || "",
       is_organic: product.is_organic || false,
+      harvest_date: (product as any).harvest_date || "",
+      availability_start: (product as any).availability_start || "",
+      availability_end: (product as any).availability_end || "",
+      cutoff_time: (product as any).cutoff_time?.substring(0, 5) || "17:00",
     });
     setIsDialogOpen(true);
   };
@@ -211,11 +199,6 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
     setFormData(initialFormState);
   };
 
-  const handleOpenDelete = (product: Product) => {
-    setDeletingProduct(product);
-    setIsDeleteDialogOpen(true);
-  };
-
   const handleSubmit = () => {
     const price = parseFloat(formData.price);
     const stock = parseInt(formData.stock, 10);
@@ -224,18 +207,16 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
       toast({ title: "Product name is required", variant: "destructive" });
       return;
     }
-
     if (isNaN(price) || price < 0) {
       toast({ title: "Please enter a valid price", variant: "destructive" });
       return;
     }
-
     if (isNaN(stock) || stock < 0) {
       toast({ title: "Please enter a valid stock quantity", variant: "destructive" });
       return;
     }
 
-    const productData = {
+    const productData: any = {
       name: formData.name.trim(),
       description: formData.description.trim() || null,
       category: formData.category,
@@ -245,6 +226,10 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
       image_url: formData.image_url.trim() || null,
       is_organic: formData.is_organic,
       farmer_id: farmerId,
+      harvest_date: formData.harvest_date || null,
+      availability_start: formData.availability_start || null,
+      availability_end: formData.availability_end || null,
+      cutoff_time: formData.cutoff_time ? `${formData.cutoff_time}:00` : null,
     };
 
     if (editingProduct) {
@@ -271,38 +256,26 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
               <Package className="h-5 w-5" />
               Product Listings
             </CardTitle>
-            <CardDescription>
-              Manage your farm products and inventory
-            </CardDescription>
+            <CardDescription>Manage your farm products and inventory</CardDescription>
           </div>
           <Button onClick={handleOpenCreate} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add Product
+            <Plus className="h-4 w-4" /> Add Product
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        {/* Search */}
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search products..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+          <Input placeholder="Search products..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
 
-        {/* Products Table */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : filteredProducts?.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            {searchQuery
-              ? "No products found matching your search"
-              : "No products yet. Add your first product!"}
+            {searchQuery ? "No products found matching your search" : "No products yet. Add your first product!"}
           </div>
         ) : (
           <div className="rounded-md border overflow-x-auto">
@@ -313,78 +286,84 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
                   <TableHead>Category</TableHead>
                   <TableHead className="text-right">Price</TableHead>
                   <TableHead className="text-right">Stock</TableHead>
-                  <TableHead className="text-center">Organic</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredProducts?.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        {product.image_url ? (
-                          <img
-                            src={product.image_url}
-                            alt={product.name}
-                            className="h-10 w-10 rounded-md object-cover"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center">
-                            <Package className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div>
-                          <div className="font-medium">{product.name}</div>
-                          {product.description && (
-                            <div className="text-xs text-muted-foreground line-clamp-1">
-                              {product.description}
+                {filteredProducts?.map((product) => {
+                  const isPaused = (product as any).is_paused;
+                  const isOutOfStock = product.stock <= 0;
+                  return (
+                    <TableRow key={product.id} className={isPaused ? "opacity-60" : ""}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          {product.image_url ? (
+                            <img src={product.image_url} alt={product.name} className="h-10 w-10 rounded-md object-cover" />
+                          ) : (
+                            <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center">
+                              <Package className="h-5 w-5 text-muted-foreground" />
                             </div>
                           )}
+                          <div>
+                            <div className="font-medium flex items-center gap-1">
+                              {product.name}
+                              {product.is_organic && <Leaf className="h-3 w-3 text-green-600" />}
+                            </div>
+                            {product.description && (
+                              <div className="text-xs text-muted-foreground line-clamp-1">{product.description}</div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{product.category}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      ₱{product.price.toFixed(2)}/{product.unit}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <span
-                        className={
-                          product.stock <= 10
-                            ? "text-destructive font-medium"
-                            : ""
-                        }
-                      >
-                        {product.stock} {product.unit}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {product.is_organic && (
-                        <Leaf className="h-4 w-4 text-green-600 mx-auto" />
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleOpenEdit(product)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleOpenDelete(product)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{product.category}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">₱{product.price.toFixed(2)}/{product.unit}</TableCell>
+                      <TableCell className="text-right">
+                        <span className={isOutOfStock ? "text-destructive font-medium" : product.stock <= 10 ? "text-amber-600 font-medium" : ""}>
+                          {product.stock} {product.unit}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {isPaused ? (
+                          <Badge variant="secondary">Paused</Badge>
+                        ) : isOutOfStock ? (
+                          <Badge variant="destructive">Out of Stock</Badge>
+                        ) : (
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">Active</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title={isPaused ? "Resume Listing" : "Pause Listing"}
+                            onClick={() => togglePauseMutation.mutate({ id: product.id, is_paused: !isPaused })}
+                          >
+                            {isPaused ? <Play className="h-4 w-4 text-green-600" /> : <Pause className="h-4 w-4 text-amber-600" />}
+                          </Button>
+                          <Button variant="ghost" size="icon" title="Manage Photos" onClick={() => setShowImageUploader(showImageUploader === product.id ? null : product.id)}>
+                            <ImageIcon className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(product)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => { setDeletingProduct(product); setIsDeleteDialogOpen(true); }}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                        {/* Inline image uploader */}
+                        {showImageUploader === product.id && (
+                          <div className="mt-3 text-left">
+                            <ProductImageUploader productId={product.id} farmerId={farmerId} />
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
@@ -393,83 +372,39 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {editingProduct ? "Edit Product" : "Add New Product"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingProduct
-                ? "Update your product information"
-                : "Add a new product to your listings"}
-            </DialogDescription>
+            <DialogTitle>{editingProduct ? "Edit Product" : "Add New Product"}</DialogTitle>
+            <DialogDescription>{editingProduct ? "Update your product information" : "Add a new product to your listings"}</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="name">Product Name *</Label>
-              <Input
-                id="name"
-                placeholder="e.g., Fresh Strawberries"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-              />
+              <Input id="name" placeholder="e.g., Fresh Strawberries" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Describe your product..."
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                rows={3}
-              />
+              <Textarea id="description" placeholder="Describe your product..." value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="category">Category *</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, category: value })
-                  }
-                >
-                  <SelectTrigger id="category">
-                    <SelectValue />
-                  </SelectTrigger>
+                <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                  <SelectTrigger id="category"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
+                    {CATEGORIES.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="grid gap-2">
                 <Label htmlFor="unit">Unit *</Label>
-                <Select
-                  value={formData.unit}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, unit: value })
-                  }
-                >
-                  <SelectTrigger id="unit">
-                    <SelectValue />
-                  </SelectTrigger>
+                <Select value={formData.unit} onValueChange={(value) => setFormData({ ...formData, unit: value })}>
+                  <SelectTrigger id="unit"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {UNITS.map((unit) => (
-                      <SelectItem key={unit} value={unit}>
-                        {unit}
-                      </SelectItem>
-                    ))}
+                    {UNITS.map((unit) => (<SelectItem key={unit} value={unit}>{unit}</SelectItem>))}
                   </SelectContent>
                 </Select>
               </div>
@@ -477,66 +412,56 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="price">Price (₱) *</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData({ ...formData, price: e.target.value })
-                  }
-                />
+                <Label htmlFor="price">Base Price (₱) *</Label>
+                <Input id="price" type="number" min="0" step="0.01" placeholder="0.00" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} />
               </div>
-
               <div className="grid gap-2">
-                <Label htmlFor="stock">Stock *</Label>
-                <Input
-                  id="stock"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={formData.stock}
-                  onChange={(e) =>
-                    setFormData({ ...formData, stock: e.target.value })
-                  }
-                />
+                <Label htmlFor="stock">Available Quantity *</Label>
+                <Input id="stock" type="number" min="0" placeholder="0" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
               </div>
+            </div>
+
+            {/* Harvest Date */}
+            <div className="grid gap-2">
+              <Label htmlFor="harvest_date">Harvest Date</Label>
+              <Input id="harvest_date" type="date" value={formData.harvest_date} onChange={(e) => setFormData({ ...formData, harvest_date: e.target.value })} />
+            </div>
+
+            {/* Availability Window */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="avail_start">Available From</Label>
+                <Input id="avail_start" type="date" value={formData.availability_start} onChange={(e) => setFormData({ ...formData, availability_start: e.target.value })} />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="avail_end">Available Until</Label>
+                <Input id="avail_end" type="date" value={formData.availability_end} onChange={(e) => setFormData({ ...formData, availability_end: e.target.value })} />
+              </div>
+            </div>
+
+            {/* Cutoff Time */}
+            <div className="grid gap-2">
+              <Label htmlFor="cutoff_time">Daily Cutoff Time</Label>
+              <Input id="cutoff_time" type="time" value={formData.cutoff_time} onChange={(e) => setFormData({ ...formData, cutoff_time: e.target.value })} />
+              <p className="text-xs text-muted-foreground">Orders placed after this time will be scheduled for the next day</p>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="image_url">Image URL</Label>
-              <Input
-                id="image_url"
-                placeholder="https://example.com/image.jpg"
-                value={formData.image_url}
-                onChange={(e) =>
-                  setFormData({ ...formData, image_url: e.target.value })
-                }
-              />
+              <Label htmlFor="image_url">Cover Image URL</Label>
+              <Input id="image_url" placeholder="https://example.com/image.jpg" value={formData.image_url} onChange={(e) => setFormData({ ...formData, image_url: e.target.value })} />
+              <p className="text-xs text-muted-foreground">You can add multiple photos after saving using the photo manager</p>
             </div>
 
             <div className="flex items-center gap-3">
-              <Switch
-                id="is_organic"
-                checked={formData.is_organic}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, is_organic: checked })
-                }
-              />
+              <Switch id="is_organic" checked={formData.is_organic} onCheckedChange={(checked) => setFormData({ ...formData, is_organic: checked })} />
               <Label htmlFor="is_organic" className="flex items-center gap-2">
-                <Leaf className="h-4 w-4 text-green-600" />
-                Organic Product
+                <Leaf className="h-4 w-4 text-green-600" /> Organic Product
               </Label>
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={handleCloseDialog}>
-              Cancel
-            </Button>
+            <Button variant="outline" onClick={handleCloseDialog}>Cancel</Button>
             <Button onClick={handleSubmit} disabled={isPending}>
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {editingProduct ? "Save Changes" : "Add Product"}
@@ -545,27 +470,22 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Product</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deletingProduct?.name}"? This
-              action cannot be undone.
+              Are you sure you want to delete "{deletingProduct?.name}"? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() =>
-                deletingProduct && deleteMutation.mutate(deletingProduct.id)
-              }
+              onClick={() => deletingProduct && deleteMutation.mutate(deletingProduct.id)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleteMutation.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
+              {deleteMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
