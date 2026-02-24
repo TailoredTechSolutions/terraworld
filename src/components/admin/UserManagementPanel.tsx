@@ -36,7 +36,7 @@ import {
   RefreshCw
 } from "lucide-react";
 
-type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin';
+type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer';
 
 interface UserProfile {
   id: string;
@@ -63,9 +63,10 @@ const ROLE_CONFIG: Record<AppRole, { label: string; icon: React.ComponentType<{ 
   farmer: { label: "Farmer", icon: Sprout, color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
   member: { label: "Member", icon: Crown, color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
   business_buyer: { label: "Business", icon: Building2, color: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
+  buyer: { label: "Buyer", icon: Users, color: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400" },
 };
 
-const ALL_ROLES: AppRole[] = ['admin', 'driver', 'farmer', 'member', 'business_buyer'];
+const ALL_ROLES: AppRole[] = ['admin', 'driver', 'farmer', 'member', 'business_buyer', 'buyer'];
 
 const UserManagementPanel = () => {
   const [users, setUsers] = useState<UserWithRoles[]>([]);
@@ -282,7 +283,12 @@ const UserManagementPanel = () => {
                             <span className="text-sm text-muted-foreground">No roles</span>
                           ) : (
                             user.roles.map(role => {
-                              const config = ROLE_CONFIG[role];
+                              const config = ROLE_CONFIG[role as AppRole];
+                              if (!config) return (
+                                <Badge key={role} variant="secondary" className="gap-1">
+                                  {role}
+                                </Badge>
+                              );
                               return (
                                 <Badge key={role} variant="secondary" className={`gap-1 ${config.color}`}>
                                   <config.icon className="h-3 w-3" />
