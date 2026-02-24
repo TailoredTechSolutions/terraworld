@@ -78,31 +78,29 @@ const HeroSection = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Column - Main Content */}
           <div>
-            {/* Animated Video Badge */}
+            {/* Animated Video Badge - Centered */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, type: "spring" }}
-              className="mb-8">
+              className="mb-8 flex justify-center lg:justify-start">
 
               <div className="relative inline-flex items-center gap-4 glass-card-accent glass-shimmer p-3 pr-6">
                 {/* Video Icon */}
-                <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden border-2 border-accent shadow-lg shadow-glow-accent">
+                <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden border-2 border-accent shadow-lg shadow-glow-accent flex-shrink-0">
                   <video
                     autoPlay
                     loop
                     muted
                     playsInline
                     className="w-full h-full object-cover">
-
                     <source src="/videos/harvest-badge.mp4" type="video/mp4" />
                   </video>
                   {/* Pulsing ring */}
                   <motion.div
-                    className="absolute inset-0 border-2 border-accent opacity-75 rounded-3xl"
+                    className="absolute inset-0 border-2 border-accent opacity-75 rounded-xl"
                     animate={{ scale: [1, 1.15, 1], opacity: [0.8, 0, 0.8] }}
                     transition={{ duration: 2, repeat: Infinity }} />
-
                 </div>
                 
                 {/* Text content */}

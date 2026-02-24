@@ -79,10 +79,10 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full glass-navbar">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-[68px] items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-3 group">
-          <img src={terraLogo} alt="Terra Farming" className="h-9 w-9 object-contain transition-transform group-hover:scale-105" />
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <img src={terraLogo} alt="Terra Farming" className="h-11 w-11 object-contain transition-transform group-hover:scale-105 rounded-lg" />
           <div className="flex items-center gap-2">
             <span className="font-display text-xl font-bold text-foreground tracking-tight">Terra Farming</span>
             <span className="hidden sm:block h-4 w-px bg-border" />
