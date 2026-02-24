@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -24,6 +24,7 @@ import {
   Ticket,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -87,13 +88,15 @@ interface UserProfile {
   avatar_url: string | null;
 }
 
+const SUPER_ADMIN_ROLES: string[] = ['admin', 'farmer', 'buyer', 'member', 'driver', 'business_buyer'];
+
 const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const isMobile = useIsMobile();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
-
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return;
@@ -103,6 +106,16 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
         .eq('user_id', user.id)
         .single();
       if (data) setProfile(data);
+
+      // Check if user has ALL roles (super admin)
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+      if (roles) {
+        const userRoles: string[] = roles.map(r => r.role as string);
+        setIsSuperAdmin(SUPER_ADMIN_ROLES.every(r => userRoles.includes(r)));
+      }
     };
     fetchProfile();
   }, [user]);
@@ -128,7 +141,15 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border">
         {(!collapsed || inSheet) && (
-          <span className="font-semibold text-foreground">Admin Panel</span>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-foreground">Admin Panel</span>
+            {isSuperAdmin && (
+              <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 px-1.5 py-0 text-[10px] font-bold">
+                <Crown className="h-2.5 w-2.5 mr-0.5" />
+                SUPER
+              </Badge>
+            )}
+          </div>
         )}
         {!inSheet && (
           <Button
@@ -235,11 +256,19 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
               </Avatar>
               {(!collapsed || inSheet) && (
                 <div className="flex-1 text-left overflow-hidden">
-                  <p className="text-sm font-medium truncate">
-                    {profile?.full_name || 'Admin User'}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-medium truncate">
+                      {profile?.full_name || 'Admin User'}
+                    </p>
+                    {isSuperAdmin && (
+                      <Badge variant="outline" className="shrink-0 px-1.5 py-0 text-[10px] font-bold border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <Crown className="h-2.5 w-2.5 mr-0.5" />
+                        DEV
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground truncate">
-                    {profile?.email || user?.email}
+                    {isSuperAdmin ? 'Super Admin' : (profile?.email || user?.email)}
                   </p>
                 </div>
               )}
