@@ -50,13 +50,13 @@ const ProductDetail = () => {
         {/* Breadcrumb */}
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4 lg:mb-8"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Marketplace
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12">
           {/* Image */}
           <div className="relative aspect-square overflow-hidden rounded-2xl bg-secondary">
             <img
