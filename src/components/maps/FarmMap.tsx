@@ -3,6 +3,7 @@ import { GoogleMap, useJsApiLoader, Marker, InfoWindow, DirectionsRenderer } fro
 import { Farm } from "@/data/products";
 import { MapPin, Star, Navigation, Clock, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GOOGLE_MAPS_API_KEY } from "@/config/maps";
 
 interface FarmMapProps {
   farms: Farm[];
@@ -48,7 +49,7 @@ const mapOptions: google.maps.MapOptions = {
   ],
 };
 
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
+// API key is imported from config/maps.ts
 
 const FarmMap = ({ farms, userLocation, onFarmSelect, selectedFarm, showRoute = false }: FarmMapProps) => {
   const [activeInfoWindow, setActiveInfoWindow] = useState<string | null>(null);
