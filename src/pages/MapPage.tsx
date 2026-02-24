@@ -179,8 +179,8 @@ const MapPage = () => {
             </div>
 
             {/* Farm List Sidebar */}
-            <div className="space-y-4 max-h-[600px] overflow-y-auto">
-              <div className="flex items-center justify-between sticky top-0 bg-background py-2">
+            <div className="lg:space-y-4 lg:max-h-[600px] lg:overflow-y-auto">
+              <div className="flex items-center justify-between lg:sticky top-0 bg-background py-2">
                 <span className="text-sm text-muted-foreground">
                   {filteredFarms.length} farms found
                 </span>
@@ -189,46 +189,93 @@ const MapPage = () => {
                 </span>
               </div>
 
-              {filteredFarms.map((farm) => {
-                const { fee, eta } = getDeliveryInfo(farm);
-                return (
-                  <div
-                    key={farm.id}
-                    className={`p-4 rounded-xl border transition-all cursor-pointer ${
-                      selectedFarm?.id === farm.id
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                    onClick={() => setSelectedFarm(farm)}
-                  >
-                    <div className="flex gap-3">
-                      <img
-                        src={farm.image}
-                        alt={farm.name}
-                        className="h-16 w-16 rounded-lg object-cover"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-foreground truncate">
-                          {farm.name}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {farm.distance} km away
-                        </p>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {eta.min}-{eta.max} min
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Truck className="h-3 w-3" />
-                            ₱{fee}
-                          </span>
+              {/* Mobile: horizontal scroll strip */}
+              <div className="flex lg:hidden gap-3 overflow-x-auto pb-3 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide">
+                {filteredFarms.map((farm) => {
+                  const { fee, eta } = getDeliveryInfo(farm);
+                  return (
+                    <div
+                      key={farm.id}
+                      className={`flex-shrink-0 w-[260px] snap-start p-3 rounded-xl border transition-all cursor-pointer ${
+                        selectedFarm?.id === farm.id
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                      onClick={() => setSelectedFarm(farm)}
+                    >
+                      <div className="flex gap-2.5">
+                        <img
+                          src={farm.image}
+                          alt={farm.name}
+                          className="h-14 w-14 rounded-lg object-cover shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-foreground text-sm truncate">
+                            {farm.name}
+                          </h4>
+                          <p className="text-xs text-muted-foreground">
+                            {farm.distance} km away
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-0.5">
+                              <Clock className="h-3 w-3" />
+                              {eta.min}-{eta.max}m
+                            </span>
+                            <span className="flex items-center gap-0.5">
+                              <Truck className="h-3 w-3" />
+                              ₱{fee}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+
+              {/* Desktop: vertical list */}
+              <div className="hidden lg:block space-y-4">
+                {filteredFarms.map((farm) => {
+                  const { fee, eta } = getDeliveryInfo(farm);
+                  return (
+                    <div
+                      key={farm.id}
+                      className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                        selectedFarm?.id === farm.id
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                      onClick={() => setSelectedFarm(farm)}
+                    >
+                      <div className="flex gap-3">
+                        <img
+                          src={farm.image}
+                          alt={farm.name}
+                          className="h-16 w-16 rounded-lg object-cover"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-foreground truncate">
+                            {farm.name}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {farm.distance} km away
+                          </p>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {eta.min}-{eta.max} min
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Truck className="h-3 w-3" />
+                              ₱{fee}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         ) : (
