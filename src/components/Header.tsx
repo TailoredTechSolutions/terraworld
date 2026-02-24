@@ -82,9 +82,9 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <img src={terraLogo} alt="Terra" className="h-9 w-9 object-contain transition-transform group-hover:scale-105" />
+          <img src={terraLogo} alt="Terra Farming" className="h-9 w-9 object-contain transition-transform group-hover:scale-105" />
           <div className="flex items-center gap-2">
-            <span className="font-display text-xl font-bold text-foreground tracking-tight">Terra</span>
+            <span className="font-display text-xl font-bold text-foreground tracking-tight">Terra Farming</span>
             <span className="hidden sm:block h-4 w-px bg-border" />
             <span className="hidden sm:block text-[10px] font-semibold tracking-[0.25em] text-muted-foreground uppercase font-display animate-fade-in italic">From Dirt to Dessert</span>
           </div>
