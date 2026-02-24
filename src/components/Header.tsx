@@ -86,7 +86,7 @@ const Header = () => {
           <div className="flex items-center gap-2">
             <span className="font-display text-xl font-bold text-foreground tracking-tight">Terra</span>
             <span className="hidden sm:block h-4 w-px bg-border" />
-            <span className="hidden sm:block text-xs font-medium tracking-wide text-muted-foreground uppercase">From Dirt to Dessert</span>
+            <span className="hidden sm:block text-[10px] font-semibold tracking-[0.25em] text-muted-foreground uppercase font-display animate-fade-in italic">From Dirt to Dessert</span>
           </div>
         </Link>
 
