@@ -1,10 +1,19 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import FarmCard from "@/components/FarmCard";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
 import { farms } from "@/data/products";
+import farmerPedro from "@/assets/testimonials/farmer-pedro.jpg";
+import farmerAlingRosa from "@/assets/testimonials/farmer-aling-rosa.jpg";
+import farmerKuyaBen from "@/assets/testimonials/farmer-kuya-ben.jpg";
+import customerMaria from "@/assets/testimonials/customer-maria.jpg";
+import customerChefJuan from "@/assets/testimonials/customer-chef-juan.jpg";
+import customerAteJoy from "@/assets/testimonials/customer-ate-joy.jpg";
+import customerMike from "@/assets/testimonials/customer-mike.jpg";
+import customerSooJin from "@/assets/testimonials/customer-soo-jin.jpg";
 import { 
   ArrowRight, 
   Leaf, 
@@ -201,46 +210,115 @@ const FeatureCard = ({ feature }: { feature: Feature }) => {
 
 
 // Testimonials data
-const testimonials = [
+interface Testimonial {
+  id: number;
+  name: string;
+  role: string;
+  location: string;
+  avatar: string;
+  rating: number;
+  quote: string;
+  translation?: string;
+  isFarmer: boolean;
+  delay: number;
+}
+
+const testimonials: Testimonial[] = [
+  // Farmers — Ilocano / Cordillera dialect quotes
   {
     id: 1,
-    name: "Maria Santos",
-    role: "Home Cook",
-    location: "Quezon City",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+    name: "Mang Pedro Bautista",
+    role: "Organic Farmer",
+    location: "La Trinidad, Benguet",
+    avatar: farmerPedro,
     rating: 5,
-    quote: "The vegetables from Terra Farming are incredibly fresh! You can really taste the difference. My family loves the Baguio lettuce and strawberries.",
+    quote: "Idi simmangpet ti Terra Farming, nagbaliw ti biag mi ditoy talon. Direkta kami nga makailako kadagiti customers — awan ti middleman! Dimmakel ti income mi iti 40%.",
+    translation: "When Terra Farming arrived, life on our farm changed. We sell directly to customers — no middleman! Our income grew by 40%.",
+    isFarmer: true,
     delay: 0,
   },
   {
     id: 2,
-    name: "Juan Dela Cruz",
-    role: "Restaurant Owner",
-    location: "Makati City",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    name: "Aling Rosa Magbanua",
+    role: "Vegetable Farmer",
+    location: "Atok, Benguet",
+    avatar: farmerAlingRosa,
     rating: 5,
-    quote: "As a chef, quality ingredients are everything. Terra Farming connects me directly with highland farmers. The produce is farm-fresh and my customers notice!",
+    quote: "Naimbag unay daytoy app. Dati, mabaybayag dagiti nateng mi bago malako. Ita, adda orders bago pay laeng mapitas. Dakkel ti tulong na kadagiti mannalon kasta kanik.",
+    translation: "This app is wonderful. Before, our vegetables took so long to sell. Now, we get orders even before harvest. It's a huge help for farmers like me.",
+    isFarmer: true,
     delay: 0.15,
   },
   {
     id: 3,
-    name: "Ana Reyes",
-    role: "Terra Farming Affiliate",
-    location: "Baguio City",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    name: "Kuya Ben Palag-ao",
+    role: "Strawberry Farmer",
+    location: "Strawberry Fields, La Trinidad",
+    avatar: farmerKuyaBen,
     rating: 5,
-    quote: "I started as a customer and now I'm earning passive income as an affiliate. The commission structure is transparent and payouts are always on time.",
+    quote: "Ay sus, grabe talaga 'tong Terra Farming eh! Dati hirap kami maghanap buyer, ngayon sila na pumupunta sa amin online. Tsaka yung referral, may extra income pa!",
+    translation: "Oh man, Terra Farming is amazing! We used to struggle to find buyers, now they come to us online. Plus the referral program gives us extra income!",
+    isFarmer: true,
     delay: 0.3,
   },
+  // Customers — mostly Filipino, couple foreigners
   {
     id: 4,
-    name: "Pedro Gomez",
-    role: "Organic Farmer",
-    location: "La Trinidad, Benguet",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    name: "Maria Santos",
+    role: "Home Cook",
+    location: "Quezon City",
+    avatar: customerMaria,
     rating: 5,
-    quote: "Terra Farming has transformed my farm business. I now reach customers directly without middlemen. My income has increased by 40% since joining!",
+    quote: "Ang fresh talaga ng mga gulay galing Terra Farming! Ibang-iba ang lasa. Paborito ng pamilya ko yung Baguio lettuce at strawberries nila.",
+    translation: "The vegetables from Terra Farming are so fresh! The taste is completely different. My family loves their Baguio lettuce and strawberries.",
+    isFarmer: false,
     delay: 0.45,
+  },
+  {
+    id: 5,
+    name: "Chef Juan Reyes",
+    role: "Restaurant Owner",
+    location: "Makati City",
+    avatar: customerChefJuan,
+    rating: 5,
+    quote: "Para sa akin bilang chef, ang quality ng ingredients ang pinaka-importante. Direktang galing sa highland farmers ang produce — fresh na fresh! Napapansin ng mga customers ko ang pagkakaiba.",
+    translation: "As a chef, ingredient quality is everything. The produce comes directly from highland farmers — super fresh! My customers notice the difference.",
+    isFarmer: false,
+    delay: 0.6,
+  },
+  {
+    id: 6,
+    name: "Ate Joy Navarro",
+    role: "Terra Farming Affiliate",
+    location: "Baguio City",
+    avatar: customerAteJoy,
+    rating: 5,
+    quote: "Nag-start ako as customer lang tapos ngayon kumikita na ko as affiliate! Transparent yung commission structure at laging on-time ang payout. Swak na swak!",
+    translation: "I started as just a customer and now I'm earning as an affiliate! The commission structure is transparent and payouts are always on time. Perfect fit!",
+    isFarmer: false,
+    delay: 0.75,
+  },
+  {
+    id: 7,
+    name: "Mike Thompson",
+    role: "Expat Food Enthusiast",
+    location: "Subic Bay",
+    avatar: customerMike,
+    rating: 5,
+    quote: "I've lived in the Philippines for 8 years and finding quality organic produce was always a challenge. Terra Farming changed that — farm-to-table has never been this easy.",
+    isFarmer: false,
+    delay: 0.9,
+  },
+  {
+    id: 8,
+    name: "Soo-Jin Park",
+    role: "Health & Wellness Coach",
+    location: "BGC, Taguig",
+    avatar: customerSooJin,
+    rating: 5,
+    quote: "I recommend Terra Farming to all my clients. The organic certification, direct farmer connection, and delivery tracking make healthy eating so much more accessible here.",
+    isFarmer: false,
+    delay: 1.05,
   },
 ];
 
@@ -274,8 +352,11 @@ const AnimatedStarRating = ({ rating, delay }: { rating: number; delay: number }
   );
 };
 
-// Testimonial Card Component
-const TestimonialCard = ({ testimonial }: { testimonial: typeof testimonials[0] }) => {
+// Testimonial Card Component with translation fade-in
+const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
+  const [showTranslation, setShowTranslation] = useState(false);
+  const hasTranslation = !!testimonial.translation;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -283,8 +364,21 @@ const TestimonialCard = ({ testimonial }: { testimonial: typeof testimonials[0] 
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, delay: testimonial.delay }}
       whileHover={{ y: -5, transition: { duration: 0.3 } }}
-      className="group relative p-6 glass-card glass-hover glass-shimmer-subtle"
+      className="group relative p-6 glass-card glass-hover glass-shimmer-subtle flex flex-col"
     >
+      {/* Farmer badge */}
+      {testimonial.isFarmer && (
+        <motion.div
+          initial={{ opacity: 0, x: 10 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4, delay: testimonial.delay + 0.1 }}
+          className="absolute -top-2.5 -right-2.5 px-2.5 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1"
+        >
+          <Leaf className="h-3 w-3" /> Farmer
+        </motion.div>
+      )}
+
       {/* Quote icon */}
       <motion.div
         initial={{ opacity: 0, scale: 0 }}
@@ -301,10 +395,55 @@ const TestimonialCard = ({ testimonial }: { testimonial: typeof testimonials[0] 
         <AnimatedStarRating rating={testimonial.rating} delay={testimonial.delay + 0.3} />
       </div>
 
-      {/* Quote */}
-      <p className="text-foreground/90 leading-relaxed mb-6 italic">
-        "{testimonial.quote}"
-      </p>
+      {/* Quote with translation toggle */}
+      <div className="flex-1 mb-6 relative min-h-[120px]">
+        <AnimatePresence mode="wait">
+          {!showTranslation ? (
+            <motion.p
+              key="original"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="text-foreground/90 leading-relaxed italic text-sm"
+            >
+              "{testimonial.quote}"
+            </motion.p>
+          ) : (
+            <motion.div
+              key="translated"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.4 }}
+            >
+              <p className="text-foreground leading-relaxed text-sm font-medium mb-2">
+                "{testimonial.translation}"
+              </p>
+              <p className="text-muted-foreground text-xs italic leading-relaxed opacity-60">
+                "{testimonial.quote}"
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Translate toggle button */}
+        {hasTranslation && (
+          <button
+            onClick={() => setShowTranslation(!showTranslation)}
+            className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+          >
+            <motion.span
+              animate={{ rotate: showTranslation ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+              className="inline-block"
+            >
+              🌐
+            </motion.span>
+            {showTranslation ? "Show Original" : "Translate to English"}
+          </button>
+        )}
+      </div>
 
       {/* Author */}
       <div className="flex items-center gap-3">
@@ -328,8 +467,8 @@ const TestimonialCard = ({ testimonial }: { testimonial: typeof testimonials[0] 
           />
         </motion.div>
         <div>
-          <p className="font-semibold text-foreground">{testimonial.name}</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="font-semibold text-foreground text-sm">{testimonial.name}</p>
+          <p className="text-xs text-muted-foreground">
             {testimonial.role} • {testimonial.location}
           </p>
         </div>
@@ -361,13 +500,45 @@ const TestimonialsSection = () => {
             Loved by Farmers & Customers
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Don't just take our word for it. Here's what our community has to say about Terra Farming.
+            Hear from our community — in their own words and their own language.
           </p>
         </motion.div>
 
-        {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {testimonials.map((testimonial) => (
+        {/* Farmers Row */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="mb-3"
+        >
+          <span className="text-xs font-semibold uppercase tracking-widest text-emerald-600 flex items-center gap-1.5 mb-4">
+            <Leaf className="h-3.5 w-3.5" /> From Our Farmers
+          </span>
+        </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          {testimonials.filter(t => t.isFarmer).map((testimonial) => (
+            <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+          ))}
+        </div>
+
+        {/* Customers Row */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="mb-3"
+        >
+          <span className="text-xs font-semibold uppercase tracking-widest text-primary flex items-center gap-1.5 mb-4">
+            <Users className="h-3.5 w-3.5" /> From Our Customers
+          </span>
+        </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {testimonials.filter(t => !t.isFarmer).slice(0, 3).map((testimonial) => (
+            <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mt-6">
+          {testimonials.filter(t => !t.isFarmer).slice(3).map((testimonial) => (
             <TestimonialCard key={testimonial.id} testimonial={testimonial} />
           ))}
         </div>
@@ -382,13 +553,13 @@ const TestimonialsSection = () => {
         >
           <div className="flex items-center gap-2">
             <div className="flex -space-x-2">
-              {testimonials.slice(0, 4).map((t, i) => (
+              {testimonials.slice(0, 6).map((t, i) => (
                 <img
                   key={t.id}
                   src={t.avatar}
                   alt=""
                   className="h-8 w-8 rounded-full border-2 border-background object-cover"
-                  style={{ zIndex: 4 - i }}
+                  style={{ zIndex: 6 - i }}
                 />
               ))}
             </div>
