@@ -109,35 +109,37 @@ const MapPage = () => {
         </div>
 
         {/* Location Status Banner */}
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary mb-8">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary">
-            {locationLoading ? (
-              <div className="h-5 w-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <MapPin className="h-5 w-5 text-primary-foreground" />
-            )}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-xl bg-secondary mb-8">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary shrink-0">
+              {locationLoading ? (
+                <div className="h-5 w-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <MapPin className="h-5 w-5 text-primary-foreground" />
+              )}
+            </div>
+            <div className="min-w-0">
+              {locationError ? (
+                <>
+                  <p className="font-medium text-foreground flex items-center gap-2 text-sm sm:text-base">
+                    <AlertCircle className="h-4 w-4 text-yellow-500 shrink-0" />
+                    <span className="truncate">Using default location (Manila)</span>
+                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">{locationError}</p>
+                </>
+              ) : (
+                <>
+                  <p className="font-medium text-foreground text-sm sm:text-base">
+                    {location ? "Showing farms near you" : "Getting your location..."}
+                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    {location ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` : "Please wait..."}
+                  </p>
+                </>
+              )}
+            </div>
           </div>
-          <div className="flex-1">
-            {locationError ? (
-              <>
-                <p className="font-medium text-foreground flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-yellow-500" />
-                  Using default location (Manila)
-                </p>
-                <p className="text-sm text-muted-foreground">{locationError}</p>
-              </>
-            ) : (
-              <>
-                <p className="font-medium text-foreground">
-                  {location ? "Showing farms near you" : "Getting your location..."}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {location ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` : "Please wait..."}
-                </p>
-              </>
-            )}
-          </div>
-          <Button variant="outline" className="rounded-xl" onClick={requestLocation}>
+          <Button variant="outline" className="rounded-xl w-full sm:w-auto shrink-0" onClick={requestLocation}>
             <Navigation className="h-4 w-4 mr-2" />
             Update Location
           </Button>
@@ -166,7 +168,7 @@ const MapPage = () => {
         {view === "map" ? (
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Map */}
-            <div className="lg:col-span-2 aspect-[4/3] lg:aspect-auto lg:h-[600px]">
+            <div className="lg:col-span-2 min-h-[400px] aspect-[3/4] sm:aspect-[4/3] lg:aspect-auto lg:h-[600px]">
               <FarmMap
                 farms={filteredFarms}
                 userLocation={location || undefined}

@@ -330,7 +330,8 @@ const AdminDashboard = () => {
           <CardDescription>Newest members on the platform</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
+        <div className="overflow-x-auto">
+        <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Member</TableHead>
@@ -359,6 +360,7 @@ const AdminDashboard = () => {
               ))}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -375,7 +377,7 @@ const AdminDashboard = () => {
           <Button className="btn-primary-gradient">Add Farmer</Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -448,7 +450,7 @@ const AdminDashboard = () => {
           <Button className="btn-primary-gradient">Add Driver</Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -530,7 +532,7 @@ const AdminDashboard = () => {
           </Select>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>

@@ -219,7 +219,7 @@ const CheckoutPage = () => {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form id="checkout-form" onSubmit={handleSubmit} className="space-y-8">
               {/* Delivery Information */}
               <div className="glass-card p-6 rounded-2xl space-y-4">
                 <h2 className="font-display text-lg font-semibold flex items-center gap-2">
@@ -541,6 +541,23 @@ const CheckoutPage = () => {
           </div>
         </div>
       </main>
+
+      {/* Mobile sticky bottom bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border p-4 flex items-center justify-between">
+        <div>
+          <p className="text-xs text-muted-foreground">Total</p>
+          <p className="text-lg font-bold text-primary">₱{total.toFixed(2)}</p>
+        </div>
+        <Button 
+          type="submit"
+          form="checkout-form"
+          className="btn-liquid-accent h-11 rounded-xl font-semibold px-6"
+          disabled={isProcessing || !selectedDeliveryProvider}
+        >
+          {isProcessing ? "Processing..." : "Place Order"}
+        </Button>
+      </div>
+      <div className="lg:hidden h-20" /> {/* Spacer for sticky bar */}
 
       <Footer />
     </div>
