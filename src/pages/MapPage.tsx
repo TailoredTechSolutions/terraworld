@@ -9,7 +9,7 @@ import { farms, Farm } from "@/data/products";
 import { useUserLocation, calculateDistance, calculateDeliveryFee, calculateETA } from "@/hooks/useUserLocation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, Filter, List, Map as MapIcon, Navigation, Clock, Truck, AlertCircle } from "lucide-react";
+import { Search, MapPin, Filter, List, Map as MapIcon, Navigation, Clock, Truck, AlertCircle, Star } from "lucide-react";
 
 const MapPage = () => {
   const [view, setView] = useState<"list" | "map">("map");
@@ -166,9 +166,9 @@ const MapPage = () => {
         )}
 
         {view === "map" ? (
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Map */}
-            <div className="lg:col-span-2 min-h-[400px] aspect-[3/4] sm:aspect-[4/3] lg:aspect-auto lg:h-[600px]">
+          <div className="space-y-6">
+            {/* Map - compact height */}
+            <div className="h-[280px] sm:h-[350px] lg:h-[400px] rounded-2xl overflow-hidden border border-border">
               <FarmMap
                 farms={filteredFarms}
                 userLocation={location || undefined}
@@ -178,98 +178,56 @@ const MapPage = () => {
               />
             </div>
 
-            {/* Farm List Sidebar */}
-            <div className="lg:space-y-4 lg:max-h-[600px] lg:overflow-y-auto">
-              <div className="flex items-center justify-between lg:sticky top-0 bg-background py-2">
-                <span className="text-sm text-muted-foreground">
-                  {filteredFarms.length} farms found
-                </span>
+            {/* Farm Cards - prominent and large */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-display font-semibold text-foreground">
+                  {filteredFarms.length} Farms Found
+                </h2>
                 <span className="text-sm text-muted-foreground">
                   Sorted by distance
                 </span>
               </div>
 
-              {/* Mobile: horizontal scroll strip */}
-              <div className="flex lg:hidden gap-3 overflow-x-auto pb-3 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredFarms.map((farm) => {
                   const { fee, eta } = getDeliveryInfo(farm);
                   return (
                     <div
                       key={farm.id}
-                      className={`flex-shrink-0 w-[260px] snap-start p-3 rounded-xl border transition-all cursor-pointer ${
+                      className={`rounded-2xl border-2 transition-all cursor-pointer overflow-hidden ${
                         selectedFarm?.id === farm.id
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
+                          ? "border-primary bg-primary/5 shadow-lg"
+                          : "border-border hover:border-primary/50 hover:shadow-md"
                       }`}
                       onClick={() => setSelectedFarm(farm)}
                     >
-                      <div className="flex gap-2.5">
-                        <img
-                          src={farm.image}
-                          alt={farm.name}
-                          className="h-14 w-14 rounded-lg object-cover shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-foreground text-sm truncate">
-                            {farm.name}
-                          </h4>
-                          <p className="text-xs text-muted-foreground">
-                            {farm.distance} km away
-                          </p>
-                          <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-0.5">
-                              <Clock className="h-3 w-3" />
-                              {eta.min}-{eta.max}m
-                            </span>
-                            <span className="flex items-center gap-0.5">
-                              <Truck className="h-3 w-3" />
-                              ₱{fee}
-                            </span>
-                          </div>
+                      <img
+                        src={farm.image}
+                        alt={farm.name}
+                        className="w-full h-36 sm:h-40 object-cover"
+                      />
+                      <div className="p-4">
+                        <h4 className="font-display font-semibold text-foreground text-lg truncate">
+                          {farm.name}
+                        </h4>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {farm.distance} km away
+                        </p>
+                        <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="h-4 w-4 text-primary" />
+                            {eta.min}-{eta.max} min
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <Truck className="h-4 w-4 text-primary" />
+                            ₱{fee}
+                          </span>
                         </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Desktop: vertical list */}
-              <div className="hidden lg:block space-y-4">
-                {filteredFarms.map((farm) => {
-                  const { fee, eta } = getDeliveryInfo(farm);
-                  return (
-                    <div
-                      key={farm.id}
-                      className={`p-4 rounded-xl border transition-all cursor-pointer ${
-                        selectedFarm?.id === farm.id
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                      onClick={() => setSelectedFarm(farm)}
-                    >
-                      <div className="flex gap-3">
-                        <img
-                          src={farm.image}
-                          alt={farm.name}
-                          className="h-16 w-16 rounded-lg object-cover"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-foreground truncate">
-                            {farm.name}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            {farm.distance} km away
-                          </p>
-                          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {eta.min}-{eta.max} min
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Truck className="h-3 w-3" />
-                              ₱{fee}
-                            </span>
-                          </div>
+                        <div className="flex items-center gap-1 mt-2">
+                          <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                          <span className="text-sm font-medium text-foreground">{farm.rating}</span>
+                          <span className="text-xs text-muted-foreground ml-1">• {farm.products.length} products</span>
                         </div>
                       </div>
                     </div>
