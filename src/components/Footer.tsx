@@ -12,12 +12,12 @@ const Footer = () => {
             <Link to="/" className="flex items-center gap-2 mb-4">
               <img 
                 src={terraLogo} 
-                alt="Terra" 
+                alt="Terra Farming" 
                 className="h-10 w-10 rounded-lg"
               />
               <div className="flex flex-col">
                 <span className="font-display text-xl font-bold text-foreground leading-tight">
-                  Terra
+                  Terra Farming
                 </span>
                 <span className="text-[10px] text-muted-foreground leading-none">
                   From Dirt to Dessert

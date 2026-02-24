@@ -138,7 +138,7 @@ const AuthPage = () => {
       }
       toast({ title: "Registration Failed", description: message, variant: "destructive" });
     } else {
-      toast({ title: "Account Created!", description: `Welcome to Terra as a ${registrationRole === "buyer" ? "Buyer" : "Farmer"}!` });
+      toast({ title: "Account Created!", description: `Welcome to Terra Farming as a ${registrationRole === "buyer" ? "Buyer" : "Farmer"}!` });
       navigate(registrationRole === "farmer" ? "/farmer" : "/buyer");
     }
     
@@ -202,7 +202,7 @@ const AuthPage = () => {
 
           <CardHeader className="text-center pb-2 relative z-10">
             <div className="py-6 md:py-8">
-              <CardTitle className="font-display text-4xl md:text-5xl drop-shadow-sm">Welcome to Terra</CardTitle>
+              <CardTitle className="font-display text-4xl md:text-5xl drop-shadow-sm">Welcome to Terra Farming</CardTitle>
               <CardDescription className="font-bold text-base mt-2">
                 Join the farm-to-table revolution
               </CardDescription>
@@ -284,7 +284,7 @@ const AuthPage = () => {
                       >
                         <Tractor className="h-8 w-8 mx-auto text-primary" />
                         <p className="font-semibold">Farmer</p>
-                        <p className="text-xs text-muted-foreground">Sell your products on Terra marketplace</p>
+                        <p className="text-xs text-muted-foreground">Sell your products on Terra Farming marketplace</p>
                       </button>
                     </div>
                   </div>
@@ -323,7 +323,7 @@ const AuthPage = () => {
                         Referral Code <span className="text-muted-foreground">(optional)</span>
                       </Label>
                       <Input id="signup-referral" type="text" placeholder="ABCD1234" value={referralCode} onChange={(e) => setReferralCode(e.target.value.toUpperCase())} disabled={isLoading} className="uppercase h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
-                      <p className="text-xs text-muted-foreground">Have a friend on Terra? Enter their code to connect.</p>
+                      <p className="text-xs text-muted-foreground">Have a friend on Terra Farming? Enter their code to connect.</p>
                     </div>
                     <Button type="submit" className="w-full h-12 md:h-10 bg-primary hover:bg-primary/90 text-base font-semibold" disabled={isLoading}>
                       {isLoading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating Account...</>) : "Create Account"}
@@ -341,7 +341,7 @@ const AuthPage = () => {
       
       {/* Footer */}
       <div className="container py-4 text-center relative z-10">
-        <p className="text-sm text-white/80 drop-shadow-md font-medium">Terra — From Dirt to Dessert 🌱</p>
+        <p className="text-sm text-white/80 drop-shadow-md font-medium">Terra Farming — From Dirt to Dessert 🌱</p>
       </div>
     </div>
   );

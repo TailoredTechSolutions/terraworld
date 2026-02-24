@@ -209,7 +209,7 @@ const testimonials = [
     location: "Quezon City",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
     rating: 5,
-    quote: "The vegetables from Terra are incredibly fresh! You can really taste the difference. My family loves the Baguio lettuce and strawberries.",
+    quote: "The vegetables from Terra Farming are incredibly fresh! You can really taste the difference. My family loves the Baguio lettuce and strawberries.",
     delay: 0,
   },
   {
@@ -219,13 +219,13 @@ const testimonials = [
     location: "Makati City",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
     rating: 5,
-    quote: "As a chef, quality ingredients are everything. Terra connects me directly with highland farmers. The produce is farm-fresh and my customers notice!",
+    quote: "As a chef, quality ingredients are everything. Terra Farming connects me directly with highland farmers. The produce is farm-fresh and my customers notice!",
     delay: 0.15,
   },
   {
     id: 3,
     name: "Ana Reyes",
-    role: "Terra Affiliate",
+    role: "Terra Farming Affiliate",
     location: "Baguio City",
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
     rating: 5,
@@ -239,7 +239,7 @@ const testimonials = [
     location: "La Trinidad, Benguet",
     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
     rating: 5,
-    quote: "Terra has transformed my farm business. I now reach customers directly without middlemen. My income has increased by 40% since joining!",
+    quote: "Terra Farming has transformed my farm business. I now reach customers directly without middlemen. My income has increased by 40% since joining!",
     delay: 0.45,
   },
 ];
@@ -361,7 +361,7 @@ const TestimonialsSection = () => {
             Loved by Farmers & Customers
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Don't just take our word for it. Here's what our community has to say about Terra.
+            Don't just take our word for it. Here's what our community has to say about Terra Farming.
           </p>
         </motion.div>
 
@@ -423,13 +423,13 @@ const Index = () => {
           <div className="container">
             <div className="text-center mb-12">
             <span className="glass-badge-primary inline-block mb-4">
-              Why Choose Terra
+              Why Choose Terra Farming
             </span>
               <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
                 Everything You Need, From Dirt to Dessert
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-                Terra connects farmers directly to consumers while rewarding our community. 
+                Terra Farming connects farmers directly to consumers while rewarding our community. 
                 Experience the future of farm-fresh commerce.
               </p>
             </div>
@@ -449,7 +449,7 @@ const Index = () => {
           <div className="container">
             <div className="text-center mb-12">
               <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-                How Terra Works
+                How Terra Farming Works
               </h2>
               <p className="text-muted-foreground max-w-xl mx-auto">
                 Simple steps to start your farm-fresh journey
@@ -511,7 +511,7 @@ const Index = () => {
               Ready to Join the Movement?
             </h2>
             <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto mb-8">
-              Whether you're a farmer looking to reach more customers, or a consumer seeking fresh organic produce — Terra has a place for you.
+              Whether you're a farmer looking to reach more customers, or a consumer seeking fresh organic produce — Terra Farming has a place for you.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/auth">
