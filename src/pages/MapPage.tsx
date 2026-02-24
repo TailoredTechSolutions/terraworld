@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
@@ -14,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Search, MapPin, Filter, List, Map as MapIcon, Navigation, Truck, AlertCircle } from "lucide-react";
 
 const MapPage = () => {
+  const [searchParams] = useSearchParams();
   const [view, setView] = useState<"list" | "map">("map");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
@@ -21,6 +23,18 @@ const MapPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   
   const { location, error: locationError, loading: locationLoading, requestLocation } = useUserLocation();
+
+  // Auto-select farm from URL params (when navigating from FarmCard "View on Map")
+  useEffect(() => {
+    const farmId = searchParams.get("farm");
+    if (farmId) {
+      const farm = farms.find(f => f.id === farmId);
+      if (farm) {
+        setSelectedFarm(farm);
+        setView("map");
+      }
+    }
+  }, [searchParams]);
 
   // Calculate distances and sort farms
   const farmsWithDistance = farms.map(farm => {
