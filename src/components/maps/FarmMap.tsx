@@ -19,10 +19,10 @@ const mapContainerStyle = {
   height: "100%",
 };
 
-// Manila center as default
+// Baguio-Benguet center as default (all farms are in this region)
 const defaultCenter = {
-  lat: 14.5995,
-  lng: 120.9842,
+  lat: 16.4023,
+  lng: 120.5960,
 };
 
 // Light mode map styles - warm earthy tones
@@ -66,7 +66,8 @@ const FarmMap = ({ farms, userLocation, onFarmSelect, selectedFarm, showRoute = 
     libraries: ["places"],
   });
 
-  const center = useMemo(() => userLocation || defaultCenter, [userLocation]);
+  // Center on farms region, not user location (farms are all in Baguio-Benguet)
+  const center = useMemo(() => defaultCenter, []);
 
   const mapOptions = useMemo<google.maps.MapOptions>(() => ({
     disableDefaultUI: false,
@@ -84,27 +85,34 @@ const FarmMap = ({ farms, userLocation, onFarmSelect, selectedFarm, showRoute = 
     }
   }, [isDark]);
 
-  // Zoom-to-fit: adjust bounds to show all farm markers + user location
+  // Zoom-to-fit: adjust bounds to show only farm markers (not user location which may be far away)
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
     if (farms.length > 0 && !hasFittedBounds.current) {
       const bounds = new google.maps.LatLngBounds();
       farms.forEach((farm) => bounds.extend({ lat: farm.latitude, lng: farm.longitude }));
-      if (userLocation) bounds.extend(userLocation);
       map.fitBounds(bounds, 40);
       hasFittedBounds.current = true;
     }
-  }, [farms, userLocation]);
+  }, [farms]);
 
-  // Re-fit when farms change
+  // Re-fit when farms list changes (e.g. filter applied)
   useEffect(() => {
     if (mapRef.current && farms.length > 0) {
       const bounds = new google.maps.LatLngBounds();
       farms.forEach((farm) => bounds.extend({ lat: farm.latitude, lng: farm.longitude }));
-      if (userLocation) bounds.extend(userLocation);
       mapRef.current.fitBounds(bounds, 40);
     }
-  }, [farms, userLocation]);
+  }, [farms]);
+
+  // Zoom to selected farm when clicking a card
+  useEffect(() => {
+    if (mapRef.current && selectedFarm) {
+      mapRef.current.panTo({ lat: selectedFarm.latitude, lng: selectedFarm.longitude });
+      mapRef.current.setZoom(14);
+      setActiveInfoWindow(selectedFarm.id);
+    }
+  }, [selectedFarm]);
 
   const handleMarkerClick = useCallback((farm: Farm) => {
     setActiveInfoWindow(farm.id);
