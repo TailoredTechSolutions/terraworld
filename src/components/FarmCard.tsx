@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Farm } from "@/data/products";
-import { Star, MapPin, ArrowRight, Phone, Award, Leaf, Shield, CheckCircle2, X, ExternalLink } from "lucide-react";
+import { Star, MapPin, ArrowRight, Phone, Award, Leaf, Shield, CheckCircle2, ExternalLink, Clock, Truck, Mountain, Calendar, Ruler, Sprout, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -17,8 +18,14 @@ interface FarmCardProps {
 
 const FarmCard = ({ farm, className }: FarmCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
   const isATICertified = farm.program === "ATI Learning Site";
   const isPhilGAP = farm.program === "PhilGAP Certified";
+
+  const handleViewOnMap = () => {
+    setIsOpen(false);
+    navigate(`/map?lat=${farm.latitude}&lng=${farm.longitude}&farm=${farm.id}`);
+  };
 
   return (
     <>
@@ -35,17 +42,14 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
             alt={farm.name}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
-          {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           
-          {/* Rating badge */}
           <div className="absolute top-3 right-3 flex items-center gap-1.5 glass-badge backdrop-blur-md">
             <Star className="h-4 w-4 fill-ph-gold text-ph-gold" />
             <span className="font-bold text-sm">{farm.rating}</span>
             <span className="text-xs text-muted-foreground">({farm.reviewCount})</span>
           </div>
 
-          {/* Certification Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {isATICertified && (
               <div className="glass-badge-accent backdrop-blur-md flex items-center gap-1.5">
@@ -61,7 +65,6 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
             )}
           </div>
 
-          {/* Distance badge */}
           {farm.distance && (
             <div className="absolute bottom-3 left-3 glass-badge backdrop-blur-md flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5 text-primary" />
@@ -69,7 +72,6 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
             </div>
           )}
 
-          {/* Farm Type badge */}
           {farm.farmType && (
             <div className="absolute bottom-3 right-3 glass-badge-primary backdrop-blur-md flex items-center gap-1.5">
               <Leaf className="h-3.5 w-3.5" />
@@ -80,7 +82,6 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
 
         {/* Content Section */}
         <div className="flex flex-col flex-1 p-5">
-          {/* Header */}
           <div className="mb-4">
             <h3 className="font-display text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 mb-1">
               {farm.name}
@@ -91,7 +92,6 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
             </p>
           </div>
 
-          {/* Certificate Info */}
           {farm.certificate && (
             <div className="flex items-center gap-2 mb-3 px-3 py-2 glass-card rounded-xl">
               <Award className="h-4 w-4 text-ph-gold flex-shrink-0" />
@@ -99,12 +99,10 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
             </div>
           )}
 
-          {/* Description */}
           <p className="text-sm text-muted-foreground line-clamp-2 mb-4 leading-relaxed">
             {farm.description}
           </p>
 
-          {/* Products - Show All */}
           <div className="mb-4">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Products Available</p>
             <div className="flex flex-wrap gap-1.5">
@@ -119,7 +117,6 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
             </div>
           </div>
 
-          {/* Contact & Action */}
           <div className="mt-auto pt-4 border-t border-glass-border">
             <div className="flex items-center justify-between gap-3">
               {farm.contact ? (
@@ -154,7 +151,7 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
           <DialogHeader>
-            <DialogTitle className="font-display text-2xl font-bold text-foreground flex items-center gap-3">
+            <DialogTitle className="font-display text-2xl font-bold text-foreground flex items-center gap-3 flex-wrap">
               {farm.name}
               {isATICertified && (
                 <span className="inline-flex items-center gap-1 text-xs font-semibold bg-accent/20 text-accent px-2 py-1 rounded-full">
@@ -180,12 +177,46 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
             
-            {/* Rating overlay */}
             <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-black/50 backdrop-blur-md text-white px-3 py-2 rounded-full">
               <Star className="h-5 w-5 fill-ph-gold text-ph-gold" />
               <span className="font-bold">{farm.rating}</span>
               <span className="text-sm text-white/70">({farm.reviewCount} reviews)</span>
             </div>
+
+            {farm.organicCertified && (
+              <div className="absolute top-4 right-4 bg-green-600/90 backdrop-blur-md text-white px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                <Sprout className="h-4 w-4" />
+                <span className="text-xs font-semibold">Organic Certified</span>
+              </div>
+            )}
+          </div>
+
+          {/* Quick Stats Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+            {farm.municipality && (
+              <div className="flex flex-col items-center gap-1 p-3 rounded-xl bg-muted/50 border border-border/50">
+                <MapPin className="h-4 w-4 text-primary" />
+                <span className="text-xs font-medium text-center">{farm.municipality}, {farm.province || "Benguet"}</span>
+              </div>
+            )}
+            {farm.elevation && (
+              <div className="flex flex-col items-center gap-1 p-3 rounded-xl bg-muted/50 border border-border/50">
+                <Mountain className="h-4 w-4 text-primary" />
+                <span className="text-xs font-medium text-center">{farm.elevation}</span>
+              </div>
+            )}
+            {farm.farmArea && (
+              <div className="flex flex-col items-center gap-1 p-3 rounded-xl bg-muted/50 border border-border/50">
+                <Ruler className="h-4 w-4 text-primary" />
+                <span className="text-xs font-medium text-center">{farm.farmArea}</span>
+              </div>
+            )}
+            {farm.established && (
+              <div className="flex flex-col items-center gap-1 p-3 rounded-xl bg-muted/50 border border-border/50">
+                <Calendar className="h-4 w-4 text-primary" />
+                <span className="text-xs font-medium text-center">Est. {farm.established}</span>
+              </div>
+            )}
           </div>
 
           {/* Farm Info Grid */}
@@ -245,10 +276,10 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
                 <div className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-foreground">Baguio-Benguet Highlands</p>
-                    <p className="text-sm text-muted-foreground">
-                      Coordinates: {farm.latitude.toFixed(4)}, {farm.longitude.toFixed(4)}
-                    </p>
+                    {farm.municipality && (
+                      <p className="text-foreground font-medium">{farm.municipality}, {farm.province || "Benguet"}</p>
+                    )}
+                    {!farm.municipality && <p className="text-foreground">Baguio-Benguet Highlands</p>}
                     {farm.distance && (
                       <p className="text-sm text-primary font-medium mt-1">{farm.distance} km away from you</p>
                     )}
@@ -256,12 +287,51 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
                 </div>
               </div>
 
+              {farm.operatingHours && (
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">Operating Hours</h4>
+                  <div className="flex items-center gap-2 text-foreground">
+                    <Clock className="h-4 w-4 text-primary" />
+                    <span>{farm.operatingHours}</span>
+                  </div>
+                </div>
+              )}
+
+              {farm.deliveryAvailable !== undefined && (
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">Delivery</h4>
+                  <div className="flex items-center gap-2">
+                    <Truck className="h-4 w-4 text-primary" />
+                    <span className={cn("font-medium", farm.deliveryAvailable ? "text-green-600 dark:text-green-400" : "text-muted-foreground")}>
+                      {farm.deliveryAvailable ? "Delivery Available" : "Pickup Only"}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">About</h4>
-                <p className="text-foreground/80 leading-relaxed">{farm.description}</p>
+                <p className="text-foreground/80 leading-relaxed text-sm">{farm.description}</p>
               </div>
             </div>
           </div>
+
+          {/* Specialties Section */}
+          {farm.specialties && farm.specialties.length > 0 && (
+            <div className="mt-6 pt-6 border-t border-border">
+              <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Specialties</h4>
+              <div className="flex flex-wrap gap-2">
+                {farm.specialties.map((s) => (
+                  <span
+                    key={s}
+                    className="text-sm font-medium bg-accent/10 text-accent-foreground px-3 py-1.5 rounded-full border border-accent/20"
+                  >
+                    ✦ {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Products Section */}
           <div className="mt-6 pt-6 border-t border-border">
@@ -295,9 +365,9 @@ const FarmCard = ({ farm, className }: FarmCardProps) => {
               variant="outline" 
               size="lg" 
               className="flex-1 gap-2"
-              onClick={() => window.open(`https://www.google.com/maps?q=${farm.latitude},${farm.longitude}`, '_blank')}
+              onClick={handleViewOnMap}
             >
-              <ExternalLink className="h-5 w-5" />
+              <Map className="h-5 w-5" />
               View on Map
             </Button>
           </div>
