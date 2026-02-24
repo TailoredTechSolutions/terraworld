@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow, DirectionsRenderer } from "@react-google-maps/api";
 import { Farm } from "@/data/products";
 import { MapPin, Star, Navigation, Clock, Truck } from "lucide-react";
@@ -55,6 +55,8 @@ const FarmMap = ({ farms, userLocation, onFarmSelect, selectedFarm, showRoute = 
   const [activeInfoWindow, setActiveInfoWindow] = useState<string | null>(null);
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
   const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const hasFittedBounds = useRef(false);
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
@@ -62,6 +64,28 @@ const FarmMap = ({ farms, userLocation, onFarmSelect, selectedFarm, showRoute = 
   });
 
   const center = useMemo(() => userLocation || defaultCenter, [userLocation]);
+
+  // Zoom-to-fit: adjust bounds to show all farm markers + user location
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+    if (farms.length > 0 && !hasFittedBounds.current) {
+      const bounds = new google.maps.LatLngBounds();
+      farms.forEach((farm) => bounds.extend({ lat: farm.latitude, lng: farm.longitude }));
+      if (userLocation) bounds.extend(userLocation);
+      map.fitBounds(bounds, 40);
+      hasFittedBounds.current = true;
+    }
+  }, [farms, userLocation]);
+
+  // Re-fit when farms change
+  useEffect(() => {
+    if (mapRef.current && farms.length > 0) {
+      const bounds = new google.maps.LatLngBounds();
+      farms.forEach((farm) => bounds.extend({ lat: farm.latitude, lng: farm.longitude }));
+      if (userLocation) bounds.extend(userLocation);
+      mapRef.current.fitBounds(bounds, 40);
+    }
+  }, [farms, userLocation]);
 
   const handleMarkerClick = useCallback((farm: Farm) => {
     setActiveInfoWindow(farm.id);
@@ -236,6 +260,7 @@ const FarmMap = ({ farms, userLocation, onFarmSelect, selectedFarm, showRoute = 
         center={center}
         zoom={13}
         options={mapOptions}
+        onLoad={onMapLoad}
       >
         {/* User Location Marker */}
         {userLocation && (
