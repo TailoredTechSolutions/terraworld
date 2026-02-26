@@ -112,22 +112,22 @@ const Footer = () => {
             </Link>
             <ul className="space-y-2">
               <li>
-                <Link to="/business-centre" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/business-centre/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Partner Dashboard
                 </Link>
               </li>
               <li>
-                <Link to="/business-centre" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/business-centre/referral" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Referral Program
                 </Link>
               </li>
               <li>
-                <Link to="/business-centre" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/business-centre/commissions" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Commissions
                 </Link>
               </li>
               <li>
-                <Link to="/business-centre" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/business-centre/rank" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Rank & Rewards
                 </Link>
               </li>

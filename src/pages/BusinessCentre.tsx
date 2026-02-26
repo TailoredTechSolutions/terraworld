@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
@@ -483,8 +483,15 @@ const PANELS: Record<TabKey, React.FC> = {
 
 const BusinessCentre = () => {
   const { user, loading } = useAuth();
+  const { tab } = useParams<{ tab?: string }>();
   const [activeTab, setActiveTab] = useState<TabKey>("dashboard");
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (tab && sidebarItems.some(item => item.key === tab)) {
+      setActiveTab(tab as TabKey);
+    }
+  }, [tab]);
 
   if (!loading && !user) return <Navigate to="/auth" replace />;
 

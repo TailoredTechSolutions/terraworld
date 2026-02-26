@@ -9,6 +9,7 @@ import ProductDetail from "@/pages/ProductDetail";
 import MapPage from "@/pages/MapPage";
 import AffiliatePage from "@/pages/AffiliatePage";
 import BusinessCentre from "@/pages/BusinessCentre";
+import BusinessCentreLanding from "@/pages/BusinessCentreLanding";
 import CheckoutPage from "@/pages/CheckoutPage";
 import OrderConfirmation from "@/pages/OrderConfirmation";
 import DriverDashboard from "@/pages/DriverDashboard";
@@ -69,6 +70,14 @@ const AnimatedRoutes = () => {
         />
         <Route
           path="/business-centre"
+          element={
+            <PageTransition>
+              <BusinessCentreLanding />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/business-centre/:tab"
           element={
             <PageTransition>
               <BusinessCentre />
