@@ -37,12 +37,15 @@ const Header = () => {
   const totalItems = getTotalItems();
 
   // Public nav links only — role-specific dashboards go in user dropdown
-  const navLinks: NavLink[] = [
+  const publicNavLinks: NavLink[] = [
     { path: "/", label: "Home" },
     { path: "/shop", label: "Shop", icon: Store },
     { path: "/map", label: "Find Farms" },
-    { path: "/affiliate", label: "Earn" },
   ];
+
+  const navLinks: NavLink[] = user
+    ? [...publicNavLinks, { path: "/affiliate", label: "Earn" }]
+    : publicNavLinks;
 
   const getInitials = (name: string | null | undefined) => {
     if (!name) return "U";
