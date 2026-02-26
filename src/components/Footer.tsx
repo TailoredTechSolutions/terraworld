@@ -107,9 +107,9 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-display font-semibold text-foreground mb-4">
+            <Link to="/business-centre" className="font-display font-semibold text-foreground mb-4 block hover:text-primary transition-colors">
               Business Centre
-            </h4>
+            </Link>
             <ul className="space-y-2">
               <li>
                 <Link to="/business-centre" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
