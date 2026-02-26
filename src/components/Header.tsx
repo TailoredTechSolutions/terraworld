@@ -44,7 +44,7 @@ const Header = () => {
   ];
 
   const navLinks: NavLink[] = user
-    ? [...publicNavLinks, { path: "/affiliate", label: "Earn" }]
+    ? [...publicNavLinks, { path: "/business-centre", label: "Business Centre" }]
     : publicNavLinks;
 
   const getInitials = (name: string | null | undefined) => {
