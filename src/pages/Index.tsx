@@ -23,7 +23,7 @@ import {
   MapPin, 
   ShieldCheck,
   TrendingUp,
-  Handshake,
+  LogIn,
   type LucideIcon,
   Star,
   Quote
@@ -66,36 +66,12 @@ const features: Feature[] = [
     delay: 0.2,
   },
   {
-    icon: Users,
-    title: "Binary Genealogy Network",
-    description: "Build your network with a 1-1 binary structure. Choose placement or let the system auto-place new members for optimal growth.",
-    gradient: "from-violet-500/20 via-purple-500/10 to-transparent",
-    iconColor: "text-violet-500",
-    delay: 0.3,
-  },
-  {
     icon: Wallet,
     title: "Multi-Wallet System",
     description: "Manage earnings with separate commission, main, and vesting wallets. Support for available and pending balances with full transaction history.",
     gradient: "from-accent/20 via-accent/10 to-transparent",
     iconColor: "text-accent",
-    delay: 0.4,
-  },
-  {
-    icon: TrendingUp,
-    title: "7-Tier Rank Progression",
-    description: "Progress from Member to Crown Director based on performance criteria. Higher ranks unlock deeper matching and advanced features.",
-    gradient: "from-yellow-500/20 via-amber-500/10 to-transparent",
-    iconColor: "text-yellow-500",
-    delay: 0.5,
-  },
-  {
-    icon: Handshake,
-    title: "Full Compensation Engine",
-    description: "Binary MLM engine with direct bonuses, binary matching, rank-based rewards, and capped earnings with fail-safe mechanisms.",
-    gradient: "from-teal-500/20 via-cyan-500/10 to-transparent",
-    iconColor: "text-teal-500",
-    delay: 0.6,
+    delay: 0.3,
   },
   {
     icon: ShieldCheck,
@@ -627,7 +603,7 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
               {[
                 {
                   step: "01",
@@ -636,16 +612,11 @@ const Index = () => {
                 },
                 {
                   step: "02",
-                  title: "Get Placed",
-                  description: "Receive your unique referral link. Get automatically placed in the binary genealogy or choose your preferred position.",
-                },
-                {
-                  step: "03",
                   title: "Shop & Earn",
                   description: "Purchase from verified farms. Transactions generate Business Volume and rewards following transparent system rules.",
                 },
                 {
-                  step: "04",
+                  step: "03",
                   title: "Grow & Withdraw",
                   description: "Build your network, progress through ranks, and withdraw earnings via bank, GCash, Maya, or crypto.",
                 },
@@ -660,7 +631,7 @@ const Index = () => {
                   <p className="text-sm text-muted-foreground">
                     {item.description}
                   </p>
-                  {index < 3 && (
+                  {index < 2 && (
                     <ArrowRight className="hidden md:block h-5 w-5 text-muted-foreground/30 absolute -right-3 top-1/2 -translate-y-1/2 z-10" />
                   )}
                 </div>
@@ -684,23 +655,34 @@ const Index = () => {
             <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto mb-8">
               Whether you're a farmer looking to reach more customers, or a consumer seeking fresh organic produce — Terra Farming has a place for you.
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-col items-center gap-3">
               <Link to="/auth">
                 <Button
                   size="lg"
-                  className="btn-liquid-accent h-12 px-8 text-base font-semibold gap-2"
+                  className="btn-liquid-accent h-12 px-10 text-base font-bold gap-2 tracking-wide"
                 >
                   <Users className="h-5 w-5" />
-                  Become a Member
+                  SIGN UP
                 </Button>
               </Link>
               <Link to="/auth">
                 <Button
                   size="lg"
-                  className="btn-liquid-outline h-12 px-8 text-base font-semibold border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 gap-2"
+                  variant="outline"
+                  className="h-10 px-8 text-sm font-semibold border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 gap-2"
                 >
-                  <Truck className="h-5 w-5" />
-                  Become a Driver
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </Button>
+              </Link>
+              <p className="text-sm text-primary-foreground/60">Not Yet Registered?</p>
+              <Link to="/auth">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-10 px-8 text-sm font-semibold border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 gap-2"
+                >
+                  Create Account
                 </Button>
               </Link>
             </div>
@@ -862,29 +844,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Affiliate Banner */}
-        <section className="py-16 bg-gradient-to-r from-accent/10 via-accent/5 to-transparent">
-          <div className="container">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8 p-8 glass-card-accent">
-              <div>
-                <span className="glass-badge-accent inline-block mb-3">
-                  Affiliate Program
-                </span>
-                <h3 className="font-display text-2xl font-bold text-foreground mb-2">
-                  Earn While You Share
-                </h3>
-                <p className="text-muted-foreground max-w-lg">
-                  Refer friends and earn commissions on every order. Our binary compensation plan helps you build sustainable passive income while supporting local farmers.
-                </p>
-              </div>
-              <Link to="/affiliate">
-                <Button className="btn-liquid-accent h-12 px-8 text-base font-semibold whitespace-nowrap">
-                  Join Affiliate Program
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer />
