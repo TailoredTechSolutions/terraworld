@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -36,6 +37,7 @@ const AuthPage = () => {
   const [registrationRole, setRegistrationRole] = useState<RegistrationRole | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   
   // Form states
   const [email, setEmail] = useState("");
@@ -250,6 +252,10 @@ const AuthPage = () => {
                       </button>
                     </div>
                     {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="remember-me" checked={rememberMe} onCheckedChange={(checked) => setRememberMe(checked === true)} />
+                    <Label htmlFor="remember-me" className="text-sm font-medium cursor-pointer select-none">Remember me</Label>
                   </div>
                   <Button type="submit" className="w-full h-12 md:h-10 bg-primary hover:bg-primary/90 text-base font-semibold" disabled={isLoading}>
                     {isLoading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing In...</>) : "Sign In"}
