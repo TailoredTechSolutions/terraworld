@@ -19,7 +19,9 @@ import { motion } from "framer-motion";
 import {
   LayoutDashboard, Users, GitBranch, DollarSign, Share2, Award, Megaphone,
   CreditCard, HelpCircle, Menu, TrendingUp, ArrowUpRight, ArrowDownRight,
-  Copy, Download, ChevronRight, Crown, ExternalLink, Search
+  Copy, Download, ChevronRight, Crown, ExternalLink, Search, Wallet,
+  CheckCircle2, XCircle, AlertTriangle, Coins, Shield, Zap, Target,
+  BarChart3, Clock, Calendar, Star, Gift, ArrowRight, Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -27,28 +29,51 @@ import { useToast } from "@/hooks/use-toast";
 type TabKey = "dashboard" | "network" | "binary" | "commissions" | "referral" | "rank" | "marketing" | "payout" | "support";
 
 const sidebarItems: { key: TabKey; label: string; icon: React.ElementType }[] = [
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { key: "network", label: "My Network", icon: Users },
   { key: "binary", label: "Binary Tree", icon: GitBranch },
+  { key: "commissions", label: "Commissions", icon: DollarSign },
+  { key: "referral", label: "Referrals", icon: Share2 },
+  { key: "rank", label: "Rank & Packages", icon: Crown },
   { key: "marketing", label: "Marketing Tools", icon: Megaphone },
-  { key: "payout", label: "Payout Settings", icon: CreditCard },
+  { key: "payout", label: "Wallet & Payouts", icon: Wallet },
   { key: "support", label: "Support", icon: HelpCircle },
 ];
 
 // ─── Dashboard Panel ───
 const DashboardPanel = () => (
   <div className="space-y-6">
+    {/* Welcome Banner */}
+    <Card className="bg-gradient-to-br from-primary/15 via-primary/5 to-transparent border-primary/20">
+      <CardContent className="p-6">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-primary/20">
+            <Crown className="h-8 w-8 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold font-display text-foreground">Welcome back, Partner!</h2>
+            <p className="text-sm text-muted-foreground">Pro Package • Binary Active • <span className="text-primary font-medium">3 Matching Levels</span></p>
+          </div>
+          <Badge className="ml-auto hidden sm:flex bg-emerald-500/10 text-emerald-600 border-emerald-500/30" variant="outline">
+            <CheckCircle2 className="h-3 w-3 mr-1" /> Qualified
+          </Badge>
+        </div>
+      </CardContent>
+    </Card>
+
+    {/* KPI Cards */}
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {[
-        { title: "Total Earnings", value: "₱12,845.50", change: "+12.4%", up: true, icon: DollarSign },
-        { title: "Active Network Members", value: "142", change: "+8 this week", up: true, icon: Users },
-        { title: "Binary Volume (L / R)", value: "8,450 / 7,980", change: "470 carry", up: true, icon: GitBranch },
-        { title: "Current Rank", value: "Gold Partner", change: "72% to Platinum", up: true, icon: Crown },
+        { title: "Total Earnings", value: "₱48,325.50", change: "+₱6,240 this week", up: true, icon: DollarSign, accent: "text-emerald-600 bg-emerald-500/10" },
+        { title: "Active Downline", value: "142", change: "+12 this month", up: true, icon: Users, accent: "text-blue-600 bg-blue-500/10" },
+        { title: "Binary BV (L / R)", value: "24,500 / 21,800", change: "2,700 carry-forward", up: true, icon: GitBranch, accent: "text-purple-600 bg-purple-500/10" },
+        { title: "AGRI Tokens", value: "1,247.5", change: "≈ ₱12,475 value", up: true, icon: Coins, accent: "text-accent bg-accent/10" },
       ].map((stat) => (
         <Card key={stat.title} variant="glass" hover="lift" className="overflow-hidden">
           <CardContent className="p-5">
             <div className="flex items-start justify-between mb-3">
-              <div className="p-2 rounded-xl bg-primary/10">
-                <stat.icon className="h-5 w-5 text-primary" />
+              <div className={cn("p-2 rounded-xl", stat.accent)}>
+                <stat.icon className="h-5 w-5" />
               </div>
               <Badge variant="secondary" className="text-xs gap-1">
                 {stat.up ? <ArrowUpRight className="h-3 w-3 text-emerald-500" /> : <ArrowDownRight className="h-3 w-3 text-destructive" />}
@@ -62,9 +87,41 @@ const DashboardPanel = () => (
       ))}
     </div>
 
+    {/* Qualification Checklist */}
+    <Card variant="glass">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Shield className="h-5 w-5 text-primary" /> Qualification Status
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            { label: "Paid Member", met: true, detail: "Pro Package Active" },
+            { label: "Left Leg Active", met: true, detail: "Alex Rivera (L1)" },
+            { label: "Right Leg Active", met: true, detail: "Maria Santos (L1)" },
+            { label: "Product BV Generated", met: true, detail: "3,200 BV this period" },
+          ].map((q) => (
+            <div key={q.label} className={cn(
+              "flex items-center gap-3 p-3 rounded-lg border transition-colors",
+              q.met ? "border-emerald-500/30 bg-emerald-500/5" : "border-destructive/30 bg-destructive/5"
+            )}>
+              {q.met ? <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" /> : <XCircle className="h-5 w-5 text-destructive shrink-0" />}
+              <div>
+                <p className="text-sm font-medium">{q.label}</p>
+                <p className="text-xs text-muted-foreground">{q.detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+
+    {/* Recent Earnings Table */}
     <Card variant="glass">
       <CardHeader>
-        <CardTitle className="text-lg">Earnings Breakdown</CardTitle>
+        <CardTitle className="text-lg">Recent Earnings</CardTitle>
+        <CardDescription>Latest commission transactions</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -73,26 +130,33 @@ const DashboardPanel = () => (
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-2 text-muted-foreground font-medium">Date</th>
                 <th className="text-left py-3 px-2 text-muted-foreground font-medium">Type</th>
+                <th className="text-left py-3 px-2 text-muted-foreground font-medium">Source</th>
                 <th className="text-right py-3 px-2 text-muted-foreground font-medium">Amount</th>
                 <th className="text-right py-3 px-2 text-muted-foreground font-medium">Status</th>
               </tr>
             </thead>
             <tbody>
               {[
-                { date: "Jan 15", type: "Direct Referral", amount: "₱120.00", status: "Approved" },
-                { date: "Jan 16", type: "Binary Bonus", amount: "₱340.00", status: "Approved" },
-                { date: "Jan 17", type: "Leadership Bonus", amount: "₱500.00", status: "Pending" },
-                { date: "Jan 18", type: "Matching Bonus", amount: "₱85.00", status: "Approved" },
-                { date: "Jan 19", type: "Direct Referral", amount: "₱200.00", status: "Approved" },
+                { date: "Mar 01", type: "Direct Product", source: "Order #TF-8842", amount: "₱660.00", status: "Paid", color: "bg-emerald-500" },
+                { date: "Mar 01", type: "Binary Pairing", source: "Matched 4,500 BV", amount: "₱450.00", status: "Paid", color: "bg-blue-500" },
+                { date: "Feb 28", type: "Matching Bonus", source: "L1 – Alex Rivera", amount: "₱45.00", status: "Paid", color: "bg-purple-500" },
+                { date: "Feb 28", type: "Direct Membership", source: "Emily Cruz (Basic)", amount: "₱80.00", status: "Paid", color: "bg-amber-500" },
+                { date: "Feb 27", type: "Direct Product", source: "Order #TF-8801", amount: "₱396.00", status: "Paid", color: "bg-emerald-500" },
+                { date: "Feb 27", type: "Binary Pairing", source: "Matched 3,200 BV", amount: "₱320.00", status: "Paid", color: "bg-blue-500" },
+                { date: "Feb 26", type: "Token Reward", source: "BV Activity Bonus", amount: "12.5 AGRI", status: "Issued", color: "bg-accent" },
               ].map((row, i) => (
                 <tr key={i} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                  <td className="py-3 px-2">{row.date}</td>
-                  <td className="py-3 px-2">{row.type}</td>
-                  <td className="py-3 px-2 text-right font-medium">{row.amount}</td>
+                  <td className="py-3 px-2 text-muted-foreground">{row.date}</td>
+                  <td className="py-3 px-2">
+                    <div className="flex items-center gap-2">
+                      <div className={cn("w-2 h-2 rounded-full", row.color)} />
+                      <span className="font-medium">{row.type}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-2 text-muted-foreground text-xs">{row.source}</td>
+                  <td className="py-3 px-2 text-right font-semibold">{row.amount}</td>
                   <td className="py-3 px-2 text-right">
-                    <Badge variant={row.status === "Approved" ? "default" : "secondary"} className="text-xs">
-                      {row.status}
-                    </Badge>
+                    <Badge variant={row.status === "Paid" ? "default" : "secondary"} className="text-xs">{row.status}</Badge>
                   </td>
                 </tr>
               ))}
@@ -110,13 +174,31 @@ const NetworkPanel = () => (
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
       <div>
         <h3 className="text-lg font-semibold">My Network</h3>
-        <p className="text-sm text-muted-foreground">Total Referrals: <span className="font-bold text-foreground">58</span></p>
+        <p className="text-sm text-muted-foreground">Direct Referrals: <span className="font-bold text-foreground">24</span> • Total Downline: <span className="font-bold text-foreground">142</span></p>
       </div>
       <div className="relative w-full sm:w-72">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input placeholder="Search members..." className="pl-9" />
       </div>
     </div>
+
+    {/* Network Stats */}
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {[
+        { label: "Left Leg Total", value: "78", icon: ArrowDownRight },
+        { label: "Right Leg Total", value: "64", icon: ArrowUpRight },
+        { label: "Active Members", value: "118", icon: CheckCircle2 },
+        { label: "New This Month", value: "12", icon: Star },
+      ].map((s) => (
+        <Card key={s.label} variant="glass">
+          <CardContent className="p-4 text-center">
+            <p className="text-2xl font-bold font-display text-foreground">{s.value}</p>
+            <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+
     <Card variant="glass">
       <CardContent className="p-0">
         <div className="overflow-x-auto">
@@ -125,23 +207,41 @@ const NetworkPanel = () => (
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-4 text-muted-foreground font-medium">Name</th>
                 <th className="text-left py-3 px-4 text-muted-foreground font-medium">Join Date</th>
-                <th className="text-left py-3 px-4 text-muted-foreground font-medium">Level</th>
+                <th className="text-left py-3 px-4 text-muted-foreground font-medium">Leg</th>
+                <th className="text-left py-3 px-4 text-muted-foreground font-medium">Package</th>
+                <th className="text-left py-3 px-4 text-muted-foreground font-medium">Product BV</th>
                 <th className="text-left py-3 px-4 text-muted-foreground font-medium">Status</th>
               </tr>
             </thead>
             <tbody>
               {[
-                { name: "John Carter", date: "Jan 02", level: "L1", active: true },
-                { name: "Maria Gonzales", date: "Jan 05", level: "L1", active: true },
-                { name: "Daniel Cho", date: "Jan 07", level: "L2", active: true },
-                { name: "Emily Johnson", date: "Jan 10", level: "L2", active: false },
-                { name: "Alex Rivera", date: "Jan 14", level: "L1", active: true },
-                { name: "Sophia Lee", date: "Jan 18", level: "L3", active: true },
+                { name: "Alex Rivera", date: "Jan 02", leg: "Left", pkg: "Pro", bv: "4,200", active: true },
+                { name: "Maria Santos", date: "Jan 05", leg: "Right", pkg: "Elite", bv: "8,750", active: true },
+                { name: "Daniel Cho", date: "Jan 10", leg: "Left", pkg: "Basic", bv: "1,800", active: true },
+                { name: "Emily Cruz", date: "Jan 14", leg: "Right", pkg: "Basic", bv: "1,200", active: true },
+                { name: "Jake Tan", date: "Jan 18", leg: "Left", pkg: "Starter", bv: "650", active: true },
+                { name: "Sophia Lee", date: "Jan 22", leg: "Right", pkg: "Pro", bv: "3,100", active: true },
+                { name: "Carlos Reyes", date: "Feb 01", leg: "Left", pkg: "Starter", bv: "320", active: false },
+                { name: "Lena Park", date: "Feb 08", leg: "Right", pkg: "Free", bv: "0", active: false },
               ].map((m, i) => (
                 <tr key={i} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                   <td className="py-3 px-4 font-medium">{m.name}</td>
                   <td className="py-3 px-4 text-muted-foreground">{m.date}</td>
-                  <td className="py-3 px-4"><Badge variant="outline">{m.level}</Badge></td>
+                  <td className="py-3 px-4">
+                    <Badge variant="outline" className={m.leg === "Left" ? "border-emerald-500/50 text-emerald-600" : "border-blue-500/50 text-blue-600"}>
+                      {m.leg}
+                    </Badge>
+                  </td>
+                  <td className="py-3 px-4">
+                    <Badge className={cn("text-xs",
+                      m.pkg === "Elite" && "bg-amber-500/10 text-amber-600 border-amber-500/30",
+                      m.pkg === "Pro" && "bg-purple-500/10 text-purple-600 border-purple-500/30",
+                      m.pkg === "Basic" && "bg-blue-500/10 text-blue-600 border-blue-500/30",
+                      m.pkg === "Starter" && "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
+                      m.pkg === "Free" && "bg-muted text-muted-foreground",
+                    )} variant="outline">{m.pkg}</Badge>
+                  </td>
+                  <td className="py-3 px-4 font-medium">{m.bv}</td>
                   <td className="py-3 px-4">
                     <Badge variant={m.active ? "default" : "secondary"}>{m.active ? "Active" : "Inactive"}</Badge>
                   </td>
@@ -158,47 +258,86 @@ const NetworkPanel = () => (
 // ─── Binary Tree Panel ───
 const BinaryTreePanel = () => (
   <div className="space-y-6">
+    {/* BV Summary */}
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {[
+        { label: "Left Product BV", value: "16,200", color: "text-emerald-600 bg-emerald-500/5 border-emerald-500/20" },
+        { label: "Left Membership BV", value: "8,300", color: "text-emerald-700 bg-emerald-500/10 border-emerald-500/30" },
+        { label: "Right Product BV", value: "14,500", color: "text-blue-600 bg-blue-500/5 border-blue-500/20" },
+        { label: "Right Membership BV", value: "7,300", color: "text-blue-700 bg-blue-500/10 border-blue-500/30" },
+      ].map((s) => (
+        <Card key={s.label} className={cn("border", s.color)}>
+          <CardContent className="p-4 text-center">
+            <p className="text-xl font-bold font-display">{s.value}</p>
+            <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+
     <Card variant="glass">
       <CardHeader>
         <CardTitle className="text-lg">Binary Tree Structure</CardTitle>
-        <CardDescription>Your network's binary placement</CardDescription>
+        <CardDescription>Your network's binary placement — Product & Membership BV tracked separately</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col items-center py-8">
           {/* Root */}
-          <div className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm shadow-lg">You</div>
+          <div className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm shadow-lg flex items-center gap-2">
+            <Crown className="h-4 w-4" /> You (Pro)
+          </div>
           <div className="w-px h-8 bg-border" />
           <div className="flex items-start gap-0">
+            {/* Left Branch */}
             <div className="flex flex-col items-center">
               <div className="w-24 h-px bg-border" />
               <div className="w-px h-6 bg-border" />
-              <div className="px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-sm font-medium">Alex L</div>
+              <div className="px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-sm font-medium text-center">
+                <p>Alex Rivera</p>
+                <p className="text-xs text-muted-foreground">Pro • 4,200 BV</p>
+              </div>
               <div className="w-px h-6 bg-border" />
               <div className="flex gap-6">
                 <div className="flex flex-col items-center">
                   <div className="w-px h-4 bg-border" />
-                  <div className="px-3 py-1.5 rounded-md bg-muted text-xs">L1</div>
+                  <div className="px-3 py-1.5 rounded-md bg-emerald-500/5 border border-emerald-500/20 text-xs text-center">
+                    <p className="font-medium">Daniel</p>
+                    <p className="text-muted-foreground">Basic</p>
+                  </div>
                 </div>
                 <div className="flex flex-col items-center">
                   <div className="w-px h-4 bg-border" />
-                  <div className="px-3 py-1.5 rounded-md bg-muted text-xs">L2</div>
+                  <div className="px-3 py-1.5 rounded-md bg-emerald-500/5 border border-emerald-500/20 text-xs text-center">
+                    <p className="font-medium">Jake</p>
+                    <p className="text-muted-foreground">Starter</p>
+                  </div>
                 </div>
               </div>
             </div>
             <div className="w-12" />
+            {/* Right Branch */}
             <div className="flex flex-col items-center">
               <div className="w-24 h-px bg-border" />
               <div className="w-px h-6 bg-border" />
-              <div className="px-4 py-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-sm font-medium">Brian R</div>
+              <div className="px-4 py-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-sm font-medium text-center">
+                <p>Maria Santos</p>
+                <p className="text-xs text-muted-foreground">Elite • 8,750 BV</p>
+              </div>
               <div className="w-px h-6 bg-border" />
               <div className="flex gap-6">
                 <div className="flex flex-col items-center">
                   <div className="w-px h-4 bg-border" />
-                  <div className="px-3 py-1.5 rounded-md bg-muted text-xs">R1</div>
+                  <div className="px-3 py-1.5 rounded-md bg-blue-500/5 border border-blue-500/20 text-xs text-center">
+                    <p className="font-medium">Emily</p>
+                    <p className="text-muted-foreground">Basic</p>
+                  </div>
                 </div>
                 <div className="flex flex-col items-center">
                   <div className="w-px h-4 bg-border" />
-                  <div className="px-3 py-1.5 rounded-md bg-muted text-xs">R2</div>
+                  <div className="px-3 py-1.5 rounded-md bg-blue-500/5 border border-blue-500/20 text-xs text-center">
+                    <p className="font-medium">Sophia</p>
+                    <p className="text-muted-foreground">Pro</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -207,16 +346,19 @@ const BinaryTreePanel = () => (
         <Separator className="my-4" />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="text-center p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
-            <p className="text-xs text-muted-foreground mb-1">Left Volume</p>
-            <p className="text-xl font-bold text-emerald-600">8,450 pts</p>
+            <p className="text-xs text-muted-foreground mb-1">Total Left BV</p>
+            <p className="text-xl font-bold text-emerald-600">24,500</p>
+            <p className="text-xs text-muted-foreground">Product: 16,200 • Membership: 8,300</p>
           </div>
           <div className="text-center p-4 rounded-lg bg-blue-500/5 border border-blue-500/20">
-            <p className="text-xs text-muted-foreground mb-1">Right Volume</p>
-            <p className="text-xl font-bold text-blue-600">7,980 pts</p>
+            <p className="text-xs text-muted-foreground mb-1">Total Right BV</p>
+            <p className="text-xl font-bold text-blue-600">21,800</p>
+            <p className="text-xs text-muted-foreground">Product: 14,500 • Membership: 7,300</p>
           </div>
           <div className="text-center p-4 rounded-lg bg-accent/5 border border-accent/20">
-            <p className="text-xs text-muted-foreground mb-1">Carry Forward</p>
-            <p className="text-xl font-bold text-accent">470 pts</p>
+            <p className="text-xs text-muted-foreground mb-1">Carry Forward (Left)</p>
+            <p className="text-xl font-bold text-accent">2,700</p>
+            <p className="text-xs text-muted-foreground">Matched: 21,800 BV</p>
           </div>
         </div>
       </CardContent>
@@ -224,42 +366,143 @@ const BinaryTreePanel = () => (
   </div>
 );
 
-// ─── Commissions Panel ───
+// ─── Commissions Panel (Spec-Correct Rates) ───
 const CommissionsPanel = () => (
   <div className="space-y-6">
+    {/* Commission Types */}
     <Card variant="glass">
       <CardHeader>
-        <CardTitle className="text-lg">Commission Structure</CardTitle>
-        <CardDescription>How your earnings are calculated</CardDescription>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <DollarSign className="h-5 w-5 text-primary" /> Commission Structure (Pro Package)
+        </CardTitle>
+        <CardDescription>Your current rates based on Pro tier membership</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {[
-          { type: "Direct Referral", rate: "10%", color: "bg-emerald-500" },
-          { type: "Binary Bonus", rate: "8%", color: "bg-blue-500" },
-          { type: "Leadership Bonus", rate: "5%", color: "bg-purple-500" },
-          { type: "Matching Bonus", rate: "3%", color: "bg-accent" },
+          { type: "Direct Product Sales", rate: "22%", basis: "of Terra Fee", formula: "Terra Fee × 22%", color: "bg-emerald-500", earned: "₱14,520" },
+          { type: "Direct Membership Sales", rate: "8%", basis: "of Package Price", formula: "Package Price × 8%", color: "bg-amber-500", earned: "₱3,200" },
+          { type: "Binary Pairing Commission", rate: "10%", basis: "of Lesser Leg BV", formula: "min(Left BV, Right BV) × 10%", color: "bg-blue-500", earned: "₱21,800" },
+          { type: "Matching Bonus (3 Levels)", rate: "10/5/5%", basis: "of downline binary paid", formula: "L1: 10% + L2: 5% + L3: 5%", color: "bg-purple-500", earned: "₱8,805" },
         ].map((c) => (
-          <div key={c.type} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors">
-            <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${c.color}`} />
-              <span className="font-medium text-sm">{c.type}</span>
+          <div key={c.type} className="p-4 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={cn("w-3 h-3 rounded-full", c.color)} />
+                <span className="font-semibold text-sm">{c.type}</span>
+              </div>
+              <Badge variant="outline" className="font-bold">{c.rate}</Badge>
             </div>
-            <Badge variant="outline" className="font-bold">{c.rate}</Badge>
+            <div className="flex items-center justify-between text-xs text-muted-foreground pl-6">
+              <span>{c.basis} • <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{c.formula}</code></span>
+              <span className="font-semibold text-foreground">Total: {c.earned}</span>
+            </div>
           </div>
         ))}
       </CardContent>
     </Card>
+
+    {/* Daily Binary Cap */}
+    <Card variant="glass">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <Target className="h-4 w-4 text-primary" /> Daily Binary Cap — Pro Package
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Today's Binary Earned</span>
+          <span className="font-bold">₱2,180 / ₱50,000</span>
+        </div>
+        <Progress value={4.36} className="h-2" />
+        <p className="text-xs text-muted-foreground">Cap applies to binary pairing commission only. Direct, matching, and token rewards are uncapped.</p>
+      </CardContent>
+    </Card>
+
+    {/* Fail-safe Transparency */}
+    <Card variant="glass" className="border-amber-500/20">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 text-amber-500" /> Fail-Safe Status (Membership BV)
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { label: "Fail-safe Triggered", value: "No", ok: true },
+            { label: "Pool Ratio", value: "62.4%", ok: true },
+            { label: "Base Cycle Value", value: "₱50 / 500 BV", ok: true },
+            { label: "Adjusted Cycle Value", value: "₱50 (no change)", ok: true },
+          ].map((f) => (
+            <div key={f.label} className="text-center p-3 rounded-lg bg-muted/30">
+              <p className="text-sm font-bold text-foreground">{f.value}</p>
+              <p className="text-xs text-muted-foreground">{f.label}</p>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
+          <Info className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+          <p className="text-xs text-muted-foreground">
+            The fail-safe ensures Membership BV payouts never exceed 75% of the Compensation Pool (33% of Terra Fee). If the ratio exceeds 75%, the cycle value is adjusted proportionally. This does not affect product bonuses, matching, or token rewards.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+
+    {/* Calculation Example */}
     <Card variant="glass">
       <CardHeader>
-        <CardTitle className="text-lg">Calculation Example</CardTitle>
+        <CardTitle className="text-sm">Example: ₱1,000 Order with ₱300 Terra Fee</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3 text-sm">
-          <div className="flex justify-between"><span className="text-muted-foreground">Referral Purchase</span><span className="font-medium">₱1,000</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">Direct Commission (10%)</span><span className="font-medium text-emerald-600">₱100</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">Binary Bonus (8%)</span><span className="font-medium text-blue-600">₱80</span></div>
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between"><span className="text-muted-foreground">Farmer Base Price</span><span>₱700.00</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Terra Fee (30% markup)</span><span className="font-medium">₱300.00</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">BV Created</span><span className="font-medium">300 BV</span></div>
           <Separator />
-          <div className="flex justify-between font-bold"><span>Total Earned</span><span className="text-primary">₱180</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Compensation Pool (33% of ₱300)</span><span>₱99.00</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Your Direct Product Bonus (22%)</span><span className="text-emerald-600 font-semibold">₱66.00</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">BV credited to binary tree</span><span className="text-blue-600 font-semibold">300 BV</span></div>
+        </div>
+      </CardContent>
+    </Card>
+
+    {/* Rate Comparison by Package */}
+    <Card variant="glass">
+      <CardHeader>
+        <CardTitle className="text-sm">Commission Rates by Package</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-2 px-2 text-muted-foreground">Package</th>
+                <th className="text-center py-2 px-2 text-muted-foreground">Direct Product</th>
+                <th className="text-center py-2 px-2 text-muted-foreground">Direct Membership</th>
+                <th className="text-center py-2 px-2 text-muted-foreground">Binary</th>
+                <th className="text-center py-2 px-2 text-muted-foreground">Matching Levels</th>
+                <th className="text-center py-2 px-2 text-muted-foreground">Daily Cap</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { pkg: "Free", dp: "15%", dm: "—", bin: "—", match: "—", cap: "—" },
+                { pkg: "Starter", dp: "18%", dm: "4%", bin: "10%", match: "L1: 10%", cap: "₱5,000" },
+                { pkg: "Basic", dp: "20%", dm: "6%", bin: "10%", match: "L1-L2", cap: "₱15,000" },
+                { pkg: "Pro", dp: "22%", dm: "8%", bin: "10%", match: "L1-L3", cap: "₱50,000", current: true },
+                { pkg: "Elite", dp: "25%", dm: "10%", bin: "10%", match: "L1-L5", cap: "₱250,000" },
+              ].map((r) => (
+                <tr key={r.pkg} className={cn("border-b border-border/50", r.current && "bg-primary/5")}>
+                  <td className="py-2 px-2 font-medium">{r.pkg} {r.current && <Badge className="ml-1 text-[10px]">You</Badge>}</td>
+                  <td className="py-2 px-2 text-center">{r.dp}</td>
+                  <td className="py-2 px-2 text-center">{r.dm}</td>
+                  <td className="py-2 px-2 text-center">{r.bin}</td>
+                  <td className="py-2 px-2 text-center">{r.match}</td>
+                  <td className="py-2 px-2 text-center">{r.cap}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </CardContent>
     </Card>
@@ -269,76 +512,61 @@ const CommissionsPanel = () => (
 // ─── Referral Panel ───
 const ReferralPanel = () => {
   const { toast } = useToast();
-  const referralLink = "https://terrafarming.app/register?ref=AMEER123";
+  const referralLink = "https://terrafarming.app/register?ref=TERRA-PRO-7X4K";
 
   return (
     <div className="space-y-6">
       <Card variant="glass">
         <CardHeader>
-          <CardTitle className="text-lg">Your Referral Link</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2"><Share2 className="h-5 w-5 text-primary" /> Your Referral Link</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="flex gap-2">
             <Input readOnly value={referralLink} className="font-mono text-xs" />
             <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(referralLink); toast({ title: "Copied!", description: "Referral link copied to clipboard" }); }}>
               <Copy className="h-4 w-4" />
             </Button>
           </div>
+          <p className="text-xs text-muted-foreground">Share this link. When someone registers and activates a package, you earn Direct Membership Bonus (8% as Pro).</p>
         </CardContent>
       </Card>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         {[
-          { label: "Total Clicks", value: "1,245" },
-          { label: "Conversions", value: "58" },
-          { label: "Conversion Rate", value: "4.6%" },
+          { label: "Link Clicks", value: "1,847", icon: TrendingUp },
+          { label: "Registrations", value: "86", icon: Users },
+          { label: "Activated (Paid)", value: "58", icon: CheckCircle2 },
+          { label: "Conversion Rate", value: "3.1%", icon: Target },
         ].map((s) => (
           <Card key={s.label} variant="glass" hover="lift">
             <CardContent className="p-5 text-center">
+              <s.icon className="h-5 w-5 text-primary mx-auto mb-2" />
               <p className="text-2xl font-bold font-display text-foreground">{s.value}</p>
               <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
             </CardContent>
           </Card>
         ))}
       </div>
-    </div>
-  );
-};
 
-// ─── Rank Panel ───
-const RankPanel = () => {
-  const ranks = ["Starter", "Bronze", "Silver", "Gold", "Platinum", "Diamond"];
-  const currentRankIndex = 3;
-
-  return (
-    <div className="space-y-6">
+      {/* Recent Referrals */}
       <Card variant="glass">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2"><Crown className="h-5 w-5 text-accent" /> Your Rank</CardTitle>
+          <CardTitle className="text-sm">Recent Referrals</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center gap-4">
-            <div className="p-4 rounded-2xl bg-accent/10 border border-accent/30">
-              <Award className="h-8 w-8 text-accent" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold font-display">Gold Partner</p>
-              <p className="text-sm text-muted-foreground">Next: Platinum</p>
-            </div>
-          </div>
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span className="text-muted-foreground">Progress to Platinum</span>
-              <span className="font-medium">72%</span>
-            </div>
-            <Progress value={72} className="h-3" />
-            <p className="text-xs text-muted-foreground mt-2">7,200 / 10,000 binary volume required</p>
-          </div>
-          <Separator />
-          <div className="flex flex-wrap gap-2">
-            {ranks.map((r, i) => (
-              <Badge key={r} variant={i <= currentRankIndex ? "default" : "outline"} className={cn("text-xs", i === currentRankIndex && "ring-2 ring-accent ring-offset-2 ring-offset-background")}>
-                {r}
-              </Badge>
+        <CardContent>
+          <div className="space-y-3">
+            {[
+              { name: "Carlos Reyes", date: "Feb 01", pkg: "Starter", bonus: "₱20.00" },
+              { name: "Emily Cruz", date: "Jan 28", pkg: "Basic", bonus: "₱60.00" },
+              { name: "Sophia Lee", date: "Jan 22", pkg: "Pro", bonus: "₱240.00" },
+              { name: "Jake Tan", date: "Jan 18", pkg: "Starter", bonus: "₱20.00" },
+            ].map((r, i) => (
+              <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors">
+                <div>
+                  <p className="font-medium text-sm">{r.name}</p>
+                  <p className="text-xs text-muted-foreground">{r.date} • {r.pkg} Package</p>
+                </div>
+                <Badge variant="outline" className="text-emerald-600 border-emerald-500/30">+{r.bonus}</Badge>
+              </div>
             ))}
           </div>
         </CardContent>
@@ -347,26 +575,83 @@ const RankPanel = () => {
   );
 };
 
+// ─── Rank & Packages Panel ───
+const RankPanel = () => (
+  <div className="space-y-6">
+    {/* Current Rank */}
+    <Card className="bg-gradient-to-br from-purple-500/10 via-primary/5 to-transparent border-purple-500/20">
+      <CardContent className="p-6">
+        <div className="flex items-center gap-4">
+          <div className="p-4 rounded-2xl bg-purple-500/20 border border-purple-500/30">
+            <Award className="h-8 w-8 text-purple-500" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold font-display">Pro Partner</p>
+            <p className="text-sm text-muted-foreground">₱3,000 Package • 3,000 Membership BV • 3 Matching Levels</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
+    {/* Packages Grid */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {[
+        { name: "Free", price: "₱0", bv: "0 BV", binary: "—", matching: "—", cap: "—", color: "border-muted", active: false },
+        { name: "Starter", price: "₱500", bv: "500 BV", binary: "10%", matching: "L1: 10%", cap: "₱5,000/day", color: "border-emerald-500/30", active: false },
+        { name: "Basic", price: "₱1,000", bv: "1,000 BV", binary: "10%", matching: "L1: 10%, L2: 5%", cap: "₱15,000/day", color: "border-blue-500/30", active: false },
+        { name: "Pro", price: "₱3,000", bv: "3,000 BV", binary: "10%", matching: "L1: 10%, L2-L3: 5%", cap: "₱50,000/day", color: "border-purple-500/30", active: true },
+        { name: "Elite", price: "₱5,000", bv: "5,000 BV", binary: "10%", matching: "L1: 10%, L2-L5: 5%", cap: "₱250,000/day", color: "border-amber-500/30", active: false },
+      ].map((pkg) => (
+        <Card key={pkg.name} className={cn("relative overflow-hidden", pkg.color, pkg.active && "ring-2 ring-primary")}>
+          {pkg.active && (
+            <div className="absolute top-0 right-0 px-3 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-bl-lg">CURRENT</div>
+          )}
+          <CardContent className="p-5 space-y-3">
+            <div>
+              <p className="text-lg font-bold font-display">{pkg.name}</p>
+              <p className="text-2xl font-bold text-primary">{pkg.price}</p>
+            </div>
+            <Separator />
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between"><span className="text-muted-foreground">Membership BV</span><span className="font-medium">{pkg.bv}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Binary Rate</span><span className="font-medium">{pkg.binary}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Matching</span><span className="font-medium">{pkg.matching}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Daily Cap</span><span className="font-medium">{pkg.cap}</span></div>
+            </div>
+            {!pkg.active && pkg.name !== "Free" && (
+              <Button size="sm" variant="outline" className="w-full mt-2">
+                {pkg.name === "Elite" ? "Upgrade to Elite" : "Downgrade"}
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  </div>
+);
+
 // ─── Marketing Panel ───
 const MarketingPanel = () => (
   <div className="space-y-6">
     <Card variant="glass">
       <CardHeader>
-        <CardTitle className="text-lg">Marketing Assets</CardTitle>
+        <CardTitle className="text-lg flex items-center gap-2"><Megaphone className="h-5 w-5 text-primary" /> Marketing Assets</CardTitle>
         <CardDescription>Download materials to grow your network</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
-            { title: "Terra Farming Presentation", type: "PDF" },
-            { title: "Compensation Plan", type: "PDF" },
-            { title: "Social Media Banners", type: "ZIP" },
-            { title: "Email Templates", type: "ZIP" },
+            { title: "Terra Farming Presentation", type: "PDF", size: "2.4 MB", downloads: 342 },
+            { title: "Compensation Plan Overview", type: "PDF", size: "1.8 MB", downloads: 567 },
+            { title: "Social Media Banner Pack", type: "ZIP", size: "8.2 MB", downloads: 189 },
+            { title: "Email Swipe Templates", type: "ZIP", size: "512 KB", downloads: 94 },
+            { title: "Product Catalog", type: "PDF", size: "5.1 MB", downloads: 423 },
+            { title: "Video Testimonials", type: "MP4", size: "45 MB", downloads: 76 },
           ].map((asset) => (
             <div key={asset.title} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors">
               <div>
                 <p className="font-medium text-sm">{asset.title}</p>
-                <p className="text-xs text-muted-foreground">{asset.type}</p>
+                <p className="text-xs text-muted-foreground">{asset.type} • {asset.size} • {asset.downloads} downloads</p>
               </div>
               <Button size="sm" variant="outline"><Download className="h-4 w-4" /></Button>
             </div>
@@ -377,39 +662,118 @@ const MarketingPanel = () => (
   </div>
 );
 
-// ─── Payout Panel ───
+// ─── Wallet & Payout Panel ───
 const PayoutPanel = () => (
   <div className="space-y-6">
+    {/* Wallet Overview */}
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {[
+        { label: "Available Balance", value: "₱18,425.50", icon: Wallet, accent: "text-emerald-600 bg-emerald-500/10" },
+        { label: "Pending Commissions", value: "₱3,280.00", icon: Clock, accent: "text-amber-600 bg-amber-500/10" },
+        { label: "Total Withdrawn", value: "₱26,620.00", icon: ArrowUpRight, accent: "text-blue-600 bg-blue-500/10" },
+      ].map((w) => (
+        <Card key={w.label} variant="glass" hover="lift">
+          <CardContent className="p-5">
+            <div className={cn("p-2 rounded-xl w-fit mb-3", w.accent)}>
+              <w.icon className="h-5 w-5" />
+            </div>
+            <p className="text-2xl font-bold font-display text-foreground">{w.value}</p>
+            <p className="text-xs text-muted-foreground mt-1">{w.label}</p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+
+    {/* Payment Methods */}
     <Card variant="glass">
       <CardHeader>
         <CardTitle className="text-lg">Payment Methods</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="p-4 rounded-lg border border-border/50 space-y-2">
+        <div className="p-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5 space-y-2">
           <div className="flex items-center justify-between">
             <span className="font-medium text-sm">Bank Transfer</span>
-            <Badge>Active</Badge>
+            <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30" variant="outline">Primary</Badge>
           </div>
-          <p className="text-xs text-muted-foreground">Global Trust Bank • **** 4832</p>
+          <p className="text-xs text-muted-foreground">BDO Unibank • **** 4832 • Juan Dela Cruz</p>
         </div>
         <div className="p-4 rounded-lg border border-border/50 space-y-2">
           <div className="flex items-center justify-between">
             <span className="font-medium text-sm">GCash</span>
             <Badge variant="outline">Available</Badge>
           </div>
-          <p className="text-xs text-muted-foreground">+63 9XX XXX X832</p>
+          <p className="text-xs text-muted-foreground">+63 917 XXX X832</p>
         </div>
-      </CardContent>
-    </Card>
-    <Card variant="glass">
-      <CardContent className="p-5">
-        <div className="flex justify-between text-sm">
+        <div className="flex justify-between text-sm p-3 rounded-lg bg-muted/30">
           <span className="text-muted-foreground">Minimum Withdrawal</span>
           <span className="font-medium">₱500</span>
         </div>
-        <div className="flex justify-between text-sm mt-2">
-          <span className="text-muted-foreground">Withdrawal Fee</span>
-          <span className="font-medium">2%</span>
+      </CardContent>
+    </Card>
+
+    {/* Withdrawal History */}
+    <Card variant="glass">
+      <CardHeader>
+        <CardTitle className="text-sm">Recent Withdrawals</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {[
+            { date: "Feb 25", method: "Bank Transfer", amount: "₱10,000", fee: "₱200", net: "₱9,800", status: "Paid" },
+            { date: "Feb 10", method: "GCash", amount: "₱5,000", fee: "₱100", net: "₱4,900", status: "Paid" },
+            { date: "Jan 28", method: "Bank Transfer", amount: "₱8,000", fee: "₱160", net: "₱7,840", status: "Paid" },
+            { date: "Jan 15", method: "GCash", amount: "₱3,620", fee: "₱72.40", net: "₱3,547.60", status: "Paid" },
+          ].map((w, i) => (
+            <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors">
+              <div>
+                <p className="font-medium text-sm">{w.method}</p>
+                <p className="text-xs text-muted-foreground">{w.date} • Fee: {w.fee}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-bold text-sm">{w.net}</p>
+                <Badge variant="default" className="text-[10px]">{w.status}</Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+
+    {/* AGRI Token Wallet */}
+    <Card variant="glass" className="border-accent/20">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <Coins className="h-4 w-4 text-accent" /> AGRI Token Wallet
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="p-3 rounded-lg bg-accent/5 text-center">
+            <p className="text-xl font-bold text-accent">1,247.5</p>
+            <p className="text-xs text-muted-foreground">Token Balance</p>
+          </div>
+          <div className="p-3 rounded-lg bg-muted/30 text-center">
+            <p className="text-xl font-bold text-foreground">₱10.00</p>
+            <p className="text-xs text-muted-foreground">Current Market Price</p>
+          </div>
+        </div>
+        <div className="space-y-2">
+          {[
+            { date: "Feb 28", reason: "BV Activity Reward", php: "₱125", tokens: "12.5 AGRI" },
+            { date: "Feb 21", reason: "Consumer Onboarding", php: "₱50", tokens: "5.0 AGRI" },
+            { date: "Feb 14", reason: "Farmer Referral Reward", php: "₱200", tokens: "20.0 AGRI" },
+          ].map((t, i) => (
+            <div key={i} className="flex items-center justify-between text-xs p-2 rounded bg-muted/20">
+              <div>
+                <span className="text-muted-foreground">{t.date}</span>
+                <span className="ml-2 font-medium">{t.reason}</span>
+              </div>
+              <div className="text-right">
+                <span className="text-muted-foreground">{t.php} → </span>
+                <span className="font-bold text-accent">{t.tokens}</span>
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>
@@ -434,8 +798,10 @@ const SupportPanel = () => (
             <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="commission">Commission Issues</SelectItem>
-              <SelectItem value="payout">Payout</SelectItem>
-              <SelectItem value="network">Network</SelectItem>
+              <SelectItem value="binary">Binary Tree / BV</SelectItem>
+              <SelectItem value="payout">Payout & Withdrawals</SelectItem>
+              <SelectItem value="membership">Membership / Package</SelectItem>
+              <SelectItem value="tokens">Token Rewards</SelectItem>
               <SelectItem value="technical">Technical</SelectItem>
               <SelectItem value="other">Other</SelectItem>
             </SelectContent>
@@ -452,14 +818,20 @@ const SupportPanel = () => (
       <CardHeader>
         <CardTitle className="text-sm">Recent Tickets</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="p-3 rounded-lg border border-border/50 flex items-center justify-between">
-          <div>
-            <p className="font-medium text-sm">Ticket #1245</p>
-            <p className="text-xs text-muted-foreground">Created: Jan 18</p>
+      <CardContent className="space-y-3">
+        {[
+          { id: "#TK-1245", subject: "Binary volume not updating", date: "Feb 28", status: "Open" },
+          { id: "#TK-1198", subject: "Withdrawal delayed", date: "Feb 20", status: "Resolved" },
+          { id: "#TK-1142", subject: "Package upgrade question", date: "Feb 10", status: "Closed" },
+        ].map((t, i) => (
+          <div key={i} className="p-3 rounded-lg border border-border/50 flex items-center justify-between hover:bg-muted/30 transition-colors">
+            <div>
+              <p className="font-medium text-sm">{t.id} — {t.subject}</p>
+              <p className="text-xs text-muted-foreground">{t.date}</p>
+            </div>
+            <Badge variant={t.status === "Open" ? "default" : t.status === "Resolved" ? "secondary" : "outline"}>{t.status}</Badge>
           </div>
-          <Badge>Open</Badge>
-        </div>
+        ))}
       </CardContent>
     </Card>
   </div>
@@ -480,7 +852,7 @@ const PANELS: Record<TabKey, React.FC> = {
 const BusinessCentre = () => {
   const { user, loading } = useAuth();
   const { tab } = useParams<{ tab?: string }>();
-  const [activeTab, setActiveTab] = useState<TabKey>("network");
+  const [activeTab, setActiveTab] = useState<TabKey>("dashboard");
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -522,16 +894,13 @@ const BusinessCentre = () => {
       <Header />
       <CartDrawer />
       <div className="flex flex-1">
-        {/* Desktop Sidebar */}
         {!isMobile && (
           <aside className="w-64 shrink-0 border-r border-border/50 bg-card/50 backdrop-blur-sm">
             <SidebarNav />
           </aside>
         )}
 
-        {/* Main Content */}
-        <main className="flex-1 p-4 md:p-8 max-w-5xl">
-          {/* Mobile sidebar trigger */}
+        <main className="flex-1 p-4 md:p-8 max-w-6xl">
           {isMobile && (
             <div className="mb-4">
               <Sheet>
