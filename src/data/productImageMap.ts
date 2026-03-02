@@ -26,6 +26,8 @@ import guavaImg from "@/assets/products/guava.jpg";
 import watermelonImg from "@/assets/products/watermelon.jpg";
 import pineappleImg from "@/assets/products/pineapple.jpg";
 import dragonFruitImg from "@/assets/products/dragon-fruit.jpg";
+import blueberriesImg from "@/assets/products/blueberries.jpg";
+import grapesImg from "@/assets/products/grapes.jpg";
 import avocadoImg from "@/assets/products/avocado.jpg";
 import arabicaCoffeeImg from "@/assets/products/arabica-coffee.jpg";
 import wildHoneyImg from "@/assets/products/wild-honey.jpg";
@@ -79,12 +81,12 @@ const imageKeywords: [string[], string][] = [
   [["dried strawberr"], strawberriesImg],
   [["strawberry seedling", "berry seedling"], strawberriesImg],
   [["strawberr"], strawberriesImg],
-  [["blueberr"], dragonFruitImg],       // closest visual match available
-  [["raspberr"], strawberriesImg],       // closest available
+  [["blueberr"], blueberriesImg],
+  [["raspberr"], strawberriesImg],
   [["mixed berry", "berry pack"], strawberriesImg],
-  [["table grape", "fresh grape"], watermelonImg],  // green/round fruit fallback
+  [["table grape", "fresh grape", "grape"], grapesImg],
   [["grape jam"], ubeJamImg],
-  [["apple"], guavaImg],                 // round fruit fallback
+  [["apple"], guavaImg],
   [["mango"], mangoesImg],
   [["papaya"], papayasImg],
   [["banana"], bananasImg],
