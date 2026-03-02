@@ -18,6 +18,7 @@ import papayasImg from "@/assets/products/papayas.jpg";
 import bananasImg from "@/assets/products/bananas.jpg";
 import calamansiImg from "@/assets/products/calamansi.jpg";
 import freshEggsImg from "@/assets/products/fresh-eggs.jpg";
+import eggsImg from "@/assets/products/eggs.jpg";
 import carabaoMilkImg from "@/assets/products/carabao-milk.jpg";
 import kesongPutiImg from "@/assets/products/kesong-puti.jpg";
 import saltedEggsImg from "@/assets/products/salted-eggs.jpg";
@@ -28,6 +29,7 @@ import dragonFruitImg from "@/assets/products/dragon-fruit.jpg";
 import avocadoImg from "@/assets/products/avocado.jpg";
 import arabicaCoffeeImg from "@/assets/products/arabica-coffee.jpg";
 import wildHoneyImg from "@/assets/products/wild-honey.jpg";
+import honeyImg from "@/assets/products/honey.jpg";
 import driedHerbsImg from "@/assets/products/dried-herbs.jpg";
 import muscovadoImg from "@/assets/products/muscovado.jpg";
 import ubeJamImg from "@/assets/products/ube-jam.jpg";
@@ -36,26 +38,53 @@ import brownRiceImg from "@/assets/products/brown-rice.jpg";
 import coconutVinegarImg from "@/assets/products/coconut-vinegar.jpg";
 import peanutButterImg from "@/assets/products/peanut-butter.jpg";
 import tomatoesImg from "@/assets/products/tomatoes.jpg";
-import honeyImg from "@/assets/products/honey.jpg";
+import nativeChickenImg from "@/assets/products/native-chicken.jpg";
+import dressedChickenImg from "@/assets/products/dressed-chicken.jpg";
 
-// Keyword-based image fallback: first match wins
+// Keyword-based image fallback: MOST SPECIFIC matches first, then general
 const imageKeywords: [string[], string][] = [
-  [["strawberr"], strawberriesImg],
+  // === VEGETABLES (specific first) ===
+  [["chinese cabbage", "wombok"], chineseCabbageImg],
+  [["baguio pechay", "pechay baguio"], pechayImg],
+  [["korean radish"], koreanRadishImg],
+  [["baguio bean", "string bean", "highland bean"], baguioBeansImg],
+  [["organic lettuce", "lettuce mix", "salad green", "mixed salad"], lettuceImg],
+  [["organic sayote"], sayoteImg],
+  [["organic broccoli"], broccoliImg],
+  [["organic tomato"], tomatoesImg],
+  [["organic cauliflower"], cauliflowerImg],
+  [["organic radish"], radishImg],
+  [["baguio cabbage", "repolyo"], cabbageImg],
+  [["fresh leek"], leeksImg],
+  [["fresh celery"], celeryImg],
+  [["itogon vegetable"], cabbageImg],
+  // General vegetables
   [["lettuce"], lettuceImg],
   [["carrot"], carrotsImg],
-  [["cabbage", "repolyo"], cabbageImg],
-  [["chinese cabbage", "wombok"], chineseCabbageImg],
-  [["baguio bean", "string bean"], baguioBeansImg],
+  [["cabbage"], cabbageImg],
   [["broccoli"], broccoliImg],
   [["celery"], celeryImg],
   [["potato"], potatoesImg],
-  [["korean radish"], koreanRadishImg],
   [["radish", "labanos"], radishImg],
   [["cauliflower"], cauliflowerImg],
   [["sayote", "chayote"], sayoteImg],
   [["leek"], leeksImg],
   [["pechay"], pechayImg],
   [["tomato"], tomatoesImg],
+  [["bean"], baguioBeansImg],
+
+  // === FRUITS (specific first) ===
+  [["benguet strawberr", "la trinidad strawberr"], strawberriesImg],
+  [["strawberry jam"], ubeJamImg],
+  [["dried strawberr"], strawberriesImg],
+  [["strawberry seedling", "berry seedling"], strawberriesImg],
+  [["strawberr"], strawberriesImg],
+  [["blueberr"], dragonFruitImg],       // closest visual match available
+  [["raspberr"], strawberriesImg],       // closest available
+  [["mixed berry", "berry pack"], strawberriesImg],
+  [["table grape", "fresh grape"], watermelonImg],  // green/round fruit fallback
+  [["grape jam"], ubeJamImg],
+  [["apple"], guavaImg],                 // round fruit fallback
   [["mango"], mangoesImg],
   [["papaya"], papayasImg],
   [["banana"], bananasImg],
@@ -65,14 +94,38 @@ const imageKeywords: [string[], string][] = [
   [["pineapple"], pineappleImg],
   [["dragon fruit"], dragonFruitImg],
   [["avocado"], avocadoImg],
+
+  // === DAIRY & EGGS (specific first) ===
+  [["salted egg", "salted duck", "itlog na maalat"], saltedEggsImg],
+  [["duck egg"], eggsImg],
+  [["quail egg"], eggsImg],
+  [["native chicken egg"], freshEggsImg],
+  [["free-range egg", "free range egg"], freshEggsImg],
+  [["organic brown egg"], eggsImg],
+  [["organic duck egg"], eggsImg],
+  [["organic egg"], freshEggsImg],
+  [["itogon.*egg"], freshEggsImg],
+  [["farm fresh egg", "fresh farm egg"], freshEggsImg],
+  [["egg tray", "eggs (tray)"], eggsImg],
   [["egg", "itlog"], freshEggsImg],
-  [["salted egg"], saltedEggsImg],
+  [["goat milk"], carabaoMilkImg],
   [["carabao milk", "fresh milk"], carabaoMilkImg],
-  [["kesong puti", "cheese"], kesongPutiImg],
-  [["coffee", "arabica", "bourbon", "catimor"], arabicaCoffeeImg],
+  [["yogurt"], carabaoMilkImg],
+  [["kesong puti", "white cheese", "organic kesong"], kesongPutiImg],
+  [["cheese"], kesongPutiImg],
+  [["milk"], carabaoMilkImg],
+
+  // === PANTRY (specific first) ===
+  [["arabica coffee", "typica"], arabicaCoffeeImg],
+  [["bourbon coffee", "red bourbon"], arabicaCoffeeImg],
+  [["catimor coffee"], arabicaCoffeeImg],
+  [["ground coffee", "house blend"], arabicaCoffeeImg],
+  [["tuba.*coffee", "tuba arabica"], arabicaCoffeeImg],
+  [["coffee"], arabicaCoffeeImg],
   [["wild honey"], wildHoneyImg],
+  [["tublay honey"], honeyImg],
   [["honey"], honeyImg],
-  [["herb", "basil"], driedHerbsImg],
+  [["fresh herb", "herb bundle", "basil"], driedHerbsImg],
   [["muscovado"], muscovadoImg],
   [["ube jam", "ube"], ubeJamImg],
   [["tablea", "cacao"], tableaImg],
@@ -80,14 +133,21 @@ const imageKeywords: [string[], string][] = [
   [["vinegar", "coconut vinegar"], coconutVinegarImg],
   [["peanut butter", "peanut"], peanutButterImg],
   [["mushroom"], driedHerbsImg],
-  [["berry", "blueberr", "raspberr"], strawberriesImg],
-  [["jam"], ubeJamImg],
+  [["dried mushroom"], driedHerbsImg],
+  [["jam", "preserve"], ubeJamImg],
   [["dried"], driedHerbsImg],
+
+  // === MEAT (if any slip through) ===
+  [["dressed chicken"], dressedChickenImg],
+  [["native chicken", "manok bisaya", "tublay.*chicken"], nativeChickenImg],
+  [["whole chicken", "free-range.*chicken"], nativeChickenImg],
+  [["chicken"], nativeChickenImg],
+  [["rabbit"], nativeChickenImg],
 ];
 
 export function getProductImage(name: string, dbImageUrl: string | null): string {
-  // If DB has a valid bundled image URL, use it
-  if (dbImageUrl && !dbImageUrl.startsWith("/src/")) {
+  // If DB has a valid external/public URL (not a /src/assets path), use it
+  if (dbImageUrl && !dbImageUrl.startsWith("/src/") && !dbImageUrl.includes("drive.google.com")) {
     return dbImageUrl;
   }
 
