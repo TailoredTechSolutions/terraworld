@@ -50,7 +50,7 @@ const AnimatedRoutes = () => {
         <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
         <Route path="/business-centre/auth" element={<P><BusinessCentreAuth /></P>} />
         <Route path="/business-centre" element={<RoleProtectedRoute allowedRoles={['affiliate', 'admin']}><P><BusinessCentreLanding /></P></RoleProtectedRoute>} />
-        <Route path="/business-centre/:tab" element={<RoleProtectedRoute allowedRoles={['affiliate', 'admin']}><P><BusinessCentre /></P></RoleProtectedRoute>} />
+        <Route path="/business-centre/dashboard" element={<RoleProtectedRoute allowedRoles={['affiliate', 'admin']}><P><BusinessCentre /></P></RoleProtectedRoute>} />
         <Route path="/checkout" element={<P><CheckoutPage /></P>} />
         <Route path="/order-confirmation" element={<P><OrderConfirmation /></P>} />
         <Route path="/auth" element={<P><AuthPage /></P>} />

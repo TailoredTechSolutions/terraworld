@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
@@ -13,8 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard, Users, GitBranch, DollarSign, Share2, Award, Megaphone,
@@ -26,19 +23,6 @@ import {
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
-type TabKey = "dashboard" | "network" | "binary" | "commissions" | "referral" | "rank" | "marketing" | "payout" | "support";
-
-const sidebarItems: { key: TabKey; label: string; icon: React.ElementType }[] = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { key: "network", label: "My Network", icon: Users },
-  { key: "binary", label: "Binary Tree", icon: GitBranch },
-  { key: "commissions", label: "Commissions", icon: DollarSign },
-  { key: "referral", label: "Referrals", icon: Share2 },
-  { key: "rank", label: "Rank & Packages", icon: Crown },
-  { key: "marketing", label: "Marketing Tools", icon: Megaphone },
-  { key: "payout", label: "Wallet & Payouts", icon: Wallet },
-  { key: "support", label: "Support", icon: HelpCircle },
-];
 
 // ─── Dashboard Panel ───
 const DashboardPanel = () => (
@@ -837,96 +821,70 @@ const SupportPanel = () => (
   </div>
 );
 
-const PANELS: Record<TabKey, React.FC> = {
-  dashboard: DashboardPanel,
-  network: NetworkPanel,
-  binary: BinaryTreePanel,
-  commissions: CommissionsPanel,
-  referral: ReferralPanel,
-  rank: RankPanel,
-  marketing: MarketingPanel,
-  payout: PayoutPanel,
-  support: SupportPanel,
-};
+
+const SectionHeader = ({ icon: Icon, title, id }: { icon: React.ElementType; title: string; id: string }) => (
+  <div id={id} className="flex items-center gap-3 pt-8 pb-4 scroll-mt-20">
+    <div className="p-2 rounded-xl bg-primary/10">
+      <Icon className="h-5 w-5 text-primary" />
+    </div>
+    <h2 className="text-xl font-bold font-display text-foreground">{title}</h2>
+    <Separator className="flex-1" />
+  </div>
+);
 
 const BusinessCentre = () => {
   const { user, loading } = useAuth();
-  const { tab } = useParams<{ tab?: string }>();
-  const [activeTab, setActiveTab] = useState<TabKey>("dashboard");
-  const isMobile = useIsMobile();
-
-  useEffect(() => {
-    if (tab && sidebarItems.some(item => item.key === tab)) {
-      setActiveTab(tab as TabKey);
-    }
-  }, [tab]);
 
   if (!loading && !user) return <Navigate to="/auth" replace />;
-
-  const ActivePanel = PANELS[activeTab];
-
-  const SidebarNav = ({ inSheet = false }: { inSheet?: boolean }) => (
-    <div className={cn("flex flex-col gap-1 p-3", inSheet && "pt-6")}>
-      <div className="px-3 mb-4">
-        <h2 className="font-display text-lg font-bold text-foreground">Business Centre</h2>
-        <p className="text-xs text-muted-foreground">Partner Dashboard</p>
-      </div>
-      {sidebarItems.map((item) => (
-        <button
-          key={item.key}
-          onClick={() => setActiveTab(item.key)}
-          className={cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-            activeTab === item.key
-              ? "bg-primary/10 text-primary shadow-sm"
-              : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-          )}
-        >
-          <item.icon className="h-4 w-4 shrink-0" />
-          {item.label}
-        </button>
-      ))}
-    </div>
-  );
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <CartDrawer />
-      <div className="flex flex-1">
-        {!isMobile && (
-          <aside className="w-64 shrink-0 border-r border-border/50 bg-card/50 backdrop-blur-sm">
-            <SidebarNav />
-          </aside>
-        )}
+      <main className="flex-1 w-full max-w-6xl mx-auto px-4 md:px-8 pb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-2"
+        >
+          {/* Dashboard */}
+          <SectionHeader icon={LayoutDashboard} title="Dashboard" id="dashboard" />
+          <DashboardPanel />
 
-        <main className="flex-1 p-4 md:p-8 max-w-6xl">
-          {isMobile && (
-            <div className="mb-4">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Menu className="h-4 w-4" />
-                    {sidebarItems.find(i => i.key === activeTab)?.label}
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-72 p-0">
-                  <SidebarNav inSheet />
-                </SheetContent>
-              </Sheet>
-            </div>
-          )}
+          {/* My Network */}
+          <SectionHeader icon={Users} title="My Network" id="network" />
+          <NetworkPanel />
 
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <ActivePanel />
-          </motion.div>
-        </main>
-      </div>
+          {/* Binary Tree */}
+          <SectionHeader icon={GitBranch} title="Binary Tree" id="binary" />
+          <BinaryTreePanel />
+
+          {/* Commissions */}
+          <SectionHeader icon={DollarSign} title="Commissions" id="commissions" />
+          <CommissionsPanel />
+
+          {/* Referrals */}
+          <SectionHeader icon={Share2} title="Referrals" id="referral" />
+          <ReferralPanel />
+
+          {/* Rank & Packages */}
+          <SectionHeader icon={Crown} title="Rank & Packages" id="rank" />
+          <RankPanel />
+
+          {/* Marketing Tools */}
+          <SectionHeader icon={Megaphone} title="Marketing Tools" id="marketing" />
+          <MarketingPanel />
+
+          {/* Wallet & Payouts */}
+          <SectionHeader icon={Wallet} title="Wallet & Payouts" id="payout" />
+          <PayoutPanel />
+
+          {/* Support */}
+          <SectionHeader icon={HelpCircle} title="Support" id="support" />
+          <SupportPanel />
+        </motion.div>
+      </main>
       <Footer />
     </div>
   );
