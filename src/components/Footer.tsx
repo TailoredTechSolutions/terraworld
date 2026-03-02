@@ -1,92 +1,240 @@
-import { Facebook, Instagram, Twitter } from "lucide-react";
+import { 
+  Facebook, Instagram, Twitter, Linkedin, 
+  Mail, MapPin, Smartphone, ChevronDown,
+  Shield, Truck, Gift, ArrowRight
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import terraLogo from "@/assets/terra-logo.png";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+
+// Accordion for mobile footer columns
+const FooterAccordion = ({ title, children }: { title: string; children: React.ReactNode }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-b border-border md:border-none">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between py-3 md:hidden text-sm font-semibold text-foreground"
+        aria-expanded={open}
+      >
+        {title}
+        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", open && "rotate-180")} />
+      </button>
+      <h4 className="hidden md:block font-display font-semibold text-foreground text-sm mb-4">{title}</h4>
+      <ul className={cn(
+        "space-y-2 pb-3 md:pb-0",
+        "md:block",
+        open ? "block" : "hidden"
+      )}>
+        {children}
+      </ul>
+    </div>
+  );
+};
+
+const FooterLink = ({ to, children, external }: { to: string; children: React.ReactNode; external?: boolean }) => {
+  if (external || to.startsWith("mailto:") || to.startsWith("http")) {
+    return (
+      <li>
+        <a
+          href={to}
+          target={to.startsWith("http") ? "_blank" : undefined}
+          rel={to.startsWith("http") ? "noopener noreferrer" : undefined}
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+        >
+          {children}
+        </a>
+      </li>
+    );
+  }
+  return (
+    <li>
+      <Link to={to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+        {children}
+      </Link>
+    </li>
+  );
+};
 
 const Footer = () => {
   const { user } = useAuth();
   const { isAdmin, isAffiliate } = useUserRoles();
   const canAccessBusinessCentre = isAdmin || isAffiliate;
+  const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-border bg-card">
-      <div className="container py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <img src={terraLogo} alt="Terra Farming" className="h-10 w-10 rounded-lg" />
-              <div className="flex flex-col">
-                <span className="font-display text-xl font-bold text-foreground leading-tight">Terra Farming</span>
-                <span className="text-[10px] text-muted-foreground leading-none">From Dirt to Dessert</span>
-              </div>
+    <footer className="border-t border-border bg-secondary/40" role="contentinfo">
+      {/* ===== 1) TOP STRIP — Trust + Quick Actions ===== */}
+      <div className="border-b border-border">
+        <div className="container py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          {/* Trust signals */}
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5"><Shield className="h-3.5 w-3.5 text-primary" /> Farm-to-business marketplace</span>
+            <span className="inline-flex items-center gap-1.5"><Truck className="h-3.5 w-3.5 text-primary" /> Transparent pricing + tracked deliveries</span>
+            <span className="inline-flex items-center gap-1.5"><Gift className="h-3.5 w-3.5 text-primary" /> Rewards for participation (utility token)</span>
+          </div>
+          {/* CTA buttons */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Link to="/#download" className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 transition-opacity">
+              <Smartphone className="h-3 w-3" /> Download App
             </Link>
-            <p className="text-sm text-muted-foreground mb-4">
-              Connecting local farmers with conscious consumers. Fresh, organic, sustainable.
-            </p>
-            <div className="flex gap-3">
-              <a href="#" className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
-                <Facebook className="h-4 w-4" />
-              </a>
-              <a href="#" className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
-                <Instagram className="h-4 w-4" />
-              </a>
-              <a href="#" className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
-                <Twitter className="h-4 w-4" />
-              </a>
-            </div>
-          </div>
-
-          {/* Shop Links */}
-          <div>
-            <h4 className="font-display font-semibold text-foreground mb-4">Shop</h4>
-            <ul className="space-y-2">
-              <li><Link to="/shop?category=vegetables" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Vegetables</Link></li>
-              <li><Link to="/shop?category=fruits" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Fruits</Link></li>
-              <li><Link to="/shop?category=dairy-eggs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Dairy & Eggs</Link></li>
-              <li><Link to="/shop?category=pantry" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pantry</Link></li>
-            </ul>
-          </div>
-
-          {/* For Farmers */}
-          <div>
-            <h4 className="font-display font-semibold text-foreground mb-4">For Farmers</h4>
-            <ul className="space-y-2">
-              <li><Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Sell on Terra</Link></li>
-              <li><Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</Link></li>
-              <li><Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Resources</Link></li>
-              <li><Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Success Stories</Link></li>
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div>
-            <h4 className="font-display font-semibold text-foreground mb-4">Support</h4>
-            <ul className="space-y-2">
-              <li><Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Help Center</Link></li>
-              <li><Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
-              <li><Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Delivery Info</Link></li>
-              <li><Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Returns</Link></li>
-            </ul>
+            <Link to="/auth" className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/5 px-4 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 transition-colors">
+              Become a Farmer <ArrowRight className="h-3 w-3" />
+            </Link>
+            <Link to="/auth" className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/5 px-4 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 transition-colors">
+              Become a Buyer <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
         </div>
+      </div>
 
-        <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">© 2025 Terra. All rights reserved.</p>
-          <div className="flex gap-6">
-            {/* Show Business Centre link based on role */}
+      {/* ===== 2) MAIN FOOTER GRID ===== */}
+      <div className="container py-12 md:py-12 py-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-x-6 gap-y-2 md:gap-y-8">
+          {/* Column A — Terra */}
+          <FooterAccordion title="Terra">
+            <FooterLink to="/about">About Terra</FooterLink>
+            <FooterLink to="/#how-it-works">How Terra Works</FooterLink>
+            <FooterLink to="/impact">Mission / Impact</FooterLink>
+            <FooterLink to="/pilot/baguio">Pilot Program (Baguio)</FooterLink>
+            <FooterLink to="/careers">Careers</FooterLink>
+          </FooterAccordion>
+
+          {/* Column B — Marketplace */}
+          <FooterAccordion title="Marketplace">
+            <FooterLink to="/shop">Browse Products</FooterLink>
+            <FooterLink to="/shop#categories">Categories</FooterLink>
+            <FooterLink to="/shop#pricing-breakdown">Pricing Breakdown</FooterLink>
+            <FooterLink to="/orders/track">Order Tracking</FooterLink>
+            <FooterLink to="/policies/quality">Quality Policy</FooterLink>
+          </FooterAccordion>
+
+          {/* Column C — For Farmers */}
+          <FooterAccordion title="For Farmers">
+            <FooterLink to="/farmers/onboarding">Farmer Onboarding</FooterLink>
+            <FooterLink to="/farmers/upload">Upload Products</FooterLink>
+            <FooterLink to="/farmers/payouts">Payouts & Settlement</FooterLink>
+            <FooterLink to="/farmers/logistics">Logistics Options</FooterLink>
+            <FooterLink to="/faq/farmers">Farmer FAQ</FooterLink>
+          </FooterAccordion>
+
+          {/* Column D — For Buyers */}
+          <FooterAccordion title="For Buyers">
+            <FooterLink to="/buyers/onboarding">Buyer Onboarding</FooterLink>
+            <FooterLink to="/buyers/wholesale">Wholesale / Restaurant Supply</FooterLink>
+            <FooterLink to="/account/transactions">Receipts & History</FooterLink>
+            <FooterLink to="/support/disputes">Support / Disputes</FooterLink>
+            <FooterLink to="/faq/buyers">Buyer FAQ</FooterLink>
+          </FooterAccordion>
+
+          {/* Column E — Rewards & Network */}
+          <FooterAccordion title="Rewards & Network">
+            <FooterLink to="/rewards">Rewards Overview</FooterLink>
             {user && canAccessBusinessCentre ? (
-              <Link to="/business-centre" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Business Centre
-              </Link>
+              <FooterLink to="/business-centre">Referral & Earnings</FooterLink>
             ) : !user ? (
-              <Link to="/business-centre/auth" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Business Centre
-              </Link>
+              <FooterLink to="/business-centre/auth">Referral & Earnings</FooterLink>
             ) : null}
-            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link>
-            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link>
+            <FooterLink to="/rewards/compensation">Compensation Rules</FooterLink>
+            {user && canAccessBusinessCentre ? (
+              <FooterLink to="/business-centre">Back Office</FooterLink>
+            ) : !user ? (
+              <FooterLink to="/business-centre/auth">Back Office (Login)</FooterLink>
+            ) : null}
+          </FooterAccordion>
+
+          {/* Column F — Resources */}
+          <FooterAccordion title="Resources">
+            <FooterLink to="/blog">Blog / Updates</FooterLink>
+            <FooterLink to="/help">Help Center</FooterLink>
+            <FooterLink to="/status">System Status</FooterLink>
+            <FooterLink to="/support">Contact Support</FooterLink>
+          </FooterAccordion>
+        </div>
+      </div>
+
+      {/* ===== 3) CONTACT + SOCIAL BAR ===== */}
+      <div className="border-t border-border">
+        <div className="container py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          {/* Contact info */}
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+            <a href="mailto:support@terrafarming.io" className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors">
+              <Mail className="h-4 w-4" /> support@terrafarming.io
+            </a>
+            <Link to="/contact" className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors">
+              <MapPin className="h-4 w-4" /> Baguio City, Philippines
+            </Link>
+          </div>
+          {/* Social icons */}
+          <nav className="flex items-center gap-2" aria-label="Social media links">
+            {[
+              { icon: Facebook, href: "https://facebook.com/terrafarming", label: "Facebook" },
+              { icon: Instagram, href: "https://instagram.com/terrafarming", label: "Instagram" },
+              { icon: Twitter, href: "https://x.com/terrafarming", label: "X (Twitter)" },
+              { icon: Linkedin, href: "https://linkedin.com/company/terrafarming", label: "LinkedIn" },
+            ].map(({ icon: Icon, href, label }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+              >
+                <Icon className="h-4 w-4" />
+              </a>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      {/* ===== 4) LEGAL + COMPLIANCE BAR ===== */}
+      <div className="border-t border-border">
+        <div className="container py-4">
+          {/* Legal links */}
+          <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-3" aria-label="Legal links">
+            {[
+              { label: "Terms of Service", to: "/legal/terms" },
+              { label: "Privacy Policy", to: "/legal/privacy" },
+              { label: "Cookie Policy", to: "/legal/cookies" },
+              { label: "Refund & Dispute Policy", to: "/legal/refunds" },
+              { label: "Risk Disclosure", to: "/legal/risk-disclosure" },
+              { label: "AML/KYC Policy", to: "/legal/aml-kyc" },
+            ].map(({ label, to }) => (
+              <Link key={to} to={to} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                {label}
+              </Link>
+            ))}
+          </nav>
+          {/* Micro-disclaimers */}
+          <div className="space-y-1 text-[10px] leading-relaxed text-muted-foreground/70">
+            <p>Tokens are utility/reward units for use within the Terra ecosystem and do not represent equity or ownership.</p>
+            <p>Rewards, discounts, and program features may change based on governance, policy, and applicable regulations.</p>
+            <p>Earnings depend on verified activity and plan rules; not all participants earn income.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== 5) BOTTOM BAR ===== */}
+      <div className="border-t border-border">
+        <div className="container py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          {/* Left — Copyright + logo */}
+          <div className="flex items-center gap-2">
+            <img src={terraLogo} alt="Terra Farming" className="h-6 w-6 rounded" />
+            <p className="text-xs text-muted-foreground">© {currentYear} Terra Farming. All rights reserved.</p>
+          </div>
+          {/* Right — Language + app placeholders */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <button className="font-medium text-foreground" disabled>EN</button>
+              <span>/</span>
+              <button className="hover:text-foreground transition-colors" disabled>Filipino</button>
+            </div>
+            <span className="text-xs text-muted-foreground/50 border border-border rounded px-2 py-0.5">App Store</span>
+            <span className="text-xs text-muted-foreground/50 border border-border rounded px-2 py-0.5">Google Play</span>
           </div>
         </div>
       </div>
