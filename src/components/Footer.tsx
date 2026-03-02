@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Facebook, Instagram, Twitter } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import terraLogo from "@/assets/terra-logo.png";
 import {
   Dialog,
@@ -16,7 +17,9 @@ import { Label } from "@/components/ui/label";
 
 const Footer = () => {
   const { user, signIn } = useAuth();
+  const { roles, isAdmin } = useUserRoles();
   const navigate = useNavigate();
+  const canAccessBusinessCentre = isAdmin || roles.includes('member');
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -193,12 +196,14 @@ const Footer = () => {
             © 2025 Terra. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <button
-              onClick={handleBusinessCentreClick}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer bg-transparent border-none p-0"
-            >
-              Business Centre
-            </button>
+            {canAccessBusinessCentre && (
+              <button
+                onClick={handleBusinessCentreClick}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer bg-transparent border-none p-0"
+              >
+                Business Centre
+              </button>
+            )}
             <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Privacy Policy
             </Link>

@@ -71,17 +71,21 @@ const AnimatedRoutes = () => {
         <Route
           path="/business-centre"
           element={
-            <PageTransition>
-              <BusinessCentreLanding />
-            </PageTransition>
+            <RoleProtectedRoute allowedRoles={['member', 'admin']}>
+              <PageTransition>
+                <BusinessCentreLanding />
+              </PageTransition>
+            </RoleProtectedRoute>
           }
         />
         <Route
           path="/business-centre/:tab"
           element={
-            <PageTransition>
-              <BusinessCentre />
-            </PageTransition>
+            <RoleProtectedRoute allowedRoles={['member', 'admin']}>
+              <PageTransition>
+                <BusinessCentre />
+              </PageTransition>
+            </RoleProtectedRoute>
           }
         />
         <Route
