@@ -168,6 +168,9 @@ const Footer = () => {
             © 2025 Terra. All rights reserved.
           </p>
           <div className="flex gap-6">
+            <Link to="/business-centre" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Business Centre
+            </Link>
             <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Privacy Policy
             </Link>

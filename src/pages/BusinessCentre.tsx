@@ -27,12 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 type TabKey = "dashboard" | "network" | "binary" | "commissions" | "referral" | "rank" | "marketing" | "payout" | "support";
 
 const sidebarItems: { key: TabKey; label: string; icon: React.ElementType }[] = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { key: "network", label: "My Network", icon: Users },
   { key: "binary", label: "Binary Tree", icon: GitBranch },
-  { key: "commissions", label: "Commissions", icon: DollarSign },
-  { key: "referral", label: "Referral Program", icon: Share2 },
-  { key: "rank", label: "Rank & Rewards", icon: Award },
   { key: "marketing", label: "Marketing Tools", icon: Megaphone },
   { key: "payout", label: "Payout Settings", icon: CreditCard },
   { key: "support", label: "Support", icon: HelpCircle },
@@ -484,7 +480,7 @@ const PANELS: Record<TabKey, React.FC> = {
 const BusinessCentre = () => {
   const { user, loading } = useAuth();
   const { tab } = useParams<{ tab?: string }>();
-  const [activeTab, setActiveTab] = useState<TabKey>("dashboard");
+  const [activeTab, setActiveTab] = useState<TabKey>("network");
   const isMobile = useIsMobile();
 
   useEffect(() => {
