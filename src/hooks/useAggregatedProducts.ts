@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserLocation, calculateDistance } from "@/hooks/useUserLocation";
+import { getProductImage } from "@/data/productImageMap";
 
 export interface FarmOffer {
   farmProductId: string;
@@ -133,7 +134,7 @@ export function useAggregatedProducts() {
             description: product.description,
             category: product.category,
             unit: product.unit,
-            imageUrl: product.image_url,
+            imageUrl: getProductImage(product.name, product.image_url),
             lowestPrice: offer.price,
             highestPrice: offer.price,
             farmCount: 1,
