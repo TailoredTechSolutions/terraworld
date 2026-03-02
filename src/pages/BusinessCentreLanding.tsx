@@ -149,6 +149,29 @@ const BusinessCentreLanding = () => {
         </div>
       </section>
 
+      {/* Quick Links — moved from footer */}
+      <section className="container pb-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+          {[
+            { label: "Rewards Overview", to: "/rewards", icon: Award, color: "text-amber-600 bg-amber-500/10" },
+            { label: "Referral & Earnings", to: "/business-centre/dashboard", icon: Share2, color: "text-emerald-600 bg-emerald-500/10" },
+            { label: "Compensation Rules", to: "/rewards/compensation", icon: ShieldCheck, color: "text-sky-600 bg-sky-500/10" },
+            { label: "Back Office", to: "/business-centre/dashboard", icon: LayoutDashboard, color: "text-violet-600 bg-violet-500/10" },
+          ].map((item) => (
+            <Link
+              key={item.label}
+              to={item.to}
+              className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4 text-center hover:border-primary/30 hover:shadow-sm transition-all group"
+            >
+              <div className={`p-2.5 rounded-lg ${item.color}`}>
+                <item.icon className="h-5 w-5" />
+              </div>
+              <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{item.label}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* Platform Capabilities Section — relocated from home page */}
       <section className="py-16 bg-background">
         <div className="container">
