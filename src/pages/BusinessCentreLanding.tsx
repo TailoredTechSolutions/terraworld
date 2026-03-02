@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Share2, DollarSign, Award, ArrowRight, TrendingUp, Users, Star } from "lucide-react";
+import { LayoutDashboard, Share2, DollarSign, Award, ArrowRight, TrendingUp, Users, Star, ShieldCheck } from "lucide-react";
 
 const sections = [
   {
@@ -141,6 +141,103 @@ const BusinessCentreLanding = () => {
               </Link>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      {/* Platform Capabilities Section — relocated from home page */}
+      <section className="py-16 bg-background">
+        <div className="container">
+          <div className="text-center mb-12">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-semibold mb-4">
+              Platform Infrastructure
+            </span>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
+              Built for Scale & Security
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+              Complete affiliate and trading infrastructure supporting fiat and crypto operations, designed to scale across regions.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-primary/10">
+                  <DollarSign className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-display font-semibold">Fund Management</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Internal wallets store earnings with available and pending balances, transaction history, and vesting schedules. Secure transfers between members enabled by compliance rules.
+              </p>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  Commission, Main & Vesting Wallets
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  GCash, Maya, Bank Transfers
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  Crypto Payment Support
+                </li>
+              </ul>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-accent/10">
+                  <TrendingUp className="h-6 w-6 text-accent" />
+                </div>
+                <h3 className="text-lg font-display font-semibold">Token & Points</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Points-to-token migration path allows earned rewards to convert into tokens. Token rewards calculated on fixed value logic, recorded separately from cash earnings.
+              </p>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-accent" />
+                  AGRI Token Integration
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-accent" />
+                  Read-Only Blockchain API
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-accent" />
+                  On-Chain Balance Display
+                </li>
+              </ul>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-emerald-500/10">
+                  <Star className="h-6 w-6 text-emerald-500" />
+                </div>
+                <h3 className="text-lg font-display font-semibold">Security & Audit</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                All financial calculations, reward distributions, and ledger entries recorded in an auditable system with predefined caps and fail-safe mechanisms.
+              </p>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  75% Fail-Safe Mechanism
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Transparent Ledger System
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Multi-Language Support
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
