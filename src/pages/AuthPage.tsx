@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Leaf, ArrowLeft, ShoppingBag, Tractor, ChevronDown } from "lucide-react";
+import { Loader2, Leaf, ArrowLeft, ShoppingBag, Tractor, ChevronDown, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import terraLogo from "@/assets/terra-logo-full.png";
 import authFarmBg from "@/assets/auth-farm-bg.jpg";
@@ -35,6 +35,7 @@ const AuthPage = () => {
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const [registrationRole, setRegistrationRole] = useState<RegistrationRole | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   // Form states
   const [email, setEmail] = useState("");
@@ -242,7 +243,12 @@ const AuthPage = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password" className="font-bold">Password</Label>
-                    <Input id="login-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading} className="h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
+                    <div className="relative">
+                      <Input id="login-password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading} className="h-11 md:h-10 pr-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                     {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
                   </div>
                   <Button type="submit" className="w-full h-12 md:h-10 bg-primary hover:bg-primary/90 text-base font-semibold" disabled={isLoading}>
@@ -315,7 +321,12 @@ const AuthPage = () => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-password" className="font-bold">Password</Label>
-                      <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading} className="h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
+                      <div className="relative">
+                        <Input id="signup-password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading} className="h-11 md:h-10 pr-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
                       {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
                     </div>
                     <div className="space-y-2">
