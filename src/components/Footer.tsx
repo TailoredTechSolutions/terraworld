@@ -108,22 +108,17 @@ const Footer = () => {
             </h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  All Products
-                </Link>
-              </li>
-              <li>
-                <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/shop?category=vegetables" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Vegetables
                 </Link>
               </li>
               <li>
-                <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/shop?category=fruits" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Fruits
                 </Link>
               </li>
               <li>
-                <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/shop?category=dairy-eggs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Dairy & Eggs
                 </Link>
               </li>

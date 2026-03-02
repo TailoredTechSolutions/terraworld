@@ -655,7 +655,7 @@ const Index = () => {
             <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto mb-8">
               Whether you're a farmer looking to reach more customers, or a consumer seeking fresh organic produce — Terra Farming has a place for you.
             </p>
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link to="/auth">
                 <Button
                   size="lg"
@@ -669,20 +669,10 @@ const Index = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="h-10 px-8 text-sm font-semibold border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 gap-2"
+                  className="h-12 px-10 text-base font-semibold border-2 border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10 gap-2"
                 >
-                  <LogIn className="h-4 w-4" />
+                  <LogIn className="h-5 w-5" />
                   Sign In
-                </Button>
-              </Link>
-              <p className="text-sm text-primary-foreground/60">Not Yet Registered?</p>
-              <Link to="/auth">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="h-10 px-8 text-sm font-semibold border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 gap-2"
-                >
-                  Create Account
                 </Button>
               </Link>
             </div>
