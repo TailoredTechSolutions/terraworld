@@ -122,6 +122,11 @@ const Footer = () => {
                   Dairy & Eggs
                 </Link>
               </li>
+              <li>
+                <Link to="/shop?category=pantry" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Pantry
+                </Link>
+              </li>
             </ul>
           </div>
 
