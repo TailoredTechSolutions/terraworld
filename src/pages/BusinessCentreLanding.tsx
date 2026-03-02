@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Share2, DollarSign, Award, ArrowRight, TrendingUp, Users, Star, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Share2, DollarSign, Award, ArrowRight, TrendingUp, Users, Star, ShieldCheck, UserPlus, ShoppingCart, GitBranch, Wallet } from "lucide-react";
 
 const sections = [
   {
@@ -246,6 +246,124 @@ const BusinessCentreLanding = () => {
         </div>
       </section>
 
+      {/* How to Earn Section */}
+      <section className="py-16 border-t border-border bg-muted/30">
+        <div className="container">
+          <div className="text-center mb-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
+                Getting Started
+              </span>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
+                How to Earn with Terra Farming
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+                Follow these simple steps to start building your income as a Terra Farming partner.
+              </p>
+            </motion.div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {[
+              {
+                step: "01",
+                icon: UserPlus,
+                title: "Join & Activate",
+                description: "Register your account, complete KYC verification, and choose a membership package to activate your partner status.",
+                color: "text-primary",
+                bg: "bg-primary/10",
+                borderColor: "border-primary/20",
+              },
+              {
+                step: "02",
+                icon: Share2,
+                title: "Refer & Build",
+                description: "Share your unique referral link with friends, family, and your community. Earn direct referral bonuses for every new partner you bring in.",
+                color: "text-accent",
+                bg: "bg-accent/10",
+                borderColor: "border-accent/20",
+              },
+              {
+                step: "03",
+                icon: GitBranch,
+                title: "Grow Binary Volume",
+                description: "As your left and right legs grow, matched binary volume generates weekly binary bonuses. The more balanced your tree, the more you earn.",
+                color: "text-emerald-600",
+                bg: "bg-emerald-500/10",
+                borderColor: "border-emerald-500/20",
+              },
+              {
+                step: "04",
+                icon: Wallet,
+                title: "Earn & Withdraw",
+                description: "Track all your commissions in real-time. Withdraw via GCash, Maya, or bank transfer — payouts processed weekly with full transparency.",
+                color: "text-sky-600",
+                bg: "bg-sky-500/10",
+                borderColor: "border-sky-500/20",
+              },
+            ].map((item, index) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className={`relative rounded-2xl border ${item.borderColor} bg-card p-6 text-center`}
+              >
+                <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full ${item.bg} ${item.color} font-display text-sm font-bold mb-4`}>
+                  {item.step}
+                </div>
+                <div className={`mx-auto mb-4 inline-flex p-3 rounded-xl ${item.bg}`}>
+                  <item.icon className={`h-6 w-6 ${item.color}`} />
+                </div>
+                <h3 className="font-display text-lg font-semibold text-foreground mb-2">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {item.description}
+                </p>
+                {index < 3 && (
+                  <ArrowRight className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/30 z-10" />
+                )}
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-12 max-w-4xl mx-auto"
+          >
+            <div className="rounded-2xl border border-border bg-card p-6 md:p-8">
+              <h3 className="font-display text-lg font-semibold text-foreground mb-6 text-center">
+                4 Ways You Earn
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: "Direct Referral", rate: "10%", description: "Per signup you refer", color: "bg-primary" },
+                  { label: "Binary Bonus", rate: "8%", description: "Matched volume weekly", color: "bg-emerald-500" },
+                  { label: "Leadership Bonus", rate: "5%", description: "From downline leaders", color: "bg-violet-500" },
+                  { label: "Matching Bonus", rate: "3%", description: "From team performance", color: "bg-accent" },
+                ].map((earning) => (
+                  <div key={earning.label} className="text-center p-4 rounded-xl border border-border/50 hover:bg-muted/30 transition-colors">
+                    <div className={`w-3 h-3 rounded-full ${earning.color} mx-auto mb-3`} />
+                    <p className="text-2xl font-bold font-display text-foreground">{earning.rate}</p>
+                    <p className="text-sm font-medium text-foreground mt-1">{earning.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{earning.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       <Footer />
     </div>
