@@ -495,6 +495,63 @@ export type Database = {
         }
         Relationships: []
       }
+      farm_products: {
+        Row: {
+          created_at: string
+          farm_id: string
+          harvest_date: string | null
+          id: string
+          is_available: boolean
+          is_organic: boolean
+          price: number
+          processing_time_minutes: number
+          product_id: string
+          stock_quantity: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          farm_id: string
+          harvest_date?: string | null
+          id?: string
+          is_available?: boolean
+          is_organic?: boolean
+          price: number
+          processing_time_minutes?: number
+          product_id: string
+          stock_quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          farm_id?: string
+          harvest_date?: string | null
+          id?: string
+          is_available?: boolean
+          is_organic?: boolean
+          price?: number
+          processing_time_minutes?: number
+          product_id?: string
+          stock_quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "farm_products_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farmers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "farm_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       farmers: {
         Row: {
           created_at: string
