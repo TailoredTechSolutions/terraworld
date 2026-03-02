@@ -93,7 +93,7 @@ const Footer = () => {
 
       {/* ===== 2) MAIN FOOTER GRID ===== */}
       <div className="container py-12 md:py-12 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-x-6 gap-y-2 md:gap-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-2 md:gap-y-8">
           {/* Column A — Terra */}
           <FooterAccordion title="Terra">
             <FooterLink to="/about">About Terra</FooterLink>
@@ -130,21 +130,6 @@ const Footer = () => {
             <FooterLink to="/faq/buyers">Buyer FAQ</FooterLink>
           </FooterAccordion>
 
-          {/* Column E — Rewards & Network */}
-          <FooterAccordion title="Rewards & Network">
-            <FooterLink to="/rewards">Rewards Overview</FooterLink>
-            {user && canAccessBusinessCentre ? (
-              <FooterLink to="/business-centre">Referral & Earnings</FooterLink>
-            ) : !user ? (
-              <FooterLink to="/business-centre/auth">Referral & Earnings</FooterLink>
-            ) : null}
-            <FooterLink to="/rewards/compensation">Compensation Rules</FooterLink>
-            {user && canAccessBusinessCentre ? (
-              <FooterLink to="/business-centre">Back Office</FooterLink>
-            ) : !user ? (
-              <FooterLink to="/business-centre/auth">Back Office (Login)</FooterLink>
-            ) : null}
-          </FooterAccordion>
 
           {/* Column F — Resources */}
           <FooterAccordion title="Resources">
@@ -226,16 +211,13 @@ const Footer = () => {
             <img src={terraLogo} alt="Terra Farming" className="h-6 w-6 rounded" />
             <p className="text-xs text-muted-foreground">© {currentYear} Terra Farming. All rights reserved.</p>
           </div>
-          {/* Right — Language + app placeholders */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <button className="font-medium text-foreground" disabled>EN</button>
-              <span>/</span>
-              <button className="hover:text-foreground transition-colors" disabled>Filipino</button>
-            </div>
-            <span className="text-xs text-muted-foreground/50 border border-border rounded px-2 py-0.5">App Store</span>
-            <span className="text-xs text-muted-foreground/50 border border-border rounded px-2 py-0.5">Google Play</span>
-          </div>
+          {/* Right — Business Centre link */}
+          <Link
+            to="/business-centre/auth"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-foreground transition-colors"
+          >
+            Business Centre <ArrowRight className="h-3 w-3" />
+          </Link>
         </div>
       </div>
     </footer>
