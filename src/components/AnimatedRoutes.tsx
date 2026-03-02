@@ -6,6 +6,7 @@ import RoleProtectedRoute from "./RoleProtectedRoute";
 import Index from "@/pages/Index";
 import ShopPage from "@/pages/ShopPage";
 import ProductDetail from "@/pages/ProductDetail";
+import ProductOffersPage from "@/pages/ProductOffersPage";
 import MapPage from "@/pages/MapPage";
 import AffiliatePage from "@/pages/AffiliatePage";
 import BusinessCentre from "@/pages/BusinessCentre";
@@ -44,6 +45,7 @@ const AnimatedRoutes = () => {
         <Route path="/" element={<P><Index /></P>} />
         <Route path="/shop" element={<P><ShopPage /></P>} />
         <Route path="/product/:id" element={<P><ProductDetail /></P>} />
+        <Route path="/product/:id/offers" element={<P><ProductOffersPage /></P>} />
         <Route path="/map" element={<P><MapPage /></P>} />
         <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
         <Route path="/business-centre/auth" element={<P><BusinessCentreAuth /></P>} />
