@@ -43,7 +43,10 @@ const Header = () => {
     { path: "/map", label: "Find Farms" },
   ];
 
-  const navLinks: NavLink[] = user
+  // Show Business Centre only to admins and members (not plain buyers/farmers)
+  const canAccessBusinessCentre = isAdmin || roles.includes('member');
+  
+  const navLinks: NavLink[] = user && canAccessBusinessCentre
     ? [...publicNavLinks, { path: "/business-centre", label: "Business Centre" }]
     : publicNavLinks;
 
