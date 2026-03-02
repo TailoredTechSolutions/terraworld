@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,12 +48,15 @@ const BusinessCentreAuth = () => {
     if (tab === "register") setActiveTab("register");
   }, [searchParams]);
 
-  // Redirect if already logged in with affiliate role
+  // Only redirect admins and affiliates — farmers/buyers must use separate credentials
+  const { isAdmin: isAdminUser, isAffiliate: isAffiliateUser, loading: rolesLoading } = useUserRoles();
   useEffect(() => {
-    if (user && !authLoading) {
-      navigate("/business-centre");
+    if (user && !authLoading && !rolesLoading) {
+      if (isAdminUser || isAffiliateUser) {
+        navigate("/business-centre");
+      }
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, rolesLoading, isAdminUser, isAffiliateUser, navigate]);
 
   const validateForm = (isSignup: boolean) => {
     let valid = true;
