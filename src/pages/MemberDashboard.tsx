@@ -71,6 +71,34 @@ interface BinaryStats {
   carryforward_right: number;
 }
 
+interface BinaryLedgerRecord {
+  id: string;
+  payout_period: string;
+  left_bv: number;
+  right_bv: number;
+  left_product_bv: number;
+  right_product_bv: number;
+  left_membership_bv: number;
+  right_membership_bv: number;
+  matched_bv: number;
+  binary_income: number;
+  cap_applied: number;
+  carryforward_left: number;
+  carryforward_right: number;
+  fail_safe_triggered: boolean;
+  adjusted_cycle_value: number | null;
+  created_at: string;
+}
+
+interface TokenLedgerRecord {
+  id: string;
+  tokens_issued: number;
+  php_reward_value: number;
+  token_market_price: number;
+  source_description: string | null;
+  created_at: string;
+}
+
 interface WalletData {
   available_balance: number;
   pending_balance: number;
@@ -118,6 +146,8 @@ const MemberDashboard = () => {
     carryforward_left: 0,
     carryforward_right: 0,
   });
+  const [binaryLedger, setBinaryLedger] = useState<BinaryLedgerRecord[]>([]);
+  const [tokenLedger, setTokenLedger] = useState<TokenLedgerRecord[]>([]);
   const isMobile = useIsMobile();
 
   const handleTabChange = (tab: string) => {
@@ -198,21 +228,23 @@ const MemberDashboard = () => {
         .filter(r => r.leg === "right")
         .reduce((sum, r) => sum + Number(r.bv_amount), 0);
 
-      // Fetch latest binary ledger for carryforward
-      const { data: binaryData } = await supabase
+      // Fetch binary ledger (all records for earnings detail)
+      const { data: binaryLedgerData } = await supabase
         .from("binary_ledger")
         .select("*")
         .eq("user_id", userId)
         .order("payout_period", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .limit(50);
+
+      setBinaryLedger((binaryLedgerData || []) as BinaryLedgerRecord[]);
+      const latestBinary = binaryLedgerData?.[0];
 
       setBinaryStats({
-        left_bv: leftBV + (binaryData?.carryforward_left || 0),
-        right_bv: rightBV + (binaryData?.carryforward_right || 0),
-        matched_bv: binaryData?.matched_bv || 0,
-        carryforward_left: binaryData?.carryforward_left || 0,
-        carryforward_right: binaryData?.carryforward_right || 0,
+        left_bv: leftBV + (latestBinary?.carryforward_left || 0),
+        right_bv: rightBV + (latestBinary?.carryforward_right || 0),
+        matched_bv: latestBinary?.matched_bv || 0,
+        carryforward_left: latestBinary?.carryforward_left || 0,
+        carryforward_right: latestBinary?.carryforward_right || 0,
       });
 
       // Fetch payouts
@@ -225,6 +257,16 @@ const MemberDashboard = () => {
 
       if (payoutError) throw payoutError;
       setPayouts(payoutData || []);
+
+      // Fetch token ledger
+      const { data: tokenData } = await supabase
+        .from("token_ledger")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      setTokenLedger((tokenData || []) as TokenLedgerRecord[]);
 
       // Fetch KYC profile
       const { data: kycData } = await supabase
@@ -397,6 +439,10 @@ const MemberDashboard = () => {
             payouts={payouts}
             totalBV={totalBV}
             binaryStats={binaryStats}
+            binaryLedger={binaryLedger}
+            tokenLedger={tokenLedger}
+            tokenBalance={profileData?.agri_token_balance || 0}
+            profileData={profileData}
           />
         );
       case 'withdraw':
