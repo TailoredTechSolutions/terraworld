@@ -43,10 +43,8 @@ const Header = () => {
     { path: "/map", label: "Find Farms" },
   ];
 
-  // Show Business Centre only to affiliates and admins
-  const canAccessBusinessCentre = isAdmin || isAffiliate;
-  
-  const navLinks: NavLink[] = user && canAccessBusinessCentre
+  // Show Business Centre in header nav only for admins
+  const navLinks: NavLink[] = user && isAdmin
     ? [...publicNavLinks, { path: "/business-centre", label: "Business Centre" }]
     : publicNavLinks;
 
@@ -74,6 +72,7 @@ const Header = () => {
 
     if (isAdmin) {
       links.push({ path: "/admin", label: "Admin Dashboard", icon: Shield });
+      links.push({ path: "/business-centre", label: "Business Centre", icon: Crown });
     }
     // Fallback: if no specific role, show member
     if (links.length === 0 && user) {

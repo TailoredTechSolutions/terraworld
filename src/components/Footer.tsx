@@ -4,8 +4,6 @@ import {
   Shield, Truck, Gift, ArrowRight
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { useUserRoles } from "@/hooks/useUserRoles";
 import terraLogo from "@/assets/terra-logo.png";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -60,9 +58,6 @@ const FooterLink = ({ to, children, external }: { to: string; children: React.Re
 };
 
 const Footer = () => {
-  const { user } = useAuth();
-  const { isAdmin, isAffiliate } = useUserRoles();
-  const canAccessBusinessCentre = isAdmin || isAffiliate;
   const currentYear = new Date().getFullYear();
 
   return (
