@@ -989,7 +989,7 @@ export const farms: Farm[] = [
     longitude: 120.652,
     rating: 4.6,
     reviewCount: 48,
-    image: "https://images.unsplash.com/photo-1501004318855-b174af8a9cef?w=800",
+    image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800",
     description: "PhilGAP-certified mixed farm along the Agno River in Itogon, Benguet. Produces vegetables, free-range eggs, and fresh milk from a small dairy herd. Known for traditional Ibaloi farming methods.",
     products: ["Tomatoes", "Eggplant", "Fresh Eggs", "Carabao Milk", "Herbs", "Broccoli"],
     contact: "0929-881-3345",

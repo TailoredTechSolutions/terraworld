@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
 import CategoryFilter from "@/components/CategoryFilter";
@@ -40,6 +41,7 @@ type SortOption = "name-asc" | "name-desc" | "price-asc" | "price-desc" | "farm"
 type GridSize = "small" | "large";
 
 const ShopPage = () => {
+  const [searchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
@@ -47,6 +49,14 @@ const ShopPage = () => {
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [gridSize, setGridSize] = useState<GridSize>("large");
   const [selectedFarms, setSelectedFarms] = useState<string[]>([]);
+
+  // Read category from URL params
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat) {
+      setSelectedCategory(cat);
+    }
+  }, [searchParams]);
 
   const farms = useMemo(() => {
     const uniqueFarms = [...new Set(products.map(p => p.farmName))];
