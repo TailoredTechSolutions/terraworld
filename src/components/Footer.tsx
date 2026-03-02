@@ -1,9 +1,61 @@
+import { useState } from "react";
 import { Facebook, Instagram, Twitter } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import terraLogo from "@/assets/terra-logo.png";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const Footer = () => {
+  const { user, signIn } = useAuth();
+  const navigate = useNavigate();
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  const handleBusinessCentreClick = (e: React.MouseEvent) => {
+    if (user) {
+      navigate("/business-centre");
+    } else {
+      e.preventDefault();
+      setLoginError("");
+      setLoginOpen(true);
+    }
+  };
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError("");
+    setLoginLoading(true);
+    try {
+      const { error } = await signIn(loginEmail, loginPassword);
+      if (error) {
+        setLoginError(error.message || "Invalid email or password.");
+      } else {
+        setLoginOpen(false);
+        setLoginEmail("");
+        setLoginPassword("");
+        navigate("/business-centre");
+      }
+    } catch {
+      setLoginError("An unexpected error occurred.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
   return (
+    <>
     <footer className="border-t border-border bg-card">
       <div className="container py-12">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
@@ -168,9 +220,12 @@ const Footer = () => {
             © 2025 Terra. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <Link to="/business-centre" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button
+              onClick={handleBusinessCentreClick}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer bg-transparent border-none p-0"
+            >
               Business Centre
-            </Link>
+            </button>
             <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Privacy Policy
             </Link>
@@ -181,6 +236,65 @@ const Footer = () => {
         </div>
       </div>
     </footer>
+
+    {/* Login Modal for Business Centre */}
+    <Dialog open={loginOpen} onOpenChange={setLoginOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Sign In to Continue</DialogTitle>
+          <DialogDescription>
+            Please log in to access the Business Centre.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleLoginSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="bc-email">Email</Label>
+            <Input
+              id="bc-email"
+              type="email"
+              placeholder="you@example.com"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="bc-password">Password</Label>
+            <Input
+              id="bc-password"
+              type="password"
+              placeholder="••••••••"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              required
+            />
+          </div>
+          {loginError && (
+            <p className="text-sm text-destructive">{loginError}</p>
+          )}
+          <Button type="submit" className="w-full" disabled={loginLoading}>
+            {loginLoading ? "Signing in..." : "Login"}
+          </Button>
+          <div className="flex items-center justify-between text-sm">
+            <Link
+              to="/reset-password"
+              className="text-primary hover:underline"
+              onClick={() => setLoginOpen(false)}
+            >
+              Forgot Password?
+            </Link>
+            <Link
+              to="/auth"
+              className="text-primary hover:underline"
+              onClick={() => setLoginOpen(false)}
+            >
+              Don't have an account? Register
+            </Link>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 };
 

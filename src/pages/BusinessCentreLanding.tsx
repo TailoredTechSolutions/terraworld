@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
@@ -53,6 +54,10 @@ const sections = [
 ];
 
 const BusinessCentreLanding = () => {
+  const { user, loading } = useAuth();
+
+  if (!loading && !user) return <Navigate to="/auth" replace />;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -241,24 +246,6 @@ const BusinessCentreLanding = () => {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="border-t border-border bg-muted/30">
-        <div className="container py-16 text-center space-y-4">
-          <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-            Ready to start earning?
-          </h2>
-          <p className="text-muted-foreground max-w-lg mx-auto">
-            Join thousands of partners already growing with Terra Farming. Access your full dashboard to get started.
-          </p>
-          <Link
-            to="/business-centre/dashboard"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors mt-4"
-          >
-            Open Full Dashboard
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
 
       <Footer />
     </div>

@@ -151,8 +151,8 @@ const HeroSection = () => {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="text-base md:text-lg text-primary-foreground/80 mb-8 max-w-lg">
 
-              The Philippines' first farm-to-table marketplace with integrated affiliate rewards. 
-              Shop organic, earn commissions, and support local Benguet farmers directly.
+              The Philippines' first farm-to-table marketplace connecting you directly with highland farmers. 
+              Shop organic, support local Benguet farmers, and enjoy fresh produce delivered to your door.
             </motion.p>
 
             {/* CTA Buttons */}
@@ -241,19 +241,19 @@ const HeroSection = () => {
 
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/30 border border-accent/40 backdrop-blur-sm shadow-glow-gold">
-                  <Wallet className="h-5 w-5 text-accent" />
+                  <Leaf className="h-5 w-5 text-accent" />
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold text-sm text-primary-foreground mb-0.5">
-                    Earn While You Shop
+                    Freshness Guaranteed
                   </p>
                   <p className="text-xs text-primary-foreground/70">
-                    Join our affiliate program and earn commissions on every referral.
+                    Harvested today, delivered to your door. 100% satisfaction or your money back.
                   </p>
                 </div>
-                <Link to="/affiliate">
+                <Link to="/shop">
                   <Button size="sm" className="btn-liquid text-xs py-1.5 px-3 h-auto rounded-lg gap-1">
-                    Learn More
+                    Shop Now
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Button>
                 </Link>
