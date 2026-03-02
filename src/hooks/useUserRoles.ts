@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
-type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer';
+type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer' | 'affiliate';
 
 interface UseUserRolesReturn {
   roles: AppRole[];
@@ -13,6 +13,7 @@ interface UseUserRolesReturn {
   isFarmer: boolean;
   isMember: boolean;
   isBuyer: boolean;
+  isAffiliate: boolean;
   refetch: () => Promise<void>;
 }
 
@@ -63,6 +64,7 @@ export const useUserRoles = (): UseUserRolesReturn => {
     isFarmer: roles.includes('farmer'),
     isMember: roles.includes('member'),
     isBuyer: roles.includes('buyer'),
+    isAffiliate: roles.includes('affiliate'),
     refetch: fetchRoles,
   };
 };

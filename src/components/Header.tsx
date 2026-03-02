@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer';
+type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer' | 'affiliate';
 
 interface NavLink {
   path: string;
@@ -32,7 +32,7 @@ const Header = () => {
   const location = useLocation();
   const { toggleCart, getTotalItems } = useCartStore();
   const { user, profile, signOut, loading } = useAuth();
-  const { roles, isAdmin, isDriver, isFarmer, isBuyer } = useUserRoles();
+  const { roles, isAdmin, isDriver, isFarmer, isBuyer, isAffiliate } = useUserRoles();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const totalItems = getTotalItems();
 
@@ -43,8 +43,8 @@ const Header = () => {
     { path: "/map", label: "Find Farms" },
   ];
 
-  // Show Business Centre only to admins and members (not plain buyers/farmers)
-  const canAccessBusinessCentre = isAdmin || roles.includes('member');
+  // Show Business Centre only to affiliates and admins
+  const canAccessBusinessCentre = isAdmin || isAffiliate;
   
   const navLinks: NavLink[] = user && canAccessBusinessCentre
     ? [...publicNavLinks, { path: "/business-centre", label: "Business Centre" }]

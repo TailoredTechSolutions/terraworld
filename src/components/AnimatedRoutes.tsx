@@ -10,6 +10,7 @@ import MapPage from "@/pages/MapPage";
 import AffiliatePage from "@/pages/AffiliatePage";
 import BusinessCentre from "@/pages/BusinessCentre";
 import BusinessCentreLanding from "@/pages/BusinessCentreLanding";
+import BusinessCentreAuth from "@/pages/BusinessCentreAuth";
 import CheckoutPage from "@/pages/CheckoutPage";
 import OrderConfirmation from "@/pages/OrderConfirmation";
 import DriverDashboard from "@/pages/DriverDashboard";
@@ -69,9 +70,17 @@ const AnimatedRoutes = () => {
           }
         />
         <Route
+          path="/business-centre/auth"
+          element={
+            <PageTransition>
+              <BusinessCentreAuth />
+            </PageTransition>
+          }
+        />
+        <Route
           path="/business-centre"
           element={
-            <RoleProtectedRoute allowedRoles={['member', 'admin']}>
+            <RoleProtectedRoute allowedRoles={['affiliate', 'admin']}>
               <PageTransition>
                 <BusinessCentreLanding />
               </PageTransition>
@@ -81,7 +90,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/business-centre/:tab"
           element={
-            <RoleProtectedRoute allowedRoles={['member', 'admin']}>
+            <RoleProtectedRoute allowedRoles={['affiliate', 'admin']}>
               <PageTransition>
                 <BusinessCentre />
               </PageTransition>
