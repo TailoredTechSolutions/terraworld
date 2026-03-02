@@ -58,7 +58,7 @@ const Footer = () => {
     <>
     <footer className="border-t border-border bg-card">
       <div className="container py-12">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
@@ -158,33 +158,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div>
-            <Link to="/business-centre" className="font-display font-semibold text-foreground mb-4 block hover:text-primary transition-colors">
-              Business Centre
-            </Link>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/business-centre/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Partner Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link to="/business-centre/referral" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Referral Program
-                </Link>
-              </li>
-              <li>
-                <Link to="/business-centre/commissions" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Commissions
-                </Link>
-              </li>
-              <li>
-                <Link to="/business-centre/rank" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Rank & Rewards
-                </Link>
-              </li>
-            </ul>
-          </div>
 
           <div>
             <h4 className="font-display font-semibold text-foreground mb-4">
