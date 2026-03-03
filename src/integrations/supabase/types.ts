@@ -544,6 +544,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "farm_products_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farmers_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "farm_products_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
@@ -1053,6 +1060,13 @@ export type Database = {
             referencedRelation: "farmers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "orders_farmer_id_fkey"
+            columns: ["farmer_id"]
+            isOneToOne: false
+            referencedRelation: "farmers_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       payout_ledger: {
@@ -1231,6 +1245,13 @@ export type Database = {
             columns: ["farmer_id"]
             isOneToOne: false
             referencedRelation: "farmers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_farmer_id_fkey"
+            columns: ["farmer_id"]
+            isOneToOne: false
+            referencedRelation: "farmers_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1682,7 +1703,54 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      farmers_public: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string | null
+          image_url: string | null
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          name: string | null
+          products_count: number | null
+          rating: number | null
+          status: Database["public"]["Enums"]["farmer_status"] | null
+          total_sales: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          image_url?: string | null
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          name?: string | null
+          products_count?: number | null
+          rating?: number | null
+          status?: Database["public"]["Enums"]["farmer_status"] | null
+          total_sales?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          image_url?: string | null
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          name?: string | null
+          products_count?: number | null
+          rating?: number | null
+          status?: Database["public"]["Enums"]["farmer_status"] | null
+          total_sales?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       generate_asset_code: { Args: { prefix?: string }; Returns: string }
