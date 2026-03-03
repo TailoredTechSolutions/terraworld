@@ -9,7 +9,6 @@ import ProductDetail from "@/pages/ProductDetail";
 import ProductOffersPage from "@/pages/ProductOffersPage";
 import MapPage from "@/pages/MapPage";
 import AffiliatePage from "@/pages/AffiliatePage";
-import BusinessCentre from "@/pages/BusinessCentre";
 import BusinessCentreLanding from "@/pages/BusinessCentreLanding";
 import BusinessCentreAuth from "@/pages/BusinessCentreAuth";
 import CheckoutPage from "@/pages/CheckoutPage";
@@ -50,7 +49,7 @@ const AnimatedRoutes = () => {
         <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
         <Route path="/business-centre/auth" element={<P><BusinessCentreAuth /></P>} />
         <Route path="/business-centre" element={<RoleProtectedRoute allowedRoles={['affiliate', 'admin']}><P><BusinessCentreLanding /></P></RoleProtectedRoute>} />
-        <Route path="/business-centre/dashboard" element={<RoleProtectedRoute allowedRoles={['affiliate', 'admin']}><P><BusinessCentre /></P></RoleProtectedRoute>} />
+        <Route path="/business-centre/dashboard" element={<RoleProtectedRoute allowedRoles={['affiliate', 'admin']}><P><BusinessCentreLanding /></P></RoleProtectedRoute>} />
         <Route path="/checkout" element={<P><CheckoutPage /></P>} />
         <Route path="/order-confirmation" element={<P><OrderConfirmation /></P>} />
         <Route path="/auth" element={<P><AuthPage /></P>} />
