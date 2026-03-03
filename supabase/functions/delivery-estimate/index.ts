@@ -1,8 +1,7 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 // Mock delivery estimates for Lalamove and Grab
@@ -21,7 +20,6 @@ function getMockEstimate(provider: string, distanceKm: number) {
       status: "available",
     };
   } else {
-    // Grab
     const baseFee = 55;
     const perKm = 10;
     const fee = baseFee + distanceKm * perKm;
@@ -47,29 +45,79 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+function isValidLat(v: unknown): v is number {
+  return typeof v === "number" && isFinite(v) && v >= -90 && v <= 90;
+}
+
+function isValidLng(v: unknown): v is number {
+  return typeof v === "number" && isFinite(v) && v >= -180 && v <= 180;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { provider, pickup_lat, pickup_lng, delivery_lat, delivery_lng } = await req.json();
-
-    if (!provider || !["lalamove", "grab"].includes(provider)) {
-      return new Response(JSON.stringify({ error: "Invalid provider. Use 'lalamove' or 'grab'." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // Require authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    if (!pickup_lat || !pickup_lng || !delivery_lat || !delivery_lng) {
-      return new Response(JSON.stringify({ error: "Missing coordinates." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    let body: Record<string, unknown>;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON body" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { provider, pickup_lat, pickup_lng, delivery_lat, delivery_lng } = body;
+
+    // Validate provider
+    if (typeof provider !== "string" || !["lalamove", "grab"].includes(provider)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid provider. Use 'lalamove' or 'grab'." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate coordinates with bounds checking
+    if (!isValidLat(pickup_lat) || !isValidLng(pickup_lng) ||
+        !isValidLat(delivery_lat) || !isValidLng(delivery_lng)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid coordinates. Latitude must be -90 to 90, longitude -180 to 180." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Philippines bounding box check (rough: 4-22°N, 116-127°E)
+    const inPhilippines = (lat: number, lng: number) =>
+      lat >= 4 && lat <= 22 && lng >= 116 && lng <= 127;
+
+    if (!inPhilippines(pickup_lat, pickup_lng) || !inPhilippines(delivery_lat, delivery_lng)) {
+      return new Response(
+        JSON.stringify({ error: "Coordinates must be within the Philippines service area." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const distanceKm = haversineDistance(pickup_lat, pickup_lng, delivery_lat, delivery_lng);
+
+    // Reject unreasonable distances (>500km)
+    if (distanceKm > 500) {
+      return new Response(
+        JSON.stringify({ error: "Distance exceeds maximum delivery range." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const estimate = getMockEstimate(provider, distanceKm);
 
     return new Response(
@@ -85,9 +133,9 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: "Internal server error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 });
