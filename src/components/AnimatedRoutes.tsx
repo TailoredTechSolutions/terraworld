@@ -15,6 +15,7 @@ import CheckoutPage from "@/pages/CheckoutPage";
 import OrderConfirmation from "@/pages/OrderConfirmation";
 import DriverDashboard from "@/pages/DriverDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AdminBackOffice from "@/pages/AdminBackOffice";
 import MemberDashboard from "@/pages/MemberDashboard";
 import FarmerDashboard from "@/pages/FarmerDashboard";
 import BuyerDashboard from "@/pages/BuyerDashboard";
@@ -59,7 +60,8 @@ const AnimatedRoutes = () => {
         {/* Role-protected dashboards */}
         <Route path="/buyer" element={<RoleProtectedRoute allowedRoles={['buyer']}><P><BuyerDashboard /></P></RoleProtectedRoute>} />
         <Route path="/driver" element={<RoleProtectedRoute allowedRoles={['driver']}><P><DriverDashboard /></P></RoleProtectedRoute>} />
-        <Route path="/admin" element={<RoleProtectedRoute allowedRoles={['admin']}><P><AdminDashboard /></P></RoleProtectedRoute>} />
+        <Route path="/admin" element={<RoleProtectedRoute allowedRoles={['admin']}><P><AdminBackOffice /></P></RoleProtectedRoute>} />
+        <Route path="/admin/legacy" element={<RoleProtectedRoute allowedRoles={['admin']}><P><AdminDashboard /></P></RoleProtectedRoute>} />
         <Route path="/member" element={<RoleProtectedRoute allowedRoles={['member']}><P><MemberDashboard /></P></RoleProtectedRoute>} />
         <Route path="/farmer" element={<RoleProtectedRoute allowedRoles={['farmer']}><P><FarmerDashboard /></P></RoleProtectedRoute>} />
 
