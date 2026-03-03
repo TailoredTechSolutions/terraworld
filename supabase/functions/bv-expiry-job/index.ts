@@ -12,11 +12,52 @@ Deno.serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Get BV expiry days from settings
-    const { data: setting } = await supabase
+    // --- Authentication: require valid JWT ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const anonClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Invalid token" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userId = claimsData.claims.sub;
+
+    // --- Authorization: require admin role ---
+    const serviceClient = createClient(supabaseUrl, serviceKey);
+
+    const { data: adminCheck } = await serviceClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (!adminCheck) {
+      return new Response(JSON.stringify({ error: "Admin access required" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // --- Business logic (uses service client) ---
+    const { data: setting } = await serviceClient
       .from("platform_settings")
       .select("setting_value")
       .eq("setting_key", "bv_expiry_days")
@@ -27,9 +68,7 @@ Deno.serve(async (req) => {
     cutoffDate.setDate(cutoffDate.getDate() - expiryDays);
     const cutoffStr = cutoffDate.toISOString().split("T")[0];
 
-    // Find unmatched BV entries older than expiry period
-    // We look at binary_ledger entries where carry-forward BV exists
-    const { data: expiredEntries, error: fetchErr } = await supabase
+    const { data: expiredEntries, error: fetchErr } = await serviceClient
       .from("binary_ledger")
       .select("id, user_id, carryforward_left, carryforward_right, payout_period")
       .lt("payout_period", cutoffStr)
@@ -45,9 +84,8 @@ Deno.serve(async (req) => {
       const rightCarry = Number(entry.carryforward_right);
 
       if (leftCarry > 0 || rightCarry > 0) {
-        // Record BV expiry in bv_ledger as reversal
         if (leftCarry > 0) {
-          await supabase.from("bv_ledger").insert({
+          await serviceClient.from("bv_ledger").insert({
             user_id: entry.user_id,
             bv_amount: -leftCarry,
             bv_type: "expiry",
@@ -58,7 +96,7 @@ Deno.serve(async (req) => {
         }
 
         if (rightCarry > 0) {
-          await supabase.from("bv_ledger").insert({
+          await serviceClient.from("bv_ledger").insert({
             user_id: entry.user_id,
             bv_amount: -rightCarry,
             bv_type: "expiry",
@@ -68,8 +106,7 @@ Deno.serve(async (req) => {
           totalExpiredBV += rightCarry;
         }
 
-        // Zero out the carry-forward
-        await supabase
+        await serviceClient
           .from("binary_ledger")
           .update({ carryforward_left: 0, carryforward_right: 0 })
           .eq("id", entry.id);
@@ -78,10 +115,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Log audit
-    await supabase.from("audit_log").insert({
+    await serviceClient.from("audit_log").insert({
       action: "bv_expiry_job",
       entity_type: "binary_ledger",
+      actor_id: userId,
       details: {
         expiry_days: expiryDays,
         cutoff_date: cutoffStr,
@@ -103,7 +140,7 @@ Deno.serve(async (req) => {
     );
   } catch (err) {
     console.error("BV expiry error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
