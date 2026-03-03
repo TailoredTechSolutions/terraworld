@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Settings, Save, Loader2, MapPin, Plus, Trash2, Key, Copy, Eye, EyeOff } from "lucide-react";
+import { Settings, Save, Loader2, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -46,8 +46,6 @@ const PlatformSettingsPanel = () => {
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [apiKeys, setApiKeys] = useState<PlatformSetting[]>([]);
-  const [showApiKey, setShowApiKey] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetchData();
@@ -55,14 +53,12 @@ const PlatformSettingsPanel = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const [settingsRes, zonesRes, apiKeysRes] = await Promise.all([
+    const [settingsRes, zonesRes] = await Promise.all([
       supabase.from("platform_settings").select("*").order("setting_key"),
       supabase.from("delivery_zones").select("*").order("min_distance_km"),
-      supabase.from("platform_settings").select("*").in("setting_key", ["google_maps_api_key"]),
     ]);
     setSettings(settingsRes.data || []);
     setZones((zonesRes.data || []) as DeliveryZone[]);
-    setApiKeys(apiKeysRes.data || []);
     setLoading(false);
   };
 
@@ -177,65 +173,6 @@ const PlatformSettingsPanel = () => {
         </CardContent>
       </Card>
 
-      {/* API Keys Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Key className="h-5 w-5 text-primary" />
-            API Keys
-          </CardTitle>
-          <CardDescription>View and reference configured API keys for external services</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Google Maps */}
-            {apiKeys.filter(k => k.setting_key === "google_maps_api_key").map(apiKey => {
-              const value = typeof apiKey.setting_value === "string" ? apiKey.setting_value : JSON.stringify(apiKey.setting_value).replace(/"/g, "");
-              const isVisible = showApiKey[apiKey.setting_key] || false;
-              return (
-                <div key={apiKey.id} className="p-4 rounded-lg border space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-primary" />
-                      Google Maps API Key
-                    </Label>
-                    <Badge variant="default" className="gap-1">Active</Badge>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      readOnly
-                      value={isVisible ? value : "••••••••••••••••••••••••••••••••"}
-                      className="flex-1 font-mono text-sm"
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setShowApiKey(prev => ({ ...prev, [apiKey.setting_key]: !isVisible }))}
-                    >
-                      {isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => {
-                        navigator.clipboard.writeText(value);
-                        toast({ title: "Copied", description: "API key copied to clipboard." });
-                      }}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{apiKey.description}</p>
-                </div>
-              );
-            })}
-
-            {apiKeys.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">No API keys configured yet.</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
