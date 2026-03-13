@@ -90,20 +90,36 @@ const DriverSidebar = ({ activeTab, onTabChange }: DriverSidebarProps) => {
 
   if (isMobile) {
     return (
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="fixed bottom-4 left-4 z-50 shadow-lg bg-background border">
-            <Menu className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-64 p-0">
-          <div className="flex items-center gap-2 p-4 border-b">
-            <Truck className="h-5 w-5 text-primary" />
-            <span className="font-semibold">Driver Portal</span>
-          </div>
-          <SidebarContent inSheet />
-        </SheetContent>
-      </Sheet>
+      <aside className="flex flex-col h-full w-14 shrink-0 border-r border-border bg-background">
+        <div className="flex items-center justify-center py-3">
+          <Truck className="h-5 w-5 text-primary" />
+        </div>
+        <div className="flex-1 overflow-y-auto py-1">
+          <nav className="flex flex-col items-center gap-1 px-1">
+            {navGroups.map((group) => (
+              <div key={group.label} className="w-full">
+                <div className="h-px bg-border mx-2 my-1" />
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.tab;
+                  return (
+                    <Button
+                      key={item.tab}
+                      variant={isActive ? "secondary" : "ghost"}
+                      size="icon"
+                      title={item.title}
+                      className={`w-full h-10 ${isActive ? "font-semibold" : "text-muted-foreground"}`}
+                      onClick={() => onTabChange(item.tab)}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </Button>
+                  );
+                })}
+              </div>
+            ))}
+          </nav>
+        </div>
+      </aside>
     );
   }
 
