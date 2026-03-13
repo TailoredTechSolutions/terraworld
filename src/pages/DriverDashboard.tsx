@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import DriverSidebar from "@/components/driver/DriverSidebar";
+import BuyerSupportPanel from "@/components/buyer/BuyerSupportPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,10 +16,11 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
   Package, Truck, CheckCircle, Clock, DollarSign, Star,
-  Navigation, MapPin, Phone, ArrowRight, Loader2, User,
-  AlertCircle, Bell, LifeBuoy, ShieldCheck
+  MapPin, Phone, Loader2, User,
+  Bell, LifeBuoy, ShieldCheck, AlertCircle, Play, Navigation,
 } from "lucide-react";
 import { format } from "date-fns";
+import type { Tables } from "@/integrations/supabase/types";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
@@ -32,36 +35,53 @@ const statusColors: Record<string, string> = {
 
 const DriverDashboard = () => {
   const { user, profile, loading: authLoading } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("home");
   const [isAvailable, setIsAvailable] = useState(true);
 
-  // Fetch orders assigned to driver (via driver_id matching any driver record linked by admin email)
-  const { data: assignedOrders, isLoading: ordersLoading } = useQuery({
-    queryKey: ["driver-orders", user?.id],
+  // Fetch this driver's record by email
+  const { data: driverRecord } = useQuery({
+    queryKey: ["driver-record", user?.id],
     queryFn: async () => {
-      // Get all orders that have a driver assigned
+      const { data } = await supabase
+        .from("drivers")
+        .select("*")
+        .eq("email", profile?.email || "")
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!profile?.email,
+  });
+
+  // Fetch orders assigned to THIS driver (RLS-scoped)
+  const { data: assignedOrders, isLoading: ordersLoading } = useQuery({
+    queryKey: ["driver-orders", driverRecord?.id],
+    queryFn: async () => {
       const { data } = await supabase
         .from("orders")
         .select("*")
-        .not("driver_id", "is", null)
+        .eq("driver_id", driverRecord!.id)
         .order("created_at", { ascending: false })
         .limit(50);
       return data || [];
     },
-    enabled: !!user?.id,
+    enabled: !!driverRecord?.id,
   });
 
   const { data: deliveryBookings } = useQuery({
-    queryKey: ["driver-bookings"],
+    queryKey: ["driver-bookings", driverRecord?.id],
     queryFn: async () => {
+      if (!assignedOrders?.length) return [];
+      const orderIds = assignedOrders.map((o) => o.id);
       const { data } = await supabase
         .from("delivery_bookings")
         .select("*")
-        .order("created_at", { ascending: false })
-        .limit(50);
+        .in("order_id", orderIds)
+        .order("created_at", { ascending: false });
       return data || [];
     },
-    enabled: !!user?.id,
+    enabled: !!assignedOrders?.length,
   });
 
   const { data: notifications } = useQuery({
@@ -105,6 +125,54 @@ const DriverDashboard = () => {
     enabled: !!user?.id,
   });
 
+  const { data: kycProfile } = useQuery({
+    queryKey: ["driver-kyc", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("kyc_profiles")
+        .select("status, submitted_at, reviewed_at, rejection_reason")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Mutation: update order status
+  const updateOrderStatus = useMutation({
+    mutationFn: async ({ orderId, status }: { orderId: string; status: string }) => {
+      const { error } = await supabase
+        .from("orders")
+        .update({ status: status as any })
+        .eq("id", orderId);
+      if (error) throw error;
+    },
+    onSuccess: (_, { status }) => {
+      queryClient.invalidateQueries({ queryKey: ["driver-orders"] });
+      toast({ title: "Status Updated", description: `Order marked as ${status.replace("_", " ")}.` });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  // Mutation: toggle driver availability
+  const toggleAvailability = useMutation({
+    mutationFn: async (available: boolean) => {
+      if (!driverRecord?.id) return;
+      const { error } = await supabase
+        .from("drivers")
+        .update({ status: available ? "online" : "offline" })
+        .eq("id", driverRecord.id);
+      if (error) throw error;
+    },
+    onSuccess: (_, available) => {
+      setIsAvailable(available);
+      queryClient.invalidateQueries({ queryKey: ["driver-record"] });
+      toast({ title: available ? "You're Online" : "You're Offline" });
+    },
+  });
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
@@ -140,6 +208,7 @@ const DriverDashboard = () => {
 
   const activeDeliveries = assignedOrders?.filter(o => o.status !== "delivered" && o.status !== "cancelled") || [];
   const completedDeliveries = assignedOrders?.filter(o => o.status === "delivered") || [];
+  const driverOnline = driverRecord?.status === "online";
 
   const getPageTitle = () => {
     const titles: Record<string, string> = {
@@ -152,15 +221,53 @@ const DriverDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "home": return <DriverHome activeCount={activeDeliveries.length} completedCount={completedDeliveries.length} wallet={wallet} onNavigate={setActiveTab} />;
-      case "assigned": return <DriverAssigned orders={activeDeliveries} bookings={deliveryBookings || []} />;
-      case "history": return <DriverHistory orders={completedDeliveries} />;
-      case "availability": return <DriverAvailability isAvailable={isAvailable} setIsAvailable={setIsAvailable} />;
-      case "earnings": return <DriverEarnings wallet={wallet} transactions={walletTxns || []} />;
-      case "notifications": return <DriverNotifications notifications={notifications || []} />;
-      case "support": return <DriverSupport />;
-      case "profile": return <DriverProfile profile={profile} />;
-      default: return <DriverHome activeCount={activeDeliveries.length} completedCount={completedDeliveries.length} wallet={wallet} onNavigate={setActiveTab} />;
+      case "home":
+        return (
+          <DriverHome
+            activeCount={activeDeliveries.length}
+            completedCount={completedDeliveries.length}
+            wallet={wallet}
+            rating={driverRecord?.rating}
+            onNavigate={setActiveTab}
+          />
+        );
+      case "assigned":
+        return (
+          <DriverAssigned
+            orders={activeDeliveries}
+            bookings={deliveryBookings || []}
+            onUpdateStatus={(orderId, status) => updateOrderStatus.mutate({ orderId, status })}
+            isUpdating={updateOrderStatus.isPending}
+          />
+        );
+      case "history":
+        return <DriverHistory orders={completedDeliveries} />;
+      case "availability":
+        return (
+          <DriverAvailability
+            isAvailable={driverOnline}
+            onToggle={(v) => toggleAvailability.mutate(v)}
+            driverRecord={driverRecord}
+          />
+        );
+      case "earnings":
+        return <DriverEarnings wallet={wallet} transactions={walletTxns || []} />;
+      case "notifications":
+        return <DriverNotifications notifications={notifications || []} />;
+      case "support":
+        return <BuyerSupportPanel />;
+      case "profile":
+        return <DriverProfile profile={profile} driverRecord={driverRecord} kycStatus={kycProfile?.status} />;
+      default:
+        return (
+          <DriverHome
+            activeCount={activeDeliveries.length}
+            completedCount={completedDeliveries.length}
+            wallet={wallet}
+            rating={driverRecord?.rating}
+            onNavigate={setActiveTab}
+          />
+        );
     }
   };
 
@@ -180,8 +287,8 @@ const DriverDashboard = () => {
                   <h1 className="text-xl font-bold">{profile?.full_name || user.email?.split("@")[0]}</h1>
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">Driver</Badge>
-                    <Badge variant="outline" className={isAvailable ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" : "bg-muted text-muted-foreground"}>
-                      {isAvailable ? "Online" : "Offline"}
+                    <Badge variant="outline" className={driverOnline ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" : "bg-muted text-muted-foreground"}>
+                      {driverOnline ? "Online" : "Offline"}
                     </Badge>
                   </div>
                 </div>
@@ -198,13 +305,13 @@ const DriverDashboard = () => {
 };
 
 // ─── HOME ────────────────────────────────────────────────────────────────
-const DriverHome = ({ activeCount, completedCount, wallet, onNavigate }: any) => (
+const DriverHome = ({ activeCount, completedCount, wallet, rating, onNavigate }: any) => (
   <div className="space-y-6">
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {[
         { label: "Active Deliveries", value: activeCount, icon: Package, color: "text-blue-600" },
-        { label: "Completed Today", value: completedCount, icon: CheckCircle, color: "text-green-600" },
-        { label: "Rating", value: "4.8 ★", icon: Star, color: "text-yellow-600" },
+        { label: "Completed", value: completedCount, icon: CheckCircle, color: "text-green-600" },
+        { label: "Rating", value: `${Number(rating || 5).toFixed(1)} ★`, icon: Star, color: "text-yellow-600" },
         { label: "Available Balance", value: `₱${Number(wallet?.available_balance || 0).toLocaleString()}`, icon: DollarSign, color: "text-primary" },
       ].map((m) => (
         <Card key={m.label}>
@@ -245,7 +352,14 @@ const DriverHome = ({ activeCount, completedCount, wallet, onNavigate }: any) =>
 );
 
 // ─── ASSIGNED ────────────────────────────────────────────────────────────
-const DriverAssigned = ({ orders, bookings }: { orders: any[]; bookings: any[] }) => {
+interface DriverAssignedProps {
+  orders: any[];
+  bookings: any[];
+  onUpdateStatus: (orderId: string, status: string) => void;
+  isUpdating: boolean;
+}
+
+const DriverAssigned = ({ orders, bookings, onUpdateStatus, isUpdating }: DriverAssignedProps) => {
   if (!orders.length) {
     return (
       <Card><CardContent className="pt-6 text-center space-y-3">
@@ -254,6 +368,15 @@ const DriverAssigned = ({ orders, bookings }: { orders: any[]; bookings: any[] }
       </CardContent></Card>
     );
   }
+
+  const getNextAction = (status: string | null) => {
+    switch (status) {
+      case "pending": return { label: "Start Preparing", next: "preparing", icon: Play };
+      case "preparing": return { label: "Mark In Transit", next: "in_transit", icon: Navigation };
+      case "in_transit": return { label: "Mark Delivered", next: "delivered", icon: CheckCircle };
+      default: return null;
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -269,23 +392,52 @@ const DriverAssigned = ({ orders, bookings }: { orders: any[]; bookings: any[] }
                   <TableHead>Status</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Date</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-mono text-xs">{order.order_number}</TableCell>
-                    <TableCell className="text-sm">{order.customer_name}</TableCell>
-                    <TableCell className="text-sm max-w-[200px] truncate">{order.delivery_address}</TableCell>
-                    <TableCell>
-                      <Badge className={statusColors[order.status || "pending"]}>{order.status}</Badge>
-                    </TableCell>
-                    <TableCell className="font-semibold">₱{Number(order.total).toLocaleString()}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {format(new Date(order.created_at), "MMM d, yyyy")}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {orders.map((order) => {
+                  const action = getNextAction(order.status);
+                  return (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-mono text-xs">{order.order_number}</TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="text-sm font-medium">{order.customer_name}</p>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Phone className="h-3 w-3" />{order.customer_phone}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm max-w-[200px]">
+                        <p className="truncate flex items-center gap-1">
+                          <MapPin className="h-3 w-3 shrink-0" />{order.delivery_address}
+                        </p>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={statusColors[order.status || "pending"]}>{(order.status || "pending").replace("_", " ")}</Badge>
+                      </TableCell>
+                      <TableCell className="font-semibold">₱{Number(order.total).toLocaleString()}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {format(new Date(order.created_at), "MMM d, yyyy")}
+                      </TableCell>
+                      <TableCell>
+                        {action && (
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="text-xs gap-1"
+                            disabled={isUpdating}
+                            onClick={() => onUpdateStatus(order.id, action.next)}
+                          >
+                            <action.icon className="h-3 w-3" />
+                            {action.label}
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
@@ -339,7 +491,7 @@ const DriverHistory = ({ orders }: { orders: any[] }) => {
 };
 
 // ─── AVAILABILITY ────────────────────────────────────────────────────────
-const DriverAvailability = ({ isAvailable, setIsAvailable }: { isAvailable: boolean; setIsAvailable: (v: boolean) => void }) => (
+const DriverAvailability = ({ isAvailable, onToggle, driverRecord }: { isAvailable: boolean; onToggle: (v: boolean) => void; driverRecord: any }) => (
   <div className="space-y-6">
     <Card>
       <CardHeader><CardTitle className="text-base">Status</CardTitle></CardHeader>
@@ -349,12 +501,13 @@ const DriverAvailability = ({ isAvailable, setIsAvailable }: { isAvailable: bool
             <Label className="text-base font-semibold">Available for Deliveries</Label>
             <p className="text-sm text-muted-foreground mt-1">Toggle to receive new delivery assignments</p>
           </div>
-          <Switch checked={isAvailable} onCheckedChange={setIsAvailable} />
+          <Switch checked={isAvailable} onCheckedChange={onToggle} />
         </div>
         <div className="p-4 rounded-lg bg-muted/50 space-y-2 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">Current Status</span><Badge variant={isAvailable ? "default" : "secondary"}>{isAvailable ? "Online" : "Offline"}</Badge></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">Vehicle</span><span>Motorcycle</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">Service Zone</span><span>Metro Manila & Benguet</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Vehicle</span><span className="capitalize">{driverRecord?.vehicle || "—"}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">License Plate</span><span>{driverRecord?.license_plate || "—"}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Deliveries</span><span>{driverRecord?.deliveries_count || 0}</span></div>
         </div>
       </CardContent>
     </Card>
@@ -422,64 +575,70 @@ const DriverNotifications = ({ notifications }: { notifications: any[] }) => (
   </div>
 );
 
-// ─── SUPPORT ─────────────────────────────────────────────────────────────
-const DriverSupport = () => (
-  <Card>
-    <CardHeader><CardTitle className="text-base flex items-center gap-2"><LifeBuoy className="h-5 w-5 text-primary" />Driver Support</CardTitle></CardHeader>
-    <CardContent className="space-y-4">
-      <p className="text-sm text-muted-foreground">Need help? Contact the Terra support team for delivery issues, payout questions, or account assistance.</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="p-4 rounded-lg border space-y-1">
-          <p className="text-sm font-medium">Emergency Hotline</p>
-          <p className="text-sm text-muted-foreground">+63 917 TERRA (83772)</p>
-        </div>
-        <div className="p-4 rounded-lg border space-y-1">
-          <p className="text-sm font-medium">Email Support</p>
-          <p className="text-sm text-muted-foreground">drivers@terrafarming.ph</p>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-);
-
 // ─── PROFILE ─────────────────────────────────────────────────────────────
-const DriverProfile = ({ profile }: { profile: any }) => (
-  <div className="space-y-6">
-    <Card>
-      <CardHeader><CardTitle className="text-base flex items-center gap-2"><User className="h-5 w-5 text-primary" />Personal Information</CardTitle></CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div><p className="text-muted-foreground">Full Name</p><p className="font-medium">{profile?.full_name || "—"}</p></div>
-          <div><p className="text-muted-foreground">Email</p><p className="font-medium">{profile?.email || "—"}</p></div>
-          <div><p className="text-muted-foreground">Phone</p><p className="font-medium">{profile?.phone || "—"}</p></div>
-          <div><p className="text-muted-foreground">Referral Code</p><p className="font-medium font-mono">{profile?.referral_code || "—"}</p></div>
-        </div>
-      </CardContent>
-    </Card>
-    <Card>
-      <CardHeader><CardTitle className="text-base flex items-center gap-2"><Truck className="h-5 w-5 text-primary" />Vehicle Details</CardTitle></CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div><p className="text-muted-foreground">Vehicle Type</p><p className="font-medium">Motorcycle</p></div>
-          <div><p className="text-muted-foreground">License Plate</p><p className="font-medium">ABC 1234</p></div>
-          <div><p className="text-muted-foreground">Service Zone</p><p className="font-medium">Metro Manila & Benguet</p></div>
-          <div><p className="text-muted-foreground">Rating</p><p className="font-medium">4.8 ★</p></div>
-        </div>
-      </CardContent>
-    </Card>
-    <Card>
-      <CardHeader><CardTitle className="text-base flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" />KYC / Verification</CardTitle></CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-          <CheckCircle className="h-5 w-5 text-green-600" />
-          <div>
-            <p className="text-sm font-medium text-green-800 dark:text-green-300">Verified</p>
-            <p className="text-xs text-green-600 dark:text-green-400">Your identity and vehicle have been verified.</p>
+const DriverProfile = ({ profile, driverRecord, kycStatus }: { profile: any; driverRecord: any; kycStatus: string | null | undefined }) => {
+  const kycConfig: Record<string, { color: string; bg: string; label: string }> = {
+    approved: { color: "text-green-800 dark:text-green-300", bg: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800", label: "Verified" },
+    pending: { color: "text-amber-800 dark:text-amber-300", bg: "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800", label: "Pending Review" },
+    in_review: { color: "text-blue-800 dark:text-blue-300", bg: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800", label: "In Review" },
+    rejected: { color: "text-red-800 dark:text-red-300", bg: "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800", label: "Rejected" },
+    not_started: { color: "text-muted-foreground", bg: "bg-muted border-border", label: "Not Started" },
+  };
+
+  const kyc = kycConfig[kycStatus || "not_started"] || kycConfig.not_started;
+  const KycIcon = kycStatus === "approved" ? CheckCircle : kycStatus === "rejected" ? AlertCircle : Clock;
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><User className="h-5 w-5 text-primary" />Personal Information</CardTitle></CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div><p className="text-muted-foreground">Full Name</p><p className="font-medium">{profile?.full_name || "—"}</p></div>
+            <div><p className="text-muted-foreground">Email</p><p className="font-medium">{profile?.email || "—"}</p></div>
+            <div><p className="text-muted-foreground">Phone</p><p className="font-medium">{profile?.phone || driverRecord?.phone || "—"}</p></div>
+            <div><p className="text-muted-foreground">Referral Code</p><p className="font-medium font-mono">{profile?.referral_code || "—"}</p></div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><Truck className="h-5 w-5 text-primary" />Vehicle Details</CardTitle></CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div><p className="text-muted-foreground">Vehicle Type</p><p className="font-medium capitalize">{driverRecord?.vehicle || "—"}</p></div>
+            <div><p className="text-muted-foreground">License Plate</p><p className="font-medium">{driverRecord?.license_plate || "—"}</p></div>
+            <div><p className="text-muted-foreground">Deliveries</p><p className="font-medium">{driverRecord?.deliveries_count || 0}</p></div>
+            <div><p className="text-muted-foreground">Rating</p><p className="font-medium">{Number(driverRecord?.rating || 5).toFixed(1)} ★</p></div>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" />KYC / Verification</CardTitle></CardHeader>
+        <CardContent>
+          <div className={`flex items-center gap-3 p-3 rounded-lg border ${kyc.bg}`}>
+            <KycIcon className={`h-5 w-5 ${kyc.color}`} />
+            <div>
+              <p className={`text-sm font-medium ${kyc.color}`}>{kyc.label}</p>
+              <p className={`text-xs ${kyc.color} opacity-75`}>
+                {kycStatus === "approved"
+                  ? "Your identity and vehicle have been verified."
+                  : kycStatus === "not_started" || !kycStatus
+                  ? "Complete your KYC to unlock all features."
+                  : kycStatus === "rejected"
+                  ? "Your verification was rejected. Please resubmit."
+                  : "Your verification is being processed."}
+              </p>
+            </div>
+            {(!kycStatus || kycStatus === "not_started" || kycStatus === "rejected") && (
+              <Button size="sm" variant="outline" className="ml-auto" asChild>
+                <Link to="/kyc">Start KYC</Link>
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
 
 export default DriverDashboard;
