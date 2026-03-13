@@ -25,16 +25,41 @@ interface NavItem {
   icon: React.ElementType;
 }
 
-const navItems: NavItem[] = [
-  { title: "Home", tab: "home", icon: LayoutDashboard },
-  { title: "Shop", tab: "shop", icon: ShoppingBag },
-  { title: "My Orders", tab: "orders", icon: Package },
-  { title: "Wallet & Payments", tab: "wallet", icon: Wallet },
-  { title: "Token Rewards", tab: "tokens", icon: Coins },
-  { title: "Referral Tracking", tab: "referrals", icon: Link2 },
-  { title: "My Profile", tab: "profile", icon: User },
-  { title: "Notifications", tab: "notifications", icon: Bell },
-  { title: "Support & Disputes", tab: "support", icon: Ticket },
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
+  {
+    label: "Shopping",
+    items: [
+      { title: "Home", tab: "home", icon: LayoutDashboard },
+      { title: "Shop", tab: "shop", icon: ShoppingBag },
+      { title: "My Orders", tab: "orders", icon: Package },
+    ],
+  },
+  {
+    label: "Finance",
+    items: [
+      { title: "Wallet & Payments", tab: "wallet", icon: Wallet },
+      { title: "Token Rewards", tab: "tokens", icon: Coins },
+    ],
+  },
+  {
+    label: "Referrals",
+    items: [
+      { title: "Referral Tracking", tab: "referrals", icon: Link2 },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { title: "My Profile", tab: "profile", icon: User },
+      { title: "Notifications", tab: "notifications", icon: Bell },
+      { title: "Support & Disputes", tab: "support", icon: Ticket },
+    ],
+  },
 ];
 
 interface BuyerSidebarProps {
@@ -59,27 +84,41 @@ const BuyerSidebar = ({ activeTab, onTabChange }: BuyerSidebarProps) => {
           </Button>
         </div>
       )}
-      <ScrollArea className="flex-1 py-4">
-        <nav className="space-y-1 px-2">
-          {navItems.map((item) => {
-            const isActive = activeTab === item.tab;
-            return (
-              <button
-                key={item.tab}
-                onClick={() => onTabChange(item.tab)}
-                className={cn(
-                  "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
-                  isActive
-                    ? "bg-primary text-primary-foreground shadow-glow-primary"
-                    : "text-muted-foreground hover:bg-glass hover:text-foreground",
-                  collapsed && !inSheet && "justify-center px-2"
-                )}
-              >
-                <item.icon className={cn("h-5 w-5 shrink-0", isActive ? "text-primary-foreground" : "text-muted-foreground")} />
-                {(!collapsed || inSheet) && <span className="truncate">{item.title}</span>}
-              </button>
-            );
-          })}
+      <ScrollArea className="flex-1 py-2">
+        <nav className="px-2 space-y-4">
+          {navGroups.map((group) => (
+            <div key={group.label}>
+              {(!collapsed || inSheet) && (
+                <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {group.label}
+                </p>
+              )}
+              {collapsed && !inSheet && (
+                <div className="h-px bg-border mx-2 mb-1" />
+              )}
+              <div className="space-y-0.5">
+                {group.items.map((item) => {
+                  const isActive = activeTab === item.tab;
+                  return (
+                    <button
+                      key={item.tab}
+                      onClick={() => onTabChange(item.tab)}
+                      className={cn(
+                        "flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+                        isActive
+                          ? "bg-primary text-primary-foreground shadow-glow-primary"
+                          : "text-muted-foreground hover:bg-glass hover:text-foreground",
+                        collapsed && !inSheet && "justify-center px-2"
+                      )}
+                    >
+                      <item.icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary-foreground" : "text-muted-foreground")} />
+                      {(!collapsed || inSheet) && <span className="truncate">{item.title}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
       </ScrollArea>
       {(!collapsed || inSheet) && (

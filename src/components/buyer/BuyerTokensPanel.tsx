@@ -1,6 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { Loader2, Coins } from "lucide-react";
 import { format } from "date-fns";
 
@@ -52,25 +61,44 @@ const BuyerTokensPanel = ({ userId }: { userId: string }) => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Token Earning History</CardTitle>
+          <CardTitle className="text-base">Token Reward History</CardTitle>
         </CardHeader>
         <CardContent>
           {!tokenHistory?.length ? (
-            <p className="text-sm text-muted-foreground text-center py-4">No token rewards earned yet. Keep shopping to earn AGRI tokens!</p>
+            <div className="text-center py-6">
+              <Coins className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">No token rewards earned yet. Keep shopping to earn AGRI tokens!</p>
+            </div>
           ) : (
-            <div className="space-y-3">
-              {tokenHistory.map((entry) => (
-                <div key={entry.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                  <div>
-                    <p className="text-sm font-medium">{entry.source_description || "Token Reward"}</p>
-                    <p className="text-xs text-muted-foreground">{format(new Date(entry.created_at), "MMM d, yyyy")}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-green-600">+{Number(entry.tokens_issued).toLocaleString()} AGRI</p>
-                    <p className="text-xs text-muted-foreground">₱{Number(entry.php_reward_value).toLocaleString()}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Activity</TableHead>
+                    <TableHead className="text-right">Tokens Earned</TableHead>
+                    <TableHead className="text-right">Value (₱)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tokenHistory.map((entry) => (
+                    <TableRow key={entry.id}>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {format(new Date(entry.created_at), "MMM d, yyyy")}
+                      </TableCell>
+                      <TableCell className="text-sm">{entry.source_description || "Token Reward"}</TableCell>
+                      <TableCell className="text-right">
+                        <Badge variant="secondary" className="text-xs text-green-700 dark:text-green-400">
+                          +{Number(entry.tokens_issued).toLocaleString()} AGRI
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right text-xs text-muted-foreground">
+                        ₱{Number(entry.php_reward_value).toLocaleString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
         </CardContent>
