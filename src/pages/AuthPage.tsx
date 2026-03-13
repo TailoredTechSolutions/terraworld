@@ -124,7 +124,7 @@ const AuthPage = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!registrationRole) {
-      toast({ title: "Select Role", description: "Please select whether you are a Buyer or Farmer.", variant: "destructive" });
+      toast({ title: "Select Role", description: "Please select your account type.", variant: "destructive" });
       return;
     }
     if (!validateForm(true)) return;
