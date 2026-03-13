@@ -125,7 +125,7 @@ const BuyerShopPanel = () => {
                   loading="lazy"
                 />
                 {product.is_organic && (
-                  <Badge className="absolute top-2 left-2 bg-green-600 text-white text-[10px] gap-1">
+                  <Badge variant="secondary" className="absolute top-2 left-2 text-[10px] gap-1">
                     <Leaf className="h-2.5 w-2.5" /> Organic
                   </Badge>
                 )}
