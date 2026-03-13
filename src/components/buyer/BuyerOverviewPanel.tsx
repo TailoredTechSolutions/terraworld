@@ -13,7 +13,12 @@ import {
   Wallet,
   ArrowRight,
   Loader2,
+  Ticket,
+  Eye,
+  Info,
+  AlertCircle,
 } from "lucide-react";
+import { format } from "date-fns";
 
 interface BuyerOverviewPanelProps {
   userId: string;
@@ -37,13 +42,11 @@ const BuyerOverviewPanel = ({ userId, onTabChange }: BuyerOverviewPanelProps) =>
     queryKey: ["buyer-overview-orders", userId],
     queryFn: async () => {
       const email = profile?.email;
-      if (!email) return { active: 0, pending: 0, delivered: 0 };
-
+      if (!email) return { active: 0, pending: 0, delivered: 0, total: 0 };
       const { data } = await supabase
         .from("orders")
         .select("status")
         .eq("customer_email", email);
-
       const orders = data || [];
       return {
         active: orders.filter((o) => ["preparing", "in_transit"].includes(o.status || "")).length,
@@ -90,6 +93,49 @@ const BuyerOverviewPanel = ({ userId, onTabChange }: BuyerOverviewPanelProps) =>
     },
   });
 
+  // Recent activity: last 5 orders + last 5 notifications
+  const { data: recentOrders } = useQuery({
+    queryKey: ["buyer-overview-recent-orders", userId],
+    queryFn: async () => {
+      const email = profile?.email;
+      if (!email) return [];
+      const { data } = await supabase
+        .from("orders")
+        .select("id, order_number, status, total, created_at")
+        .eq("customer_email", email)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      return data || [];
+    },
+    enabled: !!profile?.email,
+  });
+
+  const { data: recentNotifications } = useQuery({
+    queryKey: ["buyer-overview-recent-notifs", userId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("notifications")
+        .select("id, title, message, type, is_read, created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      return data || [];
+    },
+  });
+
+  const { data: recentTransactions } = useQuery({
+    queryKey: ["buyer-overview-recent-tx", userId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("wallet_transactions")
+        .select("id, transaction_type, amount, description, created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      return data || [];
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -97,6 +143,21 @@ const BuyerOverviewPanel = ({ userId, onTabChange }: BuyerOverviewPanelProps) =>
       </div>
     );
   }
+
+  const statusColors: Record<string, string> = {
+    pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+    preparing: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+    in_transit: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+    delivered: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+    cancelled: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+  };
+
+  const notifIcons: Record<string, React.ElementType> = {
+    order: Package,
+    alert: AlertCircle,
+    reward: Coins,
+    info: Info,
+  };
 
   return (
     <div className="space-y-6">
@@ -161,7 +222,7 @@ const BuyerOverviewPanel = ({ userId, onTabChange }: BuyerOverviewPanelProps) =>
                 <p className="text-2xl font-bold">₱{Number(wallet?.available_balance || 0).toLocaleString()}</p>
                 {Number(wallet?.pending_balance || 0) > 0 && (
                   <p className="text-xs text-muted-foreground">
-                    ₱{Number(wallet.pending_balance).toLocaleString()} pending
+                    ₱{Number(wallet?.pending_balance).toLocaleString()} pending
                   </p>
                 )}
               </div>
@@ -197,45 +258,105 @@ const BuyerOverviewPanel = ({ userId, onTabChange }: BuyerOverviewPanelProps) =>
         </Card>
       </div>
 
+      {/* Recent Activity */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm">Recent Activity</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(!recentOrders?.length && !recentNotifications?.length && !recentTransactions?.length) ? (
+            <p className="text-sm text-muted-foreground text-center py-4">No recent activity yet. Start shopping!</p>
+          ) : (
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {/* Merge and sort by date */}
+              {[
+                ...(recentOrders || []).map((o) => ({
+                  id: `order-${o.id}`,
+                  type: "order" as const,
+                  title: `Order ${o.order_number}`,
+                  detail: `₱${Number(o.total).toLocaleString()}`,
+                  status: o.status,
+                  date: o.created_at,
+                  tab: "orders",
+                })),
+                ...(recentTransactions || []).map((tx) => ({
+                  id: `tx-${tx.id}`,
+                  type: "wallet" as const,
+                  title: tx.description || tx.transaction_type,
+                  detail: `${Number(tx.amount) >= 0 ? "+" : ""}₱${Math.abs(Number(tx.amount)).toLocaleString()}`,
+                  status: null,
+                  date: tx.created_at,
+                  tab: "wallet",
+                })),
+                ...(recentNotifications || []).map((n) => ({
+                  id: `notif-${n.id}`,
+                  type: "notification" as const,
+                  title: n.title,
+                  detail: n.message,
+                  status: null,
+                  date: n.created_at,
+                  tab: "notifications",
+                })),
+              ]
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                .slice(0, 10)
+                .map((item) => {
+                  const Icon = item.type === "order" ? Package : item.type === "wallet" ? Wallet : (notifIcons[(recentNotifications?.find(n => `notif-${n.id}` === item.id))?.type || "info"] || Info);
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                      onClick={() => onTabChange(item.tab)}
+                    >
+                      <div className="p-1.5 rounded-full bg-muted shrink-0">
+                        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{item.title}</p>
+                        <p className="text-xs text-muted-foreground">{format(new Date(item.date), "MMM d, h:mm a")}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        {item.status ? (
+                          <Badge className={`text-[10px] ${statusColors[item.status || "pending"] || ""}`}>
+                            {item.status}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">{item.detail?.substring(0, 30)}</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Quick Actions */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <Button
-              variant="outline"
-              className="h-auto flex-col gap-2 py-4"
-              onClick={() => onTabChange("shop")}
-            >
-              <ShoppingBag className="h-5 w-5 text-primary" />
-              <span className="text-xs">Browse Products</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-auto flex-col gap-2 py-4"
-              onClick={() => onTabChange("orders")}
-            >
-              <Package className="h-5 w-5 text-blue-500" />
-              <span className="text-xs">View Orders</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-auto flex-col gap-2 py-4"
-              onClick={() => onTabChange("tokens")}
-            >
-              <Coins className="h-5 w-5 text-amber-500" />
-              <span className="text-xs">View Rewards</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-auto flex-col gap-2 py-4"
-              onClick={() => onTabChange("support")}
-            >
-              <Bell className="h-5 w-5 text-muted-foreground" />
-              <span className="text-xs">Get Support</span>
-            </Button>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {[
+              { label: "Browse Products", icon: ShoppingBag, tab: "shop", color: "text-primary" },
+              { label: "View Orders", icon: Package, tab: "orders", color: "text-blue-500" },
+              { label: "Track Deliveries", icon: Truck, tab: "orders", color: "text-purple-500" },
+              { label: "View Wallet", icon: Wallet, tab: "wallet", color: "text-emerald-500" },
+              { label: "View Rewards", icon: Coins, tab: "tokens", color: "text-amber-500" },
+              { label: "Get Support", icon: Ticket, tab: "support", color: "text-muted-foreground" },
+            ].map((action) => (
+              <Button
+                key={action.label}
+                variant="outline"
+                className="h-auto flex-col gap-2 py-4"
+                onClick={() => onTabChange(action.tab)}
+              >
+                <action.icon className={`h-5 w-5 ${action.color}`} />
+                <span className="text-xs">{action.label}</span>
+              </Button>
+            ))}
           </div>
         </CardContent>
       </Card>

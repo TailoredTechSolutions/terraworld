@@ -3,8 +3,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Loader2, Copy, Users, TrendingUp, Link2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 
 const BuyerReferralsPanel = ({ userId, referralCode }: { userId: string; referralCode: string }) => {
   const { toast } = useToast();
@@ -17,14 +26,11 @@ const BuyerReferralsPanel = ({ userId, referralCode }: { userId: string; referra
         .select("id")
         .eq("user_id", userId)
         .maybeSingle();
-      
       if (!profile) return [];
-
       const { data } = await supabase
         .from("profiles")
         .select("id, full_name, email, created_at")
         .eq("referred_by", profile.id);
-      
       return data || [];
     },
   });
@@ -37,7 +43,6 @@ const BuyerReferralsPanel = ({ userId, referralCode }: { userId: string; referra
         .select("net_amount, bonus_type")
         .eq("user_id", userId)
         .in("bonus_type", ["direct_product", "direct_membership", "matching"]);
-      
       return (data || []).reduce((sum, p) => sum + Number(p.net_amount), 0);
     },
   });
@@ -103,25 +108,42 @@ const BuyerReferralsPanel = ({ userId, referralCode }: { userId: string; referra
       </div>
 
       {/* Referral List */}
-      {referrals && referrals.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Your Referrals</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {referrals.map((ref) => (
-                <div key={ref.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                  <div>
-                    <p className="text-sm font-medium">{ref.full_name || "—"}</p>
-                    <p className="text-xs text-muted-foreground">{ref.email}</p>
-                  </div>
-                </div>
-              ))}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Your Referrals</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!referrals?.length ? (
+            <div className="text-center py-6">
+              <Users className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">No referrals yet. Share your link to get started!</p>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Join Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {referrals.map((ref) => (
+                    <TableRow key={ref.id}>
+                      <TableCell className="font-medium">{ref.full_name || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground text-xs">{ref.email}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {format(new Date(ref.created_at), "MMM d, yyyy")}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
