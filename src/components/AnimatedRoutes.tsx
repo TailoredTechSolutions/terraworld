@@ -24,10 +24,11 @@ import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import KYCPage from "@/pages/KYCPage";
 import NotFound from "@/pages/NotFound";
 import {
-  AboutPage, ImpactPage, CareersPage, PilotBaguioPage,
-  PricingPage, OrderTrackPage, QualityPolicyPage,
+  AboutPage, HowItWorksPage, ImpactPage, CareersPage, PilotBaguioPage,
+  PricingPage, CategoriesPage, OrderTrackPage, QualityPolicyPage,
   FarmerOnboardingPage, FarmerUploadPage, FarmerPayoutsPage, FarmerLogisticsPage, FarmerFAQPage,
   BuyerOnboardingPage, BuyerWholesalePage, AccountTransactionsPage, SupportDisputesPage, BuyerFAQPage,
+  DriverOverviewPage, DriverRegisterPage, DriverAssignmentsPage, DriverRouteTrackingPage, DriverEarningsPage, DriverGuidelinesPage, DriverFAQPage,
   RewardsPage, CompensationPage,
   BlogPage, HelpPage, StatusPage, SupportPage, ContactPage,
   TermsPage, PrivacyPage, CookiePolicyPage, RefundPolicyPage, RiskDisclosurePage, AMLKYCPolicyPage,
@@ -67,21 +68,41 @@ const AnimatedRoutes = () => {
 
         {/* Terra / Company */}
         <Route path="/about" element={<P><AboutPage /></P>} />
+        <Route path="/how-it-works" element={<P><HowItWorksPage /></P>} />
+        <Route path="/mission-impact" element={<P><ImpactPage /></P>} />
         <Route path="/impact" element={<P><ImpactPage /></P>} />
-        <Route path="/careers" element={<P><CareersPage /></P>} />
+        <Route path="/pilot-program-baguio" element={<P><PilotBaguioPage /></P>} />
         <Route path="/pilot/baguio" element={<P><PilotBaguioPage /></P>} />
+        <Route path="/careers" element={<P><CareersPage /></P>} />
 
         {/* Marketplace */}
+        <Route path="/marketplace/categories" element={<P><CategoriesPage /></P>} />
+        <Route path="/marketplace/pricing-breakdown" element={<P><PricingPage /></P>} />
         <Route path="/pricing" element={<P><PricingPage /></P>} />
+        <Route path="/marketplace/order-tracking" element={<P><OrderTrackPage /></P>} />
         <Route path="/orders/track" element={<P><OrderTrackPage /></P>} />
+        <Route path="/marketplace/quality-policy" element={<P><QualityPolicyPage /></P>} />
         <Route path="/policies/quality" element={<P><QualityPolicyPage /></P>} />
 
         {/* For Farmers */}
         <Route path="/farmers/onboarding" element={<P><FarmerOnboardingPage /></P>} />
+        <Route path="/farmers/upload-products" element={<P><FarmerUploadPage /></P>} />
         <Route path="/farmers/upload" element={<P><FarmerUploadPage /></P>} />
+        <Route path="/farmers/payouts-settlement" element={<P><FarmerPayoutsPage /></P>} />
         <Route path="/farmers/payouts" element={<P><FarmerPayoutsPage /></P>} />
+        <Route path="/farmers/logistics-options" element={<P><FarmerLogisticsPage /></P>} />
         <Route path="/farmers/logistics" element={<P><FarmerLogisticsPage /></P>} />
+        <Route path="/farmers/faq" element={<P><FarmerFAQPage /></P>} />
         <Route path="/faq/farmers" element={<P><FarmerFAQPage /></P>} />
+
+        {/* For Drivers */}
+        <Route path="/drivers" element={<P><DriverOverviewPage /></P>} />
+        <Route path="/drivers/register" element={<P><DriverRegisterPage /></P>} />
+        <Route path="/drivers/assignments" element={<P><DriverAssignmentsPage /></P>} />
+        <Route path="/drivers/route-tracking" element={<P><DriverRouteTrackingPage /></P>} />
+        <Route path="/drivers/earnings-payouts" element={<P><DriverEarningsPage /></P>} />
+        <Route path="/drivers/guidelines" element={<P><DriverGuidelinesPage /></P>} />
+        <Route path="/drivers/faq" element={<P><DriverFAQPage /></P>} />
 
         {/* For Buyers */}
         <Route path="/buyers/onboarding" element={<P><BuyerOnboardingPage /></P>} />

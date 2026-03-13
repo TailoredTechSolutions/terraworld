@@ -2,12 +2,14 @@ import PlaceholderPage from "./PlaceholderPage";
 
 // Terra
 export const AboutPage = () => <PlaceholderPage category="Company" title="About Terra" description="Learn about our mission to connect Filipino farmers directly with buyers through a transparent, technology-driven marketplace. Coming soon." />;
+export const HowItWorksPage = () => <PlaceholderPage category="Company" title="How Terra Works" description="Discover the farm-to-buyer process — from product uploads and transparent pricing to real-time delivery tracking." />;
 export const ImpactPage = () => <PlaceholderPage category="Company" title="Mission & Impact" description="Discover how Terra Farming is transforming agricultural commerce in the Philippines — empowering farmers, reducing waste, and building sustainable supply chains." />;
 export const CareersPage = () => <PlaceholderPage category="Company" title="Careers at Terra" description="Join our growing team and help build the future of farm-to-table commerce in the Philippines. Open positions will be listed here soon." />;
 export const PilotBaguioPage = () => <PlaceholderPage category="Pilot Program" title="Baguio Pilot Program" description="Terra's pilot program in Baguio City connects highland farmers with buyers across Luzon. Learn about our progress and expansion plans." />;
 
 // Marketplace
 export const PricingPage = () => <PlaceholderPage category="Marketplace" title="Pricing Breakdown" description="Understand how Terra's transparent pricing works — base price, platform fees, taxes, and transportation costs all displayed at checkout." />;
+export const CategoriesPage = () => <PlaceholderPage category="Marketplace" title="Product Categories" description="Browse our marketplace by category — vegetables, fruits, grains, dairy, meat, specialty items, and more from verified highland farms." />;
 export const OrderTrackPage = () => <PlaceholderPage category="Marketplace" title="Order Tracking" description="Track your orders in real-time from farm to your doorstep. Sign in to view your active deliveries and order history." />;
 export const QualityPolicyPage = () => <PlaceholderPage category="Policies" title="Quality Policy" description="Our commitment to quality: replacement and refund policies for produce that doesn't meet our freshness standards. Your satisfaction is guaranteed." />;
 
@@ -24,6 +26,15 @@ export const BuyerWholesalePage = () => <PlaceholderPage category="For Buyers" t
 export const AccountTransactionsPage = () => <PlaceholderPage category="For Buyers" title="Receipts & Transaction History" description="View your complete purchase history, download receipts, and track spending. Sign in to access your transaction records." />;
 export const SupportDisputesPage = () => <PlaceholderPage category="Support" title="Support & Disputes" description="Need help with an order? Submit a dispute or request assistance. Our team is here to ensure a fair resolution for both farmers and buyers." />;
 export const BuyerFAQPage = () => <PlaceholderPage category="For Buyers" title="Buyer FAQ" description="Frequently asked questions about ordering on Terra, delivery options, payment methods, and return policies." />;
+
+// For Drivers
+export const DriverOverviewPage = () => <PlaceholderPage category="For Drivers" title="Driver Overview" description="Join the Terra driver network. Deliver fresh farm produce from highland farms to buyers across Luzon with flexible schedules and competitive pay." />;
+export const DriverRegisterPage = () => <PlaceholderPage category="For Drivers" title="Driver Registration" description="Sign up as a Terra delivery partner. Requirements: valid license, registered vehicle (motorcycle, van, or truck), and smartphone with GPS." />;
+export const DriverAssignmentsPage = () => <PlaceholderPage category="For Drivers" title="Delivery Assignments" description="How delivery assignments work — automatic matching based on proximity, vehicle type, and availability. Accept jobs from your driver dashboard." />;
+export const DriverRouteTrackingPage = () => <PlaceholderPage category="For Drivers" title="Route Tracking" description="Real-time GPS tracking for active deliveries. Navigate pickup and delivery points with optimized routing for efficient farm-to-door logistics." />;
+export const DriverEarningsPage = () => <PlaceholderPage category="For Drivers" title="Earnings & Payouts" description="Track your delivery earnings, view payout history, and manage withdrawal methods. Competitive per-delivery rates with distance-based bonuses." />;
+export const DriverGuidelinesPage = () => <PlaceholderPage category="For Drivers" title="Delivery Guidelines" description="Standard operating procedures for Terra drivers — produce handling, proof of delivery, customer interaction guidelines, and safety protocols." />;
+export const DriverFAQPage = () => <PlaceholderPage category="For Drivers" title="Driver FAQ" description="Frequently asked questions about driving for Terra — vehicle requirements, payment schedule, insurance, and support contacts." />;
 
 // Rewards & Network
 export const RewardsPage = () => <PlaceholderPage category="Rewards" title="Rewards Overview" description="Earn Terra tokens for your participation in our marketplace ecosystem. Learn how token rewards work and how to redeem them." />;
