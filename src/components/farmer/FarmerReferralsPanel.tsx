@@ -3,8 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2, Copy, Users, TrendingUp, Link2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 
 const FarmerReferralsPanel = ({ userId, referralCode }: { userId: string; referralCode: string }) => {
   const { toast } = useToast();
@@ -17,14 +19,11 @@ const FarmerReferralsPanel = ({ userId, referralCode }: { userId: string; referr
         .select("id")
         .eq("user_id", userId)
         .maybeSingle();
-      
       if (!profile) return [];
-
       const { data } = await supabase
         .from("profiles")
         .select("id, full_name, email, created_at")
         .eq("referred_by", profile.id);
-      
       return data || [];
     },
   });
@@ -37,7 +36,6 @@ const FarmerReferralsPanel = ({ userId, referralCode }: { userId: string; referr
         .select("net_amount, bonus_type")
         .eq("user_id", userId)
         .in("bonus_type", ["direct_product", "direct_membership", "matching"]);
-      
       return (data || []).reduce((sum, p) => sum + Number(p.net_amount), 0);
     },
   });
@@ -56,10 +54,9 @@ const FarmerReferralsPanel = ({ userId, referralCode }: { userId: string; referr
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Link2 className="h-5 w-5" />
-            Your Referral Link
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <Link2 className="h-4 w-4" /> Your Referral Link
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -75,50 +72,67 @@ const FarmerReferralsPanel = ({ userId, referralCode }: { userId: string; referr
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <Users className="h-8 w-8 text-primary/60" />
-              <div>
-                <p className="text-sm text-muted-foreground">Total Referrals</p>
-                <p className="text-2xl font-bold">{referrals?.length || 0}</p>
-              </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Card className="p-4">
+          <div className="flex items-center gap-3">
+            <Users className="h-7 w-7 text-primary/60" />
+            <div>
+              <p className="text-xs text-muted-foreground">Total Referrals</p>
+              <p className="text-2xl font-bold">{referrals?.length || 0}</p>
             </div>
-          </CardContent>
+          </div>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <TrendingUp className="h-8 w-8 text-green-600/60" />
-              <div>
-                <p className="text-sm text-muted-foreground">Referral Earnings</p>
-                <p className="text-2xl font-bold">₱{Number(earnings || 0).toLocaleString()}</p>
-              </div>
+        <Card className="p-4">
+          <div className="flex items-center gap-3">
+            <Users className="h-7 w-7 text-green-600/60" />
+            <div>
+              <p className="text-xs text-muted-foreground">Active Referrals</p>
+              <p className="text-2xl font-bold">{referrals?.length || 0}</p>
             </div>
-          </CardContent>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-3">
+            <TrendingUp className="h-7 w-7 text-green-600/60" />
+            <div>
+              <p className="text-xs text-muted-foreground">Referral Earnings</p>
+              <p className="text-2xl font-bold">₱{Number(earnings || 0).toLocaleString()}</p>
+            </div>
+          </div>
         </Card>
       </div>
 
-      {referrals && referrals.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Your Referrals</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {referrals.map((ref) => (
-                <div key={ref.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                  <div>
-                    <p className="text-sm font-medium">{ref.full_name || "—"}</p>
-                    <p className="text-xs text-muted-foreground">{ref.email}</p>
-                  </div>
-                </div>
-              ))}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">Your Referrals</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!referrals?.length ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No referrals yet. Share your link to start earning!</p>
+          ) : (
+            <div className="rounded-md border overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Join Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {referrals.map((ref) => (
+                    <TableRow key={ref.id}>
+                      <TableCell className="font-medium">{ref.full_name || "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{ref.email}</TableCell>
+                      <TableCell className="text-sm">{format(new Date(ref.created_at), "MMM d, yyyy")}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

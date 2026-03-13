@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2, Coins } from "lucide-react";
 import { format } from "date-fns";
 
@@ -37,40 +39,48 @@ const FarmerTokensPanel = ({ userId }: { userId: string }) => {
   return (
     <div className="space-y-6">
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="p-4">
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-full bg-accent/20">
-              <Coins className="h-8 w-8 text-accent-foreground" />
+            <div className="p-3 rounded-full bg-primary/10">
+              <Coins className="h-7 w-7 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">AGRI Token Balance</p>
-              <p className="text-3xl font-bold">{Number(profile?.agri_token_balance || 0).toLocaleString()} AGRI</p>
+              <p className="text-xs text-muted-foreground">AGRI Token Balance</p>
+              <p className="text-2xl font-bold">{Number(profile?.agri_token_balance || 0).toLocaleString()} AGRI</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Token Earning History</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">Reward History</CardTitle>
         </CardHeader>
         <CardContent>
           {!tokenHistory?.length ? (
-            <p className="text-sm text-muted-foreground text-center py-4">No token rewards earned yet. Sell more products to earn AGRI tokens!</p>
+            <p className="text-sm text-muted-foreground text-center py-6">No token rewards earned yet. Sell more products to earn AGRI tokens!</p>
           ) : (
-            <div className="space-y-3">
-              {tokenHistory.map((entry) => (
-                <div key={entry.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                  <div>
-                    <p className="text-sm font-medium">{entry.source_description || "Token Reward"}</p>
-                    <p className="text-xs text-muted-foreground">{format(new Date(entry.created_at), "MMM d, yyyy")}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-green-600">+{Number(entry.tokens_issued).toLocaleString()} AGRI</p>
-                    <p className="text-xs text-muted-foreground">₱{Number(entry.php_reward_value).toLocaleString()}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="rounded-md border overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Activity</TableHead>
+                    <TableHead className="text-right">Tokens Earned</TableHead>
+                    <TableHead className="text-right">Value (₱)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tokenHistory.map((entry) => (
+                    <TableRow key={entry.id}>
+                      <TableCell className="text-sm">{format(new Date(entry.created_at), "MMM d, yyyy")}</TableCell>
+                      <TableCell className="text-sm">{entry.source_description || "Token Reward"}</TableCell>
+                      <TableCell className="text-right font-semibold text-green-600">+{Number(entry.tokens_issued).toLocaleString()}</TableCell>
+                      <TableCell className="text-right text-sm text-muted-foreground">₱{Number(entry.php_reward_value).toLocaleString()}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
         </CardContent>

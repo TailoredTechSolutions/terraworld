@@ -22,7 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Tractor, Package, DollarSign, Star, MapPin, Phone, Mail,
+  Tractor, MapPin, Phone, Mail,
   AlertCircle, Loader2,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
@@ -163,85 +163,31 @@ const FarmerDashboard = () => {
       <div className="flex-1 flex">
         <FarmerSidebar activeTab={activeTab} onTabChange={setActiveTab} />
         <main className="flex-1 overflow-auto">
-          <div className="container max-w-6xl mx-auto px-4 py-6">
-            {/* Farm Header */}
-            <div className="mb-6">
-              <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+          <div className="max-w-6xl mx-auto px-4 py-6">
+            {/* Farm Header - compact */}
+            <div className="mb-5">
+              <div className="flex items-center gap-3">
                 {farmer.image_url ? (
-                  <img src={farmer.image_url} alt={farmer.name} className="w-16 h-16 sm:w-24 sm:h-24 rounded-xl object-cover" />
+                  <img src={farmer.image_url} alt={farmer.name} className="w-12 h-12 rounded-xl object-cover shrink-0" />
                 ) : (
-                  <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Tractor className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Tractor className="h-6 w-6 text-primary" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1">
-                    <h1 className="text-xl sm:text-2xl font-bold truncate">{farmer.name}</h1>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-lg font-bold truncate">{farmer.name}</h1>
                     <Badge className={statusColor[farmer.status || "pending"]}>
                       {farmer.status || "pending"}
                     </Badge>
                   </div>
-                  <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                    {farmer.description || "Welcome to your farmer dashboard"}
-                  </p>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs sm:text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{farmer.location}</div>
-                    <div className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{farmer.phone}</div>
-                    <div className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" /><span className="truncate max-w-[150px]">{farmer.email}</span></div>
+                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
+                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{farmer.location}</span>
+                    <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{farmer.phone}</span>
+                    <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{farmer.email}</span>
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-              <Card>
-                <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Products</p>
-                      <p className="text-xl sm:text-2xl font-bold">{productCount ?? farmer.products_count ?? 0}</p>
-                    </div>
-                    <Package className="h-6 w-6 sm:h-8 sm:w-8 text-primary/60" />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Sales</p>
-                      <p className="text-xl sm:text-2xl font-bold">₱{(farmer.total_sales ?? 0).toLocaleString()}</p>
-                    </div>
-                    <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-green-600/60" />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Rating</p>
-                      <p className="text-xl sm:text-2xl font-bold flex items-center gap-1">
-                        {farmer.rating ?? 5.0}
-                        <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500 fill-yellow-500" />
-                      </p>
-                    </div>
-                    <Star className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500/60" />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Owner</p>
-                      <p className="text-sm sm:text-lg font-medium truncate">{farmer.owner}</p>
-                    </div>
-                    <Tractor className="h-6 w-6 sm:h-8 sm:w-8 text-primary/60" />
-                  </div>
-                </CardContent>
-              </Card>
             </div>
 
             {/* Tab Content */}
