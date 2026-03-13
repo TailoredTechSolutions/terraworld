@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Truck, MapPin, Phone, User, Clock, CheckCircle } from "lucide-react";
+import StatusChip from "@/components/backoffice/StatusChip";
+import { Loader2, Truck } from "lucide-react";
 import { format } from "date-fns";
 
 interface FarmerDeliveryPanelProps {
@@ -42,14 +42,6 @@ const FarmerDeliveryPanel = ({ farmerId }: FarmerDeliveryPanelProps) => {
     return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   }
 
-  const statusVariant = (status: string) => {
-    if (status === "completed") return "default" as const;
-    if (status === "in_transit") return "default" as const;
-    if (status === "confirmed") return "secondary" as const;
-    if (status === "cancelled") return "destructive" as const;
-    return "outline" as const;
-  };
-
   return (
     <div className="space-y-6">
       <Card>
@@ -61,7 +53,11 @@ const FarmerDeliveryPanel = ({ farmerId }: FarmerDeliveryPanelProps) => {
         </CardHeader>
         <CardContent>
           {!bookings?.length ? (
-            <p className="text-center text-muted-foreground py-8">No active deliveries. Delivery bookings appear when orders are dispatched.</p>
+            <div className="text-center py-8">
+              <Truck className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
+              <p className="text-sm font-medium text-muted-foreground">No active deliveries</p>
+              <p className="text-xs text-muted-foreground mt-1">Delivery bookings appear when orders are dispatched</p>
+            </div>
           ) : (
             <div className="rounded-md border overflow-x-auto">
               <Table>
@@ -96,7 +92,7 @@ const FarmerDeliveryPanel = ({ farmerId }: FarmerDeliveryPanelProps) => {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="text-xs uppercase">{b.provider_type}</Badge>
+                        <StatusChip status={b.provider_type} />
                       </TableCell>
                       <TableCell className="text-sm">
                         {b.estimated_eta_minutes ? `${b.estimated_eta_minutes} min` : "—"}
@@ -104,7 +100,7 @@ const FarmerDeliveryPanel = ({ farmerId }: FarmerDeliveryPanelProps) => {
                       </TableCell>
                       <TableCell className="text-sm">₱{Number(b.final_fee || b.estimated_fee).toLocaleString()}</TableCell>
                       <TableCell>
-                        <Badge variant={statusVariant(b.booking_status)}>{b.booking_status.replace("_", " ")}</Badge>
+                        <StatusChip status={b.booking_status} />
                         {b.completed_at && (
                           <p className="text-xs text-muted-foreground mt-0.5">{format(new Date(b.completed_at), "MMM d, h:mm a")}</p>
                         )}

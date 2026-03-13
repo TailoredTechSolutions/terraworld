@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "@/components/ui/card";
@@ -23,6 +22,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import StatusChip from "@/components/backoffice/StatusChip";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Search, Package, Leaf, Loader2, Pause, Play, ImageIcon } from "lucide-react";
 import ProductImageUploader from "./ProductImageUploader";
@@ -82,11 +82,7 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
 
   const createMutation = useMutation({
     mutationFn: async (product: ProductInsert) => {
-      const { data, error } = await supabase
-        .from("products")
-        .insert(product)
-        .select()
-        .single();
+      const { data, error } = await supabase.from("products").insert(product).select().single();
       if (error) throw error;
       return data;
     },
@@ -94,7 +90,6 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
       queryClient.invalidateQueries({ queryKey: ["farmer-products", farmerId] });
       toast({ title: "Product created successfully" });
       handleCloseDialog();
-      // Open image uploader for the new product
       setShowImageUploader(data.id);
     },
     onError: (error) => {
@@ -104,12 +99,7 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, product }: { id: string; product: ProductUpdate }) => {
-      const { data, error } = await supabase
-        .from("products")
-        .update(product)
-        .eq("id", id)
-        .select()
-        .single();
+      const { data, error } = await supabase.from("products").update(product).eq("id", id).select().single();
       if (error) throw error;
       return data;
     },
@@ -139,32 +129,14 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
     },
   });
 
-  // Toggle pause mutation
   const togglePauseMutation = useMutation({
     mutationFn: async ({ id, is_paused }: { id: string; is_paused: boolean }) => {
-      const { error } = await supabase
-        .from("products")
-        .update({ is_paused } as ProductUpdate)
-        .eq("id", id);
+      const { error } = await supabase.from("products").update({ is_paused } as ProductUpdate).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["farmer-products", farmerId] });
       toast({ title: "Product listing updated" });
-    },
-  });
-
-  // Quick stock update mutation
-  const stockMutation = useMutation({
-    mutationFn: async ({ id, stock }: { id: string; stock: number }) => {
-      const { error } = await supabase
-        .from("products")
-        .update({ stock })
-        .eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["farmer-products", farmerId] });
     },
   });
 
@@ -247,6 +219,12 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
+  const getProductStatus = (product: Product): string => {
+    if ((product as any).is_paused) return "paused";
+    if (product.stock <= 0) return "out of stock";
+    return "active";
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -274,8 +252,14 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : filteredProducts?.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            {searchQuery ? "No products found matching your search" : "No products yet. Add your first product!"}
+          <div className="text-center py-12">
+            <Package className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
+            <p className="text-sm font-medium text-muted-foreground">
+              {searchQuery ? "No products found matching your search" : "No products yet"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {searchQuery ? "Try a different search term" : "Add your first product to get started!"}
+            </p>
           </div>
         ) : (
           <div className="rounded-md border overflow-x-auto">
@@ -317,7 +301,7 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{product.category}</Badge>
+                        <StatusChip status={product.category} />
                       </TableCell>
                       <TableCell className="text-right">₱{product.price.toFixed(2)}/{product.unit}</TableCell>
                       <TableCell className="text-right">
@@ -326,13 +310,7 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
                         </span>
                       </TableCell>
                       <TableCell className="text-center">
-                        {isPaused ? (
-                          <Badge variant="secondary">Paused</Badge>
-                        ) : isOutOfStock ? (
-                          <Badge variant="destructive">Out of Stock</Badge>
-                        ) : (
-                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">Active</Badge>
-                        )}
+                        <StatusChip status={getProductStatus(product)} />
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
@@ -354,7 +332,6 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
-                        {/* Inline image uploader */}
                         {showImageUploader === product.id && (
                           <div className="mt-3 text-left">
                             <ProductImageUploader productId={product.id} farmerId={farmerId} />
@@ -421,13 +398,11 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
               </div>
             </div>
 
-            {/* Harvest Date */}
             <div className="grid gap-2">
               <Label htmlFor="harvest_date">Harvest Date</Label>
               <Input id="harvest_date" type="date" value={formData.harvest_date} onChange={(e) => setFormData({ ...formData, harvest_date: e.target.value })} />
             </div>
 
-            {/* Availability Window */}
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="avail_start">Available From</Label>
@@ -439,7 +414,6 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
               </div>
             </div>
 
-            {/* Cutoff Time */}
             <div className="grid gap-2">
               <Label htmlFor="cutoff_time">Daily Cutoff Time</Label>
               <Input id="cutoff_time" type="time" value={formData.cutoff_time} onChange={(e) => setFormData({ ...formData, cutoff_time: e.target.value })} />

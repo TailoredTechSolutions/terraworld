@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import StatusChip from "@/components/backoffice/StatusChip";
+import KPICard from "@/components/backoffice/KPICard";
 import { Loader2, DollarSign, TrendingUp, Receipt, ArrowDownRight } from "lucide-react";
 import { format } from "date-fns";
 import type { Tables } from "@/integrations/supabase/types";
@@ -45,32 +46,12 @@ const FarmerEarningsPanel = ({ farmerId, userId }: FarmerEarningsPanelProps) => 
 
   return (
     <div className="space-y-6">
-      {/* Stats */}
+      {/* Stats — shared KPICard */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-            <DollarSign className="h-4 w-4" /> Gross Sales
-          </div>
-          <p className="text-xl font-bold">₱{totalGross.toLocaleString()}</p>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-            <ArrowDownRight className="h-4 w-4" /> Platform Fees
-          </div>
-          <p className="text-xl font-bold text-destructive">-₱{totalTerraFee.toLocaleString()}</p>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-            <TrendingUp className="h-4 w-4" /> Net Earnings
-          </div>
-          <p className="text-xl font-bold text-primary">₱{totalFarmerNet.toLocaleString()}</p>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-            <Receipt className="h-4 w-4" /> Wallet Balance
-          </div>
-          <p className="text-xl font-bold">₱{Number(wallet?.available_balance || 0).toLocaleString()}</p>
-        </Card>
+        <KPICard title="Gross Sales" value={`₱${totalGross.toLocaleString()}`} icon={DollarSign} />
+        <KPICard title="Platform Fees" value={`-₱${totalTerraFee.toLocaleString()}`} icon={ArrowDownRight} />
+        <KPICard title="Net Earnings" value={`₱${totalFarmerNet.toLocaleString()}`} icon={TrendingUp} />
+        <KPICard title="Wallet Balance" value={`₱${Number(wallet?.available_balance || 0).toLocaleString()}`} icon={Receipt} />
       </div>
 
       {/* Earnings Table */}
@@ -83,7 +64,11 @@ const FarmerEarningsPanel = ({ farmerId, userId }: FarmerEarningsPanelProps) => 
         </CardHeader>
         <CardContent>
           {!orders?.length ? (
-            <p className="text-center text-muted-foreground py-6">No orders yet.</p>
+            <div className="text-center py-8">
+              <Receipt className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
+              <p className="text-sm font-medium text-muted-foreground">No earnings yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Completed orders will show earnings here</p>
+            </div>
           ) : (
             <div className="rounded-md border overflow-x-auto">
               <Table>
@@ -106,7 +91,7 @@ const FarmerEarningsPanel = ({ farmerId, userId }: FarmerEarningsPanelProps) => 
                       <TableCell className="text-right text-destructive">-₱{Number(order.terra_fee || 0).toLocaleString()}</TableCell>
                       <TableCell className="text-right font-semibold text-primary">₱{Number(order.farmer_price || 0).toLocaleString()}</TableCell>
                       <TableCell>
-                        <Badge variant={order.status === "delivered" ? "default" : "secondary"}>{order.status}</Badge>
+                        <StatusChip status={order.status || "pending"} />
                       </TableCell>
                     </TableRow>
                   ))}

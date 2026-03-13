@@ -4,53 +4,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import StatusChip from "@/components/backoffice/StatusChip";
+import KPICard from "@/components/backoffice/KPICard";
 import {
-  ShoppingBag,
-  MoreHorizontal,
-  Eye,
-  CheckCircle,
-  XCircle,
-  Truck,
-  Clock,
-  Package,
-  User,
-  Phone,
-  MapPin,
-  Loader2,
-  RefreshCw,
+  ShoppingBag, MoreHorizontal, Eye, XCircle, Truck, Clock,
+  Package, User, Phone, MapPin, Loader2, RefreshCw, CheckCircle,
 } from "lucide-react";
 import type { Tables, Enums, Json } from "@/integrations/supabase/types";
 
-// Order item structure from cart
 interface OrderItem {
   id: string;
   name: string;
@@ -72,21 +45,10 @@ interface FarmerOrdersPanelProps {
   farmerId: string;
 }
 
-// Helper to parse order items from JSON
 const parseOrderItems = (items: Json): OrderItem[] => {
   if (!items) return [];
-  if (Array.isArray(items)) {
-    return items as unknown as OrderItem[];
-  }
+  if (Array.isArray(items)) return items as unknown as OrderItem[];
   return [];
-};
-
-const STATUS_CONFIG: Record<OrderStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ElementType }> = {
-  pending: { label: "Pending", variant: "secondary", icon: Clock },
-  preparing: { label: "Preparing", variant: "outline", icon: Package },
-  in_transit: { label: "In Transit", variant: "default", icon: Truck },
-  delivered: { label: "Delivered", variant: "default", icon: CheckCircle },
-  cancelled: { label: "Cancelled", variant: "destructive", icon: XCircle },
 };
 
 const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
@@ -95,7 +57,6 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  // Fetch orders for this farmer
   const { data: orders = [], isLoading, refetch } = useQuery({
     queryKey: ["farmer-orders", farmerId],
     queryFn: async () => {
@@ -104,38 +65,24 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
         .select("*, drivers(name)")
         .eq("farmer_id", farmerId)
         .order("created_at", { ascending: false });
-
       if (error) throw error;
       return data as Order[];
     },
     enabled: !!farmerId,
   });
 
-  // Update order status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: string; status: OrderStatus }) => {
-      const { error } = await supabase
-        .from("orders")
-        .update({ status })
-        .eq("id", orderId);
-
+      const { error } = await supabase.from("orders").update({ status }).eq("id", orderId);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["farmer-orders", farmerId] });
-      toast({
-        title: "Status Updated",
-        description: "Order status has been updated successfully.",
-      });
+      toast({ title: "Status Updated", description: "Order status has been updated successfully." });
       setSelectedOrder(null);
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to update order status.",
-        variant: "destructive",
-      });
-      console.error("Update error:", error);
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update order status.", variant: "destructive" });
     },
   });
 
@@ -143,22 +90,8 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
     updateStatusMutation.mutate({ orderId, status: newStatus });
   };
 
-  const filteredOrders = statusFilter === "all"
-    ? orders
-    : orders.filter((o) => o.status === statusFilter);
+  const filteredOrders = statusFilter === "all" ? orders : orders.filter((o) => o.status === statusFilter);
 
-  const getStatusBadge = (status: OrderStatus | null) => {
-    const config = STATUS_CONFIG[status || "pending"];
-    const Icon = config.icon;
-    return (
-      <Badge variant={config.variant} className="gap-1">
-        <Icon className="h-3 w-3" />
-        {config.label}
-      </Badge>
-    );
-  };
-
-  // Calculate stats
   const pendingCount = orders.filter((o) => o.status === "pending").length;
   const preparingCount = orders.filter((o) => o.status === "preparing").length;
   const inTransitCount = orders.filter((o) => o.status === "in_transit").length;
@@ -176,36 +109,12 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Order Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <Clock className="h-4 w-4" />
-            Pending
-          </div>
-          <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{pendingCount}</p>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <Package className="h-4 w-4" />
-            Preparing
-          </div>
-          <p className="text-2xl font-bold text-primary">{preparingCount}</p>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <Truck className="h-4 w-4" />
-            In Transit
-          </div>
-          <p className="text-2xl font-bold text-accent">{inTransitCount}</p>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <CheckCircle className="h-4 w-4" />
-            Delivered
-          </div>
-          <p className="text-2xl font-bold text-primary">{deliveredCount}</p>
-        </Card>
+      {/* Order Stats — shared KPICard */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <KPICard title="Pending" value={pendingCount} icon={Clock} />
+        <KPICard title="Preparing" value={preparingCount} icon={Package} />
+        <KPICard title="In Transit" value={inTransitCount} icon={Truck} />
+        <KPICard title="Delivered" value={deliveredCount} icon={CheckCircle} />
       </div>
 
       {/* Orders Table */}
@@ -243,10 +152,10 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
         </CardHeader>
         <CardContent>
           {filteredOrders.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <ShoppingBag className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="font-medium">No orders found</p>
-              <p className="text-sm">Orders for your products will appear here</p>
+            <div className="text-center py-12">
+              <ShoppingBag className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
+              <p className="text-sm font-medium text-muted-foreground">No orders found</p>
+              <p className="text-xs text-muted-foreground mt-1">Orders for your products will appear here</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -280,7 +189,9 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
                           <span className="text-muted-foreground text-sm">Unassigned</span>
                         )}
                       </TableCell>
-                      <TableCell>{getStatusBadge(order.status)}</TableCell>
+                      <TableCell>
+                        <StatusChip status={order.status || "pending"} />
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {new Date(order.created_at).toLocaleDateString()}
                       </TableCell>
@@ -296,26 +207,17 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
                               <Eye className="h-4 w-4 mr-2" /> View Details
                             </DropdownMenuItem>
                             {order.status === "pending" && (
-                              <DropdownMenuItem
-                                onClick={() => handleStatusChange(order.id, "preparing")}
-                                className="text-primary"
-                              >
+                              <DropdownMenuItem onClick={() => handleStatusChange(order.id, "preparing")} className="text-primary">
                                 <Package className="h-4 w-4 mr-2" /> Start Preparing
                               </DropdownMenuItem>
                             )}
                             {order.status === "preparing" && (
-                              <DropdownMenuItem
-                                onClick={() => handleStatusChange(order.id, "in_transit")}
-                                className="text-accent"
-                              >
+                              <DropdownMenuItem onClick={() => handleStatusChange(order.id, "in_transit")} className="text-accent">
                                 <Truck className="h-4 w-4 mr-2" /> Mark Ready for Pickup
                               </DropdownMenuItem>
                             )}
                             {order.status !== "delivered" && order.status !== "cancelled" && (
-                              <DropdownMenuItem
-                                onClick={() => handleStatusChange(order.id, "cancelled")}
-                                className="text-destructive"
-                              >
+                              <DropdownMenuItem onClick={() => handleStatusChange(order.id, "cancelled")} className="text-destructive">
                                 <XCircle className="h-4 w-4 mr-2" /> Cancel Order
                               </DropdownMenuItem>
                             )}
@@ -342,13 +244,11 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
           </DialogHeader>
           {selectedOrder && (
             <div className="space-y-4">
-              {/* Status */}
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Current Status</span>
-                {getStatusBadge(selectedOrder.status)}
+                <StatusChip status={selectedOrder.status || "pending"} />
               </div>
 
-              {/* Customer Info */}
               <Card className="p-4 space-y-2">
                 <h4 className="font-medium flex items-center gap-2">
                   <User className="h-4 w-4" /> Customer Details
@@ -364,7 +264,6 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
                 </div>
               </Card>
 
-              {/* Delivery Info */}
               <Card className="p-4 space-y-2">
                 <h4 className="font-medium flex items-center gap-2">
                   <MapPin className="h-4 w-4" /> Delivery Address
@@ -375,7 +274,6 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
                 )}
               </Card>
 
-              {/* Order Items */}
               <Card className="p-4 space-y-3">
                 <h4 className="font-medium flex items-center gap-2">
                   <ShoppingBag className="h-4 w-4" /> Order Items
@@ -383,16 +281,9 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {parseOrderItems(selectedOrder.items).length > 0 ? (
                     parseOrderItems(selectedOrder.items).map((item, index) => (
-                      <div
-                        key={item.id || index}
-                        className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50"
-                      >
+                      <div key={item.id || index} className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50">
                         {item.image && (
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-10 h-10 rounded object-cover"
-                          />
+                          <img src={item.image} alt={item.name} className="w-10 h-10 rounded object-cover" />
                         )}
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm truncate">{item.name}</p>
@@ -400,19 +291,14 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
                             {item.quantity} × ₱{Number(item.price).toLocaleString()} / {item.unit}
                           </p>
                         </div>
-                        <p className="font-medium text-sm">
-                          ₱{(item.quantity * item.price).toLocaleString()}
-                        </p>
+                        <p className="font-medium text-sm">₱{(item.quantity * item.price).toLocaleString()}</p>
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground text-center py-2">
-                      No item details available
-                    </p>
+                    <p className="text-sm text-muted-foreground text-center py-2">No item details available</p>
                   )}
                 </div>
                 
-                {/* Subtotals with earnings breakdown */}
                 <div className="border-t pt-3 space-y-1">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
@@ -428,7 +314,6 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
                   </div>
                 </div>
 
-                {/* Farmer Earnings Breakdown */}
                 <div className="border-t pt-3 space-y-1 mt-2">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Your Earnings</p>
                   <div className="flex justify-between text-sm">
@@ -439,54 +324,27 @@ const FarmerOrdersPanel = ({ farmerId }: FarmerOrdersPanelProps) => {
                     <span className="text-muted-foreground">Terra Service Fee</span>
                     <span className="text-destructive">-₱{Number(selectedOrder.terra_fee ?? 0).toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between font-medium pt-1 border-t text-green-600 dark:text-green-400">
-                    <span>Net Earnings</span>
-                    <span>₱{(Number(selectedOrder.farmer_price ?? 0) - Number(selectedOrder.terra_fee ?? 0)).toLocaleString()}</span>
-                  </div>
                 </div>
               </Card>
 
-              {/* Driver Info */}
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div className="flex items-center gap-2 text-sm">
-                  <Truck className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Driver:</span>
-                  <span className="font-medium">{selectedOrder.drivers?.name || "Unassigned"}</span>
-                </div>
-              </div>
-
               {/* Status Actions */}
-              {selectedOrder.status !== "delivered" && selectedOrder.status !== "cancelled" && (
-                <div className="flex flex-wrap gap-2">
-                  <p className="w-full text-sm text-muted-foreground">Update Status:</p>
-                  {selectedOrder.status === "pending" && (
-                    <Button
-                      size="sm"
-                      onClick={() => handleStatusChange(selectedOrder.id, "preparing")}
-                      disabled={updateStatusMutation.isPending}
-                    >
-                      <Package className="h-4 w-4 mr-2" /> Start Preparing
-                    </Button>
-                  )}
-                  {selectedOrder.status === "preparing" && (
-                    <Button
-                      size="sm"
-                      onClick={() => handleStatusChange(selectedOrder.id, "in_transit")}
-                      disabled={updateStatusMutation.isPending}
-                    >
-                      <Truck className="h-4 w-4 mr-2" /> Ready for Pickup
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleStatusChange(selectedOrder.id, "cancelled")}
-                    disabled={updateStatusMutation.isPending}
-                  >
+              <div className="flex flex-wrap gap-2 pt-2">
+                {selectedOrder.status === "pending" && (
+                  <Button onClick={() => handleStatusChange(selectedOrder.id, "preparing")} disabled={updateStatusMutation.isPending}>
+                    <Package className="h-4 w-4 mr-2" /> Start Preparing
+                  </Button>
+                )}
+                {selectedOrder.status === "preparing" && (
+                  <Button onClick={() => handleStatusChange(selectedOrder.id, "in_transit")} disabled={updateStatusMutation.isPending}>
+                    <Truck className="h-4 w-4 mr-2" /> Ready for Pickup
+                  </Button>
+                )}
+                {selectedOrder.status !== "delivered" && selectedOrder.status !== "cancelled" && (
+                  <Button variant="destructive" onClick={() => handleStatusChange(selectedOrder.id, "cancelled")} disabled={updateStatusMutation.isPending}>
                     <XCircle className="h-4 w-4 mr-2" /> Cancel
                   </Button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
         </DialogContent>
