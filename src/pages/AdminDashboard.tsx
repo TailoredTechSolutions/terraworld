@@ -636,9 +636,31 @@ const AdminDashboard = () => {
                       <DropdownMenuItem onClick={() => setSelectedOrder(order)}>
                         <Eye className="h-4 w-4 mr-2" /> View Details
                       </DropdownMenuItem>
-                      {!order.driver_id && (
-                        <DropdownMenuItem className="text-primary">
+                      {!order.driver_id && drivers.length > 0 && (
+                        <DropdownMenuItem className="text-primary" onClick={() => {
+                          setSelectedOrder(order);
+                        }}>
                           <Truck className="h-4 w-4 mr-2" /> Assign Driver
+                        </DropdownMenuItem>
+                      )}
+                      {order.status === "pending" && (
+                        <DropdownMenuItem onClick={() => updateOrderStatus(order.id, "preparing")}>
+                          <Check className="h-4 w-4 mr-2" /> Mark Preparing
+                        </DropdownMenuItem>
+                      )}
+                      {order.status === "preparing" && (
+                        <DropdownMenuItem onClick={() => updateOrderStatus(order.id, "in_transit")}>
+                          <Truck className="h-4 w-4 mr-2" /> Mark In Transit
+                        </DropdownMenuItem>
+                      )}
+                      {order.status === "in_transit" && (
+                        <DropdownMenuItem onClick={() => updateOrderStatus(order.id, "delivered")}>
+                          <Check className="h-4 w-4 mr-2" /> Mark Delivered
+                        </DropdownMenuItem>
+                      )}
+                      {order.status !== "cancelled" && order.status !== "delivered" && (
+                        <DropdownMenuItem className="text-destructive" onClick={() => updateOrderStatus(order.id, "cancelled")}>
+                          <X className="h-4 w-4 mr-2" /> Cancel Order
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>
