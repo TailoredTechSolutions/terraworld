@@ -53,7 +53,7 @@ const SupportDisputesSection = ({ openDrawer }: Props) => {
       <DataTable
         columns={[
           { key: "ticket_number", label: "Ticket #" },
-          { key: "subject", label: "Subject", className: "max-w-[200px] truncate" },
+          { key: "subject", label: "Subject" },
           { key: "user", label: "User" },
           { key: "category", label: "Category" },
           { key: "priority", label: "Priority", render: (r) => (

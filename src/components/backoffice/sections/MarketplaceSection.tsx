@@ -80,18 +80,19 @@ const MarketplaceSection = ({ openDrawer }: Props) => {
               { key: "status", label: "Status", render: (r) => <StatusChip status={r.status} /> },
             ]}
             data={MOCK_PRODUCTS.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()))}
+            onRowClick={(row) => openDrawer("product", row)}
           />
         </TabsContent>
 
         <TabsContent value="pending" className="mt-3">
           <div className="space-y-3">
             {pendingProducts.map(p => (
-              <div key={p.id} className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-card/60">
-                <div>
+              <div key={p.id} className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-card/60 gap-3 flex-wrap">
+                <div className="min-w-0">
                   <p className="text-sm font-medium">{p.name}</p>
                   <p className="text-xs text-muted-foreground">By {p.farmer} · ₱{p.price} · Category: {p.category}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 shrink-0">
                   <Button size="sm" className="h-7 text-xs gap-1"><CheckCircle className="h-3 w-3" /> Approve</Button>
                   <Button variant="outline" size="sm" className="h-7 text-xs gap-1 text-destructive"><XCircle className="h-3 w-3" /> Reject</Button>
                 </div>
