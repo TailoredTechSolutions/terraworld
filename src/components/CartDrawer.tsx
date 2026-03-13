@@ -1,9 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useCartStore, CartItem } from "@/store/cartStore";
 import { Minus, Plus, Trash2, ShoppingBag, Truck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+
+const PLATFORM_FEE_RATE = 0.20;
+const COMMISSION_RATE = 0.10;
+const VAT_RATE = 0.12;
 
 const CartItemRow = ({ item }: { item: CartItem }) => {
   const { updateQuantity, removeItem } = useCartStore();
@@ -73,9 +77,13 @@ const CartItemRow = ({ item }: { item: CartItem }) => {
 const CartDrawer = () => {
   const navigate = useNavigate();
   const { isOpen, setCartOpen, items, getTotalPrice, clearCart } = useCartStore();
-  const subtotal = getTotalPrice();
-  const deliveryFee = subtotal > 0 ? 45 : 0;
-  const total = subtotal + deliveryFee;
+  const farmerSubtotal = getTotalPrice();
+  const platformFee = farmerSubtotal * PLATFORM_FEE_RATE;
+  const commission = farmerSubtotal * COMMISSION_RATE;
+  const subtotalBeforeVAT = farmerSubtotal + platformFee + commission;
+  const vat = subtotalBeforeVAT * VAT_RATE;
+  const deliveryFee = farmerSubtotal > 0 ? 45 : 0;
+  const total = subtotalBeforeVAT + vat + deliveryFee;
 
   return (
     <Sheet open={isOpen} onOpenChange={setCartOpen}>
@@ -129,15 +137,27 @@ const CartDrawer = () => {
                 </div>
               </div>
 
-              {/* Summary */}
-              <div className="space-y-2 text-sm glass-card p-4 rounded-xl">
+              {/* Summary with full breakdown */}
+              <div className="space-y-1.5 text-sm glass-card p-4 rounded-xl">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">₱{subtotal.toFixed(2)}</span>
+                  <span className="text-muted-foreground">Base Price</span>
+                  <span className="font-medium">₱{farmerSubtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Delivery</span>
-                  <span className="font-medium">₱{deliveryFee.toFixed(2)}</span>
+                  <span className="text-muted-foreground">Platform Fee (20%)</span>
+                  <span className="text-xs">₱{platformFee.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Commission (10%)</span>
+                  <span className="text-xs">₱{commission.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">VAT (12%)</span>
+                  <span className="text-xs">₱{vat.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Est. Delivery</span>
+                  <span className="text-xs">₱{deliveryFee.toFixed(2)}</span>
                 </div>
                 <Separator className="bg-glass-border" />
                 <div className="flex justify-between text-base pt-1">
@@ -155,7 +175,7 @@ const CartDrawer = () => {
                     navigate("/checkout");
                   }}
                 >
-                  Checkout
+                  Checkout — ₱{total.toFixed(2)}
                 </Button>
                 <Button
                   variant="ghost"

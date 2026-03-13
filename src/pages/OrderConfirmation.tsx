@@ -1,20 +1,24 @@
 import { useLocation, useNavigate, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Truck, Clock, MapPin, Receipt, Home } from "lucide-react";
+import { CheckCircle2, Truck, Clock, MapPin, Receipt, Home, ShoppingBag } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+
+interface OrderState {
+  orderId: string;
+  total: number;
+  paymentMethod: string;
+  deliveryProvider?: string;
+  items: number;
+  customerName?: string;
+  deliveryAddress?: string;
+}
 
 const OrderConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const orderData = location.state as {
-    orderId: string;
-    total: number;
-    paymentMethod: string;
-    items: number;
-  } | null;
+  const orderData = location.state as OrderState | null;
 
-  // Redirect if accessed directly without order data
   if (!orderData) {
     return <Navigate to="/" replace />;
   }
@@ -46,7 +50,7 @@ const OrderConfirmation = () => {
               Order Confirmed!
             </h1>
             <p className="text-lg text-muted-foreground">
-              Thank you for shopping with FarmDirect
+              Thank you for shopping with Terra
             </p>
           </div>
 
@@ -86,13 +90,20 @@ const OrderConfirmation = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Delivery Address</p>
-                  <p className="font-semibold text-foreground">123 Main Street</p>
-                  <p className="text-xs text-muted-foreground">Manila, 1000</p>
+                  <p className="font-semibold text-foreground text-sm">
+                    {orderData.deliveryAddress || "Address provided at checkout"}
+                  </p>
                 </div>
               </div>
             </div>
 
             <div className="p-4 rounded-xl bg-secondary/50 space-y-3">
+              {orderData.customerName && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Customer</span>
+                  <span className="font-medium">{orderData.customerName}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Items Ordered</span>
                 <span className="font-medium">{orderData.items} items</span>
@@ -101,13 +112,15 @@ const OrderConfirmation = () => {
                 <span className="text-muted-foreground">Payment Method</span>
                 <span className="font-medium">{getPaymentMethodLabel(orderData.paymentMethod)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Delivery Fee</span>
-                <span className="font-medium">₱45.00</span>
-              </div>
+              {orderData.deliveryProvider && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Delivery Service</span>
+                  <span className="font-medium capitalize">{orderData.deliveryProvider}</span>
+                </div>
+              )}
               <div className="flex justify-between pt-2 border-t border-border">
                 <span className="font-semibold">Total Paid</span>
-                <span className="font-bold text-primary text-lg">₱{orderData.total.toFixed(2)}</span>
+                <span className="font-bold text-primary text-lg">₱{Number(orderData.total).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
           </div>
@@ -155,14 +168,14 @@ const OrderConfirmation = () => {
             <Button 
               variant="outline" 
               className="rounded-xl"
-              onClick={() => navigate("/map")}
+              onClick={() => navigate("/buyer?tab=orders")}
             >
-              <MapPin className="h-4 w-4 mr-2" />
-              Track Order
+              <ShoppingBag className="h-4 w-4 mr-2" />
+              View My Orders
             </Button>
             <Button 
               className="btn-primary-gradient rounded-xl"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/shop")}
             >
               Continue Shopping
             </Button>
