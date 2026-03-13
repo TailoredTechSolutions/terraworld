@@ -1,3 +1,4 @@
+import React from "react";
 import { 
   Facebook, Instagram, Twitter, Linkedin, 
   Mail, MapPin, Smartphone, ChevronDown,
@@ -33,29 +34,32 @@ const FooterAccordion = ({ title, children }: { title: string; children: React.R
   );
 };
 
-const FooterLink = ({ to, children, external }: { to: string; children: React.ReactNode; external?: boolean }) => {
-  if (external || to.startsWith("mailto:") || to.startsWith("http")) {
+const FooterLink = React.forwardRef<HTMLLIElement, { to: string; children: React.ReactNode; external?: boolean }>(
+  ({ to, children, external }, ref) => {
+    if (external || to.startsWith("mailto:") || to.startsWith("http")) {
+      return (
+        <li ref={ref}>
+          <a
+            href={to}
+            target={to.startsWith("http") ? "_blank" : undefined}
+            rel={to.startsWith("http") ? "noopener noreferrer" : undefined}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+          >
+            {children}
+          </a>
+        </li>
+      );
+    }
     return (
-      <li>
-        <a
-          href={to}
-          target={to.startsWith("http") ? "_blank" : undefined}
-          rel={to.startsWith("http") ? "noopener noreferrer" : undefined}
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
-        >
+      <li ref={ref}>
+        <Link to={to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
           {children}
-        </a>
+        </Link>
       </li>
     );
   }
-  return (
-    <li>
-      <Link to={to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-        {children}
-      </Link>
-    </li>
-  );
-};
+);
+FooterLink.displayName = "FooterLink";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -87,7 +91,7 @@ const Footer = () => {
       </div>
 
       {/* ===== 2) MAIN FOOTER GRID ===== */}
-      <div className="container py-12 md:py-12 py-6">
+      <div className="container py-6 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-2 md:gap-y-8">
           {/* Column A — Terra */}
           <FooterAccordion title="Terra">

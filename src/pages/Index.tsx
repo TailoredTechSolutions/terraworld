@@ -559,8 +559,7 @@ const TestimonialsSection = () => {
 
 const Index = () => {
   const { user } = useAuth();
-  const { isAdmin, loading: rolesLoading } = useUserRoles();
-  const showRoleActions = !user || (!rolesLoading && isAdmin);
+  useUserRoles(); // keep hook call order stable
 
   return (
     <div className="min-h-screen bg-background">
