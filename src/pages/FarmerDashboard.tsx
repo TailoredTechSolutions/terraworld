@@ -18,9 +18,9 @@ import FarmerOrdersPanel from "@/components/farmer/FarmerOrdersPanel";
 import FarmerTokensPanel from "@/components/farmer/FarmerTokensPanel";
 import FarmerReferralsPanel from "@/components/farmer/FarmerReferralsPanel";
 import FarmerPricingPanel from "@/components/farmer/FarmerPricingPanel";
+import StatusChip from "@/components/backoffice/StatusChip";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
   Tractor, MapPin, Phone, Mail,
   AlertCircle, Loader2,
@@ -120,12 +120,6 @@ const FarmerDashboard = () => {
     );
   }
 
-  const statusColor = {
-    active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-    pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-    suspended: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-  };
-
   const renderContent = () => {
     switch (activeTab) {
       case "overview":
@@ -177,9 +171,7 @@ const FarmerDashboard = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h1 className="text-lg font-bold truncate">{farmer.name}</h1>
-                    <Badge className={statusColor[farmer.status || "pending"]}>
-                      {farmer.status || "pending"}
-                    </Badge>
+                    <StatusChip status={farmer.status || "pending"} />
                   </div>
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
                     <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{farmer.location}</span>

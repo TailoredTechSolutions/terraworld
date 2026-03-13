@@ -2,8 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import StatusChip from "@/components/backoffice/StatusChip";
+import KPICard from "@/components/backoffice/KPICard";
 import {
   ShoppingBag, Package, DollarSign, Coins, Bell, Clock,
   Plus, Eye, Wallet, TrendingUp, AlertTriangle, Truck,
@@ -104,7 +105,6 @@ const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPan
     },
   });
 
-  // Recent orders (last 5)
   const { data: recentOrders = [] } = useQuery({
     queryKey: ["farmer-recent-orders", farmerId],
     queryFn: async () => {
@@ -119,7 +119,6 @@ const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPan
     },
   });
 
-  // Recent notifications
   const { data: recentNotifs = [] } = useQuery({
     queryKey: ["farmer-recent-notifs", userId],
     queryFn: async () => {
@@ -136,73 +135,38 @@ const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPan
 
   const isLoading = ordersLoading || walletLoading || tokenLoading;
 
-  const statusColor: Record<string, string> = {
-    pending: "secondary",
-    preparing: "outline",
-    in_transit: "default",
-    delivered: "default",
-    cancelled: "destructive",
-  };
-
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
+      {/* KPI Summary Cards — shared KPICard component */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onNavigate("orders")}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">Today's Orders</p>
-                {isLoading ? <Skeleton className="h-7 w-10 mt-1" /> : (
-                  <p className="text-2xl font-bold">{todayOrders.length}</p>
-                )}
-              </div>
-              <ShoppingBag className="h-7 w-7 text-primary/60 shrink-0" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onNavigate("orders")}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">Pending</p>
-                {isLoading ? <Skeleton className="h-7 w-10 mt-1" /> : (
-                  <p className="text-2xl font-bold text-amber-600">{pendingOrders.length}</p>
-                )}
-              </div>
-              <Clock className="h-7 w-7 text-amber-500/60 shrink-0" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onNavigate("earnings")}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">Monthly Earnings</p>
-                {isLoading ? <Skeleton className="h-7 w-16 mt-1" /> : (
-                  <p className="text-xl font-bold">₱{periodEarnings.toLocaleString()}</p>
-                )}
-              </div>
-              <TrendingUp className="h-7 w-7 text-green-600/60 shrink-0" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onNavigate("tokens")}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">AGRI Tokens</p>
-                {isLoading ? <Skeleton className="h-7 w-12 mt-1" /> : (
-                  <p className="text-2xl font-bold">{Number(tokenBalance).toLocaleString()}</p>
-                )}
-              </div>
-              <Coins className="h-7 w-7 text-primary/60 shrink-0" />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="cursor-pointer" onClick={() => onNavigate("orders")}>
+          <KPICard
+            title="Today's Orders"
+            value={isLoading ? "..." : todayOrders.length}
+            icon={ShoppingBag}
+          />
+        </div>
+        <div className="cursor-pointer" onClick={() => onNavigate("orders")}>
+          <KPICard
+            title="Pending"
+            value={isLoading ? "..." : pendingOrders.length}
+            icon={Clock}
+          />
+        </div>
+        <div className="cursor-pointer" onClick={() => onNavigate("earnings")}>
+          <KPICard
+            title="Monthly Earnings"
+            value={isLoading ? "..." : `₱${periodEarnings.toLocaleString()}`}
+            icon={TrendingUp}
+          />
+        </div>
+        <div className="cursor-pointer" onClick={() => onNavigate("tokens")}>
+          <KPICard
+            title="AGRI Tokens"
+            value={isLoading ? "..." : Number(tokenBalance).toLocaleString()}
+            icon={Coins}
+          />
+        </div>
       </div>
 
       {/* Recent Activity + Wallet/Alerts row */}
@@ -214,7 +178,11 @@ const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPan
           </CardHeader>
           <CardContent>
             {recentOrders.length === 0 && recentNotifs.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">No recent activity yet.</p>
+              <div className="text-center py-8">
+                <ShoppingBag className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
+                <p className="text-sm font-medium text-muted-foreground">No recent activity yet</p>
+                <p className="text-xs text-muted-foreground mt-1">Orders and notifications will appear here</p>
+              </div>
             ) : (
               <div className="space-y-2">
                 {recentOrders.map((o) => (
@@ -232,7 +200,7 @@ const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPan
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="text-sm font-medium">₱{Number(o.total).toLocaleString()}</span>
-                      <Badge variant={statusColor[o.status || "pending"] as any} className="text-xs">{o.status}</Badge>
+                      <StatusChip status={o.status || "pending"} />
                     </div>
                   </div>
                 ))}
@@ -288,7 +256,7 @@ const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPan
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <Bell className="h-4 w-4" /> Alerts
-                {unreadCount > 0 && <Badge variant="destructive" className="text-[10px] px-1.5">{unreadCount}</Badge>}
+                {unreadCount > 0 && <StatusChip status={`${unreadCount} unread`} />}
               </CardTitle>
             </CardHeader>
             <CardContent className="pb-4">
@@ -320,7 +288,7 @@ const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPan
               {lowStockProducts.map((p) => (
                 <div key={p.id} className="flex items-center justify-between text-sm p-2 rounded-lg bg-amber-50 dark:bg-amber-950/30">
                   <span className="font-medium">{p.name}</span>
-                  <Badge variant="outline" className="text-amber-600 text-xs">{p.stock} {p.unit} left</Badge>
+                  <StatusChip status={`${p.stock} ${p.unit} left`} />
                 </div>
               ))}
               <Button size="sm" variant="outline" className="w-full" onClick={() => onNavigate("products")}>

@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import StatusChip from "@/components/backoffice/StatusChip";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Wallet, ArrowUpRight } from "lucide-react";
 import { format } from "date-fns";
@@ -24,11 +24,7 @@ const FarmerWithdrawalPanel = ({ userId }: FarmerWithdrawalPanelProps) => {
   const { data: wallet, isLoading } = useQuery({
     queryKey: ["farmer-wallet-wd", userId],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("wallets")
-        .select("*")
-        .eq("user_id", userId)
-        .maybeSingle();
+      const { data } = await supabase.from("wallets").select("*").eq("user_id", userId).maybeSingle();
       return data;
     },
   });
@@ -86,13 +82,6 @@ const FarmerWithdrawalPanel = ({ userId }: FarmerWithdrawalPanelProps) => {
 
   const balance = Number(wallet?.available_balance || 0);
 
-  const statusVariant = (status: string) => {
-    if (status === "completed" || status === "paid") return "default" as const;
-    if (status === "pending") return "secondary" as const;
-    if (status === "rejected") return "destructive" as const;
-    return "outline" as const;
-  };
-
   return (
     <div className="space-y-6">
       <Card>
@@ -137,7 +126,11 @@ const FarmerWithdrawalPanel = ({ userId }: FarmerWithdrawalPanelProps) => {
         </CardHeader>
         <CardContent>
           {!requests?.length ? (
-            <p className="text-sm text-muted-foreground text-center py-6">No withdrawal requests yet.</p>
+            <div className="text-center py-8">
+              <Wallet className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
+              <p className="text-sm font-medium text-muted-foreground">No withdrawal requests yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Submit a withdrawal to see history here</p>
+            </div>
           ) : (
             <div className="rounded-md border overflow-x-auto">
               <Table>
@@ -160,7 +153,7 @@ const FarmerWithdrawalPanel = ({ userId }: FarmerWithdrawalPanelProps) => {
                       <TableCell className="text-right text-sm">₱{Number(r.amount).toLocaleString()}</TableCell>
                       <TableCell className="text-right text-sm font-medium">₱{Number(r.net_amount).toLocaleString()}</TableCell>
                       <TableCell>
-                        <Badge variant={statusVariant(r.status)} className="text-xs">{r.status}</Badge>
+                        <StatusChip status={r.status} />
                       </TableCell>
                     </TableRow>
                   ))}

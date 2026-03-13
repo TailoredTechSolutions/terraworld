@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import KPICard from "@/components/backoffice/KPICard";
 import { Loader2, Coins } from "lucide-react";
 import { format } from "date-fns";
 
@@ -38,19 +38,14 @@ const FarmerTokensPanel = ({ userId }: { userId: string }) => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-full bg-primary/10">
-              <Coins className="h-7 w-7 text-primary" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">AGRI Token Balance</p>
-              <p className="text-2xl font-bold">{Number(profile?.agri_token_balance || 0).toLocaleString()} AGRI</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Balance — shared KPICard */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <KPICard
+          title="AGRI Token Balance"
+          value={`${Number(profile?.agri_token_balance || 0).toLocaleString()} AGRI`}
+          icon={Coins}
+        />
+      </div>
 
       <Card>
         <CardHeader className="pb-3">
@@ -58,7 +53,11 @@ const FarmerTokensPanel = ({ userId }: { userId: string }) => {
         </CardHeader>
         <CardContent>
           {!tokenHistory?.length ? (
-            <p className="text-sm text-muted-foreground text-center py-6">No token rewards earned yet. Sell more products to earn AGRI tokens!</p>
+            <div className="text-center py-8">
+              <Coins className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
+              <p className="text-sm font-medium text-muted-foreground">No token rewards yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Sell more products to earn AGRI tokens!</p>
+            </div>
           ) : (
             <div className="rounded-md border overflow-x-auto">
               <Table>

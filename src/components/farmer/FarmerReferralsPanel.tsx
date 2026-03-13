@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import KPICard from "@/components/backoffice/KPICard";
 import { Loader2, Copy, Users, TrendingUp, Link2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -72,34 +73,11 @@ const FarmerReferralsPanel = ({ userId, referralCode }: { userId: string; referr
         </CardContent>
       </Card>
 
+      {/* Stats — shared KPICard */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <Users className="h-7 w-7 text-primary/60" />
-            <div>
-              <p className="text-xs text-muted-foreground">Total Referrals</p>
-              <p className="text-2xl font-bold">{referrals?.length || 0}</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <Users className="h-7 w-7 text-green-600/60" />
-            <div>
-              <p className="text-xs text-muted-foreground">Active Referrals</p>
-              <p className="text-2xl font-bold">{referrals?.length || 0}</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <TrendingUp className="h-7 w-7 text-green-600/60" />
-            <div>
-              <p className="text-xs text-muted-foreground">Referral Earnings</p>
-              <p className="text-2xl font-bold">₱{Number(earnings || 0).toLocaleString()}</p>
-            </div>
-          </div>
-        </Card>
+        <KPICard title="Total Referrals" value={referrals?.length || 0} icon={Users} />
+        <KPICard title="Active Referrals" value={referrals?.length || 0} icon={Users} />
+        <KPICard title="Referral Earnings" value={`₱${Number(earnings || 0).toLocaleString()}`} icon={TrendingUp} />
       </div>
 
       <Card>
@@ -108,7 +86,11 @@ const FarmerReferralsPanel = ({ userId, referralCode }: { userId: string; referr
         </CardHeader>
         <CardContent>
           {!referrals?.length ? (
-            <p className="text-sm text-muted-foreground text-center py-6">No referrals yet. Share your link to start earning!</p>
+            <div className="text-center py-8">
+              <Users className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
+              <p className="text-sm font-medium text-muted-foreground">No referrals yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Share your link to start earning!</p>
+            </div>
           ) : (
             <div className="rounded-md border overflow-x-auto">
               <Table>
