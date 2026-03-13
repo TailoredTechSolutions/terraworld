@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Leaf, ArrowLeft, ShoppingBag, Tractor, ChevronDown, Eye, EyeOff } from "lucide-react";
+import { Loader2, Leaf, ArrowLeft, ShoppingBag, Tractor, Truck, ChevronDown, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import terraLogo from "@/assets/terra-logo-full.png";
 import authFarmBg from "@/assets/auth-farm-bg.jpg";
