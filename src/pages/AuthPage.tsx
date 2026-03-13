@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Leaf, ArrowLeft, ShoppingBag, Tractor, ChevronDown, Eye, EyeOff } from "lucide-react";
+import { Loader2, Leaf, ArrowLeft, ShoppingBag, Tractor, Truck, ChevronDown, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import terraLogo from "@/assets/terra-logo-full.png";
 import authFarmBg from "@/assets/auth-farm-bg.jpg";
@@ -25,7 +25,7 @@ const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 const nameSchema = z.string().min(2, "Name must be at least 2 characters").optional().or(z.literal(""));
 
-type RegistrationRole = "buyer" | "farmer";
+type RegistrationRole = "buyer" | "farmer" | "driver";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ const AuthPage = () => {
   // Pre-select role from URL param
   useEffect(() => {
     const role = searchParams.get("role");
-    if (role === "buyer" || role === "farmer") {
+    if (role === "buyer" || role === "farmer" || role === "driver") {
       setRegistrationRole(role);
       setActiveTab("register");
     }
@@ -124,7 +124,7 @@ const AuthPage = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!registrationRole) {
-      toast({ title: "Select Role", description: "Please select whether you are a Buyer or Farmer.", variant: "destructive" });
+      toast({ title: "Select Role", description: "Please select your account type.", variant: "destructive" });
       return;
     }
     if (!validateForm(true)) return;
@@ -141,8 +141,10 @@ const AuthPage = () => {
       }
       toast({ title: "Registration Failed", description: message, variant: "destructive" });
     } else {
-      toast({ title: "Account Created!", description: `Welcome to Terra Farming as a ${registrationRole === "buyer" ? "Buyer" : "Farmer"}!` });
-      navigate(registrationRole === "farmer" ? "/farmer" : "/buyer");
+      const roleLabels: Record<string, string> = { buyer: "Buyer", farmer: "Farmer", driver: "Driver" };
+      toast({ title: "Account Created!", description: `Welcome to Terra Farming as a ${roleLabels[registrationRole]}!` });
+      const redirectMap: Record<string, string> = { farmer: "/farmer", driver: "/driver", buyer: "/buyer" };
+      navigate(redirectMap[registrationRole] || "/buyer");
     }
     
     setIsLoading(false);
@@ -232,6 +234,10 @@ const AuthPage = () => {
                       <Tractor className="h-4 w-4" />
                       Register as Farmer
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleRegisterClick("driver")} className="gap-2 cursor-pointer">
+                      <Truck className="h-4 w-4" />
+                      Register as Driver
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TabsList>
@@ -281,22 +287,30 @@ const AuthPage = () => {
                 {!registrationRole ? (
                   <div className="space-y-4 text-center py-4">
                     <p className="text-muted-foreground font-bold">Choose your account type to get started:</p>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-3">
                       <button
                         onClick={() => setRegistrationRole("buyer")}
-                        className="p-6 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
+                        className="p-4 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
                       >
-                        <ShoppingBag className="h-8 w-8 mx-auto text-primary" />
-                        <p className="font-semibold">Buyer</p>
-                        <p className="text-xs text-muted-foreground">Shop fresh produce directly from farms</p>
+                        <ShoppingBag className="h-7 w-7 mx-auto text-primary" />
+                        <p className="font-semibold text-sm">Buyer</p>
+                        <p className="text-xs text-muted-foreground">Shop fresh produce</p>
                       </button>
                       <button
                         onClick={() => setRegistrationRole("farmer")}
-                        className="p-6 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
+                        className="p-4 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
                       >
-                        <Tractor className="h-8 w-8 mx-auto text-primary" />
-                        <p className="font-semibold">Farmer</p>
-                        <p className="text-xs text-muted-foreground">Sell your products on Terra Farming marketplace</p>
+                        <Tractor className="h-7 w-7 mx-auto text-primary" />
+                        <p className="font-semibold text-sm">Farmer</p>
+                        <p className="text-xs text-muted-foreground">Sell your products</p>
+                      </button>
+                      <button
+                        onClick={() => setRegistrationRole("driver")}
+                        className="p-4 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
+                      >
+                        <Truck className="h-7 w-7 mx-auto text-primary" />
+                        <p className="font-semibold text-sm">Driver</p>
+                        <p className="text-xs text-muted-foreground">Deliver orders</p>
                       </button>
                     </div>
                   </div>
@@ -305,9 +319,9 @@ const AuthPage = () => {
                     {/* Role indicator */}
                     <div className="flex items-center justify-between p-3 rounded-lg bg-secondary dark:bg-[hsl(0,0%,15%)]">
                       <div className="flex items-center gap-2">
-                        {registrationRole === "buyer" ? <ShoppingBag className="h-4 w-4 text-primary" /> : <Tractor className="h-4 w-4 text-primary" />}
+                        {registrationRole === "buyer" ? <ShoppingBag className="h-4 w-4 text-primary" /> : registrationRole === "driver" ? <Truck className="h-4 w-4 text-primary" /> : <Tractor className="h-4 w-4 text-primary" />}
                         <span className="text-sm font-medium">
-                          Registering as {registrationRole === "buyer" ? "Buyer" : "Farmer"}
+                          Registering as {{ buyer: "Buyer", farmer: "Farmer", driver: "Driver" }[registrationRole]}
                         </span>
                       </div>
                       <Button type="button" variant="ghost" size="sm" onClick={() => setRegistrationRole(null)}>
