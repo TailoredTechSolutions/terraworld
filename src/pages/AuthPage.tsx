@@ -287,22 +287,30 @@ const AuthPage = () => {
                 {!registrationRole ? (
                   <div className="space-y-4 text-center py-4">
                     <p className="text-muted-foreground font-bold">Choose your account type to get started:</p>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-3">
                       <button
                         onClick={() => setRegistrationRole("buyer")}
-                        className="p-6 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
+                        className="p-4 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
                       >
-                        <ShoppingBag className="h-8 w-8 mx-auto text-primary" />
-                        <p className="font-semibold">Buyer</p>
-                        <p className="text-xs text-muted-foreground">Shop fresh produce directly from farms</p>
+                        <ShoppingBag className="h-7 w-7 mx-auto text-primary" />
+                        <p className="font-semibold text-sm">Buyer</p>
+                        <p className="text-xs text-muted-foreground">Shop fresh produce</p>
                       </button>
                       <button
                         onClick={() => setRegistrationRole("farmer")}
-                        className="p-6 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
+                        className="p-4 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
                       >
-                        <Tractor className="h-8 w-8 mx-auto text-primary" />
-                        <p className="font-semibold">Farmer</p>
-                        <p className="text-xs text-muted-foreground">Sell your products on Terra Farming marketplace</p>
+                        <Tractor className="h-7 w-7 mx-auto text-primary" />
+                        <p className="font-semibold text-sm">Farmer</p>
+                        <p className="text-xs text-muted-foreground">Sell your products</p>
+                      </button>
+                      <button
+                        onClick={() => setRegistrationRole("driver")}
+                        className="p-4 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
+                      >
+                        <Truck className="h-7 w-7 mx-auto text-primary" />
+                        <p className="font-semibold text-sm">Driver</p>
+                        <p className="text-xs text-muted-foreground">Deliver orders</p>
                       </button>
                     </div>
                   </div>
