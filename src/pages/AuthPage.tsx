@@ -141,8 +141,10 @@ const AuthPage = () => {
       }
       toast({ title: "Registration Failed", description: message, variant: "destructive" });
     } else {
-      toast({ title: "Account Created!", description: `Welcome to Terra Farming as a ${registrationRole === "buyer" ? "Buyer" : "Farmer"}!` });
-      navigate(registrationRole === "farmer" ? "/farmer" : "/buyer");
+      const roleLabels: Record<string, string> = { buyer: "Buyer", farmer: "Farmer", driver: "Driver" };
+      toast({ title: "Account Created!", description: `Welcome to Terra Farming as a ${roleLabels[registrationRole]}!` });
+      const redirectMap: Record<string, string> = { farmer: "/farmer", driver: "/driver", buyer: "/buyer" };
+      navigate(redirectMap[registrationRole] || "/buyer");
     }
     
     setIsLoading(false);
