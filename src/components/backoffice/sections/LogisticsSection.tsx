@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import DataTable from "../DataTable";
 import StatusChip from "../StatusChip";
 import { Truck, Clock, MapPin, CheckCircle } from "lucide-react";
@@ -40,12 +38,13 @@ const LogisticsSection = ({ openDrawer }: Props) => {
               { key: "order", label: "Order" },
               { key: "driver", label: "Driver" },
               { key: "status", label: "Status", render: (r) => <StatusChip status={r.status} /> },
-              { key: "pickup", label: "Pickup", className: "max-w-[140px] truncate" },
-              { key: "dropoff", label: "Dropoff", className: "max-w-[140px] truncate" },
+              { key: "pickup", label: "Pickup" },
+              { key: "dropoff", label: "Dropoff" },
               { key: "eta", label: "ETA" },
               { key: "sla", label: "SLA" },
             ]}
             data={MOCK_DELIVERIES}
+            onRowClick={(row) => openDrawer("order", { order_number: row.order, status: row.status, buyer: "Customer", farmer: row.pickup, delivery_status: row.status, driver: row.driver })}
           />
         </div>
 
@@ -54,13 +53,9 @@ const LogisticsSection = ({ openDrawer }: Props) => {
           <div className="space-y-2">
             {AVAILABLE_DRIVERS.map((d, i) => (
               <div key={i} className="p-3 rounded-lg border border-border/50 bg-card/60">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium">{d.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{d.vehicle} · {d.zone} · ⭐ {d.rating}</p>
-                  </div>
-                  <Button size="sm" className="h-7 text-xs">Assign</Button>
-                </div>
+                <p className="text-sm font-medium">{d.name}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{d.vehicle} · {d.zone} · ⭐ {d.rating}</p>
+                <Button size="sm" className="h-7 text-xs mt-2.5 w-full">Assign Driver</Button>
               </div>
             ))}
           </div>

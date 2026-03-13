@@ -21,12 +21,12 @@ interface Props<T> {
 function DataTable<T extends Record<string, any>>({ columns, data, onRowClick, page = 1, totalPages = 1, onPageChange }: Props<T>) {
   return (
     <div>
-      <div className="rounded-lg border border-border/50 overflow-hidden">
-        <Table>
+      <div className="rounded-lg border border-border/50 overflow-x-auto">
+        <Table className="min-w-[600px]">
           <TableHeader>
             <TableRow className="bg-muted/30">
               {columns.map((col) => (
-                <TableHead key={col.key} className={col.className || "text-xs"}>
+                <TableHead key={col.key} className={col.className || "text-xs whitespace-nowrap"}>
                   {col.label}
                 </TableHead>
               ))}
@@ -43,11 +43,11 @@ function DataTable<T extends Record<string, any>>({ columns, data, onRowClick, p
               data.map((row, i) => (
                 <TableRow
                   key={i}
-                  className={onRowClick ? "cursor-pointer hover:bg-muted/20" : ""}
+                  className={onRowClick ? "cursor-pointer hover:bg-muted/20 transition-colors" : ""}
                   onClick={() => onRowClick?.(row)}
                 >
                   {columns.map((col) => (
-                    <TableCell key={col.key} className="text-xs py-2.5">
+                    <TableCell key={col.key} className={`text-xs py-2.5 ${col.className?.includes('truncate') ? col.className : 'break-words'}`}>
                       {col.render ? col.render(row) : row[col.key]}
                     </TableCell>
                   ))}

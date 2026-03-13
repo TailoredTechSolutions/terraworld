@@ -16,11 +16,11 @@ const revenueData = [
 ];
 
 const attentionItems = [
-  { type: "Flagged Order", id: "ORD-2026-089", reason: "Payment mismatch", status: "pending" },
-  { type: "Failed Payment", id: "PAY-8812", reason: "GCash timeout", status: "failed" },
-  { type: "Overdue Delivery", id: "DEL-445", reason: "ETA exceeded by 3hrs", status: "in_transit" },
-  { type: "KYC Pending", id: "USR-192", reason: "Docs submitted 5d ago", status: "pending" },
-  { type: "Low Stock", id: "PRD-034", reason: "Lettuce — 2kg remaining", status: "pending" },
+  { type: "Flagged Order", id: "ORD-2026-089", reason: "Payment mismatch", status: "pending", actionType: "order" },
+  { type: "Failed Payment", id: "PAY-8812", reason: "GCash timeout", status: "failed", actionType: "order" },
+  { type: "Overdue Delivery", id: "DEL-445", reason: "ETA exceeded by 3hrs", status: "in_transit", actionType: "order" },
+  { type: "KYC Pending", id: "USR-192", reason: "Docs submitted 5d ago", status: "pending", actionType: "user" },
+  { type: "Low Stock", id: "PRD-034", reason: "Lettuce — 2kg remaining", status: "pending", actionType: "product" },
 ];
 
 interface Props { openDrawer: (type: string, data: any) => void; }
@@ -28,13 +28,17 @@ interface Props { openDrawer: (type: string, data: any) => void; }
 const OverviewSection = ({ openDrawer }: Props) => {
   return (
     <div className="space-y-6">
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+      {/* Top KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         <KPICard icon={DollarSign} title="GMV (30d)" value="₱2.4M" change="+12.3% vs last month" changeType="up" />
         <KPICard icon={TrendingUp} title="Service Fees (30d)" value="₱362K" change="+8.1%" changeType="up" />
         <KPICard icon={ShoppingCart} title="Total Orders" value="1,847" change="+15.2%" changeType="up" />
         <KPICard icon={Users} title="Active Farmers" value="142" change="+6" changeType="up" />
         <KPICard icon={Users} title="Active Buyers" value="3,284" change="+189" changeType="up" />
+      </div>
+
+      {/* Secondary KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         <KPICard icon={Truck} title="Active Drivers" value="38" change="-2" changeType="down" />
         <KPICard icon={Ticket} title="Open Tickets" value="14" change="3 urgent" changeType="neutral" />
         <KPICard icon={Wallet} title="Pending Withdrawals" value="23" change="₱184K total" changeType="neutral" />
@@ -79,17 +83,25 @@ const OverviewSection = ({ openDrawer }: Props) => {
         </h3>
         <div className="space-y-2">
           {attentionItems.map((item, i) => (
-            <div key={i} className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/20 hover:bg-muted/40 cursor-pointer transition-colors"
-              onClick={() => openDrawer("order", { order_number: item.id, status: item.status, buyer: "Customer", farmer: "Farm", total: 1500, subtotal: 1200, platform_fee: 180, tax: 60, delivery_fee: 60, payment_status: item.status })}
+            <div key={i} className="flex items-center justify-between py-2.5 px-3 rounded-lg bg-muted/20 hover:bg-muted/40 cursor-pointer transition-colors gap-3"
+              onClick={() => {
+                if (item.actionType === "user") {
+                  openDrawer("user", { name: item.id, email: "user@terra.ph", type: "buyer", status: "active", kyc: "pending", created_at: "2026-01-15", region: "Baguio" });
+                } else if (item.actionType === "product") {
+                  openDrawer("product", { name: "Baguio Lettuce", farmer: "Aling Rosa", category: "Vegetables", price: 85, stock: 2, status: "approved", organic: true });
+                } else {
+                  openDrawer("order", { order_number: item.id, status: item.status, buyer: "Customer", farmer: "Farm", total: 1500, subtotal: 1200, platform_fee: 180, tax: 60, delivery_fee: 60, payment_status: item.status });
+                }
+              }}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <StatusChip status={item.status} />
-                <div>
-                  <p className="text-xs font-medium">{item.type}: {item.id}</p>
-                  <p className="text-[11px] text-muted-foreground">{item.reason}</p>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium break-words">{item.type}: {item.id}</p>
+                  <p className="text-[11px] text-muted-foreground break-words">{item.reason}</p>
                 </div>
               </div>
-              <span className="text-xs text-muted-foreground">View →</span>
+              <span className="text-xs text-muted-foreground shrink-0">View →</span>
             </div>
           ))}
         </div>
