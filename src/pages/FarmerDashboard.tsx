@@ -22,7 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Tractor, Package, DollarSign, Star, MapPin, Phone, Mail,
+  Tractor, MapPin, Phone, Mail,
   AlertCircle, Loader2,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
