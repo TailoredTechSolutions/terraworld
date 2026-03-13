@@ -48,16 +48,20 @@ const BuyerShopPanel = () => {
   });
 
   const handleAddToCart = (product: any) => {
-    addItem({
+    const cartProduct: Product = {
       id: product.id,
       name: product.name,
       price: product.price,
-      quantity: 1,
       image: product.image_url || "/placeholder.svg",
-      farmerId: product.farmer_id,
-      farmerName: product.farmers?.name || "Unknown Farm",
+      farmId: product.farmer_id,
+      farmName: product.farmers?.name || "Unknown Farm",
       unit: product.unit,
-    });
+      category: product.category,
+      stock: product.stock,
+      organic: product.is_organic || false,
+      description: product.description || "",
+    };
+    addItem(cartProduct, 1);
     toast({ title: "Added to cart", description: `${product.name} added to your cart.` });
   };
 
