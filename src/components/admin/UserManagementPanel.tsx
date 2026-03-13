@@ -36,7 +36,7 @@ import {
   RefreshCw
 } from "lucide-react";
 
-type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer';
+type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer' | 'affiliate';
 
 interface UserProfile {
   id: string;
@@ -57,16 +57,17 @@ interface UserWithRoles extends UserProfile {
   roles: AppRole[];
 }
 
-const ROLE_CONFIG: Record<AppRole, { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
-  admin: { label: "Admin", icon: Shield, color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
-  driver: { label: "Driver", icon: Truck, color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
-  farmer: { label: "Farmer", icon: Sprout, color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
-  member: { label: "Member", icon: Crown, color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
-  business_buyer: { label: "Business", icon: Building2, color: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
-  buyer: { label: "Buyer", icon: Users, color: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400" },
+const ROLE_CONFIG: Record<AppRole, { label: string; icon: React.ComponentType<{ className?: string }>; color: string; description: string }> = {
+  admin: { label: "Admin", icon: Shield, color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400", description: "Full access to all features and admin panel" },
+  driver: { label: "Driver", icon: Truck, color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400", description: "Access to driver dashboard and deliveries" },
+  farmer: { label: "Farmer", icon: Sprout, color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400", description: "Can manage farm products and orders" },
+  member: { label: "Member", icon: Crown, color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400", description: "Standard member with affiliate features" },
+  business_buyer: { label: "Business", icon: Building2, color: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400", description: "Business account for bulk purchases" },
+  buyer: { label: "Buyer", icon: Users, color: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400", description: "Standard buyer/customer account" },
+  affiliate: { label: "Affiliate", icon: Users, color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400", description: "Affiliate referral partner" },
 };
 
-const ALL_ROLES: AppRole[] = ['admin', 'driver', 'farmer', 'member', 'business_buyer', 'buyer'];
+const ALL_ROLES: AppRole[] = ['admin', 'driver', 'farmer', 'member', 'business_buyer', 'buyer', 'affiliate'];
 
 const UserManagementPanel = () => {
   const [users, setUsers] = useState<UserWithRoles[]>([]);
@@ -356,11 +357,7 @@ const UserManagementPanel = () => {
                     <div>
                       <p className="font-medium">{config.label}</p>
                       <p className="text-xs text-muted-foreground">
-                        {role === 'admin' && "Full access to all features and admin panel"}
-                        {role === 'driver' && "Access to driver dashboard and deliveries"}
-                        {role === 'farmer' && "Can manage farm products and orders"}
-                        {role === 'member' && "Standard member with affiliate features"}
-                        {role === 'business_buyer' && "Business account for bulk purchases"}
+                        {config.description}
                       </p>
                     </div>
                   </Label>

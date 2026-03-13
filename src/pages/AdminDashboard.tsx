@@ -139,6 +139,7 @@ const AdminDashboard = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderFilter, setOrderFilter] = useState<string>("all");
   const [membersCount, setMembersCount] = useState(0);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -183,6 +184,62 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // ── Farmer Actions ─────────────────────────────
+  const updateFarmerStatus = async (farmerId: string, newStatus: "active" | "pending" | "suspended") => {
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("farmers")
+        .update({ status: newStatus })
+        .eq("id", farmerId);
+      if (error) throw error;
+      toast({ title: "Success", description: `Farmer ${newStatus === "active" ? "approved" : newStatus}` });
+      setSelectedFarmer(null);
+      fetchData();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // ── Order Actions ──────────────────────────────
+  const updateOrderStatus = async (orderId: string, newStatus: "pending" | "preparing" | "in_transit" | "delivered" | "cancelled") => {
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({ status: newStatus })
+        .eq("id", orderId);
+      if (error) throw error;
+      toast({ title: "Success", description: `Order status updated to ${newStatus}` });
+      setSelectedOrder(null);
+      fetchData();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const assignDriverToOrder = async (orderId: string, driverId: string) => {
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({ driver_id: driverId })
+        .eq("id", orderId);
+      if (error) throw error;
+      toast({ title: "Success", description: "Driver assigned to order" });
+      setSelectedOrder(null);
+      fetchData();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
@@ -421,13 +478,20 @@ const AdminDashboard = () => {
                         <Edit className="h-4 w-4 mr-2" /> Edit
                       </DropdownMenuItem>
                       {farmer.status === "pending" && (
-                        <DropdownMenuItem className="text-primary">
+                        <DropdownMenuItem className="text-primary" onClick={() => updateFarmerStatus(farmer.id, "active")}>
                           <Check className="h-4 w-4 mr-2" /> Approve
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem className="text-destructive">
-                        <X className="h-4 w-4 mr-2" /> Suspend
-                      </DropdownMenuItem>
+                      {farmer.status === "active" && (
+                        <DropdownMenuItem className="text-destructive" onClick={() => updateFarmerStatus(farmer.id, "suspended")}>
+                          <X className="h-4 w-4 mr-2" /> Suspend
+                        </DropdownMenuItem>
+                      )}
+                      {farmer.status === "suspended" && (
+                        <DropdownMenuItem className="text-primary" onClick={() => updateFarmerStatus(farmer.id, "active")}>
+                          <Check className="h-4 w-4 mr-2" /> Reactivate
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -572,9 +636,31 @@ const AdminDashboard = () => {
                       <DropdownMenuItem onClick={() => setSelectedOrder(order)}>
                         <Eye className="h-4 w-4 mr-2" /> View Details
                       </DropdownMenuItem>
-                      {!order.driver_id && (
-                        <DropdownMenuItem className="text-primary">
+                      {!order.driver_id && drivers.length > 0 && (
+                        <DropdownMenuItem className="text-primary" onClick={() => {
+                          setSelectedOrder(order);
+                        }}>
                           <Truck className="h-4 w-4 mr-2" /> Assign Driver
+                        </DropdownMenuItem>
+                      )}
+                      {order.status === "pending" && (
+                        <DropdownMenuItem onClick={() => updateOrderStatus(order.id, "preparing")}>
+                          <Check className="h-4 w-4 mr-2" /> Mark Preparing
+                        </DropdownMenuItem>
+                      )}
+                      {order.status === "preparing" && (
+                        <DropdownMenuItem onClick={() => updateOrderStatus(order.id, "in_transit")}>
+                          <Truck className="h-4 w-4 mr-2" /> Mark In Transit
+                        </DropdownMenuItem>
+                      )}
+                      {order.status === "in_transit" && (
+                        <DropdownMenuItem onClick={() => updateOrderStatus(order.id, "delivered")}>
+                          <Check className="h-4 w-4 mr-2" /> Mark Delivered
+                        </DropdownMenuItem>
+                      )}
+                      {order.status !== "cancelled" && order.status !== "delivered" && (
+                        <DropdownMenuItem className="text-destructive" onClick={() => updateOrderStatus(order.id, "cancelled")}>
+                          <X className="h-4 w-4 mr-2" /> Cancel Order
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>
@@ -853,8 +939,24 @@ const AdminDashboard = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1">Edit Profile</Button>
-                <Button className="flex-1 btn-primary-gradient">View Products</Button>
+                {selectedFarmer.status === "pending" && (
+                  <Button className="flex-1 btn-primary-gradient" disabled={actionLoading} onClick={() => updateFarmerStatus(selectedFarmer.id, "active")}>
+                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
+                    Approve
+                  </Button>
+                )}
+                {selectedFarmer.status === "active" && (
+                  <Button variant="destructive" className="flex-1" disabled={actionLoading} onClick={() => updateFarmerStatus(selectedFarmer.id, "suspended")}>
+                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <X className="h-4 w-4 mr-2" />}
+                    Suspend
+                  </Button>
+                )}
+                {selectedFarmer.status === "suspended" && (
+                  <Button className="flex-1 btn-primary-gradient" disabled={actionLoading} onClick={() => updateFarmerStatus(selectedFarmer.id, "active")}>
+                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
+                    Reactivate
+                  </Button>
+                )}
               </div>
             </div>
           )}
@@ -963,11 +1065,50 @@ const AdminDashboard = () => {
                 </div>
                 <p className="text-2xl font-bold text-primary">₱{Number(selectedOrder.total).toLocaleString()}</p>
               </div>
-              <div className="flex gap-2">
-                {!selectedOrder.driver_id && (
-                  <Button variant="outline" className="flex-1">Assign Driver</Button>
+              {/* Driver Assignment */}
+              {!selectedOrder.driver_id && drivers.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Assign Driver</p>
+                  <Select onValueChange={(driverId) => assignDriverToOrder(selectedOrder.id, driverId)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a driver..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {drivers.map((d) => (
+                        <SelectItem key={d.id} value={d.id}>
+                          {d.name} — {d.vehicle} ({d.status})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Status Actions */}
+              <div className="flex flex-wrap gap-2">
+                {selectedOrder.status === "pending" && (
+                  <Button size="sm" disabled={actionLoading} onClick={() => updateOrderStatus(selectedOrder.id, "preparing")}>
+                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Mark Preparing
+                  </Button>
                 )}
-                <Button className="flex-1 btn-primary-gradient">Update Status</Button>
+                {selectedOrder.status === "preparing" && (
+                  <Button size="sm" disabled={actionLoading} onClick={() => updateOrderStatus(selectedOrder.id, "in_transit")}>
+                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Mark In Transit
+                  </Button>
+                )}
+                {selectedOrder.status === "in_transit" && (
+                  <Button size="sm" disabled={actionLoading} onClick={() => updateOrderStatus(selectedOrder.id, "delivered")}>
+                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Mark Delivered
+                  </Button>
+                )}
+                {selectedOrder.status !== "cancelled" && selectedOrder.status !== "delivered" && (
+                  <Button size="sm" variant="destructive" disabled={actionLoading} onClick={() => updateOrderStatus(selectedOrder.id, "cancelled")}>
+                    Cancel Order
+                  </Button>
+                )}
               </div>
             </div>
           )}
