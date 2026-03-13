@@ -1,3 +1,4 @@
+import React from "react";
 import { 
   Facebook, Instagram, Twitter, Linkedin, 
   Mail, MapPin, Smartphone, ChevronDown,
