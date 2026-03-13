@@ -131,16 +131,35 @@ const BuyerSidebar = ({ activeTab, onTabChange }: BuyerSidebarProps) => {
 
   if (isMobile) {
     return (
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="fixed bottom-4 left-4 z-50 bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 h-12 w-12 rounded-full">
-            <Menu className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="p-0 w-64">
-          <SidebarContent inSheet />
-        </SheetContent>
-      </Sheet>
+      <div className="flex flex-col h-full w-14 shrink-0 border-r border-border bg-background">
+        <ScrollArea className="flex-1 py-2">
+          <nav className="flex flex-col items-center gap-1 px-1">
+            {navGroups.map((group) => (
+              <div key={group.label} className="w-full">
+                <div className="h-px bg-border mx-2 my-1" />
+                {group.items.map((item) => {
+                  const isActive = activeTab === item.tab;
+                  return (
+                    <button
+                      key={item.tab}
+                      onClick={() => onTabChange(item.tab)}
+                      title={item.title}
+                      className={cn(
+                        "flex items-center justify-center w-full h-10 rounded-lg transition-all duration-200",
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )}
+                    >
+                      <item.icon className="h-4 w-4" />
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </nav>
+        </ScrollArea>
+      </div>
     );
   }
 
