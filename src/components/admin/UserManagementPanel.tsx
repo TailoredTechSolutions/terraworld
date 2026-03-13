@@ -357,11 +357,7 @@ const UserManagementPanel = () => {
                     <div>
                       <p className="font-medium">{config.label}</p>
                       <p className="text-xs text-muted-foreground">
-                        {role === 'admin' && "Full access to all features and admin panel"}
-                        {role === 'driver' && "Access to driver dashboard and deliveries"}
-                        {role === 'farmer' && "Can manage farm products and orders"}
-                        {role === 'member' && "Standard member with affiliate features"}
-                        {role === 'business_buyer' && "Business account for bulk purchases"}
+                        {config.description}
                       </p>
                     </div>
                   </Label>
