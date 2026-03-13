@@ -559,8 +559,7 @@ const TestimonialsSection = () => {
 
 const Index = () => {
   const { user } = useAuth();
-  const { isAdmin, loading: rolesLoading } = useUserRoles();
-  const showRoleActions = !user || (!rolesLoading && isAdmin);
+  const { isAdmin: _isAdmin, loading: rolesLoading } = useUserRoles();
 
   return (
     <div className="min-h-screen bg-background">

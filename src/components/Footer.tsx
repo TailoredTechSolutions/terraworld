@@ -91,7 +91,7 @@ const Footer = () => {
       </div>
 
       {/* ===== 2) MAIN FOOTER GRID ===== */}
-      <div className="container py-12 md:py-12 py-6">
+      <div className="container py-6 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-2 md:gap-y-8">
           {/* Column A — Terra */}
           <FooterAccordion title="Terra">

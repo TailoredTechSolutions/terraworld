@@ -31,29 +31,33 @@ const ThemeToggle = () => {
       className="relative glass-hover overflow-hidden"
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
     >
-      <AnimatePresence mode="wait" initial={false}>
-        {isDark ? (
-          <motion.div
-            key="sun"
-            initial={{ y: -20, opacity: 0, rotate: -90 }}
-            animate={{ y: 0, opacity: 1, rotate: 0 }}
-            exit={{ y: 20, opacity: 0, rotate: 90 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Sun className="h-5 w-5 text-ph-gold" />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="moon"
-            initial={{ y: -20, opacity: 0, rotate: 90 }}
-            animate={{ y: 0, opacity: 1, rotate: 0 }}
-            exit={{ y: 20, opacity: 0, rotate: -90 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Moon className="h-5 w-5 text-primary" />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <span className="flex items-center justify-center">
+        <AnimatePresence mode="wait" initial={false}>
+          {isDark ? (
+            <motion.span
+              key="sun"
+              initial={{ y: -20, opacity: 0, rotate: -90 }}
+              animate={{ y: 0, opacity: 1, rotate: 0 }}
+              exit={{ y: 20, opacity: 0, rotate: 90 }}
+              transition={{ duration: 0.2 }}
+              className="flex"
+            >
+              <Sun className="h-5 w-5 text-ph-gold" />
+            </motion.span>
+          ) : (
+            <motion.span
+              key="moon"
+              initial={{ y: -20, opacity: 0, rotate: 90 }}
+              animate={{ y: 0, opacity: 1, rotate: 0 }}
+              exit={{ y: 20, opacity: 0, rotate: -90 }}
+              transition={{ duration: 0.2 }}
+              className="flex"
+            >
+              <Moon className="h-5 w-5 text-primary" />
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </span>
     </Button>
   );
 };
