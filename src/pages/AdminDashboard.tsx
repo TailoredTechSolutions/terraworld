@@ -939,8 +939,24 @@ const AdminDashboard = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1">Edit Profile</Button>
-                <Button className="flex-1 btn-primary-gradient">View Products</Button>
+                {selectedFarmer.status === "pending" && (
+                  <Button className="flex-1 btn-primary-gradient" disabled={actionLoading} onClick={() => updateFarmerStatus(selectedFarmer.id, "active")}>
+                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
+                    Approve
+                  </Button>
+                )}
+                {selectedFarmer.status === "active" && (
+                  <Button variant="destructive" className="flex-1" disabled={actionLoading} onClick={() => updateFarmerStatus(selectedFarmer.id, "suspended")}>
+                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <X className="h-4 w-4 mr-2" />}
+                    Suspend
+                  </Button>
+                )}
+                {selectedFarmer.status === "suspended" && (
+                  <Button className="flex-1 btn-primary-gradient" disabled={actionLoading} onClick={() => updateFarmerStatus(selectedFarmer.id, "active")}>
+                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
+                    Reactivate
+                  </Button>
+                )}
               </div>
             </div>
           )}
