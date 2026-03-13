@@ -5,23 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2, DollarSign, TrendingUp, Receipt, ArrowDownRight } from "lucide-react";
 import { format } from "date-fns";
-import type { Tables, Json } from "@/integrations/supabase/types";
+import type { Tables } from "@/integrations/supabase/types";
 
 interface FarmerEarningsPanelProps {
   farmerId: string;
   userId: string;
 }
-
-interface OrderItem {
-  name: string;
-  price: number;
-  quantity: number;
-}
-
-const parseItems = (items: Json): OrderItem[] => {
-  if (Array.isArray(items)) return items as unknown as OrderItem[];
-  return [];
-};
 
 const FarmerEarningsPanel = ({ farmerId, userId }: FarmerEarningsPanelProps) => {
   const { data: orders, isLoading } = useQuery({
@@ -41,25 +30,8 @@ const FarmerEarningsPanel = ({ farmerId, userId }: FarmerEarningsPanelProps) => 
   const { data: wallet } = useQuery({
     queryKey: ["farmer-wallet", userId],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("wallets")
-        .select("*")
-        .eq("user_id", userId)
-        .maybeSingle();
+      const { data } = await supabase.from("wallets").select("*").eq("user_id", userId).maybeSingle();
       return data;
-    },
-  });
-
-  const { data: withdrawals } = useQuery({
-    queryKey: ["farmer-withdrawals", userId],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("withdrawal_requests")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(20);
-      return data || [];
     },
   });
 
@@ -70,49 +42,48 @@ const FarmerEarningsPanel = ({ farmerId, userId }: FarmerEarningsPanelProps) => 
   const totalGross = orders?.reduce((sum, o) => sum + Number(o.subtotal), 0) || 0;
   const totalTerraFee = orders?.reduce((sum, o) => sum + Number(o.terra_fee || 0), 0) || 0;
   const totalFarmerNet = orders?.reduce((sum, o) => sum + Number(o.farmer_price || 0), 0) || 0;
-  const deliveredCount = orders?.filter(o => o.status === "delivered").length || 0;
 
   return (
     <div className="space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
             <DollarSign className="h-4 w-4" /> Gross Sales
           </div>
-          <p className="text-2xl font-bold">₱{totalGross.toLocaleString()}</p>
+          <p className="text-xl font-bold">₱{totalGross.toLocaleString()}</p>
         </Card>
         <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
             <ArrowDownRight className="h-4 w-4" /> Platform Fees
           </div>
-          <p className="text-2xl font-bold text-destructive">-₱{totalTerraFee.toLocaleString()}</p>
+          <p className="text-xl font-bold text-destructive">-₱{totalTerraFee.toLocaleString()}</p>
         </Card>
         <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
             <TrendingUp className="h-4 w-4" /> Net Earnings
           </div>
-          <p className="text-2xl font-bold text-primary">₱{totalFarmerNet.toLocaleString()}</p>
+          <p className="text-xl font-bold text-primary">₱{totalFarmerNet.toLocaleString()}</p>
         </Card>
         <Card className="p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
             <Receipt className="h-4 w-4" /> Wallet Balance
           </div>
-          <p className="text-2xl font-bold">₱{Number(wallet?.available_balance || 0).toLocaleString()}</p>
+          <p className="text-xl font-bold">₱{Number(wallet?.available_balance || 0).toLocaleString()}</p>
         </Card>
       </div>
 
-      {/* Order Earnings Table */}
+      {/* Earnings Table */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Receipt className="h-5 w-5" /> Order Earnings Breakdown
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <Receipt className="h-4 w-4" /> Order Earnings Breakdown
           </CardTitle>
-          <CardDescription>{deliveredCount} delivered orders</CardDescription>
+          <CardDescription>{orders?.filter(o => o.status === "delivered").length || 0} delivered orders</CardDescription>
         </CardHeader>
         <CardContent>
           {!orders?.length ? (
-            <p className="text-center text-muted-foreground py-8">No orders yet.</p>
+            <p className="text-center text-muted-foreground py-6">No orders yet.</p>
           ) : (
             <div className="rounded-md border overflow-x-auto">
               <Table>
@@ -135,9 +106,7 @@ const FarmerEarningsPanel = ({ farmerId, userId }: FarmerEarningsPanelProps) => 
                       <TableCell className="text-right text-destructive">-₱{Number(order.terra_fee || 0).toLocaleString()}</TableCell>
                       <TableCell className="text-right font-semibold text-primary">₱{Number(order.farmer_price || 0).toLocaleString()}</TableCell>
                       <TableCell>
-                        <Badge variant={order.status === "delivered" ? "default" : "secondary"}>
-                          {order.status}
-                        </Badge>
+                        <Badge variant={order.status === "delivered" ? "default" : "secondary"}>{order.status}</Badge>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -147,33 +116,6 @@ const FarmerEarningsPanel = ({ farmerId, userId }: FarmerEarningsPanelProps) => 
           )}
         </CardContent>
       </Card>
-
-      {/* Withdrawal History */}
-      {withdrawals && withdrawals.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Withdrawal History</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {withdrawals.map((w) => (
-                <div key={w.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                  <div>
-                    <p className="text-sm font-medium">{w.reference_code}</p>
-                    <p className="text-xs text-muted-foreground">{w.method} • {format(new Date(w.created_at), "MMM d, yyyy")}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold">₱{Number(w.net_amount).toLocaleString()}</p>
-                    <Badge variant={w.status === "completed" ? "default" : w.status === "pending" ? "secondary" : "outline"} className="text-xs">
-                      {w.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };

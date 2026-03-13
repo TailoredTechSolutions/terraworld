@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Wallet, ArrowUpRight } from "lucide-react";
+import { format } from "date-fns";
 
 interface FarmerWithdrawalPanelProps {
   userId: string;
@@ -51,7 +53,7 @@ const FarmerWithdrawalPanel = ({ userId }: FarmerWithdrawalPanelProps) => {
       if (isNaN(amt) || amt <= 0) throw new Error("Invalid amount");
       if (amt > Number(wallet.available_balance)) throw new Error("Insufficient balance");
 
-      const fee = Math.round(amt * 0.02 * 100) / 100; // 2% fee
+      const fee = Math.round(amt * 0.02 * 100) / 100;
       const net = amt - fee;
 
       const { error } = await supabase
@@ -84,12 +86,19 @@ const FarmerWithdrawalPanel = ({ userId }: FarmerWithdrawalPanelProps) => {
 
   const balance = Number(wallet?.available_balance || 0);
 
+  const statusVariant = (status: string) => {
+    if (status === "completed" || status === "paid") return "default" as const;
+    if (status === "pending") return "secondary" as const;
+    if (status === "rejected") return "destructive" as const;
+    return "outline" as const;
+  };
+
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Wallet className="h-5 w-5" /> Request Withdrawal
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <Wallet className="h-4 w-4" /> Request Withdrawal
           </CardTitle>
           <CardDescription>Available balance: ₱{balance.toLocaleString()}</CardDescription>
         </CardHeader>
@@ -112,7 +121,7 @@ const FarmerWithdrawalPanel = ({ userId }: FarmerWithdrawalPanelProps) => {
           </div>
           {amount && parseFloat(amount) > 0 && (
             <div className="text-sm text-muted-foreground">
-              Fee (2%): ₱{(parseFloat(amount) * 0.02).toFixed(2)} • Net: ₱{(parseFloat(amount) * 0.98).toFixed(2)}
+              Fee (2%): ₱{(parseFloat(amount) * 0.02).toFixed(2)} · Net: ₱{(parseFloat(amount) * 0.98).toFixed(2)}
             </div>
           )}
           <Button onClick={() => withdrawMutation.mutate()} disabled={withdrawMutation.isPending || !amount} className="gap-2">
@@ -122,31 +131,45 @@ const FarmerWithdrawalPanel = ({ userId }: FarmerWithdrawalPanelProps) => {
         </CardContent>
       </Card>
 
-      {requests && requests.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Recent Requests</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {requests.map((r) => (
-                <div key={r.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                  <div>
-                    <p className="text-sm font-medium">{r.reference_code}</p>
-                    <p className="text-xs text-muted-foreground">{r.method} • {new Date(r.created_at).toLocaleDateString()}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold">₱{Number(r.net_amount).toLocaleString()}</p>
-                    <Badge variant={r.status === "completed" ? "default" : r.status === "pending" ? "secondary" : "outline"} className="text-xs">
-                      {r.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">Withdrawal History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!requests?.length ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No withdrawal requests yet.</p>
+          ) : (
+            <div className="rounded-md border overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Request ID</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Method</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead className="text-right">Net</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {requests.map((r) => (
+                    <TableRow key={r.id}>
+                      <TableCell className="font-medium text-xs">{r.reference_code}</TableCell>
+                      <TableCell className="text-sm">{format(new Date(r.created_at), "MMM d, yyyy")}</TableCell>
+                      <TableCell className="text-sm capitalize">{r.method.replace("_", " ")}</TableCell>
+                      <TableCell className="text-right text-sm">₱{Number(r.amount).toLocaleString()}</TableCell>
+                      <TableCell className="text-right text-sm font-medium">₱{Number(r.net_amount).toLocaleString()}</TableCell>
+                      <TableCell>
+                        <Badge variant={statusVariant(r.status)} className="text-xs">{r.status}</Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

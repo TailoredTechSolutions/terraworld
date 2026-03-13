@@ -6,9 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ShoppingBag, Package, DollarSign, Coins, Bell, Clock,
-  Plus, Eye, Wallet, TrendingUp, AlertTriangle,
+  Plus, Eye, Wallet, TrendingUp, AlertTriangle, Truck,
 } from "lucide-react";
-import type { Tables } from "@/integrations/supabase/types";
+import { format } from "date-fns";
 
 interface FarmerOverviewPanelProps {
   farmerId: string;
@@ -17,14 +17,13 @@ interface FarmerOverviewPanelProps {
 }
 
 const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPanelProps) => {
-  // Today's orders
   const { data: todayOrders = [], isLoading: ordersLoading } = useQuery({
     queryKey: ["farmer-today-orders", farmerId],
     queryFn: async () => {
       const today = new Date().toISOString().split("T")[0];
       const { data, error } = await supabase
         .from("orders")
-        .select("id, order_number, status, total, created_at")
+        .select("id, order_number, status, total, customer_name, created_at")
         .eq("farmer_id", farmerId)
         .gte("created_at", `${today}T00:00:00`)
         .order("created_at", { ascending: false });
@@ -33,10 +32,8 @@ const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPan
     },
   });
 
-  // Pending orders count
   const pendingOrders = todayOrders.filter((o) => o.status === "pending");
 
-  // Wallet balance
   const { data: wallet, isLoading: walletLoading } = useQuery({
     queryKey: ["farmer-wallet", userId],
     queryFn: async () => {
@@ -50,7 +47,6 @@ const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPan
     },
   });
 
-  // Token balance
   const { data: tokenBalance, isLoading: tokenLoading } = useQuery({
     queryKey: ["farmer-token-balance", userId],
     queryFn: async () => {
@@ -64,7 +60,6 @@ const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPan
     },
   });
 
-  // Low stock products
   const { data: lowStockProducts = [] } = useQuery({
     queryKey: ["farmer-low-stock", farmerId],
     queryFn: async () => {
@@ -80,7 +75,6 @@ const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPan
     },
   });
 
-  // Unread notifications
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["farmer-unread-notifs", userId],
     queryFn: async () => {
@@ -94,7 +88,6 @@ const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPan
     },
   });
 
-  // Period earnings
   const { data: periodEarnings = 0 } = useQuery({
     queryKey: ["farmer-period-earnings", farmerId],
     queryFn: async () => {
@@ -111,134 +104,223 @@ const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPan
     },
   });
 
+  // Recent orders (last 5)
+  const { data: recentOrders = [] } = useQuery({
+    queryKey: ["farmer-recent-orders", farmerId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("orders")
+        .select("id, order_number, status, total, customer_name, created_at")
+        .eq("farmer_id", farmerId)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Recent notifications
+  const { data: recentNotifs = [] } = useQuery({
+    queryKey: ["farmer-recent-notifs", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("id, title, message, type, is_read, created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const isLoading = ordersLoading || walletLoading || tokenLoading;
+
+  const statusColor: Record<string, string> = {
+    pending: "secondary",
+    preparing: "outline",
+    in_transit: "default",
+    delivered: "default",
+    cancelled: "destructive",
+  };
 
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onNavigate("orders")}>
-          <CardContent className="pt-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Today's Orders</p>
-                {isLoading ? <Skeleton className="h-8 w-12" /> : (
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">Today's Orders</p>
+                {isLoading ? <Skeleton className="h-7 w-10 mt-1" /> : (
                   <p className="text-2xl font-bold">{todayOrders.length}</p>
                 )}
               </div>
-              <ShoppingBag className="h-8 w-8 text-primary/60" />
+              <ShoppingBag className="h-7 w-7 text-primary/60 shrink-0" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onNavigate("orders")}>
-          <CardContent className="pt-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Pending Orders</p>
-                {isLoading ? <Skeleton className="h-8 w-12" /> : (
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">Pending</p>
+                {isLoading ? <Skeleton className="h-7 w-10 mt-1" /> : (
                   <p className="text-2xl font-bold text-amber-600">{pendingOrders.length}</p>
                 )}
               </div>
-              <Clock className="h-8 w-8 text-amber-500/60" />
+              <Clock className="h-7 w-7 text-amber-500/60 shrink-0" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onNavigate("earnings")}>
-          <CardContent className="pt-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">30-Day Earnings</p>
-                {isLoading ? <Skeleton className="h-8 w-20" /> : (
-                  <p className="text-2xl font-bold">₱{periodEarnings.toLocaleString()}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">Monthly Earnings</p>
+                {isLoading ? <Skeleton className="h-7 w-16 mt-1" /> : (
+                  <p className="text-xl font-bold">₱{periodEarnings.toLocaleString()}</p>
                 )}
               </div>
-              <TrendingUp className="h-8 w-8 text-green-600/60" />
+              <TrendingUp className="h-7 w-7 text-green-600/60 shrink-0" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onNavigate("tokens")}>
-          <CardContent className="pt-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">AGRI Tokens</p>
-                {isLoading ? <Skeleton className="h-8 w-16" /> : (
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">AGRI Tokens</p>
+                {isLoading ? <Skeleton className="h-7 w-12 mt-1" /> : (
                   <p className="text-2xl font-bold">{Number(tokenBalance).toLocaleString()}</p>
                 )}
               </div>
-              <Coins className="h-8 w-8 text-primary/60" />
+              <Coins className="h-7 w-7 text-primary/60 shrink-0" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Second Row: Wallet + Alerts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
+      {/* Recent Activity + Wallet/Alerts row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Recent Activity - takes 2 cols */}
+        <Card className="lg:col-span-2">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Wallet className="h-4 w-4" /> Wallet Balance
-            </CardTitle>
+            <CardTitle className="text-sm font-semibold">Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            {walletLoading ? <Skeleton className="h-10 w-32" /> : (
+            {recentOrders.length === 0 && recentNotifs.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No recent activity yet.</p>
+            ) : (
               <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Available</span>
-                  <span className="font-bold text-lg">₱{Number(wallet?.available_balance ?? 0).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Pending</span>
-                  <span>₱{Number(wallet?.pending_balance ?? 0).toLocaleString()}</span>
-                </div>
-                <Button size="sm" variant="outline" className="w-full mt-2" onClick={() => onNavigate("withdrawals")}>
-                  Request Payout
-                </Button>
+                {recentOrders.map((o) => (
+                  <div
+                    key={o.id}
+                    className="flex items-center justify-between p-2.5 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => onNavigate("orders")}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <ShoppingBag className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{o.order_number} — {o.customer_name}</p>
+                        <p className="text-xs text-muted-foreground">{format(new Date(o.created_at), "MMM d, h:mm a")}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-sm font-medium">₱{Number(o.total).toLocaleString()}</span>
+                      <Badge variant={statusColor[o.status || "pending"] as any} className="text-xs">{o.status}</Badge>
+                    </div>
+                  </div>
+                ))}
+                {recentNotifs.slice(0, 3).map((n) => (
+                  <div
+                    key={n.id}
+                    className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${!n.is_read ? "border-primary/20 bg-primary/5" : ""}`}
+                    onClick={() => onNavigate("notifications")}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Bell className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{n.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{n.message}</p>
+                      </div>
+                    </div>
+                    <span className="text-xs text-muted-foreground shrink-0">{format(new Date(n.created_at), "MMM d")}</span>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Bell className="h-4 w-4" /> Notifications
-              {unreadCount > 0 && (
-                <Badge variant="destructive" className="text-xs">{unreadCount}</Badge>
+        {/* Wallet + Alerts stacked */}
+        <div className="space-y-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <Wallet className="h-4 w-4" /> Wallet
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pb-4">
+              {walletLoading ? <Skeleton className="h-8 w-24" /> : (
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Available</span>
+                    <span className="font-bold">₱{Number(wallet?.available_balance ?? 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Pending</span>
+                    <span>₱{Number(wallet?.pending_balance ?? 0).toLocaleString()}</span>
+                  </div>
+                  <Button size="sm" variant="outline" className="w-full mt-2" onClick={() => onNavigate("withdrawals")}>
+                    Request Payout
+                  </Button>
+                </div>
               )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {unreadCount === 0 ? (
-              <p className="text-sm text-muted-foreground">No new notifications</p>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-sm">You have <span className="font-bold">{unreadCount}</span> unread alert{unreadCount > 1 ? "s" : ""}</p>
-                <Button size="sm" variant="outline" className="w-full" onClick={() => onNavigate("notifications")}>
-                  View Alerts
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <Bell className="h-4 w-4" /> Alerts
+                {unreadCount > 0 && <Badge variant="destructive" className="text-[10px] px-1.5">{unreadCount}</Badge>}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pb-4">
+              {unreadCount === 0 ? (
+                <p className="text-xs text-muted-foreground">All caught up!</p>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm"><span className="font-bold">{unreadCount}</span> unread alert{unreadCount > 1 ? "s" : ""}</p>
+                  <Button size="sm" variant="outline" className="w-full" onClick={() => onNavigate("notifications")}>
+                    View Alerts
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Low Stock Alerts */}
       {lowStockProducts.length > 0 && (
         <Card className="border-amber-200 dark:border-amber-800">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2 text-amber-600">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2 text-amber-600">
               <AlertTriangle className="h-4 w-4" /> Low Stock Alerts
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {lowStockProducts.map((p) => (
                 <div key={p.id} className="flex items-center justify-between text-sm p-2 rounded-lg bg-amber-50 dark:bg-amber-950/30">
                   <span className="font-medium">{p.name}</span>
-                  <Badge variant="outline" className="text-amber-600">{p.stock} {p.unit} left</Badge>
+                  <Badge variant="outline" className="text-amber-600 text-xs">{p.stock} {p.unit} left</Badge>
                 </div>
               ))}
               <Button size="sm" variant="outline" className="w-full" onClick={() => onNavigate("products")}>
@@ -251,26 +333,26 @@ const FarmerOverviewPanel = ({ farmerId, userId, onNavigate }: FarmerOverviewPan
 
       {/* Quick Actions */}
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Quick Actions</CardTitle>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Button variant="outline" className="h-auto flex-col gap-2 py-4" onClick={() => onNavigate("products")}>
+            <Button variant="outline" className="h-auto flex-col gap-1.5 py-3" onClick={() => onNavigate("products")}>
               <Plus className="h-5 w-5" />
               <span className="text-xs">Add Product</span>
             </Button>
-            <Button variant="outline" className="h-auto flex-col gap-2 py-4" onClick={() => onNavigate("orders")}>
+            <Button variant="outline" className="h-auto flex-col gap-1.5 py-3" onClick={() => onNavigate("orders")}>
               <Eye className="h-5 w-5" />
               <span className="text-xs">View Orders</span>
             </Button>
-            <Button variant="outline" className="h-auto flex-col gap-2 py-4" onClick={() => onNavigate("withdrawals")}>
-              <Wallet className="h-5 w-5" />
-              <span className="text-xs">Request Payout</span>
+            <Button variant="outline" className="h-auto flex-col gap-1.5 py-3" onClick={() => onNavigate("withdrawals")}>
+              <DollarSign className="h-5 w-5" />
+              <span className="text-xs">Request Withdrawal</span>
             </Button>
-            <Button variant="outline" className="h-auto flex-col gap-2 py-4" onClick={() => onNavigate("delivery")}>
-              <Package className="h-5 w-5" />
-              <span className="text-xs">Track Delivery</span>
+            <Button variant="outline" className="h-auto flex-col gap-1.5 py-3" onClick={() => onNavigate("delivery")}>
+              <Truck className="h-5 w-5" />
+              <span className="text-xs">Track Deliveries</span>
             </Button>
           </div>
         </CardContent>
