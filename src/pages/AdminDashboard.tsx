@@ -1065,11 +1065,50 @@ const AdminDashboard = () => {
                 </div>
                 <p className="text-2xl font-bold text-primary">₱{Number(selectedOrder.total).toLocaleString()}</p>
               </div>
-              <div className="flex gap-2">
-                {!selectedOrder.driver_id && (
-                  <Button variant="outline" className="flex-1">Assign Driver</Button>
+              {/* Driver Assignment */}
+              {!selectedOrder.driver_id && drivers.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Assign Driver</p>
+                  <Select onValueChange={(driverId) => assignDriverToOrder(selectedOrder.id, driverId)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a driver..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {drivers.map((d) => (
+                        <SelectItem key={d.id} value={d.id}>
+                          {d.name} — {d.vehicle} ({d.status})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Status Actions */}
+              <div className="flex flex-wrap gap-2">
+                {selectedOrder.status === "pending" && (
+                  <Button size="sm" disabled={actionLoading} onClick={() => updateOrderStatus(selectedOrder.id, "preparing")}>
+                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Mark Preparing
+                  </Button>
                 )}
-                <Button className="flex-1 btn-primary-gradient">Update Status</Button>
+                {selectedOrder.status === "preparing" && (
+                  <Button size="sm" disabled={actionLoading} onClick={() => updateOrderStatus(selectedOrder.id, "in_transit")}>
+                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Mark In Transit
+                  </Button>
+                )}
+                {selectedOrder.status === "in_transit" && (
+                  <Button size="sm" disabled={actionLoading} onClick={() => updateOrderStatus(selectedOrder.id, "delivered")}>
+                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Mark Delivered
+                  </Button>
+                )}
+                {selectedOrder.status !== "cancelled" && selectedOrder.status !== "delivered" && (
+                  <Button size="sm" variant="destructive" disabled={actionLoading} onClick={() => updateOrderStatus(selectedOrder.id, "cancelled")}>
+                    Cancel Order
+                  </Button>
+                )}
               </div>
             </div>
           )}
