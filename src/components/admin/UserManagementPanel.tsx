@@ -36,7 +36,7 @@ import {
   RefreshCw
 } from "lucide-react";
 
-type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer';
+type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer' | 'affiliate';
 
 interface UserProfile {
   id: string;
