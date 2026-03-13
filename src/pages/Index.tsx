@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import FarmCard from "@/components/FarmCard";
@@ -556,6 +558,10 @@ const TestimonialsSection = () => {
 };
 
 const Index = () => {
+  const { user } = useAuth();
+  const { isAdmin, loading: rolesLoading } = useUserRoles();
+  const showRoleActions = !user || (!rolesLoading && isAdmin);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -564,6 +570,46 @@ const Index = () => {
       <main>
         {/* Hero */}
         <HeroSection />
+
+        {/* Role Action Buttons — only when not signed in */}
+        {!user && (
+          <section className="py-10 bg-secondary/50">
+            <div className="container">
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                <Button
+                  size="lg"
+                  className="h-12 px-8 text-base font-bold gap-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-md"
+                  onClick={() => {
+                    // Placeholder for future app download link
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                  Download App
+                </Button>
+                <Link to="/auth?role=farmer">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 px-8 text-base font-semibold gap-2 rounded-full border-2 border-primary/30 text-primary hover:bg-primary/5"
+                  >
+                    Become a Farmer
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link to="/auth?role=buyer">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 px-8 text-base font-semibold gap-2 rounded-full border-2 border-primary/30 text-primary hover:bg-primary/5"
+                  >
+                    Become a Buyer
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Key Features Section */}
         <section className="py-20 bg-grain">
