@@ -139,6 +139,7 @@ const AdminDashboard = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderFilter, setOrderFilter] = useState<string>("all");
   const [membersCount, setMembersCount] = useState(0);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
