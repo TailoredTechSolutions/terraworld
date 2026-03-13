@@ -205,7 +205,7 @@ const AdminDashboard = () => {
   };
 
   // ── Order Actions ──────────────────────────────
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+  const updateOrderStatus = async (orderId: string, newStatus: "pending" | "preparing" | "in_transit" | "delivered" | "cancelled") => {
     setActionLoading(true);
     try {
       const { error } = await supabase
