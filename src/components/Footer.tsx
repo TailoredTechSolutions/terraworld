@@ -34,29 +34,32 @@ const FooterAccordion = ({ title, children }: { title: string; children: React.R
   );
 };
 
-const FooterLink = ({ to, children, external }: { to: string; children: React.ReactNode; external?: boolean }) => {
-  if (external || to.startsWith("mailto:") || to.startsWith("http")) {
+const FooterLink = React.forwardRef<HTMLLIElement, { to: string; children: React.ReactNode; external?: boolean }>(
+  ({ to, children, external }, ref) => {
+    if (external || to.startsWith("mailto:") || to.startsWith("http")) {
+      return (
+        <li ref={ref}>
+          <a
+            href={to}
+            target={to.startsWith("http") ? "_blank" : undefined}
+            rel={to.startsWith("http") ? "noopener noreferrer" : undefined}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+          >
+            {children}
+          </a>
+        </li>
+      );
+    }
     return (
-      <li>
-        <a
-          href={to}
-          target={to.startsWith("http") ? "_blank" : undefined}
-          rel={to.startsWith("http") ? "noopener noreferrer" : undefined}
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
-        >
+      <li ref={ref}>
+        <Link to={to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
           {children}
-        </a>
+        </Link>
       </li>
     );
   }
-  return (
-    <li>
-      <Link to={to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-        {children}
-      </Link>
-    </li>
-  );
-};
+);
+FooterLink.displayName = "FooterLink";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
