@@ -70,8 +70,8 @@ Deno.serve(async (req) => {
       .from('orders')
       .select(`
         *,
-        farmers:farmer_id(name),
-        drivers:driver_id(name)
+        farmers:farmer_id(name, location, phone, email),
+        drivers:driver_id(name, phone, vehicle, license_plate)
       `)
       .order('created_at', { ascending: false })
       .limit(100);

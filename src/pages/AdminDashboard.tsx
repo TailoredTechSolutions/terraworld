@@ -801,7 +801,7 @@ const AdminDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <AdminOverviewPanel membersCount={membersCount} ordersCount={orders.length} totalRevenue={totalRevenue} />;
+        return <AdminOverviewPanel membersCount={membersCount} ordersCount={orders.length} totalRevenue={totalRevenue} orders={orders} onRefresh={fetchData} />;
       case 'users':
         return <UserManagementPanel />;
       case 'marketplace':
