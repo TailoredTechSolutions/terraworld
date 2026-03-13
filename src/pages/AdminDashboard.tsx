@@ -185,6 +185,62 @@ const AdminDashboard = () => {
     fetchData();
   }, []);
 
+  // ── Farmer Actions ─────────────────────────────
+  const updateFarmerStatus = async (farmerId: string, newStatus: "active" | "pending" | "suspended") => {
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("farmers")
+        .update({ status: newStatus })
+        .eq("id", farmerId);
+      if (error) throw error;
+      toast({ title: "Success", description: `Farmer ${newStatus === "active" ? "approved" : newStatus}` });
+      setSelectedFarmer(null);
+      fetchData();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // ── Order Actions ──────────────────────────────
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({ status: newStatus })
+        .eq("id", orderId);
+      if (error) throw error;
+      toast({ title: "Success", description: `Order status updated to ${newStatus}` });
+      setSelectedOrder(null);
+      fetchData();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const assignDriverToOrder = async (orderId: string, driverId: string) => {
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({ driver_id: driverId })
+        .eq("id", orderId);
+      if (error) throw error;
+      toast({ title: "Success", description: "Driver assigned to order" });
+      setSelectedOrder(null);
+      fetchData();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
       active: { variant: "default", label: "Active" },
