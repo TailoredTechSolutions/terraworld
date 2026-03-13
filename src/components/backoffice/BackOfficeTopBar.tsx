@@ -19,7 +19,13 @@ interface Props {
 const BackOfficeTopBar = ({ sections, activeTab, onTabClick }: Props) => {
   const { profile, signOut } = useAuth();
   const { roles } = useUserRoles();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-lg border-b border-border/60 shadow-sm">
@@ -78,10 +84,11 @@ const BackOfficeTopBar = ({ sections, activeTab, onTabClick }: Props) => {
                   <Shield className="h-3.5 w-3.5 text-primary" />
                 </div>
                 <span className="hidden md:inline">{profile?.full_name || profile?.email || "Admin"}</span>
+                <ChevronDown className="h-3 w-3 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <div className="px-3 py-2">
+            <DropdownMenuContent align="end" className="w-64">
+              <div className="px-3 py-3">
                 <p className="text-sm font-medium">{profile?.full_name || "Admin"}</p>
                 <p className="text-xs text-muted-foreground">{profile?.email}</p>
                 <div className="flex flex-wrap gap-1 mt-1.5">
@@ -91,9 +98,32 @@ const BackOfficeTopBar = ({ sections, activeTab, onTabClick }: Props) => {
                 </div>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem><User className="h-3.5 w-3.5 mr-2" /> Profile</DropdownMenuItem>
+              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Navigate To</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => navigate('/')}>
+                <Home className="h-3.5 w-3.5 mr-2" /> Main Page
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/farmer')}>
+                <Tractor className="h-3.5 w-3.5 mr-2" /> Farmer Dashboard
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/buyer')}>
+                <ShoppingCart className="h-3.5 w-3.5 mr-2" /> Buyer Dashboard
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/driver')}>
+                <Truck className="h-3.5 w-3.5 mr-2" /> Driver Dashboard
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/member')}>
+                <User className="h-3.5 w-3.5 mr-2" /> Member Dashboard
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/business-centre')}>
+                <Settings className="h-3.5 w-3.5 mr-2" /> Business Centre
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut()} className="text-destructive">
+              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Account</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => onTabClick('users' as SectionId)}>
+                <User className="h-3.5 w-3.5 mr-2" /> My Profile & Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                 <LogOut className="h-3.5 w-3.5 mr-2" /> Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
