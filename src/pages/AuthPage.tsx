@@ -53,7 +53,7 @@ const AuthPage = () => {
   // Pre-select role from URL param
   useEffect(() => {
     const role = searchParams.get("role");
-    if (role === "buyer" || role === "farmer") {
+    if (role === "buyer" || role === "farmer" || role === "driver") {
       setRegistrationRole(role);
       setActiveTab("register");
     }
