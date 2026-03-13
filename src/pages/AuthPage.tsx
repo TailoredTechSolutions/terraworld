@@ -319,9 +319,9 @@ const AuthPage = () => {
                     {/* Role indicator */}
                     <div className="flex items-center justify-between p-3 rounded-lg bg-secondary dark:bg-[hsl(0,0%,15%)]">
                       <div className="flex items-center gap-2">
-                        {registrationRole === "buyer" ? <ShoppingBag className="h-4 w-4 text-primary" /> : <Tractor className="h-4 w-4 text-primary" />}
+                        {registrationRole === "buyer" ? <ShoppingBag className="h-4 w-4 text-primary" /> : registrationRole === "driver" ? <Truck className="h-4 w-4 text-primary" /> : <Tractor className="h-4 w-4 text-primary" />}
                         <span className="text-sm font-medium">
-                          Registering as {registrationRole === "buyer" ? "Buyer" : "Farmer"}
+                          Registering as {{ buyer: "Buyer", farmer: "Farmer", driver: "Driver" }[registrationRole]}
                         </span>
                       </div>
                       <Button type="button" variant="ghost" size="sm" onClick={() => setRegistrationRole(null)}>
