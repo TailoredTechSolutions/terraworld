@@ -92,41 +92,41 @@ const Footer = () => {
           {/* Column A — Terra */}
           <FooterAccordion title="Terra">
             <FooterLink to="/about">About Terra</FooterLink>
-            <FooterLink to="/#how-it-works">How Terra Works</FooterLink>
-            <FooterLink to="/impact">Mission / Impact</FooterLink>
-            <FooterLink to="/pilot/baguio">Pilot Program (Baguio)</FooterLink>
+            <FooterLink to="/how-it-works">How Terra Works</FooterLink>
+            <FooterLink to="/mission-impact">Mission / Impact</FooterLink>
+            <FooterLink to="/pilot-program-baguio">Pilot Program (Baguio)</FooterLink>
             <FooterLink to="/careers">Careers</FooterLink>
           </FooterAccordion>
 
           {/* Column B — Marketplace */}
           <FooterAccordion title="Marketplace">
             <FooterLink to="/shop">Browse Products</FooterLink>
-            <FooterLink to="/shop#categories">Categories</FooterLink>
-            <FooterLink to="/shop#pricing-breakdown">Pricing Breakdown</FooterLink>
-            <FooterLink to="/orders/track">Order Tracking</FooterLink>
-            <FooterLink to="/policies/quality">Quality Policy</FooterLink>
+            <FooterLink to="/marketplace/categories">Categories</FooterLink>
+            <FooterLink to="/marketplace/pricing-breakdown">Pricing Breakdown</FooterLink>
+            <FooterLink to="/marketplace/order-tracking">Order Tracking</FooterLink>
+            <FooterLink to="/marketplace/quality-policy">Quality Policy</FooterLink>
           </FooterAccordion>
 
           {/* Column C — For Farmers */}
           <FooterAccordion title="For Farmers">
             <FooterLink to="/farmers/onboarding">Farmer Onboarding</FooterLink>
-            <FooterLink to="/farmers/upload">Upload Products</FooterLink>
-            <FooterLink to="/farmers/payouts">Payouts & Settlement</FooterLink>
-            <FooterLink to="/farmers/logistics">Logistics Options</FooterLink>
-            <FooterLink to="/faq/farmers">Farmer FAQ</FooterLink>
+            <FooterLink to="/farmers/upload-products">Upload Products</FooterLink>
+            <FooterLink to="/farmers/payouts-settlement">Payouts & Settlement</FooterLink>
+            <FooterLink to="/farmers/logistics-options">Logistics Options</FooterLink>
+            <FooterLink to="/farmers/faq">Farmer FAQ</FooterLink>
           </FooterAccordion>
 
-          {/* Column D — For Buyers */}
-          <FooterAccordion title="For Buyers">
-            <FooterLink to="/buyers/onboarding">Buyer Onboarding</FooterLink>
-            <FooterLink to="/buyers/wholesale">Wholesale / Restaurant Supply</FooterLink>
-            <FooterLink to="/account/transactions">Receipts & History</FooterLink>
-            <FooterLink to="/support/disputes">Support / Disputes</FooterLink>
-            <FooterLink to="/faq/buyers">Buyer FAQ</FooterLink>
+          {/* Column D — For Drivers */}
+          <FooterAccordion title="For Drivers">
+            <FooterLink to="/drivers">Driver Overview</FooterLink>
+            <FooterLink to="/drivers/register">Driver Registration</FooterLink>
+            <FooterLink to="/drivers/assignments">Delivery Assignments</FooterLink>
+            <FooterLink to="/drivers/earnings-payouts">Earnings & Payouts</FooterLink>
+            <FooterLink to="/drivers/guidelines">Delivery Guidelines</FooterLink>
+            <FooterLink to="/drivers/faq">Driver FAQ</FooterLink>
           </FooterAccordion>
 
-
-          {/* Column F — Resources */}
+          {/* Column E — Resources */}
           <FooterAccordion title="Resources">
             <FooterLink to="/blog">Blog / Updates</FooterLink>
             <FooterLink to="/help">Help Center</FooterLink>
