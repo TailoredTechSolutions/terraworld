@@ -139,7 +139,7 @@ const BusinessCentreAuth = () => {
             transition={{ duration: 0.8, delay: 0.2, ease: cubicSmooth }}
           >
             <div className="flex items-center gap-3 mb-4">
-              <img src={terraLogo} alt="Terra" className="h-12 w-12 rounded-xl shadow-lg" />
+              <img src={terraLogo} alt="Terra" width={48} height={48} className="h-12 w-12 rounded-xl shadow-lg" />
               <div>
                 <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 backdrop-blur-md border border-primary/30 px-3 py-1">
                   <Zap className="h-3.5 w-3.5 text-primary" />
