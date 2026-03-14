@@ -127,17 +127,19 @@ const BuyerDashboard = () => {
         <BuyerSidebar activeTab={activeTab} onTabChange={handleTabChange} />
         <main className="flex-1 overflow-auto">
           <div className="container max-w-6xl mx-auto px-4 py-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className="p-2 rounded-full bg-primary/10">
-                  <User className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold">{profile?.full_name || user.email?.split("@")[0]}</h1>
-                  <Badge variant="secondary">Buyer</Badge>
-                </div>
-              </div>
-            </div>
+            {/* Cinematic Hero Banner */}
+            <DashboardHero
+              title={profile?.full_name || user.email?.split("@")[0] || "Buyer Dashboard"}
+              subtitle="Browse farm-fresh products, track orders, and earn rewards"
+              badge="🛒 Buyer Account"
+              backgroundImage={shopHero}
+              kpis={[
+                { icon: ShoppingBag, label: "Orders", value: "—" },
+                { icon: Wallet, label: "Wallet", value: "₱0" },
+                { icon: Coins, label: "AGRI", value: "0" },
+                { icon: Users, label: "Referrals", value: "—" },
+              ]}
+            />
 
             {isMobile ? (
               <div className="space-y-8">

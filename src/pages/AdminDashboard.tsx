@@ -862,21 +862,28 @@ const AdminDashboard = () => {
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
           <div className="container max-w-6xl mx-auto px-4 py-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-                <p className="text-sm text-muted-foreground">Manage your marketplace</p>
-              </div>
-              <div className="flex items-center gap-2">
+            {/* Cinematic Hero Banner */}
+            <DashboardHero
+              title="Admin Dashboard"
+              subtitle="Complete marketplace & operational control centre"
+              badge="⚡ Operations Hub"
+              backgroundImage={heroFarm}
+              kpis={[
+                { icon: Users, label: "Members", value: membersCount.toLocaleString() },
+                { icon: ShoppingBag, label: "Orders", value: orders.length.toString() },
+                { icon: DollarSign, label: "Revenue", value: `₱${totalRevenue.toLocaleString()}` },
+                { icon: Truck, label: "Farmers", value: activeFarmers.toString() },
+              ]}
+            >
+              <div className="flex items-center gap-2 mt-3">
                 <AdminNotificationBell />
                 <AdminCreateActions />
-                <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
+                <Button variant="outline" size="sm" onClick={fetchData} className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
                   <RefreshCw className="h-4 w-4" />
                   Refresh
                 </Button>
               </div>
-            </div>
+            </DashboardHero>
 
             {/* Page Title */}
             <h2 className="text-xl font-semibold mb-6 capitalize">

@@ -196,29 +196,19 @@ const FarmerDashboard = () => {
         <FarmerSidebar activeTab={activeTab} onTabChange={handleTabChange} />
         <main className="flex-1 overflow-auto">
           <div className="max-w-6xl mx-auto px-4 py-6">
-            {/* Farm Header - compact */}
-            <div className="mb-5">
-              <div className="flex items-center gap-3">
-                {farmer.image_url ? (
-                  <img src={farmer.image_url} alt={farmer.name} className="w-12 h-12 rounded-xl object-cover shrink-0" />
-                ) : (
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Tractor className="h-6 w-6 text-primary" />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-bold truncate">{farmer.name}</h1>
-                    <StatusChip status={farmer.status || "pending"} />
-                  </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
-                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{farmer.location}</span>
-                    <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{farmer.phone}</span>
-                    <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{farmer.email}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Cinematic Hero Banner */}
+            <DashboardHero
+              title={farmer.name}
+              subtitle={`${farmer.location} — ${farmer.description || "Farm-fresh produce direct to buyers"}`}
+              badge={`🌾 ${farmer.status === "active" ? "Active Farm" : farmer.status === "pending" ? "Pending Approval" : "Suspended"}`}
+              backgroundImage={farmer.image_url || farmsHero}
+              kpis={[
+                { icon: Package, label: "Products", value: (productCount || 0).toString() },
+                { icon: DollarSign, label: "Sales", value: `₱${Number(farmer.total_sales || 0).toLocaleString()}` },
+                { icon: Star, label: "Rating", value: Number(farmer.rating || 0).toFixed(1) },
+                { icon: MapPin, label: "Location", value: farmer.location.split(",")[0] },
+              ]}
+            />
 
             {/* Content */}
             {isMobile ? (
