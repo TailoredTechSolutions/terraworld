@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsMobile } from "@/hooks/use-mobile";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FarmerSidebar from "@/components/farmer/FarmerSidebar";
@@ -33,6 +34,24 @@ const FarmerDashboard = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const isMobile = useIsMobile();
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const registerSection = useCallback((id: string) => (el: HTMLDivElement | null) => {
+    sectionRefs.current[id] = el;
+  }, []);
+
+  const handleTabChange = useCallback((tab: string) => {
+    if (isMobile) {
+      // On mobile, scroll to section
+      const el = sectionRefs.current[tab];
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    } else {
+      setActiveTab(tab);
+    }
+  }, [isMobile]);
 
   const { data: farmer, isLoading: farmerLoading } = useQuery({
     queryKey: ["farmer-profile", user?.email],
@@ -120,7 +139,8 @@ const FarmerDashboard = () => {
     );
   }
 
-  const renderContent = () => {
+  // Desktop: tab-based rendering (unchanged)
+  const renderDesktopContent = () => {
     switch (activeTab) {
       case "overview":
         return <FarmerOverviewPanel farmerId={farmer.id} userId={user!.id} onNavigate={setActiveTab} />;
@@ -151,11 +171,25 @@ const FarmerDashboard = () => {
     }
   };
 
+  // Mobile: all sections stacked
+  const mobileSections = [
+    { id: "overview", label: "Farm Overview", component: <FarmerOverviewPanel farmerId={farmer.id} userId={user!.id} onNavigate={handleTabChange} /> },
+    { id: "products", label: "Product Listings", component: <FarmerProductsPanel farmerId={farmer.id} /> },
+    { id: "orders", label: "Orders", component: <FarmerOrdersPanel farmerId={farmer.id} /> },
+    { id: "delivery", label: "Delivery Status", component: <FarmerDeliveryPanel farmerId={farmer.id} /> },
+    { id: "earnings", label: "Revenue & Earnings", component: <FarmerEarningsPanel farmerId={farmer.id} userId={user!.id} /> },
+    { id: "tokens", label: "Token Rewards", component: <FarmerTokensPanel userId={user!.id} /> },
+    { id: "referrals", label: "Referrals", component: <FarmerReferralsPanel userId={user!.id} referralCode={profile?.referral_code || ""} /> },
+    { id: "notifications", label: "Notifications", component: <FarmerNotificationsPanel userId={user!.id} /> },
+    { id: "support", label: "Support", component: <FarmerSupportPanel userId={user!.id} /> },
+    { id: "profile", label: "Profile", component: <FarmerProfilePanel farmer={farmer} /> },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <div className="flex-1 flex">
-        <FarmerSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        <FarmerSidebar activeTab={activeTab} onTabChange={handleTabChange} />
         <main className="flex-1 overflow-auto">
           <div className="max-w-6xl mx-auto px-4 py-6">
             {/* Farm Header - compact */}
@@ -182,8 +216,25 @@ const FarmerDashboard = () => {
               </div>
             </div>
 
-            {/* Tab Content */}
-            {renderContent()}
+            {/* Content */}
+            {isMobile ? (
+              <div className="space-y-8">
+                {mobileSections.map((section) => (
+                  <div
+                    key={section.id}
+                    ref={registerSection(section.id)}
+                    className="scroll-mt-4"
+                  >
+                    <h2 className="text-lg font-semibold mb-3 sticky top-0 bg-background/95 backdrop-blur-sm py-2 z-10 border-b border-border">
+                      {section.label}
+                    </h2>
+                    {section.component}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              renderDesktopContent()
+            )}
           </div>
         </main>
       </div>

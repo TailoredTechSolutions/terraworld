@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { Loader2, User, RefreshCw, ShoppingBag } from "lucide-react";
+import { Loader2, User, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsMobile } from "@/hooks/use-mobile";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BuyerSidebar from "@/components/buyer/BuyerSidebar";
-import { useIsMobile } from "@/hooks/use-mobile";
 
-// Lazy panel imports
+// Panel imports
 import BuyerOverviewPanel from "@/components/buyer/BuyerOverviewPanel";
 import BuyerShopPanel from "@/components/buyer/BuyerShopPanel";
 import BuyerOrdersPanel from "@/components/buyer/BuyerOrdersPanel";
@@ -26,11 +26,23 @@ const BuyerDashboard = () => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const { user, profile, loading } = useAuth();
   const isMobile = useIsMobile();
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    setSearchParams({ tab });
-  };
+  const registerSection = useCallback((id: string) => (el: HTMLDivElement | null) => {
+    sectionRefs.current[id] = el;
+  }, []);
+
+  const handleTabChange = useCallback((tab: string) => {
+    if (isMobile) {
+      const el = sectionRefs.current[tab];
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    } else {
+      setActiveTab(tab);
+      setSearchParams({ tab });
+    }
+  }, [isMobile, setSearchParams]);
 
   if (loading) {
     return (
@@ -69,43 +81,41 @@ const BuyerDashboard = () => {
 
   const getPageTitle = () => {
     const titles: Record<string, string> = {
-      home: "Dashboard",
-      shop: "Shop",
-      orders: "My Orders",
-      wallet: "Wallet & Payments",
-      tokens: "Token Rewards",
-      referrals: "Referral Tracking",
-      profile: "My Profile",
-      notifications: "Notifications",
-      support: "Support & Disputes",
+      home: "Dashboard", shop: "Shop", orders: "My Orders",
+      wallet: "Wallet & Payments", tokens: "Token Rewards",
+      referrals: "Referral Tracking", profile: "My Profile",
+      notifications: "Notifications", support: "Support & Disputes",
     };
     return titles[activeTab] || "Dashboard";
   };
 
-  const renderContent = () => {
+  // Desktop: standard tab-based rendering
+  const renderDesktopContent = () => {
     switch (activeTab) {
-      case "home":
-        return <BuyerOverviewPanel userId={user.id} onTabChange={handleTabChange} />;
-      case "shop":
-        return <BuyerShopPanel />;
-      case "orders":
-        return <BuyerOrdersPanel userId={user.id} />;
-      case "wallet":
-        return <BuyerWalletPanel userId={user.id} />;
-      case "tokens":
-        return <BuyerTokensPanel userId={user.id} />;
-      case "referrals":
-        return <BuyerReferralsPanel userId={user.id} referralCode={profile?.referral_code || ""} />;
-      case "profile":
-        return <BuyerProfilePanel userId={user.id} />;
-      case "notifications":
-        return <BuyerNotificationsPanel userId={user.id} />;
-      case "support":
-        return <BuyerSupportPanel />;
-      default:
-        return <BuyerOverviewPanel userId={user.id} onTabChange={handleTabChange} />;
+      case "home": return <BuyerOverviewPanel userId={user.id} onTabChange={handleTabChange} />;
+      case "shop": return <BuyerShopPanel />;
+      case "orders": return <BuyerOrdersPanel userId={user.id} />;
+      case "wallet": return <BuyerWalletPanel userId={user.id} />;
+      case "tokens": return <BuyerTokensPanel userId={user.id} />;
+      case "referrals": return <BuyerReferralsPanel userId={user.id} referralCode={profile?.referral_code || ""} />;
+      case "profile": return <BuyerProfilePanel userId={user.id} />;
+      case "notifications": return <BuyerNotificationsPanel userId={user.id} />;
+      case "support": return <BuyerSupportPanel />;
+      default: return <BuyerOverviewPanel userId={user.id} onTabChange={handleTabChange} />;
     }
   };
+
+  // Mobile: all sections stacked
+  const mobileSections = [
+    { id: "home", label: "Overview", component: <BuyerOverviewPanel userId={user.id} onTabChange={handleTabChange} /> },
+    { id: "orders", label: "My Orders", component: <BuyerOrdersPanel userId={user.id} /> },
+    { id: "wallet", label: "Wallet & Payments", component: <BuyerWalletPanel userId={user.id} /> },
+    { id: "tokens", label: "Token Rewards", component: <BuyerTokensPanel userId={user.id} /> },
+    { id: "referrals", label: "Referral Tracking", component: <BuyerReferralsPanel userId={user.id} referralCode={profile?.referral_code || ""} /> },
+    { id: "notifications", label: "Notifications", component: <BuyerNotificationsPanel userId={user.id} /> },
+    { id: "support", label: "Support & Disputes", component: <BuyerSupportPanel /> },
+    { id: "profile", label: "My Profile", component: <BuyerProfilePanel userId={user.id} /> },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -125,8 +135,28 @@ const BuyerDashboard = () => {
                 </div>
               </div>
             </div>
-            <h2 className="text-2xl font-bold mb-6">{getPageTitle()}</h2>
-            {renderContent()}
+
+            {isMobile ? (
+              <div className="space-y-8">
+                {mobileSections.map((section) => (
+                  <div
+                    key={section.id}
+                    ref={registerSection(section.id)}
+                    className="scroll-mt-4"
+                  >
+                    <h2 className="text-lg font-semibold mb-3 sticky top-0 bg-background/95 backdrop-blur-sm py-2 z-10 border-b border-border">
+                      {section.label}
+                    </h2>
+                    {section.component}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <>
+                <h2 className="text-2xl font-bold mb-6">{getPageTitle()}</h2>
+                {renderDesktopContent()}
+              </>
+            )}
           </div>
         </main>
       </div>
