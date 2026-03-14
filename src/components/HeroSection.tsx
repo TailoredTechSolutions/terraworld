@@ -63,6 +63,10 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-brown-dark/70 via-transparent to-primary/20" />
       </div>
 
+      {/* Content */}
+      <div className="relative container py-16 md:py-24">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
             {/* Main headline */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
