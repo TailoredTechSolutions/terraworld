@@ -20,12 +20,14 @@ import FarmerTokensPanel from "@/components/farmer/FarmerTokensPanel";
 import FarmerReferralsPanel from "@/components/farmer/FarmerReferralsPanel";
 import FarmerPricingPanel from "@/components/farmer/FarmerPricingPanel";
 import StatusChip from "@/components/backoffice/StatusChip";
+import DashboardHero from "@/components/DashboardHero";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   Tractor, MapPin, Phone, Mail,
-  AlertCircle, Loader2,
+  AlertCircle, Loader2, Package, DollarSign, Star, Truck,
 } from "lucide-react";
+import farmsHero from "@/assets/farms-hero.jpg";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Farmer = Tables<"farmers">;
