@@ -145,32 +145,31 @@ const Footer = () => {
         <div className="container py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           {/* Contact info */}
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-            <a href="mailto:support@terrafarming.io" className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors">
-              <Mail className="h-4 w-4" /> support@terrafarming.io
+            <a href="mailto:andrew@tailoredtechsolutions.com" className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors">
+              <Mail className="h-4 w-4" /> andrew@tailoredtechsolutions.com
             </a>
-            <Link to="/contact" className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors">
-              <MapPin className="h-4 w-4" /> Baguio City, Philippines
-            </Link>
+            <span className="inline-flex items-center gap-1.5">
+              <MapPin className="h-4 w-4" /> NCR — National Capital Region
+            </span>
           </div>
           {/* Social icons */}
           <nav className="flex items-center gap-2" aria-label="Social media links">
-            {[
-              { icon: Facebook, href: "https://facebook.com/terrafarming", label: "Facebook" },
-              { icon: Instagram, href: "https://instagram.com/terrafarming", label: "Instagram" },
-              { icon: Twitter, href: "https://x.com/terrafarming", label: "X (Twitter)" },
-              { icon: Linkedin, href: "https://linkedin.com/company/terrafarming", label: "LinkedIn" },
-            ].map(({ icon: Icon, href, label }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
-              >
-                <Icon className="h-4 w-4" />
-              </a>
-            ))}
+            <a href="https://facebook.com/terrafarming" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-opacity hover:opacity-80" style={{ backgroundColor: '#1877F2' }}>
+              <Facebook className="h-4 w-4" />
+            </a>
+            <a href="https://instagram.com/terrafarming" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-opacity hover:opacity-80" style={{ background: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)' }}>
+              <Instagram className="h-4 w-4" />
+            </a>
+            <a href="https://x.com/terrafarming" target="_blank" rel="noopener noreferrer" aria-label="X"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-opacity hover:opacity-80" style={{ backgroundColor: '#000000' }}>
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://linkedin.com/company/terrafarming" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-opacity hover:opacity-80" style={{ backgroundColor: '#0A66C2' }}>
+              <Linkedin className="h-4 w-4" />
+            </a>
           </nav>
         </div>
       </div>
