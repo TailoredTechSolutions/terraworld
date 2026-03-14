@@ -1,6 +1,6 @@
 import React from "react";
 import { 
-  Facebook, Instagram, Twitter, Linkedin, 
+  Facebook, Instagram, Linkedin, 
   Mail, MapPin, Smartphone, ChevronDown,
   Shield, Truck, Gift, ArrowRight
 } from "lucide-react";
