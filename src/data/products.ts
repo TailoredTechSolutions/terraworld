@@ -135,7 +135,7 @@ export const products: Product[] = [
     category: "Vegetables",
     stock: 45,
     organic: true,
-    description: "Fresh organic broccoli from Cosmic Farm. Rich in nutrients, farm wholesale price: ₱35-₱40/kg.",
+    description: "Fresh organic broccoli from Fit and Fab Farm. Rich in nutrients, farm wholesale price: ₱35-₱40/kg.",
   },
   {
     id: "5",
