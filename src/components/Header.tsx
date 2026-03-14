@@ -144,19 +144,20 @@ const Header = () => {
           </Button>
         </div>
       </div>
-
-      {/* Mobile Full-Page Menu */}
-      {isMobileMenuOpen && (
-        <MobileMenuDrawer
-          user={user}
-          profile={profile}
-          userEmail={user?.email}
-          dashboardLinks={getDashboardLinks()}
-          onClose={closeMobile}
-          onSignOut={handleSignOut}
-        />
-      )}
     </header>
+
+    {/* Mobile Full-Page Menu — rendered OUTSIDE header to avoid backdrop-filter containment */}
+    {isMobileMenuOpen && (
+      <MobileMenuDrawer
+        user={user}
+        profile={profile}
+        userEmail={user?.email}
+        dashboardLinks={getDashboardLinks()}
+        onClose={closeMobile}
+        onSignOut={handleSignOut}
+      />
+    )}
+  </>
   );
 };
 
