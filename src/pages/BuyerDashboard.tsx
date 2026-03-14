@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { Loader2, User, ShoppingBag } from "lucide-react";
+import { Loader2, User, ShoppingBag, Wallet, Coins, Users, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
