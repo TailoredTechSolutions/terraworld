@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import heroImage from "@/assets/hero-farm.jpg";
 import terraLogo from "@/assets/terra-logo.png";
+import terraHeroBadge from "@/assets/terra-hero-badge.png";
 import { Button } from "@/components/ui/button";
 import {
   Truck,
@@ -84,44 +85,11 @@ const HeroSection = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, type: "spring" }}
               className="mb-8 flex justify-center lg:justify-start">
-
-              <div className="relative inline-flex items-center gap-4 glass-card-accent glass-shimmer p-3 pr-6">
-                {/* Video Icon */}
-                <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden border-2 border-accent shadow-lg shadow-glow-accent flex-shrink-0">
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover">
-                    <source src="/videos/harvest-badge.mp4" type="video/mp4" />
-                  </video>
-                  {/* Pulsing ring */}
-                  <motion.div
-                    className="absolute inset-0 border-2 border-accent opacity-75 rounded-xl"
-                    animate={{ scale: [1, 1.15, 1], opacity: [0.8, 0, 0.8] }}
-                    transition={{ duration: 2, repeat: Infinity }} />
-                </div>
-                
-                {/* Text content */}
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="relative flex h-3 w-3">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-accent"></span>
-                    </span>
-                    <span className="text-xs font-semibold text-accent uppercase tracking-wide">
-                      Live Now
-                    </span>
-                  </div>
-                  <span className="text-lg md:text-xl font-bold text-primary-foreground">
-                    Fresh Harvest Available
-                  </span>
-                  <span className="text-sm text-primary-foreground/70">
-                    Direct from Benguet highlands
-                  </span>
-                </div>
-              </div>
+              <img
+                src={terraHeroBadge}
+                alt="Terra - From Dirt to Dessert"
+                className="w-[500px] md:w-[600px] lg:w-[700px] h-auto drop-shadow-2xl"
+              />
             </motion.div>
 
             {/* Main headline */}
