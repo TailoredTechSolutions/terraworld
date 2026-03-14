@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 // ─── Section Navigation ───
 const NAV_ITEMS = [
