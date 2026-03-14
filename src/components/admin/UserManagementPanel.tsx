@@ -33,7 +33,8 @@ import {
   Building2,
   Loader2,
   UserCog,
-  RefreshCw
+  RefreshCw,
+  Eye
 } from "lucide-react";
 
 type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer' | 'affiliate';
