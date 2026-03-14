@@ -6,37 +6,37 @@
 
 @layer base {
   :root {
-    /* Terra color palette - Philippine Flag (Blue, Red, Yellow) + Brown for earth */
-    --background: 33 28% 82%;
-    --foreground: 26 40% 14%;
+    /* Terra — Light Mode: warm ivory canvas, high contrast */
+    --background: 40 30% 96%;
+    --foreground: 24 20% 16%;
 
-    --card: 34 26% 76%;
-    --card-foreground: 26 40% 14%;
+    --card: 38 28% 98%;
+    --card-foreground: 24 20% 16%;
 
-    --popover: 34 24% 78%;
-    --popover-foreground: 26 40% 14%;
+    --popover: 38 28% 98%;
+    --popover-foreground: 24 20% 16%;
 
     /* Royal Blue primary (Philippine flag blue) */
-    --primary: 218 72% 38%;
-    --primary-foreground: 40 30% 96%;
+    --primary: 218 72% 42%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Warm brown secondary */
-    --secondary: 35 24% 70%;
-    --secondary-foreground: 26 45% 18%;
+    /* Warm stone secondary */
+    --secondary: 36 16% 90%;
+    --secondary-foreground: 24 20% 22%;
 
-    --muted: 34 18% 72%;
-    --muted-foreground: 28 18% 40%;
+    --muted: 36 14% 92%;
+    --muted-foreground: 24 10% 44%;
 
     /* Philippine Red accent */
     --accent: 2 72% 48%;
-    --accent-foreground: 40 30% 96%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 68% 50%;
-    --destructive-foreground: 40 30% 96%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 33 22% 66%;
-    --input: 34 20% 72%;
-    --ring: 218 72% 38%;
+    --border: 36 18% 86%;
+    --input: 36 16% 90%;
+    --ring: 218 72% 42%;
 
     --radius: 1rem;
 
