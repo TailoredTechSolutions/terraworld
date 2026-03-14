@@ -55,6 +55,7 @@ const Header = () => {
     : [];
 
   return (
+  <>
     <header className="sticky top-0 z-50 w-full glass-navbar">
       <div className="container flex h-[68px] items-center justify-between">
         {/* Logo */}
