@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const Header = () => {
   const { toggleCart, getTotalItems } = useCartStore();
   const { user, profile, signOut, loading } = useAuth();
-  const { isAdmin, isDriver, isFarmer, isBuyer, isMember, isAffiliate } = useUserRoles();
+  const { isAdmin, isAnyAdmin, isAdminReadonly, isDriver, isFarmer, isBuyer, isMember, isAffiliate } = useUserRoles();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const totalItems = getTotalItems();
 
