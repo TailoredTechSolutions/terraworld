@@ -5,6 +5,10 @@ import {
   User,
   RefreshCw,
   Shield,
+  DollarSign,
+  Wallet,
+  GitBranch,
+  Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -26,7 +30,9 @@ import MemberUpgradePanel from "@/components/member/MemberUpgradePanel";
 import MemberSupportPanel from "@/components/member/MemberSupportPanel";
 import MemberShopPanel from "@/components/member/MemberShopPanel";
 import BinaryTreeVisualization from "@/components/member/BinaryTreeVisualization";
+import DashboardHero from "@/components/DashboardHero";
 import { useIsMobile } from "@/hooks/use-mobile";
+import riceTerraces from "@/assets/rice-terraces.jpg";
 
 interface Membership {
   id: string;
@@ -496,25 +502,19 @@ const MemberDashboard = () => {
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
           <div className="container max-w-6xl mx-auto px-4 py-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className="p-2 rounded-full bg-primary/10">
-                  <User className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold">{user.email.split('@')[0]}</h1>
-                  <p className="text-sm text-muted-foreground flex items-center gap-2">
-                    <Badge className={tierConfig.color}>{tierConfig.label}</Badge>
-                    {kycProfile && <KYCStatusBadge status={kycProfile.status} />}
-                  </p>
-                </div>
-              </div>
-              <Button variant="outline" size="sm" onClick={checkAuthAndFetchData} className="gap-2">
-                <RefreshCw className="h-4 w-4" />
-                Refresh
-              </Button>
-            </div>
+            {/* Cinematic Hero Banner */}
+            <DashboardHero
+              title={user.email.split('@')[0] || "Member Dashboard"}
+              subtitle="Track your network, earnings, and rank progression"
+              badge={`${tierConfig.label} Member${kycProfile?.status === 'approved' ? ' · ✓ KYC Verified' : ''}`}
+              backgroundImage={riceTerraces}
+              kpis={[
+                { icon: DollarSign, label: "Earnings", value: `₱${totalEarnings.toLocaleString()}` },
+                { icon: Wallet, label: "Balance", value: `₱${(walletData?.available_balance || 0).toLocaleString()}` },
+                { icon: GitBranch, label: "Matched BV", value: binaryStats.matched_bv.toLocaleString() },
+                { icon: Crown, label: "Package", value: `₱${(membership?.package_price || 0).toLocaleString()}` },
+              ]}
+            />
 
             {/* Page Title */}
             <h2 className="text-2xl font-bold mb-6">{getPageTitle()}</h2>
