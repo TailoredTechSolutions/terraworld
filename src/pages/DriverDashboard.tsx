@@ -8,6 +8,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import DriverSidebar from "@/components/driver/DriverSidebar";
+import DashboardHero from "@/components/DashboardHero";
+import deliveryHero from "@/assets/delivery-farm-logistics.jpg";
 import BuyerSupportPanel from "@/components/buyer/BuyerSupportPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -331,22 +333,19 @@ const DriverDashboard = () => {
         <DriverSidebar activeTab={activeTab} onTabChange={handleTabChange} />
         <main className="flex-1 overflow-auto">
           <div className="container max-w-6xl mx-auto px-4 py-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className="p-2 rounded-full bg-primary/10">
-                  <Truck className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold">{profile?.full_name || user.email?.split("@")[0]}</h1>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Driver</Badge>
-                    <Badge variant="outline" className={driverOnline ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" : "bg-muted text-muted-foreground"}>
-                      {driverOnline ? "Online" : "Offline"}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Cinematic Hero Banner */}
+            <DashboardHero
+              title={profile?.full_name || user.email?.split("@")[0] || "Driver Dashboard"}
+              subtitle="Manage your deliveries, track earnings, and stay connected"
+              badge={driverOnline ? "🟢 Online — Accepting Deliveries" : "⚫ Offline"}
+              backgroundImage={deliveryHero}
+              kpis={[
+                { icon: Package, label: "Active", value: activeDeliveries.length.toString() },
+                { icon: CheckCircle, label: "Completed", value: completedDeliveries.length.toString() },
+                { icon: Star, label: "Rating", value: `${Number(driverRecord?.rating || 0).toFixed(1)} ★` },
+                { icon: DollarSign, label: "Balance", value: `₱${Number(wallet?.available_balance || 0).toLocaleString()}` },
+              ]}
+            />
 
             {isMobile ? (
               <div className="space-y-8">
