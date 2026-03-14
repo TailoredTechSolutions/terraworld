@@ -108,6 +108,7 @@ const BuyerDashboard = () => {
   // Mobile: all sections stacked
   const mobileSections = [
     { id: "home", label: "Overview", component: <BuyerOverviewPanel userId={user.id} onTabChange={handleTabChange} /> },
+    { id: "shop", label: "Shop", component: <BuyerShopPanel /> },
     { id: "orders", label: "My Orders", component: <BuyerOrdersPanel userId={user.id} /> },
     { id: "wallet", label: "Wallet & Payments", component: <BuyerWalletPanel userId={user.id} /> },
     { id: "tokens", label: "Token Rewards", component: <BuyerTokensPanel userId={user.id} /> },
