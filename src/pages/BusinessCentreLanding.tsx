@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import terraHeroBadge from "@/assets/terra-hero-badge.png";
+import businessCentreHero from "@/assets/business-centre-hero.jpg";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -13,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   LayoutDashboard, Users, GitBranch, DollarSign, Share2, Award, Megaphone,
   CreditCard, HelpCircle, TrendingUp, ArrowUpRight, ArrowDownRight,
@@ -23,7 +24,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
+
+const cubicSmooth = [0.22, 1, 0.36, 1] as const;
 
 // ─── Section Navigation ───
 const NAV_ITEMS = [
@@ -811,27 +814,113 @@ const SupportPanel = () => (
 // ─── Main Page ───
 const BusinessCentreLanding = () => {
   const { user, loading } = useAuth();
+  const [activeNav, setActiveNav] = useState("dashboard");
+  const { scrollY } = useScroll();
+  const heroImageY = useTransform(scrollY, [0, 500], [0, 150]);
+  const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
+  const heroScale = useTransform(scrollY, [0, 500], [1, 1.15]);
+
+  useEffect(() => {
+    const sectionIds = NAV_ITEMS.map(n => n.id);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveNav(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: "-30% 0px -60% 0px" }
+    );
+    sectionIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
 
   if (!loading && !user) return <Navigate to="/auth" replace />;
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative">
-      {/* Sticky wallpaper background */}
-      <div className="fixed inset-0 -z-10">
-        <img src={terraHeroBadge} alt="" className="h-full w-full object-cover opacity-50" />
-      </div>
       <Header />
       <CartDrawer />
 
-      {/* Sticky Section Nav */}
-      <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm border-b border-border/50">
+      {/* ===== CINEMATIC HERO WITH PARALLAX ===== */}
+      <section className="relative h-[280px] sm:h-[340px] lg:h-[380px] overflow-hidden">
+        <motion.div
+          className="absolute inset-0"
+          style={{ y: heroImageY, scale: heroScale }}
+        >
+          <img
+            src={businessCentreHero}
+            alt="Philippine rice terraces at golden hour"
+            className="h-full w-full object-cover"
+          />
+        </motion.div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/70 to-transparent" />
+
+        <motion.div
+          className="relative container h-full flex flex-col justify-end pb-8 sm:pb-10 max-w-6xl mx-auto px-4 md:px-8"
+          style={{ opacity: heroOpacity }}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: cubicSmooth }}
+          >
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/20 backdrop-blur-md border border-primary/30 px-4 py-1.5 mb-4">
+              <Zap className="h-4 w-4 text-primary" />
+              <span className="text-xs font-semibold text-primary">Partner Business Centre</span>
+            </div>
+            <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-2 max-w-2xl leading-tight">
+              Your Business Hub
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
+              Manage your network, track commissions, and grow your Terra Farming business — all in one place.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="flex items-center gap-6 mt-5"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.5, ease: cubicSmooth }}
+          >
+            {[
+              { icon: Users, value: "142", label: "Network" },
+              { icon: DollarSign, value: "₱48.3K", label: "Earnings" },
+              { icon: Coins, value: "1,247", label: "AGRI Tokens" },
+            ].map(({ icon: Icon, value, label }) => (
+              <div key={label} className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-card/60 backdrop-blur-sm border border-border/50">
+                  <Icon className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground leading-none">{value}</p>
+                  <p className="text-[10px] text-muted-foreground">{label}</p>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* ===== STICKY SECTION NAV ===== */}
+      <div className="sticky top-16 z-30 bg-background/80 backdrop-blur-lg border-b border-border/50 transition-all duration-300">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <nav className="flex items-center gap-1 overflow-x-auto py-2 scrollbar-hide">
+          <nav className="flex items-center gap-1 overflow-x-auto py-2.5 scrollbar-hide">
             {NAV_ITEMS.map((item) => (
               <button
                 key={item.id}
                 onClick={() => scrollTo(item.id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors whitespace-nowrap"
+                className={cn(
+                  "flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap border shrink-0",
+                  activeNav === item.id
+                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                    : "text-muted-foreground border-transparent hover:text-foreground hover:bg-accent hover:border-border"
+                )}
               >
                 <item.icon className="h-3.5 w-3.5" />
                 {item.label}
@@ -842,66 +931,106 @@ const BusinessCentreLanding = () => {
       </div>
 
       <main className="flex-1 w-full max-w-6xl mx-auto px-4 md:px-8 pb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="space-y-10 pt-6"
-        >
+        <div className="space-y-10 pt-6">
           {/* Dashboard */}
-          <section>
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, ease: cubicSmooth }}
+          >
             <SectionHeader icon={LayoutDashboard} title="Dashboard" id="dashboard" />
             <div className="mt-4"><DashboardPanel /></div>
-          </section>
+          </motion.section>
 
           {/* Network */}
-          <section>
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, ease: cubicSmooth }}
+          >
             <SectionHeader icon={Users} title="My Network" id="network" />
             <div className="mt-4"><NetworkPanel /></div>
-          </section>
+          </motion.section>
 
           {/* Binary Tree */}
-          <section>
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, ease: cubicSmooth }}
+          >
             <SectionHeader icon={GitBranch} title="Binary Tree" id="binary" />
             <div className="mt-4"><BinaryTreePanel /></div>
-          </section>
+          </motion.section>
 
           {/* Commissions */}
-          <section>
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, ease: cubicSmooth }}
+          >
             <SectionHeader icon={DollarSign} title="Commissions" id="commissions" />
             <div className="mt-4"><CommissionsPanel /></div>
-          </section>
+          </motion.section>
 
           {/* Referrals */}
-          <section>
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, ease: cubicSmooth }}
+          >
             <SectionHeader icon={Share2} title="Referrals" id="referral" />
             <div className="mt-4"><ReferralPanel /></div>
-          </section>
+          </motion.section>
 
           {/* Rank & Packages */}
-          <section>
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, ease: cubicSmooth }}
+          >
             <SectionHeader icon={Crown} title="Rank & Packages" id="rank" />
             <div className="mt-4"><RankPanel /></div>
-          </section>
+          </motion.section>
 
           {/* Wallet & Payouts */}
-          <section>
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, ease: cubicSmooth }}
+          >
             <SectionHeader icon={Wallet} title="Wallet & Payouts" id="payout" />
             <div className="mt-4"><PayoutPanel /></div>
-          </section>
+          </motion.section>
 
           {/* Marketing */}
-          <section>
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, ease: cubicSmooth }}
+          >
             <SectionHeader icon={Megaphone} title="Marketing Tools" id="marketing" />
             <div className="mt-4"><MarketingPanel /></div>
-          </section>
+          </motion.section>
 
           {/* Support */}
-          <section>
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, ease: cubicSmooth }}
+          >
             <SectionHeader icon={HelpCircle} title="Support" id="support" />
             <div className="mt-4"><SupportPanel /></div>
-          </section>
-        </motion.div>
+          </motion.section>
+        </div>
       </main>
       <Footer />
     </div>
