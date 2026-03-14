@@ -163,14 +163,14 @@ export const products: Product[] = [
     organic: true,
     description: "Highland potatoes from PCJEAM Farm in Atok. Excellent for any potato dish. Wholesale: ₱43-₱49/kg.",
   },
-  // Lily of the Valley Organic Farm products
+  // Mankayan Root Crops Farm products
   {
     id: "7",
     name: "Radish",
     price: 160.00,
     unit: "kg",
-    farmId: "lily-valley-organic",
-    farmName: "Lily of the Valley Organic Farm",
+    farmId: "mankayan-root-farm",
+    farmName: "Mankayan Root Crops Farm",
     image: radishImg,
     category: "Vegetables",
     stock: 90,
