@@ -578,19 +578,10 @@ const TestimonialsSection = () => {
 const Index = () => {
   const { user } = useAuth();
   useUserRoles(); // keep hook call order stable
-  const [contentVisible, setContentVisible] = useState(false);
-  const handleIntroComplete = useCallback(() => setContentVisible(true), []);
 
   return (
     <div className="min-h-screen bg-background">
-      <VideoIntro onIntroComplete={handleIntroComplete} />
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={contentVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-        transition={{ duration: 0.8, ease: [0.25, 0.8, 0.25, 1] }}
-        style={{ pointerEvents: contentVisible ? "auto" : "none" }}
-      >
+      <div>
         <Header />
         <CartDrawer />
 
