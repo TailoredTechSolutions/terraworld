@@ -148,7 +148,7 @@ export const products: Product[] = [
     category: "Vegetables",
     stock: 70,
     organic: true,
-    description: "Aromatic Baguio celery from Cosmic Farm. Perfect for soups, salads, and cooking. Farm price: ₱25-₱30/kg.",
+    description: "Aromatic Baguio celery from Urban Garden Under the Pines. Perfect for soups, salads, and cooking. Farm price: ₱25-₱30/kg.",
   },
   {
     id: "6",
