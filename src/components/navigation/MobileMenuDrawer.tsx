@@ -29,7 +29,7 @@ const MobileMenuDrawer = ({
   onSignOut,
 }: MobileMenuDrawerProps) => {
   return (
-    <div className="md:hidden fixed inset-0 top-[68px] z-40 bg-background">
+    <div className="md:hidden fixed inset-0 top-[68px] z-[60] bg-background">
       <ScrollArea className="h-full">
         <nav className="container py-6 pb-24" aria-label="Site navigation">
           {/* All site sections — flat, no accordions */}

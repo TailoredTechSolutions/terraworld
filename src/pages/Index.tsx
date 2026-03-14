@@ -33,6 +33,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
+const featureLinks: Record<string, string> = {
+  "Farm-Fresh Marketplace": "/shop",
+  "Find Farms Near You": "/map",
+  "Real-Time Delivery Tracking": "/marketplace/order-tracking",
+  "Secure Payments": "/marketplace/pricing-breakdown",
+  "KYC/KYB Compliance": "/kyc",
+};
+
 interface Feature {
   icon: LucideIcon;
   title: string;
