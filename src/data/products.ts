@@ -964,7 +964,7 @@ export const farms: Farm[] = [
     longitude: 120.555,
     rating: 4.7,
     reviewCount: 55,
-    image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800",
+    image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&q=75",
     description: "PhilGAP-certified farm in Tuba, Benguet specializing in Arabica coffee and citrus fruits. Located at the gateway to the Cordillera highlands with ideal micro-climate for specialty coffee production.",
     products: ["Arabica Coffee", "Lemon", "Calamansi", "Coffee Beans", "Dried Coffee"],
     contact: "0917-556-4423",
