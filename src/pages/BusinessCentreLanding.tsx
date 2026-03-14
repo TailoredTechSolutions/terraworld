@@ -815,7 +815,11 @@ const BusinessCentreLanding = () => {
   if (!loading && !user) return <Navigate to="/auth" replace />;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background relative">
+      {/* Sticky wallpaper background */}
+      <div className="fixed inset-0 -z-10">
+        <img src={terraHeroBadge} alt="" className="h-full w-full object-cover opacity-50" />
+      </div>
       <Header />
       <CartDrawer />
 
