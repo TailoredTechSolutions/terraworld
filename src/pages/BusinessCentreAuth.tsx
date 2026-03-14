@@ -88,7 +88,7 @@ const BusinessCentreAuth = () => {
     try {
       const { error } = await signIn(email, password);
       if (error) { toast({ title: "Sign In Failed", description: error.message, variant: "destructive" }); }
-      else { navigate("/business-centre"); }
+      else { triggerTransition("/business-centre"); }
     } catch { toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" }); }
     finally { setIsLoading(false); }
   };
