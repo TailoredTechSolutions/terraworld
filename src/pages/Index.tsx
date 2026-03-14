@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
-import VideoIntro from "@/components/VideoIntro";
+
 import FarmCard from "@/components/FarmCard";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
