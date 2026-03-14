@@ -839,7 +839,7 @@ export const farms: Farm[] = [
     longitude: 120.706,
     rating: 4.8,
     reviewCount: 72,
-    image: "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=800",
+    image: "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=400&q=75",
     description: "PhilGAP-certified high-altitude vegetable farm in Atok, Benguet — the highest municipality in the Philippines at 2,200m. Grows premium cold-weather crops including potatoes, cabbage, and sugar beets in volcanic highland soil.",
     products: ["Potatoes", "Cabbage", "Sugar Beets", "Carrots", "Bell Pepper", "Spinach"],
     contact: "0917-854-3201",
