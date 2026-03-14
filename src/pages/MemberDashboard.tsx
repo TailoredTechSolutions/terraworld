@@ -30,7 +30,9 @@ import MemberUpgradePanel from "@/components/member/MemberUpgradePanel";
 import MemberSupportPanel from "@/components/member/MemberSupportPanel";
 import MemberShopPanel from "@/components/member/MemberShopPanel";
 import BinaryTreeVisualization from "@/components/member/BinaryTreeVisualization";
+import DashboardHero from "@/components/DashboardHero";
 import { useIsMobile } from "@/hooks/use-mobile";
+import riceTerraces from "@/assets/rice-terraces.jpg";
 
 interface Membership {
   id: string;
