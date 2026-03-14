@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, Menu, X, LogOut, LogIn, ShoppingBag, Tractor, Truck, Shield, Crown } from "lucide-react";
+import { ShoppingCart, Menu, X, LogOut, LogIn, ShoppingBag, Tractor, Truck, Shield, Crown, Users, Home, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { useState } from "react";
@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const Header = () => {
   const { toggleCart, getTotalItems } = useCartStore();
   const { user, profile, signOut, loading } = useAuth();
-  const { isAdmin, isDriver, isFarmer, isBuyer } = useUserRoles();
+  const { isAdmin, isDriver, isFarmer, isBuyer, isMember, isAffiliate } = useUserRoles();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const totalItems = getTotalItems();
 
@@ -39,11 +39,24 @@ const Header = () => {
 
   const getDashboardLinks = () => {
     const links: { path: string; label: string; icon: React.ComponentType<{ className?: string }> }[] = [];
-    if (isAdmin) links.push({ path: "/admin", label: "Admin Dashboard", icon: Shield });
-    if (isBuyer) links.push({ path: "/buyer", label: "Buyer Dashboard", icon: ShoppingBag });
-    if (isFarmer) links.push({ path: "/farmer", label: "Farmer Dashboard", icon: Tractor });
-    if (isDriver) links.push({ path: "/driver", label: "Driver Dashboard", icon: Truck });
-    if (links.length === 0 && user) links.push({ path: "/buyer", label: "My Dashboard", icon: ShoppingBag });
+
+    if (isAdmin) {
+      // Admins/Super Admins get access to ALL dashboards
+      links.push({ path: "/", label: "Main Page", icon: Home });
+      links.push({ path: "/admin", label: "Admin Dashboard", icon: Shield });
+      links.push({ path: "/buyer", label: "Buyer Dashboard", icon: ShoppingBag });
+      links.push({ path: "/farmer", label: "Farmer Dashboard", icon: Tractor });
+      links.push({ path: "/driver", label: "Driver Dashboard", icon: Truck });
+      links.push({ path: "/member", label: "Member Dashboard", icon: Users });
+      links.push({ path: "/business-centre", label: "Business Centre", icon: Briefcase });
+    } else {
+      if (isBuyer) links.push({ path: "/buyer", label: "Buyer Dashboard", icon: ShoppingBag });
+      if (isFarmer) links.push({ path: "/farmer", label: "Farmer Dashboard", icon: Tractor });
+      if (isDriver) links.push({ path: "/driver", label: "Driver Dashboard", icon: Truck });
+      if (isMember) links.push({ path: "/member", label: "Member Dashboard", icon: Users });
+      if (isAffiliate) links.push({ path: "/business-centre", label: "Business Centre", icon: Briefcase });
+      if (links.length === 0 && user) links.push({ path: "/buyer", label: "My Dashboard", icon: ShoppingBag });
+    }
     return links;
   };
 
