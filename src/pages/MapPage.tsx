@@ -33,6 +33,12 @@ import farmsHero from "@/assets/farms-hero.jpg";
 
 const cubicSmooth = [0.22, 1, 0.36, 1] as const;
 
+const farmCategories = [
+  { id: "all", label: "All Farms", icon: Mountain },
+  { id: "organic", label: "Organic", icon: Leaf },
+  { id: "delivery", label: "With Delivery", icon: Truck },
+];
+
 const MapPage = () => {
   const [searchParams] = useSearchParams();
   const [view, setView] = useState<"list" | "map">("map");
@@ -42,8 +48,29 @@ const MapPage = () => {
   const [organicOnly, setOrganicOnly] = useState(false);
   const [deliveryOnly, setDeliveryOnly] = useState(false);
   const [selectedFarmType, setSelectedFarmType] = useState("all");
+  const [activeCategory, setActiveCategory] = useState("all");
+
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollY } = useScroll();
+  const heroImageY = useTransform(scrollY, [0, 500], [0, 150]);
+  const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
+  const heroScale = useTransform(scrollY, [0, 500], [1, 1.15]);
 
   const { location, error: locationError, loading: locationLoading, requestLocation } = useUserLocation();
+
+  const handleCategoryClick = (catId: string) => {
+    setActiveCategory(catId);
+    if (catId === "all") {
+      setOrganicOnly(false);
+      setDeliveryOnly(false);
+    } else if (catId === "organic") {
+      setOrganicOnly(true);
+      setDeliveryOnly(false);
+    } else if (catId === "delivery") {
+      setOrganicOnly(false);
+      setDeliveryOnly(true);
+    }
+  };
 
   useEffect(() => {
     const farmId = searchParams.get("farm");
