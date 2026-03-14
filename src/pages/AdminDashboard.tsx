@@ -100,6 +100,8 @@ import AdminCreateActions from "@/components/admin/AdminCreateActions";
 import AdminNotificationBell from "@/components/admin/AdminNotificationBell";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import DashboardHero from "@/components/DashboardHero";
+import heroFarm from "@/assets/hero-farm.jpg";
 
 type Farmer = Tables<"farmers">;
 type Driver = Tables<"drivers">;
