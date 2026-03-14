@@ -60,7 +60,7 @@ const Header = () => {
     return links;
   };
 
-  const extraDesktopLinks = user && isAdmin
+  const extraDesktopLinks = user && isAnyAdmin
     ? [{ path: "/business-centre", label: "Business Centre" }]
     : [];
 
