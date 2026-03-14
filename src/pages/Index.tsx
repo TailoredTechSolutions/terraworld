@@ -628,7 +628,9 @@ const Index = () => {
             {/* Features Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {features.map((feature) => (
-                <FeatureCard key={feature.title} feature={feature} />
+                <Link key={feature.title} to={featureLinks[feature.title] || "/shop"} className="block">
+                  <FeatureCard feature={feature} />
+                </Link>
               ))}
             </div>
           </div>
