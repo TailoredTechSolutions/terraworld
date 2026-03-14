@@ -48,49 +48,20 @@ const stats = [
 const HeroSection = () => {
   return (
     <section className="relative overflow-hidden bg-grain min-h-[90vh] flex items-center">
-      {/* Background Image with Overlay - Blue primary with red accent hints */}
-      <div className="absolute inset-0">
+      {/* Sticky background wallpaper */}
+      <div className="fixed inset-0 -z-10">
         <img
-          src={heroImage}
-          alt="Farm at sunrise"
-          className="h-full w-full object-cover" />
-
-        {/* Blue to brown gradient with subtle red */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-brown-dark/70" />
-        <div className="absolute inset-0 bg-gradient-to-t from-brown-dark/80 via-transparent to-primary/30" />
+          src={terraHeroBadge}
+          alt=""
+          className="h-full w-full object-cover opacity-50"
+        />
       </div>
 
-      {/* Floating glow orbs */}
-      <div className="hero-glow-orb hero-glow-orb-primary w-96 h-96 -top-20 -left-20" style={{ animationDelay: '0s' }} />
-      <div className="hero-glow-orb hero-glow-orb-accent w-64 h-64 top-1/3 right-10" style={{ animationDelay: '2s' }} />
-      <div className="hero-glow-orb hero-glow-orb-gold w-80 h-80 bottom-10 left-1/4" style={{ animationDelay: '4s' }} />
-
-      {/* Decorative elements */}
-      <motion.div
-        className="absolute top-20 right-10 opacity-20 hidden lg:block"
-        animate={{ rotate: [0, 10, -10, 0], y: [0, -10, 0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}>
-
-        <Sprout className="h-32 w-32 text-accent" />
-      </motion.div>
-
-      {/* Content */}
-      <div className="relative container py-16 md:py-24">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Column - Main Content */}
-          <div>
-            {/* Animated Video Badge - Centered */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, type: "spring" }}
-              className="mb-8 flex justify-center lg:justify-start">
-              <img
-                src={terraHeroBadge}
-                alt="Terra - From Dirt to Dessert"
-                className="w-[500px] md:w-[600px] lg:w-[700px] h-auto drop-shadow-2xl"
-              />
-            </motion.div>
+      {/* Background Image with Overlay */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-brown-dark/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-brown-dark/70 via-transparent to-primary/20" />
+      </div>
 
             {/* Main headline */}
             <motion.h1
