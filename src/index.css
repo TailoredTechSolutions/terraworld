@@ -99,14 +99,14 @@
     --shadow-glow-accent: 0 4px 32px hsl(var(--glow-accent));
     --shadow-glow-gold: 0 4px 32px hsl(var(--glow-gold));
 
-    --sidebar-background: 34 24% 72%;
-    --sidebar-foreground: 26 40% 14%;
-    --sidebar-primary: 218 72% 38%;
-    --sidebar-primary-foreground: 40 30% 96%;
+    --sidebar-background: 38 22% 96%;
+    --sidebar-foreground: 24 20% 16%;
+    --sidebar-primary: 218 72% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 2 72% 48%;
-    --sidebar-accent-foreground: 40 30% 96%;
-    --sidebar-border: 33 22% 62%;
-    --sidebar-ring: 218 72% 38%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 36 18% 88%;
+    --sidebar-ring: 218 72% 42%;
   }
 
   .dark {
