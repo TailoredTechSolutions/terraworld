@@ -914,7 +914,7 @@ export const farms: Farm[] = [
     longitude: 120.789,
     rating: 4.5,
     reviewCount: 31,
-    image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800",
+    image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&q=75",
     description: "PhilGAP-certified root crop specialist farm in Mankayan, Benguet. Produces high-quality potatoes, carrots, and radish in mineral-rich mountain soil. Supplies major markets in Metro Manila.",
     products: ["Potatoes", "Carrots", "Radish", "Korean Radish", "Baguio Beans"],
     contact: "0945-331-7789",
