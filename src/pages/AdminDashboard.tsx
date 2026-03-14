@@ -437,7 +437,7 @@ const AdminDashboard = () => {
             <CardTitle>Registered Farmers</CardTitle>
             <CardDescription>Manage farmer accounts and approvals ({farmers.length} total)</CardDescription>
           </div>
-          <Button className="btn-primary-gradient">Add Farmer</Button>
+          {!isAdminReadonly && <Button className="btn-primary-gradient">Add Farmer</Button>}
         </div>
       </CardHeader>
       <CardContent className="overflow-x-auto">
