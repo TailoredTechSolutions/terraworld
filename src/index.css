@@ -432,9 +432,9 @@
     padding: 0.5rem 0.75rem;
     font-size: 0.875rem;
     font-weight: 500;
-    border-radius: 0.5rem;
+    border-radius: 0.625rem;
     color: hsl(var(--muted-foreground));
-    transition: color 0.25s ease, background-color 0.25s ease, transform 0.2s ease;
+    transition: var(--transition-fluid);
     overflow: hidden;
   }
 
