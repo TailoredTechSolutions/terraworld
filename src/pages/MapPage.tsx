@@ -125,13 +125,11 @@ const MapPage = () => {
       <Header />
       <CartDrawer />
 
-      {/* ===== CINEMATIC HERO ===== */}
-      <section className="relative h-[320px] sm:h-[380px] lg:h-[420px] overflow-hidden">
+      {/* ===== CINEMATIC HERO WITH PARALLAX ===== */}
+      <section ref={heroRef} className="relative h-[320px] sm:h-[380px] lg:h-[420px] overflow-hidden">
         <motion.div
           className="absolute inset-0"
-          initial={{ scale: 1.08 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.8, ease: cubicSmooth }}
+          style={{ y: heroImageY, scale: heroScale }}
         >
           <img
             src={farmsHero}
@@ -142,7 +140,7 @@ const MapPage = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/60 to-transparent" />
 
-        <div className="relative container h-full flex flex-col justify-end pb-8 sm:pb-10">
+        <motion.div className="relative container h-full flex flex-col justify-end pb-8 sm:pb-10" style={{ opacity: heroOpacity }}>
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -183,11 +181,62 @@ const MapPage = () => {
               </div>
             ))}
           </motion.div>
-        </div>
+        </motion.div>
       </section>
 
+      {/* ===== STICKY CATEGORY BAR ===== */}
+      <div className="sticky top-16 z-30 bg-background/80 backdrop-blur-lg border-b border-border/50 transition-all duration-300">
+        <div className="container px-3 sm:px-4 lg:px-8">
+          <div className="flex items-center gap-2 py-3 overflow-x-auto scrollbar-hide">
+            {farmCategories.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => handleCategoryClick(id)}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 border shrink-0",
+                  activeCategory === id
+                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                    : "bg-card text-muted-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </button>
+            ))}
+            {farmTypes.map(type => (
+              <button
+                key={type}
+                onClick={() => {
+                  setSelectedFarmType(type);
+                  setActiveCategory(type);
+                  setOrganicOnly(false);
+                  setDeliveryOnly(false);
+                }}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 border shrink-0",
+                  activeCategory === type
+                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                    : "bg-card text-muted-foreground border-border hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                <Sprout className="h-3.5 w-3.5" />
+                {type}
+              </button>
+            ))}
+            {activeFiltersCount > 0 && (
+              <button
+                onClick={() => { clearFilters(); setActiveCategory("all"); }}
+                className="text-xs text-primary hover:text-primary/80 whitespace-nowrap ml-2 underline underline-offset-2"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* ===== LOCATION STATUS (compact, integrated) ===== */}
-      <section className="container px-3 sm:px-4 lg:px-8 -mt-5 relative z-10 mb-6">
+      <section className="container px-3 sm:px-4 lg:px-8 mt-4 relative z-10 mb-6">
         <motion.div
           className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-2xl bg-card border border-border shadow-sm"
           initial={{ opacity: 0, y: 16 }}
