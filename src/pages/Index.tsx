@@ -1033,7 +1033,7 @@ const Index = () => {
         </main>
 
         <Footer />
-      </motion.div>
+      </div>
     </div>
   );
 };
