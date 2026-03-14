@@ -939,7 +939,7 @@ export const farms: Farm[] = [
     longitude: 120.5823,
     rating: 4.9,
     reviewCount: 245,
-    image: "https://images.unsplash.com/photo-1543528176-61b239494933?w=800",
+    image: "https://images.unsplash.com/photo-1543528176-61b239494933?w=400&q=75",
     description: "The iconic 79-hectare strawberry farm managed by Benguet State University in La Trinidad. A premier agri-tourism destination and the largest strawberry-producing area in the Philippines. Open for pick-your-own strawberry experiences.",
     products: ["Strawberries", "Strawberry Jam", "Strawberry Wine", "Fresh Berries"],
     contact: "074-422-2127",
