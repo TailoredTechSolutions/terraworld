@@ -117,7 +117,7 @@ const BusinessCentreAuth = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {transitionOverlay}
+      {/* ===== CINEMATIC HERO WITH PARALLAX ===== */}
       <section className="relative h-[320px] sm:h-[380px] lg:h-[440px] overflow-hidden">
         <motion.div
           className="absolute inset-0"
