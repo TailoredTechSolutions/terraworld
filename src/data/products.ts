@@ -1064,7 +1064,7 @@ export const farms: Farm[] = [
     longitude: 120.620,
     rating: 4.8,
     reviewCount: 89,
-    image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800",
+    image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&q=75",
     description: "Specialty dairy farm in the cool highlands between Tublay and Atok, Benguet. Produces fresh carabao milk, artisan kesong puti (white cheese), and free-range eggs. One of the few highland dairy operations in the Cordillera.",
     products: ["Carabao Milk", "Kesong Puti", "Fresh Eggs", "Salted Eggs", "Honey", "Yogurt"],
     contact: "0927-665-9912",
