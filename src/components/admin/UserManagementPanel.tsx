@@ -59,6 +59,7 @@ interface UserWithRoles extends UserProfile {
 
 const ROLE_CONFIG: Record<AppRole, { label: string; icon: React.ComponentType<{ className?: string }>; color: string; description: string }> = {
   admin: { label: "Admin", icon: Shield, color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400", description: "Full access to all features and admin panel" },
+  admin_readonly: { label: "View-Only Admin", icon: Eye, color: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400", description: "Can view all data but cannot modify anything" },
   driver: { label: "Driver", icon: Truck, color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400", description: "Access to driver dashboard and deliveries" },
   farmer: { label: "Farmer", icon: Sprout, color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400", description: "Can manage farm products and orders" },
   member: { label: "Member", icon: Crown, color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400", description: "Standard member with affiliate features" },
@@ -67,7 +68,7 @@ const ROLE_CONFIG: Record<AppRole, { label: string; icon: React.ComponentType<{ 
   affiliate: { label: "Affiliate", icon: Users, color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400", description: "Affiliate referral partner" },
 };
 
-const ALL_ROLES: AppRole[] = ['admin', 'driver', 'farmer', 'member', 'business_buyer', 'buyer', 'affiliate'];
+const ALL_ROLES: AppRole[] = ['admin', 'admin_readonly', 'driver', 'farmer', 'member', 'business_buyer', 'buyer', 'affiliate'];
 
 const UserManagementPanel = () => {
   const [users, setUsers] = useState<UserWithRoles[]>([]);
