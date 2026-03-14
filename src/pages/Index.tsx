@@ -33,6 +33,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
+const featureLinks: Record<string, string> = {
+  "Farm-Fresh Marketplace": "/shop",
+  "Find Farms Near You": "/map",
+  "Real-Time Delivery Tracking": "/marketplace/order-tracking",
+  "Secure Payments": "/marketplace/pricing-breakdown",
+  "KYC/KYB Compliance": "/kyc",
+};
+
 interface Feature {
   icon: LucideIcon;
   title: string;
@@ -575,16 +583,15 @@ const Index = () => {
           <section className="py-10 bg-secondary/50">
             <div className="container">
               <div className="flex flex-wrap items-center justify-center gap-4">
-                <Button
-                  size="lg"
-                  className="h-12 px-8 text-base font-bold gap-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-md"
-                  onClick={() => {
-                    // Placeholder for future app download link
-                  }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                  Download App
-                </Button>
+                <Link to="/about">
+                  <Button
+                    size="lg"
+                    className="h-12 px-8 text-base font-bold gap-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-md"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                    Download App
+                  </Button>
+                </Link>
                 <Link to="/auth?role=farmer">
                   <Button
                     size="lg"
@@ -629,7 +636,9 @@ const Index = () => {
             {/* Features Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {features.map((feature) => (
-                <FeatureCard key={feature.title} feature={feature} />
+                <Link key={feature.title} to={featureLinks[feature.title] || "/shop"} className="block">
+                  <FeatureCard feature={feature} />
+                </Link>
               ))}
             </div>
           </div>
