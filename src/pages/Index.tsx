@@ -17,6 +17,12 @@ import customerChefJuan from "@/assets/testimonials/customer-chef-juan.jpg";
 import customerAteJoy from "@/assets/testimonials/customer-ate-joy.jpg";
 import customerMike from "@/assets/testimonials/customer-mike.jpg";
 import customerSooJin from "@/assets/testimonials/customer-soo-jin.jpg";
+// Cinematic brand images
+import riceTerraces from "@/assets/rice-terraces.jpg";
+import deliveryLogistics from "@/assets/delivery-farm-logistics.jpg";
+import produceSpread from "@/assets/produce-spread.jpg";
+import chefPreparation from "@/assets/chef-preparation.jpg";
+import farmerPortrait from "@/assets/farmer-portrait.jpg";
 import { 
   ArrowRight, 
   Leaf, 
@@ -29,7 +35,10 @@ import {
   LogIn,
   type LucideIcon,
   Star,
-  Quote
+  Quote,
+  Sprout,
+  Package,
+  ChefHat,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
