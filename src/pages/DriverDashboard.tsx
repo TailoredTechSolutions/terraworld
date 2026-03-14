@@ -8,6 +8,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import DriverSidebar from "@/components/driver/DriverSidebar";
+import DashboardHero from "@/components/DashboardHero";
+import deliveryHero from "@/assets/delivery-farm-logistics.jpg";
 import BuyerSupportPanel from "@/components/buyer/BuyerSupportPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
