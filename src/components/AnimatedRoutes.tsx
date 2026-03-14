@@ -28,9 +28,8 @@ const AuthPage = lazy(() => import("@/pages/AuthPage"));
 const ResetPasswordPage = lazy(() => import("@/pages/ResetPasswordPage"));
 const KYCPage = lazy(() => import("@/pages/KYCPage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
-const PlaceholderPages = lazy(() => import("@/pages/placeholders"));
 
-// Lazy wrapper for placeholder pages
+// Placeholder pages are lightweight, keep as static imports
 import {
   AboutPage, HowItWorksPage, ImpactPage, CareersPage, PilotBaguioPage,
   PricingPage, CategoriesPage, OrderTrackPage, QualityPolicyPage,
