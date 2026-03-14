@@ -14,7 +14,6 @@ import { Loader2, Eye, EyeOff, Users, TrendingUp, Award, Zap, DollarSign, Coins,
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useVideoTransition } from "@/components/VideoTransitionOverlay";
 import terraLogo from "@/assets/terra-logo-full.png";
 import businessCentreHero from "@/assets/business-centre-hero.jpg";
 
