@@ -134,6 +134,7 @@ const COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(var(--secondar
 
 const AdminDashboard = () => {
   const { toast } = useToast();
+  const { isAdminReadonly } = useUserRoles();
   const [activeTab, setActiveTab] = useState("overview");
   const [farmers, setFarmers] = useState<Farmer[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
