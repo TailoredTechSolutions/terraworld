@@ -14,6 +14,7 @@ import { Loader2, Eye, EyeOff, Users, TrendingUp, Award, Zap, DollarSign, Coins,
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useVideoTransition } from "@/components/VideoTransitionOverlay";
 import terraLogo from "@/assets/terra-logo-full.png";
 import businessCentreHero from "@/assets/business-centre-hero.jpg";
 
@@ -31,6 +32,7 @@ const BusinessCentreAuth = () => {
   const { scrollY } = useScroll();
   const heroImageY = useTransform(scrollY, [0, 400], [0, 120]);
   const heroScale = useTransform(scrollY, [0, 400], [1, 1.1]);
+  const [triggerTransition, transitionOverlay] = useVideoTransition();
 
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const [isLoading, setIsLoading] = useState(false);
@@ -55,10 +57,10 @@ const BusinessCentreAuth = () => {
   useEffect(() => {
     if (user && !authLoading && !rolesLoading) {
       if (isAdminUser || isAffiliateUser) {
-        navigate("/business-centre");
+        triggerTransition("/business-centre");
       }
     }
-  }, [user, authLoading, rolesLoading, isAdminUser, isAffiliateUser, navigate]);
+  }, [user, authLoading, rolesLoading, isAdminUser, isAffiliateUser, triggerTransition]);
 
   const validateForm = (isSignup: boolean) => {
     let valid = true;
@@ -86,7 +88,7 @@ const BusinessCentreAuth = () => {
     try {
       const { error } = await signIn(email, password);
       if (error) { toast({ title: "Sign In Failed", description: error.message, variant: "destructive" }); }
-      else { navigate("/business-centre"); }
+      else { triggerTransition("/business-centre"); }
     } catch { toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" }); }
     finally { setIsLoading(false); }
   };
@@ -116,7 +118,7 @@ const BusinessCentreAuth = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* ===== CINEMATIC HERO WITH PARALLAX ===== */}
+      {transitionOverlay}
       <section className="relative h-[320px] sm:h-[380px] lg:h-[440px] overflow-hidden">
         <motion.div
           className="absolute inset-0"
