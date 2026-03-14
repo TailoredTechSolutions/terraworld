@@ -864,7 +864,7 @@ export const farms: Farm[] = [
     longitude: 120.651,
     rating: 4.7,
     reviewCount: 43,
-    image: "https://images.unsplash.com/photo-1500076656116-558758c991c1?w=800",
+    image: "https://images.unsplash.com/photo-1500076656116-558758c991c1?w=400&q=75",
     description: "PhilGAP-certified terraced farm in Kibungan, Benguet. Grows sweet peas, tomatoes, and parsley on ancient rice terraces converted to vegetable production. Known for pesticide-free practices.",
     products: ["Sweet Peas", "Tomatoes", "Parsley", "Lettuce", "Chinese Cabbage", "Beans"],
     contact: "0928-413-5567",
