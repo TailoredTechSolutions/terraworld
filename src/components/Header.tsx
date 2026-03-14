@@ -40,7 +40,7 @@ const Header = () => {
   const getDashboardLinks = () => {
     const links: { path: string; label: string; icon: React.ComponentType<{ className?: string }> }[] = [];
 
-    if (isAdmin) {
+    if (isAnyAdmin) {
       // Admins/Super Admins get access to ALL dashboards
       links.push({ path: "/", label: "Main Page", icon: Home });
       links.push({ path: "/admin", label: "Admin Dashboard", icon: Shield });
