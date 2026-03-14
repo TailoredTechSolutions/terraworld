@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Loader2, User, ShoppingBag, Wallet, Coins, Users, TrendingUp } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,6 +31,50 @@ const BuyerDashboard = () => {
   const { user, profile, loading } = useAuth();
   const isMobile = useIsMobile();
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Fetch real-time KPI data for hero badges
+  const { data: kpiData } = useQuery({
+    queryKey: ["buyer-hero-kpis", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return { orders: 0, wallet: 0, tokens: 0, referrals: 0 };
+
+      const email = profile?.email || user.email;
+
+      const [ordersRes, walletRes, tokensRes, referralsRes] = await Promise.all([
+        // Order count
+        supabase
+          .from("orders")
+          .select("*", { count: "exact", head: true })
+          .eq("customer_email", email || ""),
+        // Wallet balance
+        supabase
+          .from("wallets")
+          .select("available_balance")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        // Token balance from profile
+        supabase
+          .from("profiles")
+          .select("agri_token_balance")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        // Referral count
+        supabase
+          .from("profiles")
+          .select("*", { count: "exact", head: true })
+          .eq("referred_by", profile?.id || ""),
+      ]);
+
+      return {
+        orders: ordersRes.count || 0,
+        wallet: Number(walletRes.data?.available_balance || 0),
+        tokens: Number(tokensRes.data?.agri_token_balance || 0),
+        referrals: referralsRes.count || 0,
+      };
+    },
+    enabled: !!user?.id,
+    staleTime: 30_000,
+  });
 
   const registerSection = useCallback((id: string) => (el: HTMLDivElement | null) => {
     sectionRefs.current[id] = el;
@@ -134,10 +180,10 @@ const BuyerDashboard = () => {
               badge="🛒 Buyer Account"
               backgroundImage={shopHero}
               kpis={[
-                { icon: ShoppingBag, label: "Orders", value: "—" },
-                { icon: Wallet, label: "Wallet", value: "₱0" },
-                { icon: Coins, label: "AGRI", value: "0" },
-                { icon: Users, label: "Referrals", value: "—" },
+                { icon: ShoppingBag, label: "Orders", value: (kpiData?.orders ?? 0).toString() },
+                { icon: Wallet, label: "Wallet", value: `₱${(kpiData?.wallet ?? 0).toLocaleString()}` },
+                { icon: Coins, label: "AGRI", value: (kpiData?.tokens ?? 0).toLocaleString() },
+                { icon: Users, label: "Referrals", value: (kpiData?.referrals ?? 0).toString() },
               ]}
             />
 
