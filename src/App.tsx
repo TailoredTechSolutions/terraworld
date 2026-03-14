@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "next-themes";
+import { TransitionProvider } from "@/components/TransitionProvider";
 import AnimatedRoutes from "./components/AnimatedRoutes";
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -17,10 +18,12 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AuthProvider>
-            <ScrollToTop />
-            <AnimatedRoutes />
-          </AuthProvider>
+          <TransitionProvider>
+            <AuthProvider>
+              <ScrollToTop />
+              <AnimatedRoutes />
+            </AuthProvider>
+          </TransitionProvider>
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>

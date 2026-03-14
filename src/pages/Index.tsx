@@ -1,10 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
-import VideoIntro from "@/components/VideoIntro";
+
 import FarmCard from "@/components/FarmCard";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
@@ -578,19 +578,10 @@ const TestimonialsSection = () => {
 const Index = () => {
   const { user } = useAuth();
   useUserRoles(); // keep hook call order stable
-  const [contentVisible, setContentVisible] = useState(false);
-  const handleIntroComplete = useCallback(() => setContentVisible(true), []);
 
   return (
     <div className="min-h-screen bg-background">
-      <VideoIntro onIntroComplete={handleIntroComplete} />
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={contentVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-        transition={{ duration: 0.8, ease: [0.25, 0.8, 0.25, 1] }}
-        style={{ pointerEvents: contentVisible ? "auto" : "none" }}
-      >
+      <div>
         <Header />
         <CartDrawer />
 
@@ -1042,7 +1033,7 @@ const Index = () => {
         </main>
 
         <Footer />
-      </motion.div>
+      </div>
     </div>
   );
 };
