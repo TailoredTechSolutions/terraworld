@@ -38,7 +38,7 @@
     --input: 34 20% 72%;
     --ring: 218 72% 38%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     /* Custom tokens - Philippine flag + earth theme */
     --success: 148 55% 38%;
@@ -62,11 +62,17 @@
     --yellow-soft: 48 45% 76%;
 
     /* Liquid Glass tokens - Light Mode (warm brown tinted) */
-    --glass: 34 26% 84% / 0.80;
-    --glass-border: 33 24% 68% / 0.6;
-    --glass-highlight: 0 0% 100% / 0.4;
-    --glass-blur: 16px;
-    --glass-radius: 20px;
+    --glass: 34 26% 84% / 0.70;
+    --glass-border: 33 24% 68% / 0.35;
+    --glass-highlight: 0 0% 100% / 0.35;
+    --glass-blur: 20px;
+    --glass-radius: 24px;
+    
+    /* Fluid motion easing */
+    --ease-fluid: cubic-bezier(0.4, 0, 0.1, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-organic: cubic-bezier(0.25, 0.8, 0.25, 1);
+    --transition-fluid: all 0.4s var(--ease-fluid);
     
     /* Glow effects using Terra colors */
     --glow-primary: 218 72% 38% / 0.35;
@@ -83,15 +89,15 @@
     --gradient-brown: linear-gradient(135deg, hsl(26 36% 32%) 0%, hsl(28 30% 44%) 100%);
     --gradient-brown-gold: linear-gradient(135deg, hsl(26 40% 22%) 0%, hsl(30 36% 36%) 50%, hsl(44 78% 54%) 100%);
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(26 40% 14% / 0.06);
-    --shadow-md: 0 4px 6px -1px hsl(26 40% 14% / 0.10), 0 2px 4px -2px hsl(26 40% 14% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(26 40% 14% / 0.12), 0 4px 6px -4px hsl(26 40% 14% / 0.08);
-    --shadow-card: 0 4px 20px -4px hsl(26 40% 14% / 0.15);
-    --shadow-glass: 0 8px 32px hsl(26 40% 14% / 0.12), inset 0 1px 0 hsl(0 0% 100% / 0.3);
-    --shadow-glow-primary: 0 0 24px hsl(var(--glow-primary));
-    --shadow-glow-accent: 0 0 24px hsl(var(--glow-accent));
-    --shadow-glow-gold: 0 0 24px hsl(var(--glow-gold));
+    /* Shadows - softer, more diffuse for fluid depth */
+    --shadow-sm: 0 2px 8px -2px hsl(26 40% 14% / 0.06);
+    --shadow-md: 0 8px 16px -4px hsl(26 40% 14% / 0.08), 0 2px 6px -2px hsl(26 40% 14% / 0.04);
+    --shadow-lg: 0 16px 32px -8px hsl(26 40% 14% / 0.10), 0 6px 12px -4px hsl(26 40% 14% / 0.06);
+    --shadow-card: 0 8px 32px -8px hsl(26 40% 14% / 0.12);
+    --shadow-glass: 0 12px 40px -8px hsl(26 40% 14% / 0.10), inset 0 1px 0 hsl(0 0% 100% / 0.25);
+    --shadow-glow-primary: 0 4px 32px hsl(var(--glow-primary));
+    --shadow-glow-accent: 0 4px 32px hsl(var(--glow-accent));
+    --shadow-glow-gold: 0 4px 32px hsl(var(--glow-gold));
 
     --sidebar-background: 34 24% 72%;
     --sidebar-foreground: 26 40% 14%;
@@ -163,6 +169,7 @@
 @layer base {
   * {
     @apply border-border;
+    transition-timing-function: var(--ease-fluid);
   }
 
   body {
@@ -229,15 +236,15 @@
     box-shadow: 0 4px 30px hsl(220 40% 15% / 0.1);
   }
 
-  /* Glass Button - Liquid style */
+  /* Glass Button - Liquid style with fluid motion */
   .btn-liquid {
     background: var(--gradient-hero);
-    border-radius: 14px;
-    padding: 12px 24px;
+    border-radius: 16px;
+    padding: 12px 28px;
     color: hsl(var(--primary-foreground));
     font-weight: 500;
     box-shadow: var(--shadow-glow-primary);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: var(--transition-fluid);
     position: relative;
     overflow: hidden;
   }
@@ -249,18 +256,21 @@
     left: 0;
     right: 0;
     height: 50%;
-    background: linear-gradient(to bottom, hsl(0 0% 100% / 0.2), transparent);
+    background: linear-gradient(to bottom, hsl(0 0% 100% / 0.18), transparent);
+    border-radius: 16px 16px 0 0;
     pointer-events: none;
+    transition: opacity 0.4s var(--ease-organic);
   }
 
   .btn-liquid:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 0 32px hsl(var(--glow-primary));
-    filter: brightness(1.1);
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 8px 40px hsl(var(--glow-primary));
+    filter: brightness(1.08);
   }
 
   .btn-liquid:active {
-    transform: translateY(0) scale(0.98);
+    transform: translateY(0) scale(0.97);
+    transition-duration: 0.15s;
   }
 
   /* Glass Button - Accent variant */
@@ -292,11 +302,11 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--primary) / 0.4);
-    border-radius: 14px;
-    padding: 12px 24px;
+    border-radius: 16px;
+    padding: 12px 28px;
     color: hsl(var(--primary));
     font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: var(--transition-fluid);
   }
 
   .btn-liquid-outline:hover {
@@ -312,10 +322,10 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--glass-border));
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 12px 16px;
     color: hsl(var(--foreground));
-    transition: all 0.2s ease;
+    transition: var(--transition-fluid);
   }
 
   .glass-input:focus {
@@ -392,22 +402,23 @@
   }
 
   .card-hover {
-    @apply transition-all duration-300 ease-out;
+    transition: var(--transition-fluid);
   }
 
   .card-hover:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px) scale(1.01);
     box-shadow: var(--shadow-card);
   }
 
-  /* Glass hover effect */
+  /* Glass hover effect - fluid organic lift */
   .glass-hover {
-    @apply transition-all duration-300 ease-out;
+    transition: var(--transition-fluid);
   }
 
   .glass-hover:hover {
-    transform: translateY(-4px) scale(1.01);
-    box-shadow: var(--shadow-glass), 0 12px 40px hsl(220 40% 15% / 0.15);
+    transform: translateY(-6px) scale(1.015);
+    box-shadow: var(--shadow-glass), 0 20px 48px -12px hsl(220 40% 15% / 0.12);
+    border-color: hsl(var(--glass-border));
   }
 
   /* === NAV LINK ANIMATIONS === */
@@ -421,9 +432,9 @@
     padding: 0.5rem 0.75rem;
     font-size: 0.875rem;
     font-weight: 500;
-    border-radius: 0.5rem;
+    border-radius: 0.625rem;
     color: hsl(var(--muted-foreground));
-    transition: color 0.25s ease, background-color 0.25s ease, transform 0.2s ease;
+    transition: var(--transition-fluid);
     overflow: hidden;
   }
 
