@@ -57,10 +57,10 @@ const BusinessCentreAuth = () => {
   useEffect(() => {
     if (user && !authLoading && !rolesLoading) {
       if (isAdminUser || isAffiliateUser) {
-        navigate("/business-centre");
+        triggerTransition("/business-centre");
       }
     }
-  }, [user, authLoading, rolesLoading, isAdminUser, isAffiliateUser, navigate]);
+  }, [user, authLoading, rolesLoading, isAdminUser, isAffiliateUser, triggerTransition]);
 
   const validateForm = (isSignup: boolean) => {
     let valid = true;
