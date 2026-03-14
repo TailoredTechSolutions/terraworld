@@ -66,6 +66,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Terra earth colors
+        terra: {
+          soil: "hsl(var(--terra-soil))",
+          terracotta: "hsl(var(--terra-terracotta))",
+          leaf: "hsl(var(--terra-leaf))",
+          rice: "hsl(var(--terra-rice))",
+          gold: "hsl(var(--terra-gold))",
+        },
         // Philippine flag colors
         ph: {
           blue: "hsl(var(--ph-blue))",
