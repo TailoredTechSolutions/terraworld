@@ -56,7 +56,7 @@ const BusinessCentreAuth = () => {
   useEffect(() => {
     if (user && !authLoading && !rolesLoading) {
       if (isAdminUser || isAffiliateUser) {
-        triggerTransition("/business-centre");
+        navigate("/business-centre");
       }
     }
   }, [user, authLoading, rolesLoading, isAdminUser, isAffiliateUser, triggerTransition]);
