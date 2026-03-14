@@ -26,6 +26,8 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useRef, useState, useEffect } from "react";
 
+const cubicSmooth = [0.22, 1, 0.36, 1] as const;
+
 // ─── Section Navigation ───
 const NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
