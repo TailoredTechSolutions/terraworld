@@ -96,6 +96,8 @@ import AuditLogPanel from "@/components/admin/AuditLogPanel";
 import CustomerServicePanel from "@/components/admin/CustomerServicePanel";
 import TokenRewardsPanel from "@/components/admin/TokenRewardsPanel";
 import ProductApprovalPanel from "@/components/admin/ProductApprovalPanel";
+import AdminCreateActions from "@/components/admin/AdminCreateActions";
+import AdminNotificationBell from "@/components/admin/AdminNotificationBell";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
