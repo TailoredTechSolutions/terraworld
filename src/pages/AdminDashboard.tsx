@@ -480,23 +480,27 @@ const AdminDashboard = () => {
                       <DropdownMenuItem onClick={() => setSelectedFarmer(farmer)}>
                         <Eye className="h-4 w-4 mr-2" /> View Details
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Edit className="h-4 w-4 mr-2" /> Edit
-                      </DropdownMenuItem>
-                      {farmer.status === "pending" && (
-                        <DropdownMenuItem className="text-primary" onClick={() => updateFarmerStatus(farmer.id, "active")}>
-                          <Check className="h-4 w-4 mr-2" /> Approve
-                        </DropdownMenuItem>
-                      )}
-                      {farmer.status === "active" && (
-                        <DropdownMenuItem className="text-destructive" onClick={() => updateFarmerStatus(farmer.id, "suspended")}>
-                          <X className="h-4 w-4 mr-2" /> Suspend
-                        </DropdownMenuItem>
-                      )}
-                      {farmer.status === "suspended" && (
-                        <DropdownMenuItem className="text-primary" onClick={() => updateFarmerStatus(farmer.id, "active")}>
-                          <Check className="h-4 w-4 mr-2" /> Reactivate
-                        </DropdownMenuItem>
+                      {!isAdminReadonly && (
+                        <>
+                          <DropdownMenuItem>
+                            <Edit className="h-4 w-4 mr-2" /> Edit
+                          </DropdownMenuItem>
+                          {farmer.status === "pending" && (
+                            <DropdownMenuItem className="text-primary" onClick={() => updateFarmerStatus(farmer.id, "active")}>
+                              <Check className="h-4 w-4 mr-2" /> Approve
+                            </DropdownMenuItem>
+                          )}
+                          {farmer.status === "active" && (
+                            <DropdownMenuItem className="text-destructive" onClick={() => updateFarmerStatus(farmer.id, "suspended")}>
+                              <X className="h-4 w-4 mr-2" /> Suspend
+                            </DropdownMenuItem>
+                          )}
+                          {farmer.status === "suspended" && (
+                            <DropdownMenuItem className="text-primary" onClick={() => updateFarmerStatus(farmer.id, "active")}>
+                              <Check className="h-4 w-4 mr-2" /> Reactivate
+                            </DropdownMenuItem>
+                          )}
+                        </>
                       )}
                     </DropdownMenuContent>
                   </DropdownMenu>
