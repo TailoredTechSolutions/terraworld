@@ -89,15 +89,15 @@
     --gradient-brown: linear-gradient(135deg, hsl(26 36% 32%) 0%, hsl(28 30% 44%) 100%);
     --gradient-brown-gold: linear-gradient(135deg, hsl(26 40% 22%) 0%, hsl(30 36% 36%) 50%, hsl(44 78% 54%) 100%);
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(26 40% 14% / 0.06);
-    --shadow-md: 0 4px 6px -1px hsl(26 40% 14% / 0.10), 0 2px 4px -2px hsl(26 40% 14% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(26 40% 14% / 0.12), 0 4px 6px -4px hsl(26 40% 14% / 0.08);
-    --shadow-card: 0 4px 20px -4px hsl(26 40% 14% / 0.15);
-    --shadow-glass: 0 8px 32px hsl(26 40% 14% / 0.12), inset 0 1px 0 hsl(0 0% 100% / 0.3);
-    --shadow-glow-primary: 0 0 24px hsl(var(--glow-primary));
-    --shadow-glow-accent: 0 0 24px hsl(var(--glow-accent));
-    --shadow-glow-gold: 0 0 24px hsl(var(--glow-gold));
+    /* Shadows - softer, more diffuse for fluid depth */
+    --shadow-sm: 0 2px 8px -2px hsl(26 40% 14% / 0.06);
+    --shadow-md: 0 8px 16px -4px hsl(26 40% 14% / 0.08), 0 2px 6px -2px hsl(26 40% 14% / 0.04);
+    --shadow-lg: 0 16px 32px -8px hsl(26 40% 14% / 0.10), 0 6px 12px -4px hsl(26 40% 14% / 0.06);
+    --shadow-card: 0 8px 32px -8px hsl(26 40% 14% / 0.12);
+    --shadow-glass: 0 12px 40px -8px hsl(26 40% 14% / 0.10), inset 0 1px 0 hsl(0 0% 100% / 0.25);
+    --shadow-glow-primary: 0 4px 32px hsl(var(--glow-primary));
+    --shadow-glow-accent: 0 4px 32px hsl(var(--glow-accent));
+    --shadow-glow-gold: 0 4px 32px hsl(var(--glow-gold));
 
     --sidebar-background: 34 24% 72%;
     --sidebar-foreground: 26 40% 14%;
