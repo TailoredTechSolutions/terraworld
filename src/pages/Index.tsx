@@ -17,6 +17,12 @@ import customerChefJuan from "@/assets/testimonials/customer-chef-juan.jpg";
 import customerAteJoy from "@/assets/testimonials/customer-ate-joy.jpg";
 import customerMike from "@/assets/testimonials/customer-mike.jpg";
 import customerSooJin from "@/assets/testimonials/customer-soo-jin.jpg";
+// Cinematic brand images
+import riceTerraces from "@/assets/rice-terraces.jpg";
+import deliveryLogistics from "@/assets/delivery-farm-logistics.jpg";
+import produceSpread from "@/assets/produce-spread.jpg";
+import chefPreparation from "@/assets/chef-preparation.jpg";
+import farmerPortrait from "@/assets/farmer-portrait.jpg";
 import { 
   ArrowRight, 
   Leaf, 
@@ -29,7 +35,10 @@ import {
   LogIn,
   type LucideIcon,
   Star,
-  Quote
+  Quote,
+  Sprout,
+  Package,
+  ChefHat,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -705,7 +714,235 @@ const Index = () => {
           </div>
         </section>
 
-        {/* CTA Section - Moved up after How It Works */}
+        {/* ═══ CINEMATIC JOURNEY SECTION — soil → harvest → delivery → plate ═══ */}
+        <section className="py-24 bg-background overflow-hidden">
+          <div className="container">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-16"
+            >
+              <span className="inline-block px-4 py-1.5 rounded-full bg-terra-terracotta/10 text-terra-terracotta text-sm font-semibold mb-4">
+                The Terra Journey
+              </span>
+              <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4">
+                From Soil to Your Table
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+                Every product tells a story — from the rich highland soil of Benguet to your kitchen.
+              </p>
+            </motion.div>
+
+            {/* Journey Steps — alternating image/text layout */}
+            <div className="space-y-20">
+              {/* Step 1: The Soil */}
+              <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+                <motion.div
+                  initial={{ opacity: 0, x: -40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.7 }}
+                  className="relative rounded-3xl overflow-hidden aspect-[16/10] shadow-lg"
+                >
+                  <img src={riceTerraces} alt="Philippine rice terraces at golden hour" className="h-full w-full object-cover" loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent" />
+                  <div className="absolute bottom-4 left-4 flex items-center gap-2 glass-badge-primary">
+                    <Sprout className="h-3.5 w-3.5" />
+                    Highland Terraces
+                  </div>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: 40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.7, delay: 0.15 }}
+                >
+                  <span className="text-5xl font-display font-bold text-primary/20">01</span>
+                  <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground mt-2 mb-4">
+                    Rooted in Rich Soil
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    Our partner farms sit in the highlands of Benguet — 1,500 meters above sea level. The cool mountain air, mineral-rich volcanic soil, and morning mists create the perfect conditions for growing exceptional produce.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Every farmer on Terra is ATI-certified and follows sustainable agricultural practices passed down through generations.
+                  </p>
+                </motion.div>
+              </div>
+
+              {/* Step 2: The Harvest */}
+              <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+                <motion.div
+                  initial={{ opacity: 0, x: -40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.7, delay: 0.15 }}
+                  className="lg:order-2"
+                >
+                  <span className="text-5xl font-display font-bold text-primary/20">02</span>
+                  <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground mt-2 mb-4">
+                    Harvested at Dawn
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    Farmers harvest at sunrise when produce is at peak freshness. Vegetables are picked, cleaned, and packed into wooden crates within hours — preserving nutrients, flavor, and natural crispness.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed">
+                    No cold storage, no warehouses. Just farm-fresh produce moving directly to you.
+                  </p>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: 40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.7 }}
+                  className="relative rounded-3xl overflow-hidden aspect-[16/10] shadow-lg lg:order-1"
+                >
+                  <img src={produceSpread} alt="Freshly harvested vegetables on a farm table" className="h-full w-full object-cover" loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent" />
+                  <div className="absolute bottom-4 left-4 flex items-center gap-2 glass-badge-accent">
+                    <Leaf className="h-3.5 w-3.5" />
+                    Fresh Harvest
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Step 3: The Delivery */}
+              <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+                <motion.div
+                  initial={{ opacity: 0, x: -40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.7 }}
+                  className="relative rounded-3xl overflow-hidden aspect-[16/10] shadow-lg"
+                >
+                  <img src={deliveryLogistics} alt="Farm logistics team loading produce into delivery vehicles" className="h-full w-full object-cover" loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent" />
+                  <div className="absolute bottom-4 left-4 flex items-center gap-2 glass-badge-gold">
+                    <Package className="h-3.5 w-3.5" />
+                    Same-Day Logistics
+                  </div>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: 40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.7, delay: 0.15 }}
+                >
+                  <span className="text-5xl font-display font-bold text-primary/20">03</span>
+                  <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground mt-2 mb-4">
+                    Direct Farm-to-Door Delivery
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    Our logistics network coordinates directly with farms. Produce is loaded into crates and dispatched within hours of harvest. Track your delivery in real-time from field to front door.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed">
+                    No middlemen. No warehouses. Just farm-fresh produce moving at the speed of freshness.
+                  </p>
+                </motion.div>
+              </div>
+
+              {/* Step 4: The Plate */}
+              <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+                <motion.div
+                  initial={{ opacity: 0, x: -40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.7, delay: 0.15 }}
+                  className="lg:order-2"
+                >
+                  <span className="text-5xl font-display font-bold text-primary/20">04</span>
+                  <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground mt-2 mb-4">
+                    From Kitchen to Table
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    Chefs and home cooks alike taste the difference. Highland-grown produce has richer flavor, better texture, and higher nutritional value — qualities you can see and taste.
+                  </p>
+                  <Link to="/shop">
+                    <Button className="btn-liquid gap-2 mt-2">
+                      Start Shopping <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: 40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.7 }}
+                  className="relative rounded-3xl overflow-hidden aspect-[16/10] shadow-lg lg:order-1"
+                >
+                  <img src={chefPreparation} alt="Chef preparing fresh farm vegetables" className="h-full w-full object-cover" loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent" />
+                  <div className="absolute bottom-4 left-4 flex items-center gap-2 glass-badge-primary">
+                    <ChefHat className="h-3.5 w-3.5" />
+                    Farm-to-Plate
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ FARMER SPOTLIGHT SECTION ═══ */}
+        <section className="relative py-24 overflow-hidden">
+          <div className="absolute inset-0">
+            <img src={farmerPortrait} alt="" className="h-full w-full object-cover" loading="lazy" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
+          </div>
+          <div className="container relative">
+            <div className="max-w-xl">
+              <motion.span
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="inline-block px-4 py-1.5 rounded-full bg-primary/15 text-primary text-sm font-semibold mb-4"
+              >
+                Meet Our Farmers
+              </motion.span>
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="font-display text-3xl md:text-5xl font-bold text-foreground mb-6"
+              >
+                The People Behind
+                <br />
+                <span className="text-primary">Your Food</span>
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="text-lg text-muted-foreground leading-relaxed mb-8"
+              >
+                Every purchase on Terra directly supports Filipino highland farmers — their families, their communities, and sustainable agricultural practices that have been perfected over generations.
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 }}
+                className="flex flex-wrap gap-4"
+              >
+                <Link to="/map">
+                  <Button className="btn-liquid gap-2">
+                    Visit Our Farms <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link to="/auth?role=farmer">
+                  <Button variant="liquid-outline" className="gap-2">
+                    Become a Partner
+                  </Button>
+                </Link>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
         <section className="py-20 bg-primary relative overflow-hidden">
           {/* Glass overlay decorations */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
