@@ -59,7 +59,7 @@ const BusinessCentreAuth = () => {
         navigate("/business-centre");
       }
     }
-  }, [user, authLoading, rolesLoading, isAdminUser, isAffiliateUser, triggerTransition]);
+  }, [user, authLoading, rolesLoading, isAdminUser, isAffiliateUser, navigate]);
 
   const validateForm = (isSignup: boolean) => {
     let valid = true;
