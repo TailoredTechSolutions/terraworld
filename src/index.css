@@ -49,22 +49,22 @@
     --ph-red-light: 2 58% 62%;
     --ph-gold: 44 92% 50%;
     --ph-white: 0 0% 100%;
-    --cream: 38 32% 84%;
-    --cream-dark: 35 28% 76%;
-    --earth-dark: 26 40% 12%;
-    --tan: 33 26% 60%;
-    --tan-light: 35 24% 72%;
-    --tan-dark: 30 28% 48%;
-    --brown: 26 36% 36%;
-    --brown-light: 28 30% 54%;
-    --brown-dark: 24 40% 22%;
+    --cream: 40 30% 96%;
+    --cream-dark: 36 22% 90%;
+    --earth-dark: 24 20% 14%;
+    --tan: 33 18% 62%;
+    --tan-light: 36 16% 80%;
+    --tan-dark: 30 22% 46%;
+    --brown: 26 28% 38%;
+    --brown-light: 28 22% 52%;
+    --brown-dark: 24 32% 22%;
     --yellow-hint: 46 82% 56%;
-    --yellow-soft: 48 45% 76%;
+    --yellow-soft: 48 45% 80%;
 
-    /* Liquid Glass tokens - Light Mode (warm brown tinted) */
-    --glass: 34 26% 84% / 0.70;
-    --glass-border: 33 24% 68% / 0.35;
-    --glass-highlight: 0 0% 100% / 0.35;
+    /* Liquid Glass tokens - Light Mode */
+    --glass: 40 20% 98% / 0.75;
+    --glass-border: 36 16% 82% / 0.45;
+    --glass-highlight: 0 0% 100% / 0.5;
     --glass-blur: 20px;
     --glass-radius: 24px;
     
