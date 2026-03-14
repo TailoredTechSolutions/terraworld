@@ -180,10 +180,10 @@ const BuyerDashboard = () => {
               badge="🛒 Buyer Account"
               backgroundImage={shopHero}
               kpis={[
-                { icon: ShoppingBag, label: "Orders", value: "—" },
-                { icon: Wallet, label: "Wallet", value: "₱0" },
-                { icon: Coins, label: "AGRI", value: "0" },
-                { icon: Users, label: "Referrals", value: "—" },
+                { icon: ShoppingBag, label: "Orders", value: (kpiData?.orders ?? 0).toString() },
+                { icon: Wallet, label: "Wallet", value: `₱${(kpiData?.wallet ?? 0).toLocaleString()}` },
+                { icon: Coins, label: "AGRI", value: (kpiData?.tokens ?? 0).toLocaleString() },
+                { icon: Users, label: "Referrals", value: (kpiData?.referrals ?? 0).toString() },
               ]}
             />
 
