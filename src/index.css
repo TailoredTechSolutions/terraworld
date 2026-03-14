@@ -302,11 +302,11 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--primary) / 0.4);
-    border-radius: 14px;
-    padding: 12px 24px;
+    border-radius: 16px;
+    padding: 12px 28px;
     color: hsl(var(--primary));
     font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: var(--transition-fluid);
   }
 
   .btn-liquid-outline:hover {
