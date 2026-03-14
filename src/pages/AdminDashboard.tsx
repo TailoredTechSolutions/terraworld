@@ -879,11 +879,17 @@ const AdminDashboard = () => {
             >
               <div className="flex items-center gap-2 mt-3">
                 <AdminNotificationBell />
-                <AdminCreateActions />
+                {!isAdminReadonly && <AdminCreateActions />}
                 <Button variant="outline" size="sm" onClick={fetchData} className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
                   <RefreshCw className="h-4 w-4" />
                   Refresh
                 </Button>
+                {isAdminReadonly && (
+                  <Badge variant="outline" className="bg-yellow-500/20 text-yellow-200 border-yellow-500/30 text-xs">
+                    <Eye className="h-3 w-3 mr-1" />
+                    View Only
+                  </Badge>
+                )}
               </div>
             </DashboardHero>
 
