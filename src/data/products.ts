@@ -814,7 +814,7 @@ export const farms: Farm[] = [
     longitude: 120.670,
     rating: 4.6,
     reviewCount: 58,
-    image: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=800",
+    image: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400&q=75",
     description: "PhilGAP-certified integrated farm in Itogon, Benguet. Features vegetables, fruit orchards, and honey production with certified food safety practices across terraced mountain slopes.",
     products: ["Vegetables & Fruits", "Mangoes", "Papayas", "Watermelon", "Wild Honey", "Coconut Vinegar", "Salted Eggs"],
     farmType: "Integrated Farm",
