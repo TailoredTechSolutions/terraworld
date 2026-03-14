@@ -83,12 +83,9 @@ export const TransitionProvider = ({ children }: { children: ReactNode }) => {
     return () => clearTimeout(fallback);
   }, [active, finish]);
 
-  // Block page content until first-visit intro finishes
-  const showChildren = !firstVisitPending;
-
   return (
     <TransitionContext.Provider value={{ triggerTransition }}>
-      {showChildren && children}
+      {children}
       <AnimatePresence>
         {active && (
           <motion.div
