@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, Menu, X, LogOut, LogIn, ShoppingBag, Tractor, Truck, Shield, Crown } from "lucide-react";
+import { ShoppingCart, Menu, X, LogOut, LogIn, ShoppingBag, Tractor, Truck, Shield, Crown, Users, Home, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { useState } from "react";
