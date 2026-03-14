@@ -175,7 +175,7 @@ export const products: Product[] = [
     category: "Vegetables",
     stock: 90,
     organic: true,
-    description: "Fresh organic radish from Lily of the Valley. Crisp and slightly peppery, great for salads and pickling.",
+    description: "Fresh organic radish from Mankayan. Crisp and slightly peppery, great for salads and pickling.",
   },
   {
     id: "8",
