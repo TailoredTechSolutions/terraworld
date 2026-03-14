@@ -410,14 +410,15 @@
     box-shadow: var(--shadow-card);
   }
 
-  /* Glass hover effect */
+  /* Glass hover effect - fluid organic lift */
   .glass-hover {
-    @apply transition-all duration-300 ease-out;
+    transition: var(--transition-fluid);
   }
 
   .glass-hover:hover {
-    transform: translateY(-4px) scale(1.01);
-    box-shadow: var(--shadow-glass), 0 12px 40px hsl(220 40% 15% / 0.15);
+    transform: translateY(-6px) scale(1.015);
+    box-shadow: var(--shadow-glass), 0 20px 48px -12px hsl(220 40% 15% / 0.12);
+    border-color: hsl(var(--glass-border));
   }
 
   /* === NAV LINK ANIMATIONS === */
