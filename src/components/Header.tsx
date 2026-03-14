@@ -39,14 +39,11 @@ const Header = () => {
 
   const getDashboardLinks = () => {
     const links: { path: string; label: string; icon: React.ComponentType<{ className?: string }> }[] = [];
+    if (isAdmin) links.push({ path: "/admin", label: "Admin Dashboard", icon: Shield });
     if (isBuyer) links.push({ path: "/buyer", label: "Buyer Dashboard", icon: ShoppingBag });
     if (isFarmer) links.push({ path: "/farmer", label: "Farmer Dashboard", icon: Tractor });
     if (isDriver) links.push({ path: "/driver", label: "Driver Dashboard", icon: Truck });
-    if (isAdmin) {
-      links.push({ path: "/admin", label: "Admin Dashboard", icon: Shield });
-      links.push({ path: "/business-centre", label: "Business Centre", icon: Crown });
-    }
-    if (links.length === 0 && user) links.push({ path: "/member", label: "Member Dashboard", icon: Crown });
+    if (links.length === 0 && user) links.push({ path: "/buyer", label: "My Dashboard", icon: ShoppingBag });
     return links;
   };
 
