@@ -802,9 +802,10 @@ const Index = () => {
           </div>
         </section>
 
-      </main>
+        </main>
 
-      <Footer />
+        <Footer />
+      </motion.div>
     </div>
   );
 };
