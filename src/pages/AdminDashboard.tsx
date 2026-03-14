@@ -96,6 +96,8 @@ import AuditLogPanel from "@/components/admin/AuditLogPanel";
 import CustomerServicePanel from "@/components/admin/CustomerServicePanel";
 import TokenRewardsPanel from "@/components/admin/TokenRewardsPanel";
 import ProductApprovalPanel from "@/components/admin/ProductApprovalPanel";
+import AdminCreateActions from "@/components/admin/AdminCreateActions";
+import AdminNotificationBell from "@/components/admin/AdminNotificationBell";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -864,10 +866,14 @@ const AdminDashboard = () => {
                 <h1 className="text-2xl font-bold">Admin Dashboard</h1>
                 <p className="text-sm text-muted-foreground">Manage your marketplace</p>
               </div>
-              <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
-                <RefreshCw className="h-4 w-4" />
-                Refresh
-              </Button>
+              <div className="flex items-center gap-2">
+                <AdminNotificationBell />
+                <AdminCreateActions />
+                <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
+                  <RefreshCw className="h-4 w-4" />
+                  Refresh
+                </Button>
+              </div>
             </div>
 
             {/* Page Title */}
