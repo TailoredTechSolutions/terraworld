@@ -175,9 +175,11 @@ const FarmerDashboard = () => {
   const mobileSections = [
     { id: "overview", label: "Farm Overview", component: <FarmerOverviewPanel farmerId={farmer.id} userId={user!.id} onNavigate={handleTabChange} /> },
     { id: "products", label: "Product Listings", component: <FarmerProductsPanel farmerId={farmer.id} /> },
+    { id: "pricing", label: "Pricing", component: <FarmerPricingPanel farmerId={farmer.id} /> },
     { id: "orders", label: "Orders", component: <FarmerOrdersPanel farmerId={farmer.id} /> },
     { id: "delivery", label: "Delivery Status", component: <FarmerDeliveryPanel farmerId={farmer.id} /> },
     { id: "earnings", label: "Revenue & Earnings", component: <FarmerEarningsPanel farmerId={farmer.id} userId={user!.id} /> },
+    { id: "withdrawals", label: "Withdrawals", component: <FarmerWithdrawalPanel userId={user!.id} /> },
     { id: "tokens", label: "Token Rewards", component: <FarmerTokensPanel userId={user!.id} /> },
     { id: "referrals", label: "Referrals", component: <FarmerReferralsPanel userId={user!.id} referralCode={profile?.referral_code || ""} /> },
     { id: "notifications", label: "Notifications", component: <FarmerNotificationsPanel userId={user!.id} /> },
