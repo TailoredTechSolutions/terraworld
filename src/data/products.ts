@@ -609,7 +609,7 @@ export const farms: Farm[] = [
     longitude: 120.590,
     rating: 4.9,
     reviewCount: 128,
-    image: "https://images.unsplash.com/photo-1530836176759-510f58baebf4?w=800",
+    image: "https://images.unsplash.com/photo-1530836176759-510f58baebf4?w=400&q=75",
     description: "ATI-certified integrated farm in La Trinidad, Benguet. Certificate: SPA-2022-04-006. Demonstrates diversified crop production and sustainable farming techniques. A model learning site for aspiring highland farmers.",
     products: ["Diversified Crops", "Broccoli", "Celery", "Mixed Vegetables", "Bell Pepper"],
     contact: "0919-326-0749",
