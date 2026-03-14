@@ -80,14 +80,14 @@
     --glow-gold: 44 92% 50% / 0.45;
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(218 72% 38%) 0%, hsl(218 58% 48%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(218 72% 42%) 0%, hsl(218 58% 52%) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(2 72% 48%) 0%, hsl(2 58% 58%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(34 26% 80%) 0%, hsl(33 24% 74%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(38 28% 98%) 0%, hsl(36 22% 94%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(44 92% 50%) 0%, hsl(46 82% 58%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsl(218 72% 38%) 0%, hsl(2 72% 48%) 100%);
-    --gradient-tan: linear-gradient(135deg, hsl(33 26% 64%) 0%, hsl(35 24% 56%) 100%);
-    --gradient-brown: linear-gradient(135deg, hsl(26 36% 32%) 0%, hsl(28 30% 44%) 100%);
-    --gradient-brown-gold: linear-gradient(135deg, hsl(26 40% 22%) 0%, hsl(30 36% 36%) 50%, hsl(44 78% 54%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(218 72% 42%) 0%, hsl(2 72% 48%) 100%);
+    --gradient-tan: linear-gradient(135deg, hsl(33 18% 62%) 0%, hsl(35 18% 54%) 100%);
+    --gradient-brown: linear-gradient(135deg, hsl(26 28% 34%) 0%, hsl(28 22% 46%) 100%);
+    --gradient-brown-gold: linear-gradient(135deg, hsl(24 32% 22%) 0%, hsl(30 28% 36%) 50%, hsl(44 78% 54%) 100%);
 
     /* Shadows - softer, more diffuse for fluid depth */
     --shadow-sm: 0 2px 8px -2px hsl(26 40% 14% / 0.06);
