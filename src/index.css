@@ -169,6 +169,7 @@
 @layer base {
   * {
     @apply border-border;
+    transition-timing-function: var(--ease-fluid);
   }
 
   body {
