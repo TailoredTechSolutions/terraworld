@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import DriverSidebar from "@/components/driver/DriverSidebar";
@@ -33,12 +34,48 @@ const statusColors: Record<string, string> = {
   delivered: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
 };
 
+// Demo data for driver dashboard
+const demoAssignedOrders = [
+  { id: "dd1", order_number: "ORD-2026-045", customer_name: "Downtown Market", customer_phone: "+63 917 123 4567", delivery_address: "123 Main St, Baguio City", status: "in_transit", total: 5625, created_at: new Date(Date.now() - 2 * 3600000).toISOString() },
+  { id: "dd2", order_number: "ORD-2026-046", customer_name: "Fresh Grocery Co.", customer_phone: "+63 918 234 5678", delivery_address: "45 Session Rd, Baguio City", status: "preparing", total: 3200, created_at: new Date(Date.now() - 4 * 3600000).toISOString() },
+  { id: "dd3", order_number: "ORD-2026-047", customer_name: "Maria Santos", customer_phone: "+63 919 345 6789", delivery_address: "78 Burnham Park, Baguio City", status: "pending", total: 1800, created_at: new Date(Date.now() - 6 * 3600000).toISOString() },
+];
+
+const demoCompletedOrders = [
+  { id: "dc1", order_number: "ORD-2026-041", customer_name: "Chef Juan's Kitchen", total: 8500, status: "delivered", created_at: new Date(Date.now() - 24 * 3600000).toISOString() },
+  { id: "dc2", order_number: "ORD-2026-038", customer_name: "Local Market", total: 4200, status: "delivered", created_at: new Date(Date.now() - 48 * 3600000).toISOString() },
+  { id: "dc3", order_number: "ORD-2026-035", customer_name: "Green Valley Store", total: 6100, status: "delivered", created_at: new Date(Date.now() - 72 * 3600000).toISOString() },
+];
+
+const demoNotifications = [
+  { id: "dn1", title: "New Delivery Assigned", message: "You have been assigned ORD-2026-047 for pickup at Terra Farm HQ", is_read: false, created_at: new Date(Date.now() - 15 * 60000).toISOString() },
+  { id: "dn2", title: "Delivery Confirmed", message: "ORD-2026-041 has been confirmed as delivered", is_read: true, created_at: new Date(Date.now() - 24 * 3600000).toISOString() },
+  { id: "dn3", title: "Earnings Updated", message: "₱850 has been added to your wallet for completed deliveries", is_read: true, created_at: new Date(Date.now() - 48 * 3600000).toISOString() },
+];
+
 const DriverDashboard = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("home");
   const [isAvailable, setIsAvailable] = useState(true);
+  const isMobile = useIsMobile();
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const registerSection = useCallback((id: string) => (el: HTMLDivElement | null) => {
+    sectionRefs.current[id] = el;
+  }, []);
+
+  const handleTabChange = useCallback((tab: string) => {
+    if (isMobile) {
+      const el = sectionRefs.current[tab];
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    } else {
+      setActiveTab(tab);
+    }
+  }, [isMobile]);
 
   // Fetch this driver's record by email
   const { data: driverRecord } = useQuery({
@@ -206,8 +243,11 @@ const DriverDashboard = () => {
     );
   }
 
-  const activeDeliveries = assignedOrders?.filter(o => o.status !== "delivered" && o.status !== "cancelled") || [];
-  const completedDeliveries = assignedOrders?.filter(o => o.status === "delivered") || [];
+  const realActiveDeliveries = assignedOrders?.filter(o => o.status !== "delivered" && o.status !== "cancelled") || [];
+  const realCompletedDeliveries = assignedOrders?.filter(o => o.status === "delivered") || [];
+  const activeDeliveries = realActiveDeliveries.length > 0 ? realActiveDeliveries : demoAssignedOrders;
+  const completedDeliveries = realCompletedDeliveries.length > 0 ? realCompletedDeliveries : demoCompletedOrders;
+  const displayNotifications = (notifications && notifications.length > 0) ? notifications : demoNotifications;
   const driverOnline = driverRecord?.status === "online";
 
   const getPageTitle = () => {
@@ -219,7 +259,8 @@ const DriverDashboard = () => {
     return titles[activeTab] || "Dashboard";
   };
 
-  const renderContent = () => {
+  // Desktop tab-based content (unchanged)
+  const renderDesktopContent = () => {
     switch (activeTab) {
       case "home":
         return (
@@ -253,7 +294,7 @@ const DriverDashboard = () => {
       case "earnings":
         return <DriverEarnings wallet={wallet} transactions={walletTxns || []} />;
       case "notifications":
-        return <DriverNotifications notifications={notifications || []} />;
+        return <DriverNotifications notifications={displayNotifications} />;
       case "support":
         return <BuyerSupportPanel />;
       case "profile":
@@ -271,11 +312,23 @@ const DriverDashboard = () => {
     }
   };
 
+  // Mobile: all sections stacked
+  const mobileSections = [
+    { id: "home", label: "Driver Overview", component: <DriverHome activeCount={activeDeliveries.length} completedCount={completedDeliveries.length} wallet={wallet} rating={driverRecord?.rating} onNavigate={handleTabChange} /> },
+    { id: "assigned", label: "Assigned Deliveries", component: <DriverAssigned orders={activeDeliveries} bookings={deliveryBookings || []} onUpdateStatus={(orderId: string, status: string) => updateOrderStatus.mutate({ orderId, status })} isUpdating={updateOrderStatus.isPending} /> },
+    { id: "history", label: "Delivery History", component: <DriverHistory orders={completedDeliveries} /> },
+    { id: "availability", label: "Availability", component: <DriverAvailability isAvailable={driverOnline} onToggle={(v: boolean) => toggleAvailability.mutate(v)} driverRecord={driverRecord} /> },
+    { id: "earnings", label: "Earnings Summary", component: <DriverEarnings wallet={wallet} transactions={walletTxns || []} /> },
+    { id: "notifications", label: "Notifications", component: <DriverNotifications notifications={displayNotifications} /> },
+    { id: "support", label: "Support", component: <BuyerSupportPanel /> },
+    { id: "profile", label: "Profile", component: <DriverProfile profile={profile} driverRecord={driverRecord} kycStatus={kycProfile?.status} /> },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <div className="flex-1 flex">
-        <DriverSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        <DriverSidebar activeTab={activeTab} onTabChange={handleTabChange} />
         <main className="flex-1 overflow-auto">
           <div className="container max-w-6xl mx-auto px-4 py-6">
             <div className="flex items-center justify-between mb-6">
@@ -294,8 +347,28 @@ const DriverDashboard = () => {
                 </div>
               </div>
             </div>
-            <h2 className="text-2xl font-bold mb-6">{getPageTitle()}</h2>
-            {renderContent()}
+
+            {isMobile ? (
+              <div className="space-y-8">
+                {mobileSections.map((section) => (
+                  <div
+                    key={section.id}
+                    ref={registerSection(section.id)}
+                    className="scroll-mt-4"
+                  >
+                    <h2 className="text-lg font-semibold mb-3 sticky top-0 bg-background/95 backdrop-blur-sm py-2 z-10 border-b border-border">
+                      {section.label}
+                    </h2>
+                    {section.component}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <>
+                <h2 className="text-2xl font-bold mb-6">{getPageTitle()}</h2>
+                {renderDesktopContent()}
+              </>
+            )}
           </div>
         </main>
       </div>
@@ -309,10 +382,10 @@ const DriverHome = ({ activeCount, completedCount, wallet, rating, onNavigate }:
   <div className="space-y-6">
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {[
-        { label: "Active Deliveries", value: activeCount, icon: Package, color: "text-blue-600" },
-        { label: "Completed", value: completedCount, icon: CheckCircle, color: "text-green-600" },
-        { label: "Rating", value: `${Number(rating || 5).toFixed(1)} ★`, icon: Star, color: "text-yellow-600" },
-        { label: "Available Balance", value: `₱${Number(wallet?.available_balance || 0).toLocaleString()}`, icon: DollarSign, color: "text-primary" },
+        { label: "Active Deliveries", value: activeCount || 3, icon: Package, color: "text-blue-600" },
+        { label: "Completed", value: completedCount || 32, icon: CheckCircle, color: "text-green-600" },
+        { label: "Rating", value: `${Number(rating || 4.8).toFixed(1)} ★`, icon: Star, color: "text-yellow-600" },
+        { label: "Available Balance", value: `₱${Number(wallet?.available_balance || 12450).toLocaleString()}`, icon: DollarSign, color: "text-primary" },
       ].map((m) => (
         <Card key={m.label}>
           <CardContent className="pt-5 pb-4">
@@ -505,9 +578,9 @@ const DriverAvailability = ({ isAvailable, onToggle, driverRecord }: { isAvailab
         </div>
         <div className="p-4 rounded-lg bg-muted/50 space-y-2 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">Current Status</span><Badge variant={isAvailable ? "default" : "secondary"}>{isAvailable ? "Online" : "Offline"}</Badge></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">Vehicle</span><span className="capitalize">{driverRecord?.vehicle || "—"}</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">License Plate</span><span>{driverRecord?.license_plate || "—"}</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">Deliveries</span><span>{driverRecord?.deliveries_count || 0}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Vehicle</span><span className="capitalize">{driverRecord?.vehicle || "Motorcycle"}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">License Plate</span><span>{driverRecord?.license_plate || "ABC-1234"}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Deliveries</span><span>{driverRecord?.deliveries_count || 32}</span></div>
         </div>
       </CardContent>
     </Card>
@@ -515,21 +588,27 @@ const DriverAvailability = ({ isAvailable, onToggle, driverRecord }: { isAvailab
 );
 
 // ─── EARNINGS ────────────────────────────────────────────────────────────
-const DriverEarnings = ({ wallet, transactions }: { wallet: any; transactions: any[] }) => (
-  <div className="space-y-6">
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Available</p><p className="text-2xl font-bold">₱{Number(wallet?.available_balance || 0).toLocaleString()}</p></CardContent></Card>
-      <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Pending</p><p className="text-2xl font-bold">₱{Number(wallet?.pending_balance || 0).toLocaleString()}</p></CardContent></Card>
-      <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Total Withdrawn</p><p className="text-2xl font-bold">₱{Number(wallet?.total_withdrawn || 0).toLocaleString()}</p></CardContent></Card>
-    </div>
-    <Card>
-      <CardHeader><CardTitle className="text-base">Transaction History</CardTitle></CardHeader>
-      <CardContent>
-        {!transactions.length ? (
-          <p className="text-sm text-muted-foreground text-center py-4">No transactions yet.</p>
-        ) : (
+const DriverEarnings = ({ wallet, transactions }: { wallet: any; transactions: any[] }) => {
+  const demoTxns = [
+    { id: "dt1", description: "Delivery commission - ORD-2026-041", amount: 850, transaction_type: "delivery_commission", created_at: new Date(Date.now() - 24 * 3600000).toISOString() },
+    { id: "dt2", description: "Delivery commission - ORD-2026-038", amount: 620, transaction_type: "delivery_commission", created_at: new Date(Date.now() - 48 * 3600000).toISOString() },
+    { id: "dt3", description: "Weekly bonus", amount: 500, transaction_type: "bonus", created_at: new Date(Date.now() - 72 * 3600000).toISOString() },
+    { id: "dt4", description: "Delivery commission - ORD-2026-035", amount: 780, transaction_type: "delivery_commission", created_at: new Date(Date.now() - 96 * 3600000).toISOString() },
+  ];
+  const displayTxns = transactions.length > 0 ? transactions : demoTxns;
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Available</p><p className="text-2xl font-bold">₱{Number(wallet?.available_balance || 12450).toLocaleString()}</p></CardContent></Card>
+        <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Pending</p><p className="text-2xl font-bold">₱{Number(wallet?.pending_balance || 2300).toLocaleString()}</p></CardContent></Card>
+        <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Total Withdrawn</p><p className="text-2xl font-bold">₱{Number(wallet?.total_withdrawn || 28500).toLocaleString()}</p></CardContent></Card>
+      </div>
+      <Card>
+        <CardHeader><CardTitle className="text-base">Transaction History</CardTitle></CardHeader>
+        <CardContent>
           <div className="space-y-3">
-            {transactions.map((tx) => (
+            {displayTxns.map((tx: any) => (
               <div key={tx.id} className="flex items-center justify-between py-2 border-b last:border-0">
                 <div>
                   <p className="text-sm font-medium">{tx.description || tx.transaction_type}</p>
@@ -541,11 +620,11 @@ const DriverEarnings = ({ wallet, transactions }: { wallet: any; transactions: a
               </div>
             ))}
           </div>
-        )}
-      </CardContent>
-    </Card>
-  </div>
-);
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
 
 // ─── NOTIFICATIONS ───────────────────────────────────────────────────────
 const DriverNotifications = ({ notifications }: { notifications: any[] }) => (
@@ -556,7 +635,7 @@ const DriverNotifications = ({ notifications }: { notifications: any[] }) => (
         <p className="text-muted-foreground">No notifications.</p>
       </CardContent></Card>
     ) : (
-      notifications.map((n) => (
+      notifications.map((n: any) => (
         <Card key={n.id} className={!n.is_read ? "border-primary/30 bg-primary/5" : ""}>
           <CardContent className="py-3 px-4">
             <div className="flex justify-between items-start">
@@ -594,10 +673,10 @@ const DriverProfile = ({ profile, driverRecord, kycStatus }: { profile: any; dri
         <CardHeader><CardTitle className="text-base flex items-center gap-2"><User className="h-5 w-5 text-primary" />Personal Information</CardTitle></CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div><p className="text-muted-foreground">Full Name</p><p className="font-medium">{profile?.full_name || "—"}</p></div>
-            <div><p className="text-muted-foreground">Email</p><p className="font-medium">{profile?.email || "—"}</p></div>
-            <div><p className="text-muted-foreground">Phone</p><p className="font-medium">{profile?.phone || driverRecord?.phone || "—"}</p></div>
-            <div><p className="text-muted-foreground">Referral Code</p><p className="font-medium font-mono">{profile?.referral_code || "—"}</p></div>
+            <div><p className="text-muted-foreground">Full Name</p><p className="font-medium">{profile?.full_name || "Carlos Martinez"}</p></div>
+            <div><p className="text-muted-foreground">Email</p><p className="font-medium">{profile?.email || "carlos@terra.ph"}</p></div>
+            <div><p className="text-muted-foreground">Phone</p><p className="font-medium">{profile?.phone || driverRecord?.phone || "+63 917 555 1234"}</p></div>
+            <div><p className="text-muted-foreground">Referral Code</p><p className="font-medium font-mono">{profile?.referral_code || "DRV-8X4K"}</p></div>
           </div>
         </CardContent>
       </Card>
@@ -605,10 +684,10 @@ const DriverProfile = ({ profile, driverRecord, kycStatus }: { profile: any; dri
         <CardHeader><CardTitle className="text-base flex items-center gap-2"><Truck className="h-5 w-5 text-primary" />Vehicle Details</CardTitle></CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div><p className="text-muted-foreground">Vehicle Type</p><p className="font-medium capitalize">{driverRecord?.vehicle || "—"}</p></div>
-            <div><p className="text-muted-foreground">License Plate</p><p className="font-medium">{driverRecord?.license_plate || "—"}</p></div>
-            <div><p className="text-muted-foreground">Deliveries</p><p className="font-medium">{driverRecord?.deliveries_count || 0}</p></div>
-            <div><p className="text-muted-foreground">Rating</p><p className="font-medium">{Number(driverRecord?.rating || 5).toFixed(1)} ★</p></div>
+            <div><p className="text-muted-foreground">Vehicle Type</p><p className="font-medium capitalize">{driverRecord?.vehicle || "Motorcycle"}</p></div>
+            <div><p className="text-muted-foreground">License Plate</p><p className="font-medium">{driverRecord?.license_plate || "ABC-1234"}</p></div>
+            <div><p className="text-muted-foreground">Deliveries</p><p className="font-medium">{driverRecord?.deliveries_count || 32}</p></div>
+            <div><p className="text-muted-foreground">Rating</p><p className="font-medium">{Number(driverRecord?.rating || 4.8).toFixed(1)} ★</p></div>
           </div>
         </CardContent>
       </Card>
