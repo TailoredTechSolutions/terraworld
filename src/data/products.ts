@@ -739,7 +739,7 @@ export const farms: Farm[] = [
     longitude: 120.596,
     rating: 4.9,
     reviewCount: 112,
-    image: "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=800",
+    image: "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=400&q=75",
     description: "ATI-certified cacao processing facility in Irisan, Baguio City. Certificate: LSA-2023-09-216. Specializes in bean-to-bar chocolate using Benguet cacao and locally grown Arabica coffee.",
     products: ["Cacao", "Artisan Chocolate", "Arabica Coffee", "Tablea", "Cacao Products"],
     contact: "0930-296-1654",
