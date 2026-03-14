@@ -43,7 +43,7 @@ export interface DrawerState {
 
 const AdminBackOffice = () => {
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: rolesLoading } = useUserRoles();
+  const { isAdmin, isAnyAdmin, isAdminReadonly, loading: rolesLoading } = useUserRoles();
   const [activeTab, setActiveTab] = useState<SectionId>("overview");
   const [drawer, setDrawer] = useState<DrawerState>({ open: false, type: "", data: null });
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
