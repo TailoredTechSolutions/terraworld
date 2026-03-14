@@ -52,14 +52,14 @@ const BusinessCentreAuth = () => {
     if (tab === "register") setActiveTab("register");
   }, [searchParams]);
 
-  const { isAdmin: isAdminUser, isAffiliate: isAffiliateUser, loading: rolesLoading } = useUserRoles();
+  const { isAdmin: isAdminUser, isAnyAdmin, isAffiliate: isAffiliateUser, loading: rolesLoading } = useUserRoles();
   useEffect(() => {
     if (user && !authLoading && !rolesLoading) {
-      if (isAdminUser || isAffiliateUser) {
+      if (isAnyAdmin || isAffiliateUser) {
         navigate("/business-centre");
       }
     }
-  }, [user, authLoading, rolesLoading, isAdminUser, isAffiliateUser, navigate]);
+  }, [user, authLoading, rolesLoading, isAnyAdmin, isAffiliateUser, navigate]);
 
   const validateForm = (isSignup: boolean) => {
     let valid = true;
