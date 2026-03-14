@@ -37,7 +37,7 @@ import {
   Eye
 } from "lucide-react";
 
-type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer' | 'affiliate';
+type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer' | 'affiliate' | 'admin_readonly';
 
 interface UserProfile {
   id: string;
