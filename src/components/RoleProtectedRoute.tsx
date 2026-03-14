@@ -20,7 +20,7 @@ const RoleProtectedRoute = ({
   fallbackPath = "/" 
 }: RoleProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
-  const { roles, loading: rolesLoading, isAdmin } = useUserRoles();
+  const { roles, loading: rolesLoading, isAdmin, isAnyAdmin } = useUserRoles();
   const location = useLocation();
 
   // Show loading while checking auth and roles
