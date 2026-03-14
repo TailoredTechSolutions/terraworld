@@ -635,7 +635,7 @@ export const farms: Farm[] = [
     longitude: 120.585,
     rating: 4.7,
     reviewCount: 76,
-    image: "https://images.unsplash.com/photo-1592419044706-39796d40f98c?w=800",
+    image: "https://images.unsplash.com/photo-1592419044706-39796d40f98c?w=400&q=75",
     description: "ATI-certified organic farm in La Trinidad, Benguet. Certificate: SPA-2021-03-009. Training center for organic produce cultivation and certification. Known for premium quality radish and cauliflower.",
     products: ["Organic Produce", "Radish", "Korean Radish", "Cauliflower", "Leafy Greens"],
     contact: "0949-399-7126",
