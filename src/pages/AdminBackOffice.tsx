@@ -43,7 +43,7 @@ export interface DrawerState {
 
 const AdminBackOffice = () => {
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: rolesLoading } = useUserRoles();
+  const { isAdmin, isAnyAdmin, isAdminReadonly, loading: rolesLoading } = useUserRoles();
   const [activeTab, setActiveTab] = useState<SectionId>("overview");
   const [drawer, setDrawer] = useState<DrawerState>({ open: false, type: "", data: null });
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -93,7 +93,7 @@ const AdminBackOffice = () => {
   }
 
   if (!user) return <Navigate to="/auth" replace />;
-  if (!isAdmin) return <Navigate to="/" replace />;
+  if (!isAnyAdmin) return <Navigate to="/" replace />;
 
   const registerRef = (id: string) => (el: HTMLElement | null) => {
     sectionRefs.current[id] = el;

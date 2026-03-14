@@ -76,6 +76,7 @@ import {
   Area,
 } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -133,6 +134,7 @@ const COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(var(--secondar
 
 const AdminDashboard = () => {
   const { toast } = useToast();
+  const { isAdminReadonly } = useUserRoles();
   const [activeTab, setActiveTab] = useState("overview");
   const [farmers, setFarmers] = useState<Farmer[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -435,7 +437,7 @@ const AdminDashboard = () => {
             <CardTitle>Registered Farmers</CardTitle>
             <CardDescription>Manage farmer accounts and approvals ({farmers.length} total)</CardDescription>
           </div>
-          <Button className="btn-primary-gradient">Add Farmer</Button>
+          {!isAdminReadonly && <Button className="btn-primary-gradient">Add Farmer</Button>}
         </div>
       </CardHeader>
       <CardContent className="overflow-x-auto">
@@ -478,23 +480,27 @@ const AdminDashboard = () => {
                       <DropdownMenuItem onClick={() => setSelectedFarmer(farmer)}>
                         <Eye className="h-4 w-4 mr-2" /> View Details
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Edit className="h-4 w-4 mr-2" /> Edit
-                      </DropdownMenuItem>
-                      {farmer.status === "pending" && (
-                        <DropdownMenuItem className="text-primary" onClick={() => updateFarmerStatus(farmer.id, "active")}>
-                          <Check className="h-4 w-4 mr-2" /> Approve
-                        </DropdownMenuItem>
-                      )}
-                      {farmer.status === "active" && (
-                        <DropdownMenuItem className="text-destructive" onClick={() => updateFarmerStatus(farmer.id, "suspended")}>
-                          <X className="h-4 w-4 mr-2" /> Suspend
-                        </DropdownMenuItem>
-                      )}
-                      {farmer.status === "suspended" && (
-                        <DropdownMenuItem className="text-primary" onClick={() => updateFarmerStatus(farmer.id, "active")}>
-                          <Check className="h-4 w-4 mr-2" /> Reactivate
-                        </DropdownMenuItem>
+                      {!isAdminReadonly && (
+                        <>
+                          <DropdownMenuItem>
+                            <Edit className="h-4 w-4 mr-2" /> Edit
+                          </DropdownMenuItem>
+                          {farmer.status === "pending" && (
+                            <DropdownMenuItem className="text-primary" onClick={() => updateFarmerStatus(farmer.id, "active")}>
+                              <Check className="h-4 w-4 mr-2" /> Approve
+                            </DropdownMenuItem>
+                          )}
+                          {farmer.status === "active" && (
+                            <DropdownMenuItem className="text-destructive" onClick={() => updateFarmerStatus(farmer.id, "suspended")}>
+                              <X className="h-4 w-4 mr-2" /> Suspend
+                            </DropdownMenuItem>
+                          )}
+                          {farmer.status === "suspended" && (
+                            <DropdownMenuItem className="text-primary" onClick={() => updateFarmerStatus(farmer.id, "active")}>
+                              <Check className="h-4 w-4 mr-2" /> Reactivate
+                            </DropdownMenuItem>
+                          )}
+                        </>
                       )}
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -877,11 +883,17 @@ const AdminDashboard = () => {
             >
               <div className="flex items-center gap-2 mt-3">
                 <AdminNotificationBell />
-                <AdminCreateActions />
+                {!isAdminReadonly && <AdminCreateActions />}
                 <Button variant="outline" size="sm" onClick={fetchData} className="gap-2 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white">
                   <RefreshCw className="h-4 w-4" />
                   Refresh
                 </Button>
+                {isAdminReadonly && (
+                  <Badge variant="outline" className="bg-yellow-500/20 text-yellow-200 border-yellow-500/30 text-xs">
+                    <Eye className="h-3 w-3 mr-1" />
+                    View Only
+                  </Badge>
+                )}
               </div>
             </DashboardHero>
 

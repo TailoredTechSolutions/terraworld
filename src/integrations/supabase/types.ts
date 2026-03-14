@@ -1910,6 +1910,7 @@ export type Database = {
         | "admin"
         | "buyer"
         | "affiliate"
+        | "admin_readonly"
       delivery_booking_status:
         | "none"
         | "pending"
@@ -2079,6 +2080,7 @@ export const Constants = {
         "admin",
         "buyer",
         "affiliate",
+        "admin_readonly",
       ],
       delivery_booking_status: [
         "none",

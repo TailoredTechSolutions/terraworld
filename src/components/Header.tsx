@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const Header = () => {
   const { toggleCart, getTotalItems } = useCartStore();
   const { user, profile, signOut, loading } = useAuth();
-  const { isAdmin, isDriver, isFarmer, isBuyer, isMember, isAffiliate } = useUserRoles();
+  const { isAdmin, isAnyAdmin, isAdminReadonly, isDriver, isFarmer, isBuyer, isMember, isAffiliate } = useUserRoles();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const totalItems = getTotalItems();
 
@@ -40,7 +40,7 @@ const Header = () => {
   const getDashboardLinks = () => {
     const links: { path: string; label: string; icon: React.ComponentType<{ className?: string }> }[] = [];
 
-    if (isAdmin) {
+    if (isAnyAdmin) {
       // Admins/Super Admins get access to ALL dashboards
       links.push({ path: "/", label: "Main Page", icon: Home });
       links.push({ path: "/admin", label: "Admin Dashboard", icon: Shield });
@@ -60,7 +60,7 @@ const Header = () => {
     return links;
   };
 
-  const extraDesktopLinks = user && isAdmin
+  const extraDesktopLinks = user && isAnyAdmin
     ? [{ path: "/business-centre", label: "Business Centre" }]
     : [];
 

@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
-type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer' | 'affiliate';
+type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer' | 'affiliate' | 'admin_readonly';
 
 interface UseUserRolesReturn {
   roles: AppRole[];
   loading: boolean;
   hasRole: (role: AppRole) => boolean;
   isAdmin: boolean;
+  isAdminReadonly: boolean;
+  isAnyAdmin: boolean;
   isDriver: boolean;
   isFarmer: boolean;
   isMember: boolean;
@@ -55,11 +57,17 @@ export const useUserRoles = (): UseUserRolesReturn => {
     return roles.includes(role);
   };
 
+  const isAdmin = roles.includes('admin');
+  const isAdminReadonly = roles.includes('admin_readonly');
+  const isAnyAdmin = isAdmin || isAdminReadonly;
+
   return {
     roles,
     loading,
     hasRole,
-    isAdmin: roles.includes('admin'),
+    isAdmin,
+    isAdminReadonly,
+    isAnyAdmin,
     isDriver: roles.includes('driver'),
     isFarmer: roles.includes('farmer'),
     isMember: roles.includes('member'),

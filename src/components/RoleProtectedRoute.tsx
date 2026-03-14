@@ -6,7 +6,7 @@ import { Loader2, ShieldX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
-type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer' | 'affiliate';
+type AppRole = 'farmer' | 'business_buyer' | 'member' | 'driver' | 'admin' | 'buyer' | 'affiliate' | 'admin_readonly';
 
 interface RoleProtectedRouteProps {
   children: ReactNode;
@@ -20,7 +20,7 @@ const RoleProtectedRoute = ({
   fallbackPath = "/" 
 }: RoleProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
-  const { roles, loading: rolesLoading, isAdmin } = useUserRoles();
+  const { roles, loading: rolesLoading, isAdmin, isAnyAdmin } = useUserRoles();
   const location = useLocation();
 
   // Show loading while checking auth and roles
@@ -40,8 +40,8 @@ const RoleProtectedRoute = ({
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // Check if user has any of the allowed roles (admins always have access)
-  const hasAccess = isAdmin || allowedRoles.some(role => roles.includes(role));
+  // Check if user has any of the allowed roles (admins and readonly admins always have access)
+  const hasAccess = isAnyAdmin || allowedRoles.some(role => roles.includes(role));
 
   if (!hasAccess) {
     return (
