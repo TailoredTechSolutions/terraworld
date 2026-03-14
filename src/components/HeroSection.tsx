@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import heroImage from "@/assets/hero-farm.jpg";
 import terraLogo from "@/assets/terra-logo.png";
+import terraHeroBadge from "@/assets/terra-hero-badge.png";
 import { Button } from "@/components/ui/button";
 import {
   Truck,
