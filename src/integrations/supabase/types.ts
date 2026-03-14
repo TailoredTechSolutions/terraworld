@@ -750,6 +750,39 @@ export type Database = {
         }
         Relationships: []
       }
+      manual_adjustments: {
+        Row: {
+          adjustment_type: string
+          amount: number
+          created_at: string
+          created_by_user_id: string
+          id: string
+          notes: string | null
+          reason: string
+          target_user_id: string
+        }
+        Insert: {
+          adjustment_type: string
+          amount: number
+          created_at?: string
+          created_by_user_id: string
+          id?: string
+          notes?: string | null
+          reason: string
+          target_user_id: string
+        }
+        Update: {
+          adjustment_type?: string
+          amount?: number
+          created_at?: string
+          created_by_user_id?: string
+          id?: string
+          notes?: string | null
+          reason?: string
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       member_transfers: {
         Row: {
           amount: number
@@ -1069,6 +1102,53 @@ export type Database = {
           },
         ]
       }
+      payout_entries: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          payout_method: string | null
+          payout_run_id: string
+          payout_status: string
+          reference_number: string | null
+          target_user_id: string
+          target_user_type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          payout_method?: string | null
+          payout_run_id: string
+          payout_status?: string
+          reference_number?: string | null
+          target_user_id: string
+          target_user_type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          payout_method?: string | null
+          payout_run_id?: string
+          payout_status?: string
+          reference_number?: string | null
+          target_user_id?: string
+          target_user_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_entries_payout_run_id_fkey"
+            columns: ["payout_run_id"]
+            isOneToOne: false
+            referencedRelation: "payout_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payout_ledger: {
         Row: {
           bonus_type: string
@@ -1118,6 +1198,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payout_runs: {
+        Row: {
+          created_at: string
+          created_by_user_id: string
+          id: string
+          notes: string | null
+          payment_method: string | null
+          payout_status: string
+          payout_type: string
+          period_end: string
+          period_start: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_user_id: string
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          payout_status?: string
+          payout_type: string
+          period_end: string
+          period_start: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by_user_id?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          payout_status?: string
+          payout_type?: string
+          period_end?: string
+          period_start?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       platform_settings: {
         Row: {
