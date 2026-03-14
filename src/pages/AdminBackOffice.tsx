@@ -93,7 +93,7 @@ const AdminBackOffice = () => {
   }
 
   if (!user) return <Navigate to="/auth" replace />;
-  if (!isAdmin) return <Navigate to="/" replace />;
+  if (!isAnyAdmin) return <Navigate to="/" replace />;
 
   const registerRef = (id: string) => (el: HTMLElement | null) => {
     sectionRefs.current[id] = el;
