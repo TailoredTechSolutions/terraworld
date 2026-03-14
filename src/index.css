@@ -118,89 +118,86 @@
   }
 
   .dark {
-    /* Dark Mode — deep warm brown (#161311) */
-    --background: 20 12% 8%;
-    --foreground: 36 28% 94%;
+    /* Dark Mode — brighter, high-contrast warm brown for readability */
+    --background: 24 12% 14%;
+    --foreground: 36 42% 95%;
 
-    /* Surface: #211C19 */
-    --card: 20 14% 11%;
-    --card-foreground: 36 28% 94%;
+    /* Surfaces lifted for clear text separation */
+    --card: 24 14% 18%;
+    --card-foreground: 36 42% 95%;
 
-    /* Popover: slightly lighter */
-    --popover: 20 12% 10%;
-    --popover-foreground: 36 28% 94%;
+    --popover: 24 14% 19%;
+    --popover-foreground: 36 42% 95%;
 
-    /* Rice Green for dark mode primary (#7AA65A) — bright & readable */
-    --primary: 94 30% 50%;
-    --primary-foreground: 100 20% 6%;
+    /* Primary actions: brighter green + white text for clarity */
+    --primary: 96 35% 58%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Dark secondary (#3A312C) */
-    --secondary: 20 14% 20%;
-    --secondary-foreground: 36 24% 90%;
+    --secondary: 24 14% 27%;
+    --secondary-foreground: 36 38% 94%;
 
-    /* Muted */
-    --muted: 20 12% 18%;
-    --muted-foreground: 30 16% 64%;
+    /* Muted content now much more readable */
+    --muted: 24 12% 24%;
+    --muted-foreground: 34 24% 80%;
 
-    /* Terracotta accent — brighter for dark (#D9A441 gold as highlight) */
-    --accent: 38 68% 55%;
-    --accent-foreground: 20 12% 8%;
+    --accent: 38 74% 60%;
+    --accent-foreground: 24 24% 14%;
 
-    --destructive: 0 62% 52%;
+    --destructive: 0 78% 62%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Border: #4A3F38 — clearly visible */
-    --border: 22 14% 25%;
-    --input: 22 12% 22%;
-    --ring: 94 30% 50%;
+    /* Clear input and border contrast */
+    --border: 24 14% 38%;
+    --input: 24 14% 30%;
+    --ring: 96 35% 60%;
 
     /* Dark custom tokens */
-    --terra-soil: 14 24% 40%;
-    --terra-terracotta: 22 48% 56%;
-    --terra-leaf: 134 24% 50%;
-    --terra-rice: 94 30% 50%;
-    --terra-gold: 38 68% 55%;
-    --cream: 20 14% 11%;
-    --cream-dark: 20 12% 16%;
-    --earth-dark: 20 12% 6%;
-    --tan: 28 16% 48%;
-    --tan-light: 30 12% 36%;
-    --tan-dark: 26 18% 32%;
-    --brown: 14 20% 42%;
-    --brown-light: 22 16% 54%;
-    --brown-dark: 14 22% 28%;
+    --terra-soil: 14 26% 44%;
+    --terra-terracotta: 22 52% 60%;
+    --terra-leaf: 134 28% 56%;
+    --terra-rice: 96 35% 58%;
+    --terra-gold: 38 74% 60%;
+    --cream: 24 14% 18%;
+    --cream-dark: 24 12% 22%;
+    --earth-dark: 24 16% 10%;
+    --tan: 30 20% 60%;
+    --tan-light: 30 16% 46%;
+    --tan-dark: 28 18% 38%;
+    --brown: 16 24% 48%;
+    --brown-light: 22 18% 60%;
+    --brown-dark: 14 22% 34%;
 
     /* Liquid Glass tokens - Dark Mode */
-    --glass: 20 14% 12% / 0.75;
-    --glass-border: 22 14% 28% / 0.50;
-    --glass-highlight: 36 28% 92% / 0.06;
+    --glass: 24 14% 20% / 0.78;
+    --glass-border: 24 14% 40% / 0.55;
+    --glass-highlight: 36 42% 96% / 0.10;
     --glass-blur: 20px;
-    
+
     /* Glow effects */
-    --glow-primary: 94 30% 50% / 0.3;
-    --glow-accent: 38 68% 55% / 0.35;
-    --glow-gold: 38 68% 55% / 0.4;
+    --glow-primary: 96 35% 58% / 0.34;
+    --glow-accent: 38 74% 60% / 0.38;
+    --glow-gold: 38 74% 60% / 0.44;
 
     /* Dark mode shadows */
-    --shadow-sm: 0 2px 8px -2px hsl(0 0% 0% / 0.25);
-    --shadow-md: 0 8px 16px -4px hsl(0 0% 0% / 0.30), 0 2px 6px -2px hsl(0 0% 0% / 0.15);
-    --shadow-lg: 0 16px 32px -8px hsl(0 0% 0% / 0.35), 0 6px 12px -4px hsl(0 0% 0% / 0.18);
-    --shadow-card: 0 8px 32px -8px hsl(0 0% 0% / 0.30);
-    --shadow-glass: 0 8px 32px hsl(0 0% 0% / 0.35), inset 0 1px 0 hsl(36 28% 92% / 0.06);
+    --shadow-sm: 0 2px 8px -2px hsl(0 0% 0% / 0.22);
+    --shadow-md: 0 8px 16px -4px hsl(0 0% 0% / 0.28), 0 2px 6px -2px hsl(0 0% 0% / 0.12);
+    --shadow-lg: 0 16px 32px -8px hsl(0 0% 0% / 0.32), 0 6px 12px -4px hsl(0 0% 0% / 0.16);
+    --shadow-card: 0 8px 32px -8px hsl(0 0% 0% / 0.26);
+    --shadow-glass: 0 8px 32px hsl(0 0% 0% / 0.32), inset 0 1px 0 hsl(36 42% 96% / 0.10);
 
     /* Dark mode gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(94 30% 50%) 0%, hsl(134 24% 42%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(38 68% 55%) 0%, hsl(22 48% 56%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(20 14% 13%) 0%, hsl(20 14% 10%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(96 35% 58%) 0%, hsl(134 28% 50%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(38 74% 60%) 0%, hsl(22 52% 60%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(24 14% 20%) 0%, hsl(24 14% 17%) 100%);
 
-    --sidebar-background: 20 14% 9%;
-    --sidebar-foreground: 36 28% 94%;
-    --sidebar-primary: 94 30% 50%;
-    --sidebar-primary-foreground: 100 20% 6%;
-    --sidebar-accent: 38 68% 55%;
-    --sidebar-accent-foreground: 20 12% 8%;
-    --sidebar-border: 22 14% 22%;
-    --sidebar-ring: 94 30% 50%;
+    --sidebar-background: 24 14% 16%;
+    --sidebar-foreground: 36 42% 95%;
+    --sidebar-primary: 96 35% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 38 74% 60%;
+    --sidebar-accent-foreground: 24 24% 14%;
+    --sidebar-border: 24 14% 34%;
+    --sidebar-ring: 96 35% 60%;
   }
 }
 
