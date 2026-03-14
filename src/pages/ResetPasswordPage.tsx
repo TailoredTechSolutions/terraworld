@@ -106,7 +106,7 @@ const ResetPasswordPage = () => {
       <Card className="w-full max-w-md border-2 shadow-xl">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src={terraLogo} alt="Terra" className="h-12 w-12" />
+            <img src={terraLogo} alt="Terra" width={48} height={48} className="h-12 w-12" />
           </div>
           <CardTitle className="font-display text-2xl">Set New Password</CardTitle>
           <CardDescription>Enter your new password below</CardDescription>

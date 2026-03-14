@@ -206,7 +206,7 @@ const Footer = () => {
         <div className="container py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           {/* Left — Copyright + logo */}
           <div className="flex items-center gap-2">
-            <img src={terraLogo} alt="Terra Farming" className="h-6 w-6 rounded" />
+            <img src={terraLogo} alt="Terra Farming" width={24} height={24} className="h-6 w-6 rounded" />
             <p className="text-xs text-muted-foreground">© {currentYear} Terra Farming. All rights reserved.</p>
           </div>
           {/* Right — Business Centre link */}

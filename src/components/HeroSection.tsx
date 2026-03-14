@@ -36,6 +36,7 @@ const HeroSection = () => {
           src={heroHarvest}
           alt="Filipino farmers harvesting at sunrise in Benguet highlands"
           className="h-full w-full object-cover"
+          fetchPriority="high"
           initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
           transition={{ duration: 8, ease: "easeOut" }}

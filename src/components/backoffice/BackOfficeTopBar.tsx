@@ -33,7 +33,7 @@ const BackOfficeTopBar = ({ sections, activeTab, onTabClick }: Props) => {
       <div className="flex items-center gap-4 px-4 lg:px-8 h-14 max-w-[1600px] mx-auto">
         {/* Left: Logo + env badge */}
         <div className="flex items-center gap-2 shrink-0">
-          <img src={terraLogo} alt="Terra" className="h-8 w-8" />
+          <img src={terraLogo} alt="Terra" width={32} height={32} className="h-8 w-8" />
           <span className="font-display font-bold text-foreground text-lg hidden sm:inline">Terra</span>
           <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-primary/40 text-primary font-mono">
             DEV
