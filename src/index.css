@@ -402,11 +402,11 @@
   }
 
   .card-hover {
-    @apply transition-all duration-300 ease-out;
+    transition: var(--transition-fluid);
   }
 
   .card-hover:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px) scale(1.01);
     box-shadow: var(--shadow-card);
   }
 
