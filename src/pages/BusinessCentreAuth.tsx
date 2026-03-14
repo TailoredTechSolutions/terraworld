@@ -31,7 +31,7 @@ const BusinessCentreAuth = () => {
   const { scrollY } = useScroll();
   const heroImageY = useTransform(scrollY, [0, 400], [0, 120]);
   const heroScale = useTransform(scrollY, [0, 400], [1, 1.1]);
-  const [triggerTransition, transitionOverlay] = useVideoTransition();
+  
 
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const [isLoading, setIsLoading] = useState(false);
