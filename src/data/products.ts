@@ -652,7 +652,7 @@ export const farms: Farm[] = [
     longitude: 120.646,
     rating: 4.8,
     reviewCount: 68,
-    image: "https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=400&q=75",
+    image: laFaustinoImg,
     description: "ATI-certified specialized farm in Tublay, Benguet. Certificate: LSA-2022-04-059. Integrated farm featuring mixed crops, strawberries, and free-range eggs across terraced highland terrain.",
     products: ["Mixed Crops", "Strawberries", "Bananas", "Pineapple", "Peanut Butter", "Eggs"],
     contact: "0949-793-4967",
