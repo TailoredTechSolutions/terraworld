@@ -678,7 +678,7 @@ export const farms: Farm[] = [
     longitude: 120.676,
     rating: 4.7,
     reviewCount: 45,
-    image: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=400&q=75",
+    image: pcjeamImg,
     description: "ATI-certified specialized farm in Atok, Benguet. Certificate: LSA-2022-06-108. High-altitude vegetable and dairy production at over 2,000m elevation. Known for premium potatoes and fresh carabao milk.",
     products: ["Vegetables", "Potatoes", "Carabao Milk", "Avocado", "Brown Rice", "Highland Produce"],
     contact: "0909-201-2105",
