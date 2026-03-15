@@ -755,7 +755,7 @@ export const farms: Farm[] = [
     longitude: 120.6010,
     rating: 4.7,
     reviewCount: 64,
-    image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=75",
+    image: fitFabImg,
     description: "PhilGAP-certified organic garden in Lucnab, Baguio City. Produces health-focused organic vegetables with sustainability certification. Supplies fresh salad greens to Baguio restaurants.",
     products: ["Organic Vegetables", "Pechay", "Lettuce", "Dragon Fruit", "Salad Greens", "Herbs"],
     farmType: "Organic Garden",
