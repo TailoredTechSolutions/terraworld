@@ -44,15 +44,7 @@ const FarmDetailPage = () => {
   }
 
   const handleAddToCart = (product: typeof farmProducts[0]) => {
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      unit: product.unit,
-      farmName: product.farmName,
-      image: product.image,
-      quantity: 1,
-    });
+    addItem(product);
     toast.success(`${product.name} added to cart`);
   };
 
