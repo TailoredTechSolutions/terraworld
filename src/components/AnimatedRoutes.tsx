@@ -13,6 +13,7 @@ const ShopPage = lazy(() => import("@/pages/ShopPage"));
 const ProductDetail = lazy(() => import("@/pages/ProductDetail"));
 const ProductOffersPage = lazy(() => import("@/pages/ProductOffersPage"));
 const MapPage = lazy(() => import("@/pages/MapPage"));
+const FarmDetailPage = lazy(() => import("@/pages/FarmDetailPage"));
 const AffiliatePage = lazy(() => import("@/pages/AffiliatePage"));
 const BusinessCentreLanding = lazy(() => import("@/pages/BusinessCentreLanding"));
 const BusinessCentreAuth = lazy(() => import("@/pages/BusinessCentreAuth"));
