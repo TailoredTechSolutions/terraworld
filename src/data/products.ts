@@ -979,7 +979,7 @@ export const farms: Farm[] = [
     longitude: 120.580,
     rating: 4.5,
     reviewCount: 37,
-    image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=400&q=75",
+    image: pinsaoUrbanImg,
     description: "PhilGAP-certified urban farm in Barangay Pinsao, Baguio City. Compact city garden growing premium coffee and lemon using vertical and container farming techniques adapted to urban highland settings.",
     products: ["Coffee", "Lemon", "Herbs", "Microgreens", "Edible Flowers"],
     contact: "0918-773-5592",
