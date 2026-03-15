@@ -626,7 +626,7 @@ export const farms: Farm[] = [
     longitude: 120.592,
     rating: 4.6,
     reviewCount: 52,
-    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&q=75",
+    image: urbanGardenImg,
     description: "ATI-certified vegetable farm in La Trinidad, Benguet. Certificate: LSA-2022-04-061. Specializes in highland vegetables and herbs using urban farming techniques under pine forests.",
     products: ["Highland Vegetables", "Leeks", "Dried Herbs", "Herbs", "Microgreens"],
     contact: "0921-481-8137",
