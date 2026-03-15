@@ -954,7 +954,7 @@ export const farms: Farm[] = [
     longitude: 120.640,
     rating: 4.7,
     reviewCount: 61,
-    image: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=75",
+    image: tublayBerryImg,
     description: "PhilGAP-certified berry and salad greens farm in Tublay, Benguet. Supplies premium strawberries and specialty lettuce varieties to hotels and restaurants in Baguio City and Metro Manila.",
     products: ["Strawberries", "Lettuce", "Arugula", "Kale", "Spinach", "Dragon Fruit"],
     contact: "0935-442-1178",
