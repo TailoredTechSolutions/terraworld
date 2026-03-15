@@ -731,7 +731,7 @@ export const farms: Farm[] = [
     longitude: 120.571,
     rating: 4.8,
     reviewCount: 86,
-    image: "https://images.unsplash.com/photo-1498579809087-ef1e558fd1da?w=400&q=75",
+    image: csbFamilyImg,
     description: "PhilGAP-certified fruit & vegetable farm in Tuba, Benguet. Implements Philippine Good Agricultural Practices for food safety and quality assurance across diverse crop production.",
     products: ["Vegetables & Fruits", "Sayote", "Calamansi", "Guava", "Kesong Puti", "Muscovado", "Ube Jam"],
     farmType: "Fruit & Vegetable Farm",
