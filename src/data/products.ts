@@ -854,7 +854,7 @@ export const farms: Farm[] = [
     longitude: 120.589,
     rating: 4.6,
     reviewCount: 39,
-    image: "https://images.unsplash.com/photo-1563514227147-6d2ff665a6a0?w=400&q=75",
+    image: bakunValleyImg,
     description: "PhilGAP-certified organic farm in Bakun, Benguet. Produces premium highland lettuce, herbs, and coffee at the remote mountain municipality known for its pristine environment and clean water sources.",
     products: ["Lettuce", "Herbs", "Coffee", "Celery", "Cabbage", "Strawberries"],
     contact: "0936-722-8814",
