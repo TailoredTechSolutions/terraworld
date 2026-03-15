@@ -13,6 +13,7 @@ const ShopPage = lazy(() => import("@/pages/ShopPage"));
 const ProductDetail = lazy(() => import("@/pages/ProductDetail"));
 const ProductOffersPage = lazy(() => import("@/pages/ProductOffersPage"));
 const MapPage = lazy(() => import("@/pages/MapPage"));
+const FarmDetailPage = lazy(() => import("@/pages/FarmDetailPage"));
 const AffiliatePage = lazy(() => import("@/pages/AffiliatePage"));
 const BusinessCentreLanding = lazy(() => import("@/pages/BusinessCentreLanding"));
 const BusinessCentreAuth = lazy(() => import("@/pages/BusinessCentreAuth"));
@@ -62,6 +63,7 @@ const AnimatedRoutes = () => {
           <Route path="/product/:id" element={<P><ProductDetail /></P>} />
           <Route path="/product/:id/offers" element={<P><ProductOffersPage /></P>} />
           <Route path="/map" element={<P><MapPage /></P>} />
+          <Route path="/farm/:farmId" element={<P><FarmDetailPage /></P>} />
           <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
           <Route path="/business-centre/auth" element={<P><BusinessCentreAuth /></P>} />
           <Route path="/business-centre" element={<RoleProtectedRoute allowedRoles={['affiliate', 'admin']}><P><BusinessCentreLanding /></P></RoleProtectedRoute>} />
