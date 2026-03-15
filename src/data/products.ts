@@ -600,7 +600,7 @@ export const farms: Farm[] = [
     longitude: 120.587,
     rating: 4.8,
     reviewCount: 94,
-    image: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?w=400&q=75",
+    image: saymayatImg,
     description: "ATI-certified organic farm in La Trinidad, Benguet. Certificate: LSA-2022-04-058. Specializes in organic highland vegetables using sustainable farming practices passed down through generations of Igorot farming traditions.",
     products: ["Organic Vegetables", "Cabbage", "Chinese Cabbage", "Baguio Beans", "Carrots"],
     contact: "0963-791-7097",
