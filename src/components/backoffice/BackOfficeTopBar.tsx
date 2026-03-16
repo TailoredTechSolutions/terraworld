@@ -100,7 +100,7 @@ const BackOfficeTopBar = ({ sections, activeTab, onTabClick }: Props) => {
               <DropdownMenuSeparator />
               <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Navigate To</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => navigate('/')}>
-                <Home className="h-3.5 w-3.5 mr-2" /> Main Page
+                <Home className="h-3.5 w-3.5 mr-2" /> Home
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate('/farmer')}>
                 <Tractor className="h-3.5 w-3.5 mr-2" /> Farmer Dashboard

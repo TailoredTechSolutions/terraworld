@@ -42,7 +42,6 @@ const Header = () => {
 
     if (isAnyAdmin) {
       // Admins/Super Admins get access to ALL dashboards
-      links.push({ path: "/", label: "Main Page", icon: Home });
       links.push({ path: "/admin", label: "Admin Dashboard", icon: Shield });
       links.push({ path: "/buyer", label: "Buyer Dashboard", icon: ShoppingBag });
       links.push({ path: "/farmer", label: "Farmer Dashboard", icon: Tractor });
