@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { products as localProducts } from "@/data/products";
+import { getProductImage } from "@/data/productImageMap";
 import { useCartStore } from "@/store/cartStore";
 import Header from "@/components/Header";
 import CartDrawer from "@/components/CartDrawer";
@@ -50,7 +51,7 @@ const ProductDetail = () => {
         farmName: (dbProduct.farmers as any)?.name || "Farm",
         farmLocation: (dbProduct.farmers as any)?.location || "",
         farmRating: Number((dbProduct.farmers as any)?.rating || 5),
-        image: dbProduct.image_url || "/placeholder.svg",
+        image: getProductImage(dbProduct.name, dbProduct.image_url),
         category: dbProduct.category,
         stock: dbProduct.stock,
         organic: dbProduct.is_organic || false,
@@ -164,7 +165,13 @@ const ProductDetail = () => {
             <img
               src={product.image}
               alt={product.name}
+              loading="lazy"
+              decoding="async"
               className="h-full w-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = '/placeholder.svg';
+              }}
             />
             {product.organic && (
               <div className="absolute top-4 left-4 flex items-center gap-1.5 rounded-full bg-primary/90 px-3 py-1.5 text-sm font-medium text-primary-foreground backdrop-blur-sm">

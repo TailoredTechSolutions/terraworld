@@ -33,7 +33,13 @@ const AggregatedProductCard = React.forwardRef<HTMLAnchorElement, AggregatedProd
             <img
               src={product.imageUrl}
               alt={product.name}
+              loading="lazy"
+              decoding="async"
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = '/placeholder.svg';
+              }}
             />
           ) : (
             <div className="h-full w-full bg-secondary flex items-center justify-center">

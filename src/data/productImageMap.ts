@@ -42,6 +42,15 @@ import peanutButterImg from "@/assets/products/peanut-butter.jpg";
 import tomatoesImg from "@/assets/products/tomatoes.jpg";
 import nativeChickenImg from "@/assets/products/native-chicken.jpg";
 import dressedChickenImg from "@/assets/products/dressed-chicken.jpg";
+// New product image imports
+import gingerImg from "@/assets/products/ginger.jpg";
+import turmericImg from "@/assets/products/turmeric.jpg";
+import passionFruitImg from "@/assets/products/passion-fruit.jpg";
+import lemongrassImg from "@/assets/products/lemongrass.jpg";
+import sweetPotatoImg from "@/assets/products/sweet-potato.jpg";
+import stringBeansImg from "@/assets/products/string-beans.jpg";
+import eggplantImg from "@/assets/products/eggplant.jpg";
+import bellPeppersImg from "@/assets/products/bell-peppers.jpg";
 
 // Keyword-based image fallback: MOST SPECIFIC matches first, then general
 const imageKeywords: [string[], string][] = [
@@ -49,7 +58,7 @@ const imageKeywords: [string[], string][] = [
   [["chinese cabbage", "wombok"], chineseCabbageImg],
   [["baguio pechay", "pechay baguio"], pechayImg],
   [["korean radish"], koreanRadishImg],
-  [["baguio bean", "string bean", "highland bean"], baguioBeansImg],
+  [["baguio bean", "string bean", "highland bean", "sitaw"], stringBeansImg],
   [["organic lettuce", "lettuce mix", "salad green", "mixed salad"], lettuceImg],
   [["organic sayote"], sayoteImg],
   [["organic broccoli"], broccoliImg],
@@ -60,6 +69,10 @@ const imageKeywords: [string[], string][] = [
   [["fresh leek"], leeksImg],
   [["fresh celery"], celeryImg],
   [["itogon vegetable"], cabbageImg],
+  [["sweet potato", "camote"], sweetPotatoImg],
+  [["bell pepper"], bellPeppersImg],
+  [["eggplant", "talong"], eggplantImg],
+  [["ginger", "luya"], gingerImg],
   // General vegetables
   [["lettuce"], lettuceImg],
   [["carrot"], carrotsImg],
@@ -84,6 +97,7 @@ const imageKeywords: [string[], string][] = [
   [["blueberr"], blueberriesImg],
   [["raspberr"], strawberriesImg],
   [["mixed berry", "berry pack"], strawberriesImg],
+  [["passion fruit", "passionfruit"], passionFruitImg],
   [["table grape", "fresh grape", "grape"], grapesImg],
   [["grape jam"], ubeJamImg],
   [["apple"], guavaImg],
@@ -122,12 +136,17 @@ const imageKeywords: [string[], string][] = [
   [["bourbon coffee", "red bourbon"], arabicaCoffeeImg],
   [["catimor coffee"], arabicaCoffeeImg],
   [["ground coffee", "house blend"], arabicaCoffeeImg],
+  [["robusta coffee", "barako"], arabicaCoffeeImg],
   [["tuba.*coffee", "tuba arabica"], arabicaCoffeeImg],
   [["coffee"], arabicaCoffeeImg],
   [["wild honey"], wildHoneyImg],
   [["tublay honey"], honeyImg],
+  [["mountain.*honey", "bee honey"], honeyImg],
   [["honey"], honeyImg],
+  [["lemongrass", "tanglad"], lemongrassImg],
+  [["turmeric", "luyang dilaw"], turmericImg],
   [["fresh herb", "herb bundle", "basil"], driedHerbsImg],
+  [["tea blend", "herbal tea"], driedHerbsImg],
   [["muscovado"], muscovadoImg],
   [["ube jam", "ube"], ubeJamImg],
   [["tablea", "cacao"], tableaImg],
