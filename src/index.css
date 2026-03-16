@@ -442,14 +442,14 @@
     box-shadow: var(--shadow-card);
   }
 
-  /* Glass hover effect - fluid organic lift */
+  /* Glass hover effect — subtle lift */
   .glass-hover {
     transition: var(--transition-fluid);
   }
 
   .glass-hover:hover {
-    transform: translateY(-6px) scale(1.015);
-    box-shadow: var(--shadow-glass), 0 20px 48px -12px hsl(220 40% 15% / 0.12);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-glass), var(--shadow-md);
     border-color: hsl(var(--glass-border));
   }
 
