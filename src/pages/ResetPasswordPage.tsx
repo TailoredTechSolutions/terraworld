@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Lock, CheckCircle2 } from "lucide-react";
 import { z } from "zod";
-import terraLogo from "@/assets/terra-logo.png";
+import { LOGO as terraLogo } from "@/lib/siteImages";
 
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 

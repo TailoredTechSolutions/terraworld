@@ -32,7 +32,7 @@ import MemberShopPanel from "@/components/member/MemberShopPanel";
 import BinaryTreeVisualization from "@/components/member/BinaryTreeVisualization";
 import DashboardHero from "@/components/DashboardHero";
 import { useIsMobile } from "@/hooks/use-mobile";
-import riceTerraces from "@/assets/rice-terraces.jpg";
+import { RICE_TERRACES as riceTerraces } from "@/lib/siteImages";
 
 interface Membership {
   id: string;

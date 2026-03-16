@@ -9,20 +9,21 @@ import FarmCard from "@/components/FarmCard";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
 import { farms } from "@/data/products";
-import farmerPedro from "@/assets/testimonials/farmer-pedro.jpg";
-import farmerAlingRosa from "@/assets/testimonials/farmer-aling-rosa.jpg";
-import farmerKuyaBen from "@/assets/testimonials/farmer-kuya-ben.jpg";
-import customerMaria from "@/assets/testimonials/customer-maria.jpg";
-import customerChefJuan from "@/assets/testimonials/customer-chef-juan.jpg";
-import customerAteJoy from "@/assets/testimonials/customer-ate-joy.jpg";
-import customerMike from "@/assets/testimonials/customer-mike.jpg";
-import customerSooJin from "@/assets/testimonials/customer-soo-jin.jpg";
-// Cinematic brand images
-import riceTerraces from "@/assets/rice-terraces.jpg";
-import deliveryLogistics from "@/assets/delivery-farm-logistics.jpg";
-import produceSpread from "@/assets/produce-spread.jpg";
-import chefPreparation from "@/assets/chef-preparation.jpg";
-import farmerPortrait from "@/assets/farmer-portrait.jpg";
+import {
+  FARMER_PEDRO as farmerPedro,
+  FARMER_ALING_ROSA as farmerAlingRosa,
+  FARMER_KUYA_BEN as farmerKuyaBen,
+  CUSTOMER_MARIA as customerMaria,
+  CUSTOMER_CHEF_JUAN as customerChefJuan,
+  CUSTOMER_ATE_JOY as customerAteJoy,
+  CUSTOMER_MIKE as customerMike,
+  CUSTOMER_SOO_JIN as customerSooJin,
+  RICE_TERRACES as riceTerraces,
+  DELIVERY_LOGISTICS as deliveryLogistics,
+  PRODUCE_SPREAD as produceSpread,
+  CHEF_PREPARATION as chefPreparation,
+  FARMER_PORTRAIT as farmerPortrait,
+} from "@/lib/siteImages";
 import { 
   ArrowRight, 
   Leaf, 

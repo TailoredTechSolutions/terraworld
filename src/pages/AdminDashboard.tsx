@@ -102,7 +102,7 @@ import AdminNotificationBell from "@/components/admin/AdminNotificationBell";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import DashboardHero from "@/components/DashboardHero";
-import heroFarm from "@/assets/hero-farm.jpg";
+import { HERO_FARM as heroFarm } from "@/lib/siteImages";
 
 type Farmer = Tables<"farmers">;
 type Driver = Tables<"drivers">;
