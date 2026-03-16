@@ -20,6 +20,8 @@ import calamansiImg from "@/assets/products/calamansi.jpg";
 import freshEggsImg from "@/assets/products/fresh-eggs.jpg";
 import eggsImg from "@/assets/products/eggs.jpg";
 import carabaoMilkImg from "@/assets/products/carabao-milk.jpg";
+import goatMilkImg from "@/assets/products/goat-milk.jpg";
+import chickenImg from "@/assets/products/chicken.jpg";
 import kesongPutiImg from "@/assets/products/kesong-puti.jpg";
 import saltedEggsImg from "@/assets/products/salted-eggs.jpg";
 import guavaImg from "@/assets/products/guava.jpg";
@@ -174,6 +176,8 @@ const imageKeywords: [string[], string][] = [
   [["duck egg"], eggsImg],
   [["quail egg"], eggsImg],
   [["native chicken egg"], freshEggsImg],
+  [["native chicken", "free range chicken", "free-range chicken", "organic chicken"], chickenImg],
+  [["chicken"], chickenImg],
   [["free-range egg", "free range egg"], freshEggsImg],
   [["organic brown egg"], eggsImg],
   [["organic duck egg"], eggsImg],
@@ -182,7 +186,7 @@ const imageKeywords: [string[], string][] = [
   [["farm fresh egg", "fresh farm egg"], freshEggsImg],
   [["egg tray", "eggs (tray)"], eggsImg],
   [["egg", "itlog"], freshEggsImg],
-  [["goat milk"], carabaoMilkImg],
+  [["goat milk", "goat's milk"], goatMilkImg],
   [["carabao milk"], carabaoMilkImg],
   [["fresh milk"], freshMilkImg],
   [["yogurt"], carabaoMilkImg],
