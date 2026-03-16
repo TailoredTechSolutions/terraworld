@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { products as localProducts } from "@/data/products";
+import { getProductImage } from "@/data/productImageMap";
 import { useCartStore } from "@/store/cartStore";
 import Header from "@/components/Header";
 import CartDrawer from "@/components/CartDrawer";
