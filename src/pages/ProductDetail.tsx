@@ -51,7 +51,7 @@ const ProductDetail = () => {
         farmName: (dbProduct.farmers as any)?.name || "Farm",
         farmLocation: (dbProduct.farmers as any)?.location || "",
         farmRating: Number((dbProduct.farmers as any)?.rating || 5),
-        image: dbProduct.image_url || "/placeholder.svg",
+        image: getProductImage(dbProduct.name, dbProduct.image_url),
         category: dbProduct.category,
         stock: dbProduct.stock,
         organic: dbProduct.is_organic || false,
