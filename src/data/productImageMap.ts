@@ -40,8 +40,6 @@ import brownRiceImg from "@/assets/products/brown-rice.jpg";
 import coconutVinegarImg from "@/assets/products/coconut-vinegar.jpg";
 import peanutButterImg from "@/assets/products/peanut-butter.jpg";
 import tomatoesImg from "@/assets/products/tomatoes.jpg";
-import nativeChickenImg from "@/assets/products/native-chicken.jpg";
-import dressedChickenImg from "@/assets/products/dressed-chicken.jpg";
 // New product image imports
 import gingerImg from "@/assets/products/ginger.jpg";
 import turmericImg from "@/assets/products/turmeric.jpg";
