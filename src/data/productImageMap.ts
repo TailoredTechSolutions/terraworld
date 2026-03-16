@@ -40,7 +40,6 @@ import brownRiceImg from "@/assets/products/brown-rice.jpg";
 import coconutVinegarImg from "@/assets/products/coconut-vinegar.jpg";
 import peanutButterImg from "@/assets/products/peanut-butter.jpg";
 import tomatoesImg from "@/assets/products/tomatoes.jpg";
-// New product image imports
 import gingerImg from "@/assets/products/ginger.jpg";
 import turmericImg from "@/assets/products/turmeric.jpg";
 import passionFruitImg from "@/assets/products/passion-fruit.jpg";
@@ -49,11 +48,47 @@ import sweetPotatoImg from "@/assets/products/sweet-potato.jpg";
 import stringBeansImg from "@/assets/products/string-beans.jpg";
 import eggplantImg from "@/assets/products/eggplant.jpg";
 import bellPeppersImg from "@/assets/products/bell-peppers.jpg";
+// New batch imports
+import spinachImg from "@/assets/products/spinach.jpg";
+import kangkongImg from "@/assets/products/kangkong.jpg";
+import kaleImg from "@/assets/products/kale.jpg";
+import mustardGreensImg from "@/assets/products/mustard-greens.jpg";
+import okraImg from "@/assets/products/okra.jpg";
+import ampalayaImg from "@/assets/products/ampalaya.jpg";
+import greenBeansImg from "@/assets/products/green-beans.jpg";
+import bellPepperRedImg from "@/assets/products/bell-pepper-red.jpg";
+import chiliRedImg from "@/assets/products/chili-red.jpg";
+import chiliGreenImg from "@/assets/products/chili-green.jpg";
+import onionRedImg from "@/assets/products/onion-red.jpg";
+import onionWhiteImg from "@/assets/products/onion-white.jpg";
+import garlicImg from "@/assets/products/garlic.jpg";
+import squashImg from "@/assets/products/squash.jpg";
+import cucumberImg from "@/assets/products/cucumber.jpg";
+import cornImg from "@/assets/products/corn.jpg";
+import coconutImg from "@/assets/products/coconut.jpg";
+import orangeImg from "@/assets/products/orange.jpg";
+import lemonImg from "@/assets/products/lemon.jpg";
+import melonImg from "@/assets/products/melon.jpg";
+import whiteRiceImg from "@/assets/products/white-rice.jpg";
+import blackRiceImg from "@/assets/products/black-rice.jpg";
+import cornGritsImg from "@/assets/products/corn-grits.jpg";
+import mongoBeansImg from "@/assets/products/mongo-beans.jpg";
+import peanutsImg from "@/assets/products/peanuts.jpg";
+import coconutOilImg from "@/assets/products/coconut-oil.jpg";
+import vinegarImg from "@/assets/products/vinegar.jpg";
+import seaSaltImg from "@/assets/products/sea-salt.jpg";
+import basilImg from "@/assets/products/basil.jpg";
+import springOnionImg from "@/assets/products/spring-onion.jpg";
+import parsleyImg from "@/assets/products/parsley.jpg";
+import cilantroImg from "@/assets/products/cilantro.jpg";
+import blackPepperImg from "@/assets/products/black-pepper.jpg";
+import chiliFlakesImg from "@/assets/products/chili-flakes.jpg";
+import freshMilkImg from "@/assets/products/fresh-milk.jpg";
 
 // Keyword-based image fallback: MOST SPECIFIC matches first, then general
 const imageKeywords: [string[], string][] = [
   // === VEGETABLES (specific first) ===
-  [["chinese cabbage", "wombok"], chineseCabbageImg],
+  [["chinese cabbage", "wombok", "napa cabbage"], chineseCabbageImg],
   [["baguio pechay", "pechay baguio"], pechayImg],
   [["korean radish"], koreanRadishImg],
   [["baguio bean", "string bean", "highland bean", "sitaw"], stringBeansImg],
@@ -68,10 +103,29 @@ const imageKeywords: [string[], string][] = [
   [["fresh celery"], celeryImg],
   [["itogon vegetable"], cabbageImg],
   [["sweet potato", "camote"], sweetPotatoImg],
+  [["red bell pepper", "bell pepper red"], bellPepperRedImg],
   [["bell pepper"], bellPeppersImg],
   [["eggplant", "talong"], eggplantImg],
   [["ginger", "luya"], gingerImg],
-  [["corn", "mais"], potatoesImg],
+  [["kangkong", "water spinach"], kangkongImg],
+  [["spinach"], spinachImg],
+  [["kale"], kaleImg],
+  [["mustard green"], mustardGreensImg],
+  [["okra"], okraImg],
+  [["ampalaya", "bitter melon", "bitter gourd"], ampalayaImg],
+  [["green bean"], greenBeansImg],
+  [["red chili", "chili red", "siling labuyo"], chiliRedImg],
+  [["green chili", "chili green", "siling haba"], chiliGreenImg],
+  [["chili flake"], chiliFlakesImg],
+  [["chili", "sili"], chiliRedImg],
+  [["red onion", "onion red", "sibuyas pula"], onionRedImg],
+  [["white onion", "onion white", "sibuyas puti"], onionWhiteImg],
+  [["spring onion", "green onion", "scallion"], springOnionImg],
+  [["onion", "sibuyas"], onionRedImg],
+  [["garlic", "bawang"], garlicImg],
+  [["squash", "kalabasa"], squashImg],
+  [["cucumber", "pipino"], cucumberImg],
+  [["corn", "mais"], cornImg],
   // General vegetables
   [["lettuce"], lettuceImg],
   [["carrot"], carrotsImg],
@@ -83,7 +137,7 @@ const imageKeywords: [string[], string][] = [
   [["cauliflower"], cauliflowerImg],
   [["sayote", "chayote"], sayoteImg],
   [["leek"], leeksImg],
-  [["pechay"], pechayImg],
+  [["pechay", "bok choy"], pechayImg],
   [["tomato"], tomatoesImg],
   [["bean"], baguioBeansImg],
 
@@ -109,6 +163,11 @@ const imageKeywords: [string[], string][] = [
   [["pineapple"], pineappleImg],
   [["dragon fruit"], dragonFruitImg],
   [["avocado"], avocadoImg],
+  [["coconut oil"], coconutOilImg],
+  [["coconut"], coconutImg],
+  [["orange", "dalandan"], orangeImg],
+  [["lemon", "dayap"], lemonImg],
+  [["melon", "cantaloupe"], melonImg],
 
   // === DAIRY & EGGS (specific first) ===
   [["salted egg", "salted duck", "itlog na maalat"], saltedEggsImg],
@@ -124,11 +183,19 @@ const imageKeywords: [string[], string][] = [
   [["egg tray", "eggs (tray)"], eggsImg],
   [["egg", "itlog"], freshEggsImg],
   [["goat milk"], carabaoMilkImg],
-  [["carabao milk", "fresh milk"], carabaoMilkImg],
+  [["carabao milk"], carabaoMilkImg],
+  [["fresh milk"], freshMilkImg],
   [["yogurt"], carabaoMilkImg],
   [["kesong puti", "white cheese", "organic kesong"], kesongPutiImg],
   [["cheese"], kesongPutiImg],
-  [["milk"], carabaoMilkImg],
+  [["milk"], freshMilkImg],
+
+  // === HERBS & SPICES ===
+  [["basil"], basilImg],
+  [["parsley"], parsleyImg],
+  [["cilantro", "wansoy", "coriander"], cilantroImg],
+  [["black pepper", "peppercorn"], blackPepperImg],
+  [["chili flake"], chiliFlakesImg],
 
   // === PANTRY (specific first) ===
   [["arabica coffee", "typica"], arabicaCoffeeImg],
@@ -144,14 +211,22 @@ const imageKeywords: [string[], string][] = [
   [["honey"], honeyImg],
   [["lemongrass", "tanglad"], lemongrassImg],
   [["turmeric", "luyang dilaw"], turmericImg],
-  [["fresh herb", "herb bundle", "basil"], driedHerbsImg],
+  [["fresh herb", "herb bundle"], driedHerbsImg],
   [["tea blend", "herbal tea"], driedHerbsImg],
   [["muscovado"], muscovadoImg],
   [["ube jam", "ube"], ubeJamImg],
   [["tablea", "cacao"], tableaImg],
-  [["brown rice", "rice"], brownRiceImg],
-  [["vinegar", "coconut vinegar"], coconutVinegarImg],
-  [["peanut butter", "peanut"], peanutButterImg],
+  [["black rice", "tapol"], blackRiceImg],
+  [["white rice"], whiteRiceImg],
+  [["brown rice"], brownRiceImg],
+  [["rice"], whiteRiceImg],
+  [["corn grit"], cornGritsImg],
+  [["mongo", "mung bean", "monggo"], mongoBeansImg],
+  [["sea salt", "asin"], seaSaltImg],
+  [["vinegar", "coconut vinegar", "suka"], vinegarImg],
+  [["peanut butter"], peanutButterImg],
+  [["peanut", "mani"], peanutsImg],
+  [["coconut oil"], coconutOilImg],
   [["mushroom"], driedHerbsImg],
   [["dried mushroom"], driedHerbsImg],
   [["jam", "preserve"], ubeJamImg],
