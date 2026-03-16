@@ -120,10 +120,15 @@ const BuyerShopPanel = () => {
             <Card key={product.id} className="overflow-hidden group">
               <div className="aspect-square relative bg-muted">
                 <img
-                  src={product.image_url || "/placeholder.svg"}
+                  src={getProductImage(product.name, product.image_url)}
                   alt={product.name}
                   className="w-full h-full object-cover"
                   loading="lazy"
+                  decoding="async"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder.svg';
+                  }}
                 />
                 {product.is_organic && (
                   <Badge variant="secondary" className="absolute top-2 left-2 text-[10px] gap-1">
