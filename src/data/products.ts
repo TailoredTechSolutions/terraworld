@@ -58,6 +58,19 @@ import tableaImg from "@/assets/products/tablea.jpg";
 import brownRiceImg from "@/assets/products/brown-rice.jpg";
 import coconutVinegarImg from "@/assets/products/coconut-vinegar.jpg";
 import peanutButterImg from "@/assets/products/peanut-butter.jpg";
+// Additional product imports
+import tomatoesImg from "@/assets/products/tomatoes.jpg";
+import blueberriesImg from "@/assets/products/blueberries.jpg";
+import grapesImg from "@/assets/products/grapes.jpg";
+import honeyImg from "@/assets/products/honey.jpg";
+import gingerImg from "@/assets/products/ginger.jpg";
+import turmericImg from "@/assets/products/turmeric.jpg";
+import passionFruitImg from "@/assets/products/passion-fruit.jpg";
+import lemongrassImg from "@/assets/products/lemongrass.jpg";
+import sweetPotatoImg from "@/assets/products/sweet-potato.jpg";
+import stringBeansImg from "@/assets/products/string-beans.jpg";
+import eggplantImg from "@/assets/products/eggplant.jpg";
+import bellPeppersImg from "@/assets/products/bell-peppers.jpg";
 
 export interface Product {
   id: string;
