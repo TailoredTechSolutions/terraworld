@@ -6,50 +6,50 @@
 
 @layer base {
   :root {
-    /* Terra Light Mode — warm ivory canvas (#F7F3EC) */
-    --background: 36 30% 95%;
-    --foreground: 18 14% 11%;
+    /* Terra Light Mode — Natural agricultural canvas (#E6EEDC) */
+    --background: 96 28% 90%;
+    --foreground: 0 0% 18%;
 
-    /* Surface: #FFFDF9 */
-    --card: 40 100% 98%;
-    --card-foreground: 18 14% 11%;
+    /* Card surface: soft beige (#F5F3EB) */
+    --card: 43 25% 94%;
+    --card-foreground: 0 0% 18%;
 
-    --popover: 40 100% 98%;
-    --popover-foreground: 18 14% 11%;
+    --popover: 43 25% 94%;
+    --popover-foreground: 0 0% 18%;
 
-    /* Leaf Green primary (#4E8B57) */
-    --primary: 134 28% 42%;
+    /* Earth green primary (#3F6B4F) */
+    --primary: 142 26% 33%;
     --primary-foreground: 0 0% 100%;
 
-    /* Warm secondary (#E9DFD2) */
-    --secondary: 30 28% 87%;
-    --secondary-foreground: 20 18% 16%;
+    /* Leaf green secondary (#739E6A) */
+    --secondary: 112 22% 51%;
+    --secondary-foreground: 0 0% 100%;
 
-    /* Muted surfaces */
-    --muted: 32 22% 90%;
-    --muted-foreground: 24 10% 38%;
+    /* Muted surfaces — desaturated sage */
+    --muted: 100 16% 85%;
+    --muted-foreground: 0 0% 35%;
 
-    /* Terracotta accent (#B86A3C) */
+    /* Warm terracotta accent (#B86A3C) */
     --accent: 22 52% 48%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 68% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Border: #D8CBBE */
-    --border: 30 24% 80%;
-    --input: 30 22% 86%;
-    --ring: 134 28% 42%;
+    /* Border: soft muted green (#C7D3BE) */
+    --border: 110 16% 80%;
+    --input: 100 14% 86%;
+    --ring: 142 26% 33%;
 
-    --radius: 1rem;
+    --radius: 0.75rem;
 
     /* Terra earth tokens */
-    --success: 134 28% 42%;
+    --success: 142 26% 33%;
     --warning: 38 68% 55%;
     --terra-soil: 14 34% 26%;
     --terra-terracotta: 22 52% 48%;
-    --terra-leaf: 134 28% 42%;
-    --terra-rice: 94 28% 50%;
+    --terra-leaf: 142 26% 33%;
+    --terra-rice: 112 22% 51%;
     --terra-gold: 38 68% 55%;
     --ph-blue: 218 72% 38%;
     --ph-blue-light: 218 58% 55%;
@@ -57,9 +57,9 @@
     --ph-red-light: 2 58% 62%;
     --ph-gold: 38 68% 55%;
     --ph-white: 0 0% 100%;
-    --cream: 36 30% 95%;
-    --cream-dark: 30 24% 88%;
-    --earth-dark: 18 14% 11%;
+    --cream: 96 28% 90%;
+    --cream-dark: 96 18% 82%;
+    --earth-dark: 0 0% 18%;
     --tan: 30 18% 62%;
     --tan-light: 32 20% 78%;
     --tan-dark: 28 22% 46%;
@@ -69,52 +69,52 @@
     --yellow-hint: 38 72% 56%;
     --yellow-soft: 36 40% 80%;
 
-    /* Liquid Glass tokens - Light Mode */
-    --glass: 36 30% 96% / 0.78;
-    --glass-border: 30 24% 78% / 0.45;
-    --glass-highlight: 0 0% 100% / 0.5;
-    --glass-blur: 20px;
-    --glass-radius: 24px;
+    /* Light glass tokens — subtle, clean */
+    --glass: 96 28% 92% / 0.85;
+    --glass-border: 110 16% 78% / 0.5;
+    --glass-highlight: 0 0% 100% / 0.35;
+    --glass-blur: 12px;
+    --glass-radius: 16px;
     
-    /* Fluid motion easing */
-    --ease-fluid: cubic-bezier(0.4, 0, 0.1, 1);
-    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* Fluid motion easing — calmer */
+    --ease-fluid: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-spring: cubic-bezier(0.34, 1.2, 0.64, 1);
     --ease-organic: cubic-bezier(0.25, 0.8, 0.25, 1);
-    --transition-fluid: all 0.4s var(--ease-fluid);
+    --transition-fluid: all 0.3s var(--ease-fluid);
     
-    /* Glow effects */
-    --glow-primary: 134 28% 42% / 0.3;
-    --glow-accent: 22 52% 48% / 0.3;
-    --glow-gold: 38 68% 55% / 0.4;
+    /* Subtle glow effects */
+    --glow-primary: 142 26% 33% / 0.15;
+    --glow-accent: 22 52% 48% / 0.15;
+    --glow-gold: 38 68% 55% / 0.2;
 
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(134 28% 42%) 0%, hsl(94 28% 50%) 100%);
+    /* Gradients — earth toned */
+    --gradient-hero: linear-gradient(135deg, hsl(142 26% 33%) 0%, hsl(112 22% 51%) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(22 52% 48%) 0%, hsl(22 48% 58%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(40 100% 98%) 0%, hsl(36 30% 94%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(43 25% 94%) 0%, hsl(96 28% 89%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(38 68% 55%) 0%, hsl(40 72% 62%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsl(134 28% 42%) 0%, hsl(22 52% 48%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(142 26% 33%) 0%, hsl(112 22% 51%) 100%);
     --gradient-tan: linear-gradient(135deg, hsl(30 18% 62%) 0%, hsl(28 18% 54%) 100%);
     --gradient-brown: linear-gradient(135deg, hsl(14 34% 26%) 0%, hsl(22 28% 38%) 100%);
     --gradient-brown-gold: linear-gradient(135deg, hsl(14 36% 18%) 0%, hsl(14 34% 26%) 50%, hsl(38 68% 55%) 100%);
 
-    /* Shadows - warm earth toned */
-    --shadow-sm: 0 2px 8px -2px hsl(14 34% 20% / 0.06);
-    --shadow-md: 0 8px 16px -4px hsl(14 34% 20% / 0.08), 0 2px 6px -2px hsl(14 34% 20% / 0.04);
-    --shadow-lg: 0 16px 32px -8px hsl(14 34% 20% / 0.10), 0 6px 12px -4px hsl(14 34% 20% / 0.06);
-    --shadow-card: 0 8px 32px -8px hsl(14 34% 20% / 0.10);
-    --shadow-glass: 0 12px 40px -8px hsl(14 34% 20% / 0.08), inset 0 1px 0 hsl(0 0% 100% / 0.25);
-    --shadow-glow-primary: 0 4px 32px hsl(var(--glow-primary));
-    --shadow-glow-accent: 0 4px 32px hsl(var(--glow-accent));
-    --shadow-glow-gold: 0 4px 32px hsl(var(--glow-gold));
+    /* Shadows — soft and natural */
+    --shadow-sm: 0 1px 4px -1px hsl(110 10% 30% / 0.08);
+    --shadow-md: 0 4px 12px -3px hsl(110 10% 30% / 0.1), 0 2px 4px -1px hsl(110 10% 30% / 0.05);
+    --shadow-lg: 0 10px 24px -6px hsl(110 10% 30% / 0.12), 0 4px 8px -3px hsl(110 10% 30% / 0.06);
+    --shadow-card: 0 4px 16px -4px hsl(110 10% 30% / 0.1);
+    --shadow-glass: 0 4px 20px -4px hsl(110 10% 30% / 0.08);
+    --shadow-glow-primary: 0 2px 16px hsl(var(--glow-primary));
+    --shadow-glow-accent: 0 2px 16px hsl(var(--glow-accent));
+    --shadow-glow-gold: 0 2px 16px hsl(var(--glow-gold));
 
-    --sidebar-background: 36 28% 96%;
-    --sidebar-foreground: 18 14% 11%;
-    --sidebar-primary: 134 28% 42%;
+    --sidebar-background: 96 24% 92%;
+    --sidebar-foreground: 0 0% 18%;
+    --sidebar-primary: 142 26% 33%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 22 52% 48%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 30 22% 86%;
-    --sidebar-ring: 134 28% 42%;
+    --sidebar-border: 110 14% 82%;
+    --sidebar-ring: 142 26% 33%;
   }
 
   .dark {
