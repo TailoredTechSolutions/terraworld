@@ -53,7 +53,7 @@ const BuyerShopPanel = () => {
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.image_url || "/placeholder.svg",
+      image: getProductImage(product.name, product.image_url),
       farmId: product.farmer_id,
       farmName: product.farmers?.name || "Unknown Farm",
       unit: product.unit,
