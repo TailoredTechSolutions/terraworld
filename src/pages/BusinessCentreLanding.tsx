@@ -1,6 +1,5 @@
 import { Navigate } from "react-router-dom";
-import terraHeroBadge from "@/assets/terra-hero-badge.png";
-import businessCentreHero from "@/assets/business-centre-hero.jpg";
+import { HERO_BADGE as terraHeroBadge, BUSINESS_CENTRE_HERO as businessCentreHero } from "@/lib/siteImages";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";

@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
-import heroHarvest from "@/assets/hero-harvest-sunrise.jpg";
-import terraLogo from "@/assets/terra-logo.png";
+import { HERO_HARVEST_SUNRISE } from "@/lib/siteImages";
 import { Button } from "@/components/ui/button";
 import {
   Truck,
@@ -30,10 +29,9 @@ const cubicSmooth = [0.22, 1, 0.36, 1] as [number, number, number, number];
 const HeroSection = () => {
   return (
     <section className="relative overflow-hidden min-h-[92vh] flex items-center">
-      {/* Cinematic background image */}
       <div className="absolute inset-0">
         <motion.img
-          src={heroHarvest}
+          src={HERO_HARVEST_SUNRISE}
           alt="Filipino farmers harvesting at sunrise in Benguet highlands"
           className="h-full w-full object-cover"
           fetchPriority="high"
@@ -41,18 +39,14 @@ const HeroSection = () => {
           animate={{ scale: 1 }}
           transition={{ duration: 8, ease: "easeOut" }}
         />
-        {/* Multi-layer gradient overlays for depth */}
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/30" />
-        {/* Warm golden accent from right */}
         <div className="absolute inset-0 bg-gradient-to-l from-terra-gold/10 via-transparent to-transparent" />
       </div>
 
-      {/* Content */}
       <div className="relative container py-16 md:py-24">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="max-w-xl">
-            {/* Badge */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -63,7 +57,6 @@ const HeroSection = () => {
               <span className="text-sm font-medium text-primary">Philippines' Farm-to-Table Platform</span>
             </motion.div>
 
-            {/* Headline */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -99,7 +92,6 @@ const HeroSection = () => {
               farmers, and enjoy fresh produce delivered to your door.
             </motion.p>
 
-            {/* CTA */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -119,7 +111,6 @@ const HeroSection = () => {
               </Link>
             </motion.div>
 
-            {/* Stats */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -145,7 +136,6 @@ const HeroSection = () => {
             </motion.div>
           </div>
 
-          {/* Right Column — Trust Badges */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -175,7 +165,6 @@ const HeroSection = () => {
               </motion.div>
             ))}
 
-            {/* Freshness Guarantee */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -203,7 +192,6 @@ const HeroSection = () => {
               </div>
             </motion.div>
 
-            {/* Verification */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -221,7 +209,6 @@ const HeroSection = () => {
           </motion.div>
         </div>
 
-        {/* Mobile Trust Badges */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

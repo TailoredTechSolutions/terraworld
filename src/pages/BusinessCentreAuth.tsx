@@ -14,8 +14,7 @@ import { Loader2, Eye, EyeOff, Users, TrendingUp, Award, Zap, DollarSign, Coins,
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, useScroll, useTransform } from "framer-motion";
-import terraLogo from "@/assets/terra-logo-full.png";
-import businessCentreHero from "@/assets/business-centre-hero.jpg";
+import { LOGO_FULL as terraLogo, BUSINESS_CENTRE_HERO as businessCentreHero } from "@/lib/siteImages";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");

@@ -12,8 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Leaf, ArrowLeft, ShoppingBag, Tractor, Truck, ChevronDown, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
-import terraLogo from "@/assets/terra-logo-full.png";
-import authFarmBg from "@/assets/auth-farm-bg.jpg";
+import { LOGO_FULL as terraLogo, AUTH_FARM_BG as authFarmBg } from "@/lib/siteImages";
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -5,7 +5,7 @@ import { useCartStore } from "@/store/cartStore";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
-import terraLogo from "@/assets/terra-logo.png";
+import { LOGO as terraLogo } from "@/lib/siteImages";
 import ThemeToggle from "@/components/ThemeToggle";
 import { DesktopNav, MobileMenuDrawer } from "@/components/navigation";
 import {

@@ -5,7 +5,7 @@ import {
   Shield, Truck, Gift, ArrowRight
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import terraLogo from "@/assets/terra-logo.png";
+import { LOGO as terraLogo } from "@/lib/siteImages";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 

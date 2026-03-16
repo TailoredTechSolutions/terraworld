@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Bell, Search, Plus, User, LogOut, ChevronDown, Shield, Home, Tractor, ShoppingCart, Truck, Settings } from "lucide-react";
 import type { SectionId } from "@/pages/AdminBackOffice";
-import terraLogo from "@/assets/terra-logo.png";
+import { LOGO as terraLogo } from "@/lib/siteImages";
 
 interface Props {
   sections: readonly { id: SectionId; label: string }[];

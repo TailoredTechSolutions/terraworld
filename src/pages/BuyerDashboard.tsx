@@ -11,7 +11,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BuyerSidebar from "@/components/buyer/BuyerSidebar";
 import DashboardHero from "@/components/DashboardHero";
-import shopHero from "@/assets/shop-hero.jpg";
+import { SHOP_HERO as shopHero } from "@/lib/siteImages";
 
 // Panel imports
 import BuyerOverviewPanel from "@/components/buyer/BuyerOverviewPanel";

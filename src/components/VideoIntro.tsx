@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
-import terraLogo from "@/assets/terra-logo.png";
+import { LOGO as terraLogo } from "@/lib/siteImages";
 
 const INTRO_PLAYED_KEY = "terra_intro_played";
 
