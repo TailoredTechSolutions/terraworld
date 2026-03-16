@@ -17,6 +17,7 @@ import { ShoppingBag, Search, Leaf, Loader2, ExternalLink } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@/data/products";
+import { getProductImage } from "@/data/productImageMap";
 
 const BuyerShopPanel = () => {
   const [search, setSearch] = useState("");
