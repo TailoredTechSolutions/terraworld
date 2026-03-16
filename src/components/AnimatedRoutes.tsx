@@ -5,11 +5,27 @@ import PageTransition from "./PageTransition";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleProtectedRoute from "./RoleProtectedRoute";
 
+// Retry wrapper for lazy imports – reloads once on chunk failures
+function lazyRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
+  return lazy(() =>
+    factory().catch(() => {
+      // Force a full page reload once to clear stale chunks
+      const key = "chunk-reload";
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, "1");
+        window.location.reload();
+      }
+      sessionStorage.removeItem(key);
+      return factory();
+    })
+  );
+}
+
 // Only the landing page is eagerly loaded for fast initial paint
 import Index from "@/pages/Index";
 
 // Lazy-load everything else
-const ShopPage = lazy(() => import("@/pages/ShopPage"));
+const ShopPage = lazyRetry(() => import("@/pages/ShopPage"));
 const ProductDetail = lazy(() => import("@/pages/ProductDetail"));
 const ProductOffersPage = lazy(() => import("@/pages/ProductOffersPage"));
 const MapPage = lazy(() => import("@/pages/MapPage"));
