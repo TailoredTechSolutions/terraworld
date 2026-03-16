@@ -137,10 +137,12 @@ const ProductApprovalPanel = () => {
                   <TableRow key={product.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        {product.image_url ? (
-                          <img src={product.image_url} alt={product.name} className="h-10 w-10 rounded-lg object-cover" />
-                        ) : (
-                          <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center"><Image className="h-4 w-4 text-muted-foreground" /></div>
+                        {(() => {
+                          const imgSrc = getProductImage(product.name, product.image_url);
+                          return (
+                            <img src={imgSrc} alt={product.name} className="h-10 w-10 rounded-lg object-cover" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }} />
+                          );
+                        })()}
                         )}
                         <div>
                           <p className="font-medium">{product.name}</p>
