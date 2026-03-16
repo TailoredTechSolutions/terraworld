@@ -44,7 +44,7 @@ const BuyerShopPanel = () => {
 
   const filtered = (products || []).filter((p) => {
     const matchesSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCat = category === "all" || p.category === category;
+    const matchesCat = category === "all" || p.category.toLowerCase() === category.toLowerCase();
     return matchesSearch && matchesCat;
   });
 
