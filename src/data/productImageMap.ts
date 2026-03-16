@@ -176,6 +176,8 @@ const imageKeywords: [string[], string][] = [
   [["duck egg"], eggsImg],
   [["quail egg"], eggsImg],
   [["native chicken egg"], freshEggsImg],
+  [["native chicken", "free range chicken", "free-range chicken", "organic chicken"], chickenImg],
+  [["chicken"], chickenImg],
   [["free-range egg", "free range egg"], freshEggsImg],
   [["organic brown egg"], eggsImg],
   [["organic duck egg"], eggsImg],
