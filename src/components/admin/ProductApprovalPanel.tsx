@@ -191,7 +191,7 @@ const ProductApprovalPanel = () => {
           <DialogHeader><DialogTitle>{selectedProduct?.name}</DialogTitle></DialogHeader>
           {selectedProduct && (
             <div className="space-y-4">
-              {selectedProduct.image_url && <img src={selectedProduct.image_url} alt={selectedProduct.name} className="w-full h-48 object-cover rounded-lg" />}
+              <img src={getProductImage(selectedProduct.name, selectedProduct.image_url)} alt={selectedProduct.name} className="w-full h-48 object-cover rounded-lg" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }} />
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div><p className="text-muted-foreground">Farmer</p><p className="font-medium">{selectedProduct.farmer_name}</p></div>
                 <div><p className="text-muted-foreground">Category</p><p className="font-medium">{selectedProduct.category}</p></div>
