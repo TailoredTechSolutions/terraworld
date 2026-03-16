@@ -6,60 +6,60 @@
 
 @layer base {
   :root {
-    /* Terra Light Mode — Natural agricultural canvas (#E6EEDC) */
-    --background: 96 28% 90%;
-    --foreground: 0 0% 18%;
+    /* Terra Light Mode — Natural agricultural canvas */
+    --background: 96 28% 91%;
+    --foreground: 0 0% 12%;
 
-    /* Card surface: soft beige (#F5F3EB) */
-    --card: 43 25% 94%;
-    --card-foreground: 0 0% 18%;
+    /* Card surface: soft beige */
+    --card: 43 25% 95%;
+    --card-foreground: 0 0% 12%;
 
-    --popover: 43 25% 94%;
-    --popover-foreground: 0 0% 18%;
+    --popover: 43 25% 95%;
+    --popover-foreground: 0 0% 12%;
 
     /* Earth green primary (#3F6B4F) */
     --primary: 142 26% 33%;
     --primary-foreground: 0 0% 100%;
 
-    /* Leaf green secondary (#739E6A) */
-    --secondary: 112 22% 51%;
+    /* Leaf green secondary — darker for readability */
+    --secondary: 112 24% 42%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Muted surfaces — desaturated sage */
-    --muted: 100 16% 85%;
-    --muted-foreground: 0 0% 35%;
+    /* Muted surfaces */
+    --muted: 100 16% 86%;
+    --muted-foreground: 0 0% 28%;
 
-    /* Warm terracotta accent (#B86A3C) */
-    --accent: 22 52% 48%;
+    /* Warm terracotta accent */
+    --accent: 22 52% 44%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 68% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Border: soft muted green (#C7D3BE) */
-    --border: 110 16% 80%;
-    --input: 100 14% 86%;
+    /* Border: soft muted green */
+    --border: 110 16% 78%;
+    --input: 100 14% 84%;
     --ring: 142 26% 33%;
 
     --radius: 0.75rem;
 
     /* Terra earth tokens */
     --success: 142 26% 33%;
-    --warning: 38 68% 55%;
-    --terra-soil: 14 34% 26%;
-    --terra-terracotta: 22 52% 48%;
+    --warning: 38 68% 50%;
+    --terra-soil: 14 34% 22%;
+    --terra-terracotta: 22 52% 44%;
     --terra-leaf: 142 26% 33%;
-    --terra-rice: 112 22% 51%;
-    --terra-gold: 38 68% 55%;
+    --terra-rice: 112 24% 42%;
+    --terra-gold: 38 68% 50%;
     --ph-blue: 218 72% 38%;
-    --ph-blue-light: 218 58% 55%;
+    --ph-blue-light: 218 58% 50%;
     --ph-red: 2 72% 48%;
-    --ph-red-light: 2 58% 62%;
-    --ph-gold: 38 68% 55%;
+    --ph-red-light: 2 58% 56%;
+    --ph-gold: 38 68% 50%;
     --ph-white: 0 0% 100%;
-    --cream: 96 28% 90%;
-    --cream-dark: 96 18% 82%;
-    --earth-dark: 0 0% 18%;
+    --cream: 96 28% 91%;
+    --cream-dark: 96 18% 80%;
+    --earth-dark: 0 0% 12%;
     --tan: 30 18% 62%;
     --tan-light: 32 20% 78%;
     --tan-dark: 28 22% 46%;
