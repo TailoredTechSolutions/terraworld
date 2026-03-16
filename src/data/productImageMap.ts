@@ -157,12 +157,6 @@ const imageKeywords: [string[], string][] = [
   [["jam", "preserve"], ubeJamImg],
   [["dried"], driedHerbsImg],
 
-  // === MEAT (if any slip through) ===
-  [["dressed chicken"], dressedChickenImg],
-  [["native chicken", "manok bisaya", "tublay.*chicken"], nativeChickenImg],
-  [["whole chicken", "free-range.*chicken"], nativeChickenImg],
-  [["chicken"], nativeChickenImg],
-  [["rabbit"], nativeChickenImg],
 ];
 
 export function getProductImage(name: string, dbImageUrl: string | null): string {
