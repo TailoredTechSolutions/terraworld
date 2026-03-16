@@ -184,7 +184,7 @@ const imageKeywords: [string[], string][] = [
   [["farm fresh egg", "fresh farm egg"], freshEggsImg],
   [["egg tray", "eggs (tray)"], eggsImg],
   [["egg", "itlog"], freshEggsImg],
-  [["goat milk"], carabaoMilkImg],
+  [["goat milk", "goat's milk"], goatMilkImg],
   [["carabao milk"], carabaoMilkImg],
   [["fresh milk"], freshMilkImg],
   [["yogurt"], carabaoMilkImg],
