@@ -20,6 +20,8 @@ import calamansiImg from "@/assets/products/calamansi.jpg";
 import freshEggsImg from "@/assets/products/fresh-eggs.jpg";
 import eggsImg from "@/assets/products/eggs.jpg";
 import carabaoMilkImg from "@/assets/products/carabao-milk.jpg";
+import goatMilkImg from "@/assets/products/goat-milk.jpg";
+import chickenImg from "@/assets/products/chicken.jpg";
 import kesongPutiImg from "@/assets/products/kesong-puti.jpg";
 import saltedEggsImg from "@/assets/products/salted-eggs.jpg";
 import guavaImg from "@/assets/products/guava.jpg";
