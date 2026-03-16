@@ -58,6 +58,19 @@ import tableaImg from "@/assets/products/tablea.jpg";
 import brownRiceImg from "@/assets/products/brown-rice.jpg";
 import coconutVinegarImg from "@/assets/products/coconut-vinegar.jpg";
 import peanutButterImg from "@/assets/products/peanut-butter.jpg";
+// Additional product imports
+import tomatoesImg from "@/assets/products/tomatoes.jpg";
+import blueberriesImg from "@/assets/products/blueberries.jpg";
+import grapesImg from "@/assets/products/grapes.jpg";
+import honeyImg from "@/assets/products/honey.jpg";
+import gingerImg from "@/assets/products/ginger.jpg";
+import turmericImg from "@/assets/products/turmeric.jpg";
+import passionFruitImg from "@/assets/products/passion-fruit.jpg";
+import lemongrassImg from "@/assets/products/lemongrass.jpg";
+import sweetPotatoImg from "@/assets/products/sweet-potato.jpg";
+import stringBeansImg from "@/assets/products/string-beans.jpg";
+import eggplantImg from "@/assets/products/eggplant.jpg";
+import bellPeppersImg from "@/assets/products/bell-peppers.jpg";
 
 export interface Product {
   id: string;
@@ -588,10 +601,193 @@ export const products: Product[] = [
     organic: false,
     description: "Homemade peanut butter from La Faustino Farm. Creamy, all-natural with no preservatives. Made from locally grown peanuts.",
   },
+  // === NEW PRODUCTS ===
+  // Vegetables - using existing unused + new generated images
+  {
+    id: "44",
+    name: "Tomatoes",
+    price: 40.00,
+    unit: "kg",
+    farmId: "saymayat-vegetable",
+    farmName: "Saymayat Vegetable Farming",
+    image: tomatoesImg,
+    category: "Vegetables",
+    stock: 130,
+    organic: true,
+    description: "Vine-ripened highland tomatoes from Saymayat Farm. Deep red, juicy, and full of flavor. Perfect for sinigang and salads.",
+  },
+  {
+    id: "45",
+    name: "Eggplant (Talong)",
+    price: 45.00,
+    unit: "kg",
+    farmId: "kibungan-green-terraces",
+    farmName: "Kibungan Green Terraces",
+    image: eggplantImg,
+    category: "Vegetables",
+    stock: 90,
+    organic: true,
+    description: "Fresh Filipino eggplant from Kibungan. Long and slender, perfect for tortang talong, grilling, and kare-kare.",
+  },
+  {
+    id: "46",
+    name: "Bell Peppers",
+    price: 120.00,
+    unit: "kg",
+    farmId: "fit-fab-farm",
+    farmName: "Fit and Fab Farm",
+    image: bellPeppersImg,
+    category: "Vegetables",
+    stock: 55,
+    organic: true,
+    description: "Colorful bell peppers from Fit and Fab Farm. Mix of green, red, and orange. Crisp and sweet, great for stir-fries and salads.",
+  },
+  {
+    id: "47",
+    name: "Sitaw (String Beans)",
+    price: 50.00,
+    unit: "kg",
+    farmId: "urban-garden-pines",
+    farmName: "Urban Garden Under the Pines",
+    image: stringBeansImg,
+    category: "Vegetables",
+    stock: 80,
+    organic: true,
+    description: "Fresh long string beans (sitaw) from Urban Garden. Essential for pinakbet and adobong sitaw. Harvested daily.",
+  },
+  {
+    id: "48",
+    name: "Sweet Potato (Camote)",
+    price: 35.00,
+    unit: "kg",
+    farmId: "mankayan-root-farm",
+    farmName: "Mankayan Root Crops Farm",
+    image: sweetPotatoImg,
+    category: "Vegetables",
+    stock: 150,
+    organic: true,
+    description: "Purple-skinned sweet potatoes from Mankayan. Naturally sweet with orange flesh. Great for boiling, frying, or desserts.",
+  },
+  {
+    id: "49",
+    name: "Ginger (Luya)",
+    price: 80.00,
+    unit: "kg",
+    farmId: "itogon-mixed-farm",
+    farmName: "Itogon Mixed Crops Farm",
+    image: gingerImg,
+    category: "Vegetables",
+    stock: 100,
+    organic: true,
+    description: "Fresh organic ginger from Itogon highlands. Aromatic and spicy, essential for salabat, cooking, and traditional remedies.",
+  },
+  // Fruits - additional
+  {
+    id: "50",
+    name: "Blueberries",
+    price: 480.00,
+    unit: "250g",
+    farmId: "bsu-strawberry-farm",
+    farmName: "BSU Strawberry Farm",
+    image: blueberriesImg,
+    category: "Fruits",
+    stock: 20,
+    organic: true,
+    description: "Rare highland blueberries from BSU experimental farm. Rich in antioxidants, sweet-tart flavor. Limited seasonal availability.",
+  },
+  {
+    id: "51",
+    name: "Table Grapes",
+    price: 220.00,
+    unit: "kg",
+    farmId: "la-faustino-farm",
+    farmName: "La Faustino Farm",
+    image: grapesImg,
+    category: "Fruits",
+    stock: 35,
+    organic: false,
+    description: "Sweet table grapes from La Faustino Farm. Juicy and seedless variety, perfect for snacking, salads, and juices.",
+  },
+  {
+    id: "52",
+    name: "Passion Fruit",
+    price: 200.00,
+    unit: "kg",
+    farmId: "tublay-berry-farm",
+    farmName: "Tublay Berry Farm",
+    image: passionFruitImg,
+    category: "Fruits",
+    stock: 25,
+    organic: true,
+    description: "Tropical passion fruit from Tublay highlands. Intensely fragrant with tangy-sweet pulp. Perfect for juices, desserts, and cocktails.",
+  },
+  // Pantry - additional
+  {
+    id: "53",
+    name: "Mountain Bee Honey",
+    price: 320.00,
+    unit: "350ml",
+    farmId: "bakun-valley-farm",
+    farmName: "Bakun Valley Farm",
+    image: honeyImg,
+    category: "Pantry",
+    stock: 30,
+    organic: true,
+    description: "Pure mountain honey from Bakun Valley apiaries. Light amber with floral notes from wildflowers. Raw and unprocessed.",
+  },
+  {
+    id: "54",
+    name: "Turmeric Powder (Luyang Dilaw)",
+    price: 150.00,
+    unit: "100g",
+    farmId: "itogon-mixed-farm",
+    farmName: "Itogon Mixed Crops Farm",
+    image: turmericImg,
+    category: "Pantry",
+    stock: 50,
+    organic: true,
+    description: "Ground turmeric from Itogon. Sun-dried and stone-ground, vibrant golden color. Anti-inflammatory superfood for cooking and wellness.",
+  },
+  {
+    id: "55",
+    name: "Fresh Lemongrass (Tanglad)",
+    price: 25.00,
+    unit: "bundle",
+    farmId: "pinsao-urban-farm",
+    farmName: "Pinsao Urban Farm",
+    image: lemongrassImg,
+    category: "Pantry",
+    stock: 100,
+    organic: true,
+    description: "Fragrant lemongrass stalks from Pinsao Urban Farm. Essential for Filipino soups, teas, and marinades. Citrusy aroma.",
+  },
+  {
+    id: "56",
+    name: "Robusta Coffee Beans",
+    price: 280.00,
+    unit: "250g",
+    farmId: "atok-highlands-farm",
+    farmName: "Atok Highlands Organic Farm",
+    image: arabicaCoffeeImg,
+    category: "Pantry",
+    stock: 35,
+    organic: true,
+    description: "Bold Robusta coffee from Atok highlands. Full-bodied with earthy notes and higher caffeine. Traditional barako-style roast.",
+  },
+  {
+    id: "57",
+    name: "Benguet Tea Blend",
+    price: 180.00,
+    unit: "50g",
+    farmId: "kibungan-green-terraces",
+    farmName: "Kibungan Green Terraces",
+    image: driedHerbsImg,
+    category: "Pantry",
+    stock: 40,
+    organic: true,
+    description: "Artisan herbal tea blend from Kibungan. Mix of lemongrass, pandan, and ginger. Naturally caffeine-free, soothing highland flavors.",
+  },
 ];
-
-
-
 
 export const farms: Farm[] = [
   // ATI Learning Site Farms
