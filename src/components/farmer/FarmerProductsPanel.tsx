@@ -26,6 +26,7 @@ import StatusChip from "@/components/backoffice/StatusChip";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Search, Package, Leaf, Loader2, Pause, Play, ImageIcon } from "lucide-react";
 import ProductImageUploader from "./ProductImageUploader";
+import { getProductImage } from "@/data/productImageMap";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 
 type Product = Tables<"products">;
@@ -282,13 +283,16 @@ const FarmerProductsPanel = ({ farmerId }: FarmerProductsPanelProps) => {
                     <TableRow key={product.id} className={isPaused ? "opacity-60" : ""}>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          {product.image_url ? (
-                            <img src={product.image_url} alt={product.name} className="h-10 w-10 rounded-md object-cover" />
-                          ) : (
-                            <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center">
-                              <Package className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                          )}
+                          <img 
+                            src={getProductImage(product.name, product.image_url)} 
+                            alt={product.name} 
+                            className="h-10 w-10 rounded-md object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/placeholder.svg';
+                            }}
+                          />
                           <div>
                             <div className="font-medium flex items-center gap-1">
                               {product.name}

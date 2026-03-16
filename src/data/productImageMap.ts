@@ -73,6 +73,7 @@ const imageKeywords: [string[], string][] = [
   [["bell pepper"], bellPeppersImg],
   [["eggplant", "talong"], eggplantImg],
   [["ginger", "luya"], gingerImg],
+  [["corn", "mais"], potatoesImg],
   // General vegetables
   [["lettuce"], lettuceImg],
   [["carrot"], carrotsImg],

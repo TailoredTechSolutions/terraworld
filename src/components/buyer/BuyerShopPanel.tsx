@@ -17,6 +17,7 @@ import { ShoppingBag, Search, Leaf, Loader2, ExternalLink } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@/data/products";
+import { getProductImage } from "@/data/productImageMap";
 
 const BuyerShopPanel = () => {
   const [search, setSearch] = useState("");
@@ -43,7 +44,7 @@ const BuyerShopPanel = () => {
 
   const filtered = (products || []).filter((p) => {
     const matchesSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCat = category === "all" || p.category === category;
+    const matchesCat = category === "all" || p.category.toLowerCase() === category.toLowerCase();
     return matchesSearch && matchesCat;
   });
 
@@ -52,7 +53,7 @@ const BuyerShopPanel = () => {
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.image_url || "/placeholder.svg",
+      image: getProductImage(product.name, product.image_url),
       farmId: product.farmer_id,
       farmName: product.farmers?.name || "Unknown Farm",
       unit: product.unit,
@@ -119,10 +120,15 @@ const BuyerShopPanel = () => {
             <Card key={product.id} className="overflow-hidden group">
               <div className="aspect-square relative bg-muted">
                 <img
-                  src={product.image_url || "/placeholder.svg"}
+                  src={getProductImage(product.name, product.image_url)}
                   alt={product.name}
                   className="w-full h-full object-cover"
                   loading="lazy"
+                  decoding="async"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder.svg';
+                  }}
                 />
                 {product.is_organic && (
                   <Badge variant="secondary" className="absolute top-2 left-2 text-[10px] gap-1">

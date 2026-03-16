@@ -15,6 +15,7 @@ import {
 import { Package, Search, Loader2, Check, X, Eye, Image } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getProductImage } from "@/data/productImageMap";
 
 interface ProductRow {
   id: string;
@@ -136,11 +137,12 @@ const ProductApprovalPanel = () => {
                   <TableRow key={product.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        {product.image_url ? (
-                          <img src={product.image_url} alt={product.name} className="h-10 w-10 rounded-lg object-cover" />
-                        ) : (
-                          <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center"><Image className="h-4 w-4 text-muted-foreground" /></div>
-                        )}
+                        {(() => {
+                          const imgSrc = getProductImage(product.name, product.image_url);
+                          return (
+                            <img src={imgSrc} alt={product.name} className="h-10 w-10 rounded-lg object-cover" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }} />
+                          );
+                        })()}
                         <div>
                           <p className="font-medium">{product.name}</p>
                           <p className="text-xs text-muted-foreground">{product.unit} • {product.is_organic ? "🌿 Organic" : ""}</p>
@@ -188,7 +190,7 @@ const ProductApprovalPanel = () => {
           <DialogHeader><DialogTitle>{selectedProduct?.name}</DialogTitle></DialogHeader>
           {selectedProduct && (
             <div className="space-y-4">
-              {selectedProduct.image_url && <img src={selectedProduct.image_url} alt={selectedProduct.name} className="w-full h-48 object-cover rounded-lg" />}
+              <img src={getProductImage(selectedProduct.name, selectedProduct.image_url)} alt={selectedProduct.name} className="w-full h-48 object-cover rounded-lg" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }} />
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div><p className="text-muted-foreground">Farmer</p><p className="font-medium">{selectedProduct.farmer_name}</p></div>
                 <div><p className="text-muted-foreground">Category</p><p className="font-medium">{selectedProduct.category}</p></div>
