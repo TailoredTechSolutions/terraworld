@@ -15,6 +15,7 @@ import {
 import { Package, Search, Loader2, Check, X, Eye, Image } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getProductImage } from "@/data/productImageMap";
 
 interface ProductRow {
   id: string;
