@@ -462,7 +462,13 @@ const CheckoutPage = () => {
                       <img 
                         src={item.product.image} 
                         alt={item.product.name}
+                        loading="lazy"
+                        decoding="async"
                         className="h-full w-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder.svg';
+                        }}
                       />
                     </div>
                     <div className="flex-1 min-w-0">
