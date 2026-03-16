@@ -26,6 +26,7 @@ import StatusChip from "@/components/backoffice/StatusChip";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Search, Package, Leaf, Loader2, Pause, Play, ImageIcon } from "lucide-react";
 import ProductImageUploader from "./ProductImageUploader";
+import { getProductImage } from "@/data/productImageMap";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 
 type Product = Tables<"products">;
