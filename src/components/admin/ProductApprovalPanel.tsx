@@ -143,7 +143,6 @@ const ProductApprovalPanel = () => {
                             <img src={imgSrc} alt={product.name} className="h-10 w-10 rounded-lg object-cover" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }} />
                           );
                         })()}
-                        )}
                         <div>
                           <p className="font-medium">{product.name}</p>
                           <p className="text-xs text-muted-foreground">{product.unit} • {product.is_organic ? "🌿 Organic" : ""}</p>
