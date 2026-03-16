@@ -5,30 +5,46 @@ import PageTransition from "./PageTransition";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleProtectedRoute from "./RoleProtectedRoute";
 
+// Retry wrapper for lazy imports – reloads once on chunk failures
+function lazyRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
+  return lazy(() =>
+    factory().catch(() => {
+      // Force a full page reload once to clear stale chunks
+      const key = "chunk-reload";
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, "1");
+        window.location.reload();
+      }
+      sessionStorage.removeItem(key);
+      return factory();
+    })
+  );
+}
+
 // Only the landing page is eagerly loaded for fast initial paint
 import Index from "@/pages/Index";
 
 // Lazy-load everything else
-const ShopPage = lazy(() => import("@/pages/ShopPage"));
-const ProductDetail = lazy(() => import("@/pages/ProductDetail"));
-const ProductOffersPage = lazy(() => import("@/pages/ProductOffersPage"));
-const MapPage = lazy(() => import("@/pages/MapPage"));
-const FarmDetailPage = lazy(() => import("@/pages/FarmDetailPage"));
-const AffiliatePage = lazy(() => import("@/pages/AffiliatePage"));
-const BusinessCentreLanding = lazy(() => import("@/pages/BusinessCentreLanding"));
-const BusinessCentreAuth = lazy(() => import("@/pages/BusinessCentreAuth"));
-const CheckoutPage = lazy(() => import("@/pages/CheckoutPage"));
-const OrderConfirmation = lazy(() => import("@/pages/OrderConfirmation"));
-const DriverDashboard = lazy(() => import("@/pages/DriverDashboard"));
-const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
-const AdminBackOffice = lazy(() => import("@/pages/AdminBackOffice"));
-const MemberDashboard = lazy(() => import("@/pages/MemberDashboard"));
-const FarmerDashboard = lazy(() => import("@/pages/FarmerDashboard"));
-const BuyerDashboard = lazy(() => import("@/pages/BuyerDashboard"));
-const AuthPage = lazy(() => import("@/pages/AuthPage"));
-const ResetPasswordPage = lazy(() => import("@/pages/ResetPasswordPage"));
-const KYCPage = lazy(() => import("@/pages/KYCPage"));
-const NotFound = lazy(() => import("@/pages/NotFound"));
+const ShopPage = lazyRetry(() => import("@/pages/ShopPage"));
+const ProductDetail = lazyRetry(() => import("@/pages/ProductDetail"));
+const ProductOffersPage = lazyRetry(() => import("@/pages/ProductOffersPage"));
+const MapPage = lazyRetry(() => import("@/pages/MapPage"));
+const FarmDetailPage = lazyRetry(() => import("@/pages/FarmDetailPage"));
+const AffiliatePage = lazyRetry(() => import("@/pages/AffiliatePage"));
+const BusinessCentreLanding = lazyRetry(() => import("@/pages/BusinessCentreLanding"));
+const BusinessCentreAuth = lazyRetry(() => import("@/pages/BusinessCentreAuth"));
+const CheckoutPage = lazyRetry(() => import("@/pages/CheckoutPage"));
+const OrderConfirmation = lazyRetry(() => import("@/pages/OrderConfirmation"));
+const DriverDashboard = lazyRetry(() => import("@/pages/DriverDashboard"));
+const AdminDashboard = lazyRetry(() => import("@/pages/AdminDashboard"));
+const AdminBackOffice = lazyRetry(() => import("@/pages/AdminBackOffice"));
+const MemberDashboard = lazyRetry(() => import("@/pages/MemberDashboard"));
+const FarmerDashboard = lazyRetry(() => import("@/pages/FarmerDashboard"));
+const BuyerDashboard = lazyRetry(() => import("@/pages/BuyerDashboard"));
+const AuthPage = lazyRetry(() => import("@/pages/AuthPage"));
+const ResetPasswordPage = lazyRetry(() => import("@/pages/ResetPasswordPage"));
+const KYCPage = lazyRetry(() => import("@/pages/KYCPage"));
+const NotFound = lazyRetry(() => import("@/pages/NotFound"));
 
 // Placeholder pages are lightweight, keep as static imports
 import {
