@@ -1,85 +1,84 @@
 
 
-## Mobile Responsiveness Audit & Fix Plan
+# Security Review Results
 
-### Current State Assessment
-
-After auditing every major page on a 390x844 mobile viewport, the project is **already well-structured for mobile** in most areas. However, there are specific issues that need fixing to achieve a professional mobile experience:
-
-### Issues Found
-
-**1. Farmer Dashboard - Tab Overflow (Critical)**
-The `FarmerDashboard.tsx` uses a horizontal `TabsList` with 12 tabs. On mobile, these wrap awkwardly and overflow. This needs to be converted to a sidebar/sheet pattern (like Buyer and Admin dashboards already use) or a scrollable tab bar.
-
-**2. Map Page - Location Banner Layout Break**
-The location status banner on `/map` has text wrapping poorly on mobile. The "Using default location (Manila)" text and "Update Location" button stack awkwardly. The banner needs better mobile flex layout.
-
-**3. Map Page - Map + Sidebar Stacking**
-When in map view on mobile, the `lg:grid-cols-3` layout correctly stacks, but the map's `aspect-[4/3]` creates a very short map on narrow screens, and the farm sidebar below gets no height constraint, creating a very long scroll.
-
-**4. Product Detail Page - Gap Too Large**
-The `gap-12` between image and details on `/product/:id` is excessive on mobile. The breadcrumb "Back to Marketplace" also has `mb-8` which wastes space.
-
-**5. Index Page - "How It Works" 4-Column Grid**
-The `md:grid-cols-4` layout drops to single column on mobile, which is fine, but the step cards could use a 2-column layout on small screens for a tighter look.
-
-**6. Checkout Page - Order Summary Overlap**
-The `lg:grid-cols-2` layout stacks on mobile correctly, but the order summary panel (right column) lacks a sticky behavior on mobile, making it hard to review totals when the form is long.
-
-**7. Admin Dashboard - Tables Overflow**
-Admin tables (Farmers, Drivers, Orders) don't have horizontal scroll containers on mobile, causing content to get clipped or overflow.
-
-**8. Footer - Single Column on Mobile**
-The footer grid `md:grid-cols-4` drops to single column. This is functional but takes excessive vertical space. A 2-column mobile layout for the link sections would be more compact.
+The scan found **4 vulnerabilities** (2 critical, 2 warnings) plus architectural observations. No database linter issues were found.
 
 ---
 
-### Implementation Plan
+## Critical Findings
 
-#### A. Farmer Dashboard - Add Sidebar Navigation (Highest Priority)
-- Create `FarmerSidebar.tsx` following the same pattern as `BuyerSidebar.tsx` and `MemberSidebar.tsx`
-- On mobile: floating menu button that opens a Sheet with all 12 tabs
-- On desktop: collapsible sidebar
-- Update `FarmerDashboard.tsx` to use sidebar layout instead of `TabsList`
+### 1. Farmer PII Exposed to Anonymous Users
+**Severity: Critical**
 
-#### B. Map Page Mobile Fixes
-- Refactor location banner: stack text and button vertically on mobile with `flex-col sm:flex-row`
-- Increase mobile map height from `aspect-[4/3]` to `aspect-[3/4]` or a fixed `min-h-[400px]` on mobile
-- Limit farm sidebar to a horizontal scroll card strip on mobile
+The `farmers` table policy "Public can view active farmers via view" grants `anon` access to all columns including `email`, `phone`, `owner`, and exact GPS coordinates. Any unauthenticated user can query this data directly.
 
-#### C. Product Detail Mobile Fixes
-- Reduce gap: `gap-6 lg:gap-12` instead of `gap-12`
-- Reduce breadcrumb margin: `mb-4 lg:mb-8`
-- Make price section more compact on mobile
+**Fix:** Replace the `anon` role on this policy with a narrower policy or restrict anonymous access to only use the existing `farmers_public` view (which already strips PII). The current policy should be scoped to `authenticated` only, while a new `anon` SELECT policy should expose only `id`, `name`, `location`, `latitude`, `longitude`, `rating`, `image_url`, `description`, `status`.
 
-#### D. Admin Tables - Horizontal Scroll
-- Wrap all `<Table>` components in admin panels with `overflow-x-auto` containers
-- This affects: `renderFarmersTab()`, `renderDriversTab()`, `renderOrdersTab()`, and sub-panels
+### 2. Delivery Bookings Leak Across Farmers
+**Severity: Critical**
 
-#### E. Index Page - How It Works Grid
-- Change from `grid-cols-1 md:grid-cols-4` to `grid-cols-2 md:grid-cols-4` for a tighter mobile layout
+The "Farmers can view assigned order bookings" policy on `delivery_bookings` only checks `has_role(auth.uid(), 'farmer')` -- it does NOT verify the farmer owns the order. Any farmer can read driver contact details (`driver_phone`, `driver_name`, `driver_plate`), delivery addresses, and booking info for ALL orders.
 
-#### F. Footer - Mobile 2-Column Links
-- Change link sections from `grid-cols-1 md:grid-cols-4` to `grid-cols-2 md:grid-cols-4` so the three link columns (Shop, For Farmers, Support) display in a 2-column grid on mobile
-
-#### G. Checkout Page - Mobile Summary
-- Add a sticky bottom bar on mobile showing the total and "Place Order" button, so users always see the total without scrolling
+**Fix:** Update the policy to also verify the order's `farmer_id` matches the authenticated farmer's profile, mirroring the pattern used on the `orders` table:
+```sql
+EXISTS (
+  SELECT 1 FROM orders o
+  WHERE o.id = delivery_bookings.order_id
+  AND EXISTS (
+    SELECT 1 FROM farmers f
+    WHERE f.id = o.farmer_id
+    AND f.email = (SELECT p.email FROM profiles p WHERE p.user_id = auth.uid() LIMIT 1)
+  )
+)
+```
 
 ---
 
-### Technical Details
+## Warnings
 
-**Files to create:**
-- `src/components/farmer/FarmerSidebar.tsx` (new, based on BuyerSidebar pattern)
+### 3. Product Images: Cross-Farmer Manipulation
+**Severity: Warning**
 
-**Files to modify:**
-- `src/pages/FarmerDashboard.tsx` - Replace TabsList with FarmerSidebar layout
-- `src/pages/MapPage.tsx` - Fix location banner and map height on mobile
-- `src/pages/ProductDetail.tsx` - Reduce spacing for mobile
-- `src/pages/Index.tsx` - 2-col "How It Works" grid on mobile
-- `src/pages/AdminDashboard.tsx` - Add overflow-x-auto to table containers
-- `src/components/Footer.tsx` - 2-col mobile grid for link sections
-- `src/pages/CheckoutPage.tsx` - Mobile-friendly order summary
+The INSERT and DELETE policies on `product_images` check `has_role(auth.uid(), 'farmer')` but do NOT verify product ownership. Any farmer can attach or remove images from another farmer's products.
 
-**No database changes required.**
+**Fix:** Add ownership verification to match the `products` table pattern -- check that `products.farmer_id` corresponds to the authenticated farmer's record.
+
+### 4. Platform Settings Over-Exposure
+**Severity: Warning**
+
+The authenticated user policy on `platform_settings` uses an exclusion list (`setting_key <> 'google_maps_api_key'`). Any new sensitive setting added in the future is automatically exposed to all users.
+
+**Fix:** Switch to an allowlist approach matching the public policy pattern:
+```sql
+setting_key = ANY (ARRAY[
+  'terra_fee_percent', 'tax_rate_percent', 'token_market_price',
+  'min_withdrawal', 'max_daily_withdrawal', 'withdrawal_fee_percent',
+  'bv_expiry_days'
+])
+```
+
+---
+
+## Additional Observations
+
+### Edge Functions: All Have `verify_jwt = false`
+All 14 edge functions disable JWT verification at the gateway level. This is acceptable **only if** each function validates the JWT internally (which most do via `supabase.auth.getUser(token)`). The webhook functions correctly use HMAC signature validation instead. No action needed, but worth documenting.
+
+### Auth Configuration
+- Email auto-confirm status should be verified -- the codebase expects email verification before sign-in
+- Password reset flow is properly implemented with a dedicated `/reset-password` route
+
+---
+
+## Recommended Fix Priority
+
+| Priority | Finding | Effort |
+|----------|---------|--------|
+| 1 | Farmer PII anonymous exposure | 1 migration |
+| 2 | Delivery bookings cross-farmer leak | 1 migration |
+| 3 | Product images cross-farmer manipulation | 1 migration |
+| 4 | Platform settings allowlist | 1 migration |
+
+All four fixes can be applied in a single SQL migration. Shall I proceed with the implementation?
 
