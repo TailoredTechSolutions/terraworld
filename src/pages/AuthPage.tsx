@@ -336,7 +336,7 @@ const AuthPage = () => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-email" className="font-bold">Email</Label>
-                      <Input id="signup-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading} className="h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
+                      <Input id="signup-email" type="email" placeholder="andrew@tailoredtech.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading} className="h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
                       {emailError && <p className="text-sm text-destructive">{emailError}</p>}
                     </div>
                     <div className="space-y-2">
