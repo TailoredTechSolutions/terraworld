@@ -295,13 +295,13 @@
   }
 
   .btn-liquid:hover {
-    transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 8px 40px hsl(var(--glow-primary));
-    filter: brightness(1.08);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px hsl(var(--glow-primary));
+    filter: brightness(1.05);
   }
 
   .btn-liquid:active {
-    transform: translateY(0) scale(0.97);
+    transform: translateY(0) scale(0.98);
     transition-duration: 0.15s;
   }
 
