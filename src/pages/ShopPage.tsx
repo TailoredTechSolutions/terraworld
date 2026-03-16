@@ -43,11 +43,13 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 // Hero + category images
-import shopHero from "@/assets/shop-hero.jpg";
-import categoryVegetables from "@/assets/category-vegetables.jpg";
-import categoryFruits from "@/assets/category-fruits.jpg";
-import categoryDairy from "@/assets/category-dairy.jpg";
-import categoryPantry from "@/assets/category-pantry.jpg";
+import {
+  SHOP_HERO as shopHero,
+  CATEGORY_VEGETABLES as categoryVegetables,
+  CATEGORY_FRUITS as categoryFruits,
+  CATEGORY_DAIRY as categoryDairy,
+  CATEGORY_PANTRY as categoryPantry,
+} from "@/lib/siteImages";
 
 type SortOption = "name-asc" | "name-desc" | "price-asc" | "price-desc" | "farms";
 type GridSize = "small" | "large";
