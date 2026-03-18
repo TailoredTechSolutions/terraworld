@@ -69,7 +69,7 @@ const Header = () => {
         <Link to="/" className="flex items-center gap-2.5 group" onClick={closeMobile}>
           <img alt="Terra Farming" width={44} height={44} className="h-11 w-11 transition-transform group-hover:scale-105 rounded-lg object-cover" src="/lovable-uploads/8cb444ea-2373-4b75-88be-b663c27fcfc1.png" />
           <div className="flex items-center gap-2">
-            <span className="font-display text-xl font-bold text-foreground tracking-tight">Terra Farming</span>
+            <span className="font-display font-bold text-foreground tracking-tight text-2xl">Terra Farming</span>
             <span className="hidden sm:block h-4 w-px bg-border" />
             <span className="hidden sm:block text-[10px] font-semibold tracking-[0.25em] text-muted-foreground uppercase font-display animate-fade-in italic">From Dirt to Dessert</span>
           </div>
