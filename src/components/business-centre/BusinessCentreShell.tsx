@@ -138,6 +138,7 @@ const ADMIN_SECTIONS: { title: string; moduleNumber: number; items: NavItem[] }[
     title: "7. Tokenomics",
     moduleNumber: 7,
     items: [
+      { id: "tokenomics", label: "Tokenomics Admin", icon: Coins, path: "/business-centre/tokenomics", adminOnly: true },
       { id: "token-rewards", label: "Token Rewards", icon: Coins, path: "/business-centre/token-rewards" },
     ],
   },
