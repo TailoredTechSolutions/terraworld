@@ -38,6 +38,7 @@ const BASE_NAV_ITEMS = [
   { id: "commissions", label: "Commissions", icon: DollarSign },
   { id: "referral", label: "Referrals", icon: Share2 },
   { id: "rank", label: "Rank & Activation", icon: Award },
+  { id: "coupons", label: "Coupons", icon: Ticket },
   { id: "payout", label: "Wallet", icon: Wallet },
   { id: "marketing", label: "Marketing", icon: Megaphone },
   { id: "support", label: "Support", icon: HelpCircle },
