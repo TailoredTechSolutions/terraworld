@@ -11,7 +11,7 @@ const TERRA_FEE_RATE = 0.30; // 30% Terra service fee
 
 // Validation schema for order input
 const orderItemSchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
   name: z.string().max(200),
   quantity: z.number().int().positive().max(100),
   price: z.number().positive().max(1000000),
@@ -127,7 +127,14 @@ Deno.serve(async (req) => {
     for (const item of orderData.items) {
       const dbProduct = productPrices[item.id];
       
-      const farmerPricePerUnit = dbProduct ? dbProduct.price : item.price;
+      if (!dbProduct) {
+        return new Response(
+          JSON.stringify({ error: `Product not found: ${item.id}` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      const farmerPricePerUnit = dbProduct.price;
       const terraFeePerUnit = farmerPricePerUnit * TERRA_FEE_RATE;
       const totalPricePerUnit = farmerPricePerUnit + terraFeePerUnit;
       
