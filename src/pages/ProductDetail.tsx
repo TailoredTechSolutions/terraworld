@@ -293,15 +293,15 @@ const ProductDetail = () => {
                   <span className="font-medium">₱{basePrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Platform Fee (20%)</span>
+                  <span className="text-muted-foreground">Platform Fee</span>
                   <span>₱{platformFee.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Commission (10%)</span>
+                  <span className="text-muted-foreground">Commission</span>
                   <span>₱{commission.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">VAT (12%)</span>
+                  <span className="text-muted-foreground">Tax</span>
                   <span>₱{vat.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
