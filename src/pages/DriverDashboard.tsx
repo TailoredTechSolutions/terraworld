@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import {
   Package, Truck, CheckCircle, Clock, DollarSign, Star,
   MapPin, Phone, Loader2, User,
-  Bell, LifeBuoy, ShieldCheck, AlertCircle, Play, Navigation,
+  Bell, LifeBuoy, ShieldCheck, AlertCircle, Play, Navigation, ArrowUp,
 } from "lucide-react";
 import { format } from "date-fns";
 import type { Tables } from "@/integrations/supabase/types";
@@ -57,29 +57,57 @@ const demoNotifications = [
   { id: "dn3", title: "Earnings Updated", message: "₱850 has been added to your wallet for completed deliveries", is_read: true, created_at: new Date(Date.now() - 48 * 3600000).toISOString() },
 ];
 
+const SCROLL_OFFSET = 80;
+
 const DriverDashboardInner = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("home");
+  const [activeSection, setActiveSection] = useState("home");
   const [isAvailable, setIsAvailable] = useState(true);
-  const isMobile = useIsMobile();
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const mainRef = useRef<HTMLDivElement>(null);
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   const registerSection = useCallback((id: string) => (el: HTMLDivElement | null) => {
     sectionRefs.current[id] = el;
   }, []);
 
-  const handleTabChange = useCallback((tab: string) => {
-    if (isMobile) {
-      const el = sectionRefs.current[tab];
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    } else {
-      setActiveTab(tab);
+  const scrollToSection = useCallback((sectionId: string) => {
+    const el = sectionRefs.current[sectionId];
+    if (el && mainRef.current) {
+      const containerTop = mainRef.current.getBoundingClientRect().top;
+      const elTop = el.getBoundingClientRect().top;
+      const offset = elTop - containerTop + mainRef.current.scrollTop - SCROLL_OFFSET;
+      mainRef.current.scrollTo({ top: offset, behavior: "smooth" });
     }
-  }, [isMobile]);
+  }, []);
+
+  // Scroll spy
+  useEffect(() => {
+    const container = mainRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      setShowBackToTop(container.scrollTop > 400);
+      const sectionIds = Object.keys(sectionRefs.current);
+      let currentSection = sectionIds[0];
+      for (const id of sectionIds) {
+        const el = sectionRefs.current[id];
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          if (rect.top - containerRect.top <= SCROLL_OFFSET + 100) {
+            currentSection = id;
+          }
+        }
+      }
+      setActiveSection(currentSection);
+    };
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Fetch this driver's record by email
   const { data: driverRecord } = useQuery({
@@ -254,71 +282,8 @@ const DriverDashboardInner = () => {
   const displayNotifications = (notifications && notifications.length > 0) ? notifications : demoNotifications;
   const driverOnline = driverRecord?.status === "online";
 
-  const getPageTitle = () => {
-    const titles: Record<string, string> = {
-      home: "Dashboard", assigned: "Assigned Deliveries", history: "Delivery History",
-      availability: "Availability", earnings: "Earnings", notifications: "Notifications",
-      support: "Support", profile: "Profile",
-    };
-    return titles[activeTab] || "Dashboard";
-  };
-
-  // Desktop tab-based content (unchanged)
-  const renderDesktopContent = () => {
-    switch (activeTab) {
-      case "home":
-        return (
-          <DriverHome
-            activeCount={activeDeliveries.length}
-            completedCount={completedDeliveries.length}
-            wallet={wallet}
-            rating={driverRecord?.rating}
-            onNavigate={setActiveTab}
-          />
-        );
-      case "assigned":
-        return (
-          <DriverAssigned
-            orders={activeDeliveries}
-            bookings={deliveryBookings || []}
-            onUpdateStatus={(orderId, status) => updateOrderStatus.mutate({ orderId, status })}
-            isUpdating={updateOrderStatus.isPending}
-          />
-        );
-      case "history":
-        return <DriverHistory orders={completedDeliveries} />;
-      case "availability":
-        return (
-          <DriverAvailability
-            isAvailable={driverOnline}
-            onToggle={(v) => toggleAvailability.mutate(v)}
-            driverRecord={driverRecord}
-          />
-        );
-      case "earnings":
-        return <DriverEarnings wallet={wallet} transactions={walletTxns || []} />;
-      case "notifications":
-        return <DriverNotifications notifications={displayNotifications} />;
-      case "support":
-        return <BuyerSupportPanel />;
-      case "profile":
-        return <DriverProfile profile={profile} driverRecord={driverRecord} kycStatus={kycProfile?.status} />;
-      default:
-        return (
-          <DriverHome
-            activeCount={activeDeliveries.length}
-            completedCount={completedDeliveries.length}
-            wallet={wallet}
-            rating={driverRecord?.rating}
-            onNavigate={setActiveTab}
-          />
-        );
-    }
-  };
-
-  // Mobile: all sections stacked
-  const mobileSections = [
-    { id: "home", label: "Driver Overview", component: <DriverHome activeCount={activeDeliveries.length} completedCount={completedDeliveries.length} wallet={wallet} rating={driverRecord?.rating} onNavigate={handleTabChange} /> },
+  const sections = [
+    { id: "home", label: "Driver Overview", component: <DriverHome activeCount={activeDeliveries.length} completedCount={completedDeliveries.length} wallet={wallet} rating={driverRecord?.rating} onNavigate={scrollToSection} /> },
     { id: "assigned", label: "Assigned Deliveries", component: <DriverAssigned orders={activeDeliveries} bookings={deliveryBookings || []} onUpdateStatus={(orderId: string, status: string) => updateOrderStatus.mutate({ orderId, status })} isUpdating={updateOrderStatus.isPending} /> },
     { id: "history", label: "Delivery History", component: <DriverHistory orders={completedDeliveries} /> },
     { id: "availability", label: "Availability", component: <DriverAvailability isAvailable={driverOnline} onToggle={(v: boolean) => toggleAvailability.mutate(v)} driverRecord={driverRecord} /> },
@@ -332,8 +297,8 @@ const DriverDashboardInner = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <div className="flex-1 flex">
-        <DriverSidebar activeTab={activeTab} onTabChange={handleTabChange} />
-        <main className="flex-1 overflow-auto">
+        <DriverSidebar activeTab={activeSection} onTabChange={scrollToSection} />
+        <main ref={mainRef} className="flex-1 overflow-auto relative">
           <div className="container max-w-6xl mx-auto px-4 py-6">
             {/* Cinematic Hero Banner */}
             <DashboardHero
@@ -349,28 +314,34 @@ const DriverDashboardInner = () => {
               ]}
             />
 
-            {isMobile ? (
-              <div className="space-y-8">
-                {mobileSections.map((section) => (
-                  <div
-                    key={section.id}
-                    ref={registerSection(section.id)}
-                    className="scroll-mt-4"
-                  >
-                    <h2 className="text-lg font-semibold mb-3 sticky top-0 bg-background/95 backdrop-blur-sm py-2 z-10 border-b border-border">
-                      {section.label}
-                    </h2>
-                    {section.component}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <>
-                <h2 className="text-2xl font-bold mb-6">{getPageTitle()}</h2>
-                {renderDesktopContent()}
-              </>
-            )}
+            {/* All sections rendered vertically */}
+            <div className="space-y-10">
+              {sections.map((section) => (
+                <div
+                  key={section.id}
+                  id={`driver-${section.id}`}
+                  ref={registerSection(section.id)}
+                  className="scroll-mt-20"
+                >
+                  <h2 className="text-xl font-bold mb-4 sticky top-0 bg-background/95 backdrop-blur-sm py-3 z-10 border-b border-border">
+                    {section.label}
+                  </h2>
+                  {section.component}
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Back to Top */}
+          {showBackToTop && (
+            <Button
+              size="icon"
+              className="fixed bottom-6 right-6 z-50 rounded-full shadow-lg"
+              onClick={() => mainRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
+            >
+              <ArrowUp className="h-4 w-4" />
+            </Button>
+          )}
         </main>
       </div>
       <Footer />
