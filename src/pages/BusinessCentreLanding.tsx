@@ -641,121 +641,73 @@ const RankPanel = () => (
 );
 
 // ─── Wallet & Payout Panel ───
-const PayoutPanel = () => (
-  <div className="space-y-5">
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      {[
-        { label: "Cash Balance", value: "₱18,425.50", icon: Wallet, accent: "text-emerald-600 bg-emerald-500/10" },
-        { label: "Internal Wallet", value: "₱0.00", icon: Ticket, accent: "text-primary bg-primary/10" },
-        { label: "Pending Commissions", value: "₱3,280.00", icon: Clock, accent: "text-amber-600 bg-amber-500/10" },
-        { label: "Total Withdrawn", value: "₱26,620.00", icon: ArrowUpRight, accent: "text-blue-600 bg-blue-500/10" },
-      ].map((w) => (
-        <Card key={w.label} className="border-border/40">
-          <CardContent className="p-4">
-            <div className={cn("p-1.5 rounded-lg w-fit mb-2", w.accent)}>
-              <w.icon className="h-4 w-4" />
+const PayoutPanel = ({ data }: { data: BusinessData }) => {
+  const fmt = (n: number) => `₱${n.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: "Cash Balance", value: fmt(data.walletData?.available_balance || 0), icon: Wallet, accent: "text-emerald-600 bg-emerald-500/10" },
+          { label: "Internal Wallet", value: fmt(data.walletData?.internal_balance || 0), icon: Ticket, accent: "text-primary bg-primary/10" },
+          { label: "Pending", value: fmt(data.walletData?.pending_balance || 0), icon: Clock, accent: "text-amber-600 bg-amber-500/10" },
+          { label: "Total Withdrawn", value: fmt(data.walletData?.total_withdrawn || 0), icon: ArrowUpRight, accent: "text-blue-600 bg-blue-500/10" },
+        ].map((w) => (
+          <Card key={w.label} className="border-border/40">
+            <CardContent className="p-4">
+              <div className={cn("p-1.5 rounded-lg w-fit mb-2", w.accent)}>
+                <w.icon className="h-4 w-4" />
+              </div>
+              <p className="text-xl font-bold font-display text-foreground">{w.value}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{w.label}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card className="border-border/40">
+          <CardHeader className="px-5 pt-4 pb-2">
+            <CardTitle className="text-sm">Payment Methods</CardTitle>
+          </CardHeader>
+          <CardContent className="px-5 pb-4 space-y-3">
+            <div className="p-3 rounded-lg border border-border/40 space-y-1">
+              <span className="font-medium text-xs">Bank Transfer</span>
+              <p className="text-[10px] text-muted-foreground">Configure your bank details for withdrawals</p>
             </div>
-            <p className="text-xl font-bold font-display text-foreground">{w.value}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">{w.label}</p>
+            <div className="p-3 rounded-lg border border-border/40 space-y-1">
+              <span className="font-medium text-xs">GCash</span>
+              <p className="text-[10px] text-muted-foreground">Configure your GCash for faster payouts</p>
+            </div>
+            <div className="flex justify-between text-xs p-2.5 rounded-lg bg-muted/30">
+              <span className="text-muted-foreground">Minimum Withdrawal</span>
+              <span className="font-medium">₱500</span>
+            </div>
           </CardContent>
         </Card>
-      ))}
+
+        <Card className="border-accent/20">
+          <CardHeader className="px-5 pt-4 pb-2">
+            <CardTitle className="text-xs flex items-center gap-2">
+              <Coins className="h-3.5 w-3.5 text-accent" /> AGRI Token Wallet
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="px-5 pb-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-lg bg-accent/5 text-center">
+                <p className="text-xl font-bold text-accent">{data.tokenBalance.toLocaleString()}</p>
+                <p className="text-[10px] text-muted-foreground">Token Balance</p>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/30 text-center">
+                <p className="text-xl font-bold text-foreground">₱10.00</p>
+                <p className="text-[10px] text-muted-foreground">Current Market Price</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
-
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <Card className="border-border/40">
-        <CardHeader className="px-5 pt-4 pb-2">
-          <CardTitle className="text-sm">Payment Methods</CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-4 space-y-3">
-          <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="font-medium text-xs">Bank Transfer</span>
-              <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30 text-[10px] px-1.5 py-0" variant="outline">Primary</Badge>
-            </div>
-            <p className="text-[10px] text-muted-foreground">BDO Unibank • **** 4832 • Juan Dela Cruz</p>
-          </div>
-          <div className="p-3 rounded-lg border border-border/40 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="font-medium text-xs">GCash</span>
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0">Available</Badge>
-            </div>
-            <p className="text-[10px] text-muted-foreground">+63 917 XXX X832</p>
-          </div>
-          <div className="flex justify-between text-xs p-2.5 rounded-lg bg-muted/30">
-            <span className="text-muted-foreground">Minimum Withdrawal</span>
-            <span className="font-medium">₱500</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="border-border/40">
-        <CardHeader className="px-5 pt-4 pb-2">
-          <CardTitle className="text-xs">Recent Withdrawals</CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-4">
-          <div className="space-y-2">
-            {[
-              { date: "Feb 25", method: "Bank Transfer", amount: "₱10,000", fee: "₱200", net: "₱9,800", status: "Paid" },
-              { date: "Feb 10", method: "GCash", amount: "₱5,000", fee: "₱100", net: "₱4,900", status: "Paid" },
-              { date: "Jan 28", method: "Bank Transfer", amount: "₱8,000", fee: "₱160", net: "₱7,840", status: "Paid" },
-              { date: "Jan 15", method: "GCash", amount: "₱3,620", fee: "₱72.40", net: "₱3,547.60", status: "Paid" },
-            ].map((w, i) => (
-              <div key={i} className="flex items-center justify-between p-2.5 rounded-lg border border-border/30 hover:bg-muted/20 transition-colors">
-                <div>
-                  <p className="font-medium text-xs">{w.method}</p>
-                  <p className="text-[10px] text-muted-foreground">{w.date} • Fee: {w.fee}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-xs">{w.net}</p>
-                  <Badge variant="default" className="text-[9px] px-1 py-0">{w.status}</Badge>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-
-    <Card className="border-accent/20">
-      <CardHeader className="px-5 pt-4 pb-2">
-        <CardTitle className="text-xs flex items-center gap-2">
-          <Coins className="h-3.5 w-3.5 text-accent" /> AGRI Token Wallet
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-5 pb-4">
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <div className="p-3 rounded-lg bg-accent/5 text-center">
-            <p className="text-xl font-bold text-accent">1,247.5</p>
-            <p className="text-[10px] text-muted-foreground">Token Balance</p>
-          </div>
-          <div className="p-3 rounded-lg bg-muted/30 text-center">
-            <p className="text-xl font-bold text-foreground">₱10.00</p>
-            <p className="text-[10px] text-muted-foreground">Current Market Price</p>
-          </div>
-        </div>
-        <div className="space-y-1.5">
-          {[
-            { date: "Feb 28", reason: "BV Activity Reward", php: "₱125", tokens: "12.5 AGRI" },
-            { date: "Feb 21", reason: "Consumer Onboarding", php: "₱50", tokens: "5.0 AGRI" },
-            { date: "Feb 14", reason: "Farmer Referral Reward", php: "₱200", tokens: "20.0 AGRI" },
-          ].map((t, i) => (
-            <div key={i} className="flex items-center justify-between text-[10px] p-2 rounded bg-muted/15">
-              <div>
-                <span className="text-muted-foreground">{t.date}</span>
-                <span className="ml-2 font-medium">{t.reason}</span>
-              </div>
-              <div className="text-right">
-                <span className="text-muted-foreground">{t.php} → </span>
-                <span className="font-bold text-accent">{t.tokens}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
+  );
+};
 
 // ─── Marketing Panel ───
 const MarketingPanel = () => (
