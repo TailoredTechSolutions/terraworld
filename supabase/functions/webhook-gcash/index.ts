@@ -39,7 +39,7 @@ serve(async (req) => {
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    if (signature && signature !== expectedSignature) {
+    if (!signature || signature !== expectedSignature) {
       console.error("GCash webhook signature mismatch");
       return new Response(JSON.stringify({ error: "Invalid signature" }), {
         status: 401,

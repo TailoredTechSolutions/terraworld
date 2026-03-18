@@ -127,7 +127,14 @@ Deno.serve(async (req) => {
     for (const item of orderData.items) {
       const dbProduct = productPrices[item.id];
       
-      const farmerPricePerUnit = dbProduct ? dbProduct.price : item.price;
+      if (!dbProduct) {
+        return new Response(
+          JSON.stringify({ error: `Product not found: ${item.id}` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      const farmerPricePerUnit = dbProduct.price;
       const terraFeePerUnit = farmerPricePerUnit * TERRA_FEE_RATE;
       const totalPricePerUnit = farmerPricePerUnit + terraFeePerUnit;
       
