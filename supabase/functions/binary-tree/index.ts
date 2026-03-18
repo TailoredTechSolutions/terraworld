@@ -186,6 +186,7 @@ Deno.serve(async (req) => {
         .or(`full_name.ilike.%${q}%,email.ilike.%${q}%,referral_code.ilike.%${q}%`)
         .limit(20);
 
+      logAudit("tree_search", "binary_tree", null, { query: q, results_count: (searchResults || []).length });
       return jsonResponse({ results: searchResults || [] });
     }
 
