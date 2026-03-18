@@ -61,6 +61,7 @@ interface CartStore {
 export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
   couponItems: [],
+  upgradeItem: null,
   isOpen: false,
   
   addItem: (product, quantity = 1) => {
