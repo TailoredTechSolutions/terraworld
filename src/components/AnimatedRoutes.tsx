@@ -82,8 +82,8 @@ const AnimatedRoutes = () => {
           <Route path="/farm/:farmId" element={<P><FarmDetailPage /></P>} />
           <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
           <Route path="/business-centre/auth" element={<P><BusinessCentreAuth /></P>} />
-          <Route path="/business-centre" element={<RoleProtectedRoute allowedRoles={['affiliate', 'admin']}><P><BusinessCentreLanding /></P></RoleProtectedRoute>} />
-          <Route path="/business-centre/dashboard" element={<RoleProtectedRoute allowedRoles={['affiliate', 'admin']}><P><BusinessCentreLanding /></P></RoleProtectedRoute>} />
+          <Route path="/business-centre" element={<RoleProtectedRoute allowedRoles={['affiliate', 'member', 'admin']}><P><BusinessCentreLanding /></P></RoleProtectedRoute>} />
+          <Route path="/business-centre/dashboard" element={<RoleProtectedRoute allowedRoles={['affiliate', 'member', 'admin']}><P><BusinessCentreLanding /></P></RoleProtectedRoute>} />
           <Route path="/checkout" element={<P><CheckoutPage /></P>} />
           <Route path="/order-confirmation" element={<P><OrderConfirmation /></P>} />
           <Route path="/auth" element={<P><AuthPage /></P>} />
