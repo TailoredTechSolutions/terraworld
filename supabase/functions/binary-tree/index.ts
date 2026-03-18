@@ -151,6 +151,17 @@ Deno.serve(async (req) => {
     // Service client for privileged queries
     const admin = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Helper: write audit log (fire-and-forget)
+    function logAudit(action: string, entityType: string, entityId: string | null, details: Record<string, unknown>) {
+      admin.from("audit_log").insert({
+        actor_id: callerId,
+        action,
+        entity_type: entityType,
+        entity_id: entityId,
+        details,
+      }).then(({ error }) => { if (error) console.error("audit_log error:", error); });
+    }
+
     // Role check (single query)
     const { data: roles } = await admin
       .from("user_roles")
@@ -175,6 +186,7 @@ Deno.serve(async (req) => {
         .or(`full_name.ilike.%${q}%,email.ilike.%${q}%,referral_code.ilike.%${q}%`)
         .limit(20);
 
+      logAudit("tree_search", "binary_tree", null, { query: q, results_count: (searchResults || []).length });
       return jsonResponse({ results: searchResults || [] });
     }
 
@@ -208,6 +220,12 @@ Deno.serve(async (req) => {
       }
 
       const tree = buildNestedTree((rows as FlatRow[]) || []);
+
+      // Audit: admin viewing another member's tree
+      if (isAnyAdmin && targetUserId !== callerId) {
+        logAudit("tree_view", "binary_tree", targetUserId, { action, depth, target_user_id: targetUserId });
+      }
+
       return jsonResponse({ tree });
     }
 
@@ -274,6 +292,11 @@ Deno.serve(async (req) => {
       const totalEarnings = (payoutsRes.data || []).reduce(
         (s: number, p: { net_amount: number }) => s + (p.net_amount || 0), 0
       );
+
+      // Audit: admin inspecting another member's detail
+      if (isAnyAdmin && targetUserId !== callerId) {
+        logAudit("tree_member_inspect", "binary_tree", targetUserId, { target_user_id: targetUserId });
+      }
 
       return jsonResponse({
         detail: {
