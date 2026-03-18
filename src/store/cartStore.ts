@@ -145,7 +145,11 @@ export const useCartStore = create<CartStore>((set, get) => ({
     return get().couponItems.reduce((sum, c) => sum + c.price, 0);
   },
 
+  getUpgradeSubtotal: () => {
+    return get().upgradeItem?.upgradeCost || 0;
+  },
+
   hasItems: () => {
-    return get().items.length > 0 || get().couponItems.length > 0;
+    return get().items.length > 0 || get().couponItems.length > 0 || get().upgradeItem !== null;
   },
 }));
