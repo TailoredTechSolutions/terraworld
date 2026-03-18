@@ -174,8 +174,8 @@ const BCLogistics = () => {
                       <TableCell className="text-xs capitalize">{d.vehicle}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={`text-[10px] ${
-                          d.status === "available" ? "text-emerald-600" :
-                          d.status === "busy" ? "text-blue-600" : "text-muted-foreground"
+                          d.status === "online" ? "text-emerald-600" :
+                          d.status === "delivering" ? "text-blue-600" : "text-muted-foreground"
                         }`}>
                           {d.status}
                         </Badge>
