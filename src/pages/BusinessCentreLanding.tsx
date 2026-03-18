@@ -74,129 +74,144 @@ const SectionHeader = ({ icon: Icon, title, id }: { icon: React.ElementType; tit
   </div>
 );
 
+// ─── Types for data-driven panels ───
+interface BusinessData {
+  walletData: { available_balance: number; pending_balance: number; total_withdrawn: number; internal_balance: number } | null;
+  membership: { tier: string; package_price: number; membership_bv: number } | null;
+  totalEarnings: number;
+  binaryStats: { left_bv: number; right_bv: number; matched_bv: number };
+  tokenBalance: number;
+  referralCode: string;
+  recentEarnings: Array<{ bonus_type: string; net_amount: number; payout_period: string; source_order_id: string | null }>;
+  isAnyAdmin: boolean;
+}
+
 // ─── Dashboard Panel ───
-const DashboardPanel = () => (
-  <div className="space-y-5">
-    <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
-      <CardContent className="p-5">
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-primary/20">
-            <Crown className="h-7 w-7 text-primary" />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-lg font-bold font-display text-foreground">Welcome back, Partner!</h2>
-            <p className="text-sm text-muted-foreground">Pro Package • Binary Active • <span className="text-primary font-medium">3 Matching Levels</span></p>
-          </div>
-          <Badge className="hidden sm:flex bg-emerald-500/10 text-emerald-600 border-emerald-500/30" variant="outline">
-            <CheckCircle2 className="h-3 w-3 mr-1" /> Qualified
-          </Badge>
-        </div>
-      </CardContent>
-    </Card>
+const DashboardPanel = ({ data }: { data: BusinessData }) => {
+  const tier = data.membership?.tier || "free";
+  const tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1);
+  const carryForward = Math.abs(data.binaryStats.left_bv - data.binaryStats.right_bv);
 
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      {[
-        { title: "Total Earnings", value: "₱48,325.50", change: "+₱6,240 this week", up: true, icon: DollarSign, accent: "text-emerald-600 bg-emerald-500/10" },
-        { title: "Active Downline", value: "142", change: "+12 this month", up: true, icon: Users, accent: "text-blue-600 bg-blue-500/10" },
-        { title: "Binary BV (L / R)", value: "24,500 / 21,800", change: "2,700 carry-forward", up: true, icon: GitBranch, accent: "text-purple-600 bg-purple-500/10" },
-        { title: "AGRI Tokens", value: "1,247.5", change: "≈ ₱12,475 value", up: true, icon: Coins, accent: "text-accent bg-accent/10" },
-      ].map((stat) => (
-        <Card key={stat.title} className="border-border/40">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className={cn("p-1.5 rounded-lg", stat.accent)}>
-                <stat.icon className="h-4 w-4" />
-              </div>
-              <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                {stat.up ? <ArrowUpRight className="h-3 w-3 text-emerald-500" /> : <ArrowDownRight className="h-3 w-3 text-destructive" />}
-                {stat.change}
-              </span>
+  return (
+    <div className="space-y-5">
+      <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
+        <CardContent className="p-5">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-primary/20">
+              <Crown className="h-7 w-7 text-primary" />
             </div>
-            <p className="text-xl font-bold font-display text-foreground leading-tight">{stat.value}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">{stat.title}</p>
-          </CardContent>
-        </Card>
-      ))}
+            <div className="flex-1">
+              <h2 className="text-lg font-bold font-display text-foreground">
+                {data.isAnyAdmin ? "System Overview" : "Welcome back, Partner!"}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {tierLabel} Package • Binary {data.binaryStats.matched_bv > 0 ? "Active" : "Inactive"}
+              </p>
+            </div>
+            <Badge className="hidden sm:flex bg-emerald-500/10 text-emerald-600 border-emerald-500/30" variant="outline">
+              <CheckCircle2 className="h-3 w-3 mr-1" /> {tier !== "free" ? "Qualified" : "Free Tier"}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { title: "Total Earnings", value: `₱${data.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, change: "All time", up: true, icon: DollarSign, accent: "text-emerald-600 bg-emerald-500/10" },
+          { title: "Binary BV (L / R)", value: `${data.binaryStats.left_bv.toLocaleString()} / ${data.binaryStats.right_bv.toLocaleString()}`, change: `${carryForward.toLocaleString()} carry-forward`, up: true, icon: GitBranch, accent: "text-purple-600 bg-purple-500/10" },
+          { title: "Wallet Balance", value: `₱${(data.walletData?.available_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, change: `₱${(data.walletData?.pending_balance || 0).toLocaleString()} pending`, up: true, icon: Wallet, accent: "text-blue-600 bg-blue-500/10" },
+          { title: "AGRI Tokens", value: data.tokenBalance.toLocaleString(), change: "Non-cash reward", up: true, icon: Coins, accent: "text-accent bg-accent/10" },
+        ].map((stat) => (
+          <Card key={stat.title} className="border-border/40">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className={cn("p-1.5 rounded-lg", stat.accent)}>
+                  <stat.icon className="h-4 w-4" />
+                </div>
+                <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                  {stat.up ? <ArrowUpRight className="h-3 w-3 text-emerald-500" /> : <ArrowDownRight className="h-3 w-3 text-destructive" />}
+                  {stat.change}
+                </span>
+              </div>
+              <p className="text-xl font-bold font-display text-foreground leading-tight">{stat.value}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{stat.title}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="border-border/40">
+        <CardHeader className="pb-2 px-5 pt-4">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Shield className="h-4 w-4 text-primary" /> Qualification Status
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-5 pb-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+            {[
+              { label: "Paid Member", met: tier !== "free", detail: tier !== "free" ? `${tierLabel} Package Active` : "No package" },
+              { label: "Left Leg BV", met: data.binaryStats.left_bv > 0, detail: `${data.binaryStats.left_bv.toLocaleString()} BV` },
+              { label: "Right Leg BV", met: data.binaryStats.right_bv > 0, detail: `${data.binaryStats.right_bv.toLocaleString()} BV` },
+              { label: "Matched BV", met: data.binaryStats.matched_bv > 0, detail: `${data.binaryStats.matched_bv.toLocaleString()} BV matched` },
+            ].map((q) => (
+              <div key={q.label} className={cn(
+                "flex items-center gap-2 p-2.5 rounded-lg border",
+                q.met ? "border-emerald-500/20 bg-emerald-500/5" : "border-destructive/20 bg-destructive/5"
+              )}>
+                {q.met ? <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" /> : <XCircle className="h-4 w-4 text-destructive shrink-0" />}
+                <div>
+                  <p className="text-xs font-medium leading-tight">{q.label}</p>
+                  <p className="text-[10px] text-muted-foreground">{q.detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-border/40">
+        <CardHeader className="px-5 pt-4 pb-2">
+          <CardTitle className="text-sm">Recent Earnings</CardTitle>
+        </CardHeader>
+        <CardContent className="px-5 pb-4">
+          {data.recentEarnings.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No earnings recorded yet. Start building your network!</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-2.5 px-2 text-muted-foreground font-medium text-xs">Period</th>
+                    <th className="text-left py-2.5 px-2 text-muted-foreground font-medium text-xs">Type</th>
+                    <th className="text-right py-2.5 px-2 text-muted-foreground font-medium text-xs">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.recentEarnings.slice(0, 10).map((row, i) => (
+                    <tr key={i} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
+                      <td className="py-2.5 px-2 text-muted-foreground text-xs">{row.payout_period}</td>
+                      <td className="py-2.5 px-2">
+                        <div className="flex items-center gap-2">
+                          <div className={cn("w-1.5 h-1.5 rounded-full",
+                            row.bonus_type === "direct_product" ? "bg-emerald-500" :
+                            row.bonus_type === "binary" ? "bg-blue-500" :
+                            row.bonus_type === "matching" ? "bg-purple-500" : "bg-amber-500"
+                          )} />
+                          <span className="text-xs font-medium">{row.bonus_type.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</span>
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-2 text-right font-semibold text-xs">₱{Number(row.net_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
-
-    <Card className="border-border/40">
-      <CardHeader className="pb-2 px-5 pt-4">
-        <CardTitle className="text-sm flex items-center gap-2">
-          <Shield className="h-4 w-4 text-primary" /> Qualification Status
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-5 pb-4">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-          {[
-            { label: "Paid Member", met: true, detail: "Pro Package Active" },
-            { label: "Left Leg Active", met: true, detail: "Alex Rivera (L1)" },
-            { label: "Right Leg Active", met: true, detail: "Maria Santos (L1)" },
-            { label: "Product BV Generated", met: true, detail: "3,200 BV this period" },
-          ].map((q) => (
-            <div key={q.label} className={cn(
-              "flex items-center gap-2 p-2.5 rounded-lg border",
-              q.met ? "border-emerald-500/20 bg-emerald-500/5" : "border-destructive/20 bg-destructive/5"
-            )}>
-              {q.met ? <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" /> : <XCircle className="h-4 w-4 text-destructive shrink-0" />}
-              <div>
-                <p className="text-xs font-medium leading-tight">{q.label}</p>
-                <p className="text-[10px] text-muted-foreground">{q.detail}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-
-    <Card className="border-border/40">
-      <CardHeader className="px-5 pt-4 pb-2">
-        <CardTitle className="text-sm">Recent Earnings</CardTitle>
-      </CardHeader>
-      <CardContent className="px-5 pb-4">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-2.5 px-2 text-muted-foreground font-medium text-xs">Date</th>
-                <th className="text-left py-2.5 px-2 text-muted-foreground font-medium text-xs">Type</th>
-                <th className="text-left py-2.5 px-2 text-muted-foreground font-medium text-xs hidden sm:table-cell">Source</th>
-                <th className="text-right py-2.5 px-2 text-muted-foreground font-medium text-xs">Amount</th>
-                <th className="text-right py-2.5 px-2 text-muted-foreground font-medium text-xs">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { date: "Mar 01", type: "Direct Product", source: "Order #TF-8842", amount: "₱660.00", status: "Paid", color: "bg-emerald-500" },
-                { date: "Mar 01", type: "Binary Pairing", source: "Matched 4,500 BV", amount: "₱450.00", status: "Paid", color: "bg-blue-500" },
-                { date: "Feb 28", type: "Matching Bonus", source: "L1 – Alex Rivera", amount: "₱45.00", status: "Paid", color: "bg-purple-500" },
-                { date: "Feb 28", type: "Direct Membership", source: "Emily Cruz (Basic)", amount: "₱80.00", status: "Paid", color: "bg-amber-500" },
-                { date: "Feb 27", type: "Direct Product", source: "Order #TF-8801", amount: "₱396.00", status: "Paid", color: "bg-emerald-500" },
-                { date: "Feb 27", type: "Binary Pairing", source: "Matched 3,200 BV", amount: "₱320.00", status: "Paid", color: "bg-blue-500" },
-                { date: "Feb 26", type: "Token Reward", source: "BV Activity Bonus", amount: "12.5 AGRI", status: "Issued", color: "bg-accent" },
-              ].map((row, i) => (
-                <tr key={i} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
-                  <td className="py-2.5 px-2 text-muted-foreground text-xs">{row.date}</td>
-                  <td className="py-2.5 px-2">
-                    <div className="flex items-center gap-2">
-                      <div className={cn("w-1.5 h-1.5 rounded-full", row.color)} />
-                      <span className="text-xs font-medium">{row.type}</span>
-                    </div>
-                  </td>
-                  <td className="py-2.5 px-2 text-muted-foreground text-xs hidden sm:table-cell">{row.source}</td>
-                  <td className="py-2.5 px-2 text-right font-semibold text-xs">{row.amount}</td>
-                  <td className="py-2.5 px-2 text-right">
-                    <Badge variant={row.status === "Paid" ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">{row.status}</Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
-
+  );
+};
 // ─── Network Panel ───
 const NetworkPanel = () => (
   <div className="space-y-5">
