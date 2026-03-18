@@ -23,9 +23,22 @@ export interface CouponCartItem {
   };
 }
 
+export interface UpgradeCartItem {
+  id: string;
+  targetTier: string;
+  targetPrice: number;
+  currentTier: string;
+  currentValue: number;
+  upgradeCost: number;
+  bvGenerated: number;
+  image: string;
+  benefits: string;
+}
+
 interface CartStore {
   items: CartItem[];
   couponItems: CouponCartItem[];
+  upgradeItem: UpgradeCartItem | null;
   isOpen: boolean;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (productId: string) => void;
@@ -33,6 +46,7 @@ interface CartStore {
   addCoupon: (coupon: CouponCartItem) => void;
   removeCoupon: (id: string) => void;
   updateCouponRecipient: (id: string, recipient: CouponCartItem['recipient'], details?: CouponCartItem['recipientDetails']) => void;
+  setUpgrade: (upgrade: UpgradeCartItem | null) => void;
   clearCart: () => void;
   toggleCart: () => void;
   setCartOpen: (open: boolean) => void;
@@ -40,6 +54,7 @@ interface CartStore {
   getTotalPrice: () => number;
   getProductSubtotal: () => number;
   getCouponSubtotal: () => number;
+  getUpgradeSubtotal: () => number;
   hasItems: () => boolean;
 }
 
