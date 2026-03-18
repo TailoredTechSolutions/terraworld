@@ -62,7 +62,7 @@ interface DeliveryEstimate {
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { items, couponItems, getTotalPrice, getProductSubtotal, getCouponSubtotal, clearCart, removeItem, removeCoupon, updateCouponRecipient, hasItems } = useCartStore();
+  const { items, couponItems, upgradeItem, getTotalPrice, getProductSubtotal, getCouponSubtotal, getUpgradeSubtotal, clearCart, removeItem, removeCoupon, updateCouponRecipient, setUpgrade, hasItems } = useCartStore();
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
