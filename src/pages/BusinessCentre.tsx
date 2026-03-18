@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import BinaryTreeExplorer from "@/components/member/BinaryTreeExplorer";
 
 
 // ─── Dashboard Panel ───
@@ -239,116 +240,9 @@ const NetworkPanel = () => (
   </div>
 );
 
-// ─── Binary Tree Panel ───
-const BinaryTreePanel = () => (
-  <div className="space-y-6">
-    {/* BV Summary */}
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      {[
-        { label: "Left Product BV", value: "16,200", color: "text-emerald-600 bg-emerald-500/5 border-emerald-500/20" },
-        { label: "Left Membership BV", value: "8,300", color: "text-emerald-700 bg-emerald-500/10 border-emerald-500/30" },
-        { label: "Right Product BV", value: "14,500", color: "text-blue-600 bg-blue-500/5 border-blue-500/20" },
-        { label: "Right Membership BV", value: "7,300", color: "text-blue-700 bg-blue-500/10 border-blue-500/30" },
-      ].map((s) => (
-        <Card key={s.label} className={cn("border", s.color)}>
-          <CardContent className="p-4 text-center">
-            <p className="text-xl font-bold font-display">{s.value}</p>
-            <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+// ─── Binary Tree Panel ── now uses the interactive explorer
 
-    <Card variant="glass">
-      <CardHeader>
-        <CardTitle className="text-lg">Binary Tree Structure</CardTitle>
-        <CardDescription>Your network's binary placement — Product & Membership BV tracked separately</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col items-center py-8">
-          {/* Root */}
-          <div className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm shadow-lg flex items-center gap-2">
-            <Crown className="h-4 w-4" /> You (Pro)
-          </div>
-          <div className="w-px h-8 bg-border" />
-          <div className="flex items-start gap-0">
-            {/* Left Branch */}
-            <div className="flex flex-col items-center">
-              <div className="w-24 h-px bg-border" />
-              <div className="w-px h-6 bg-border" />
-              <div className="px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-sm font-medium text-center">
-                <p>Alex Rivera</p>
-                <p className="text-xs text-muted-foreground">Pro • 4,200 BV</p>
-              </div>
-              <div className="w-px h-6 bg-border" />
-              <div className="flex gap-6">
-                <div className="flex flex-col items-center">
-                  <div className="w-px h-4 bg-border" />
-                  <div className="px-3 py-1.5 rounded-md bg-emerald-500/5 border border-emerald-500/20 text-xs text-center">
-                    <p className="font-medium">Daniel</p>
-                    <p className="text-muted-foreground">Basic</p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="w-px h-4 bg-border" />
-                  <div className="px-3 py-1.5 rounded-md bg-emerald-500/5 border border-emerald-500/20 text-xs text-center">
-                    <p className="font-medium">Jake</p>
-                    <p className="text-muted-foreground">Starter</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="w-12" />
-            {/* Right Branch */}
-            <div className="flex flex-col items-center">
-              <div className="w-24 h-px bg-border" />
-              <div className="w-px h-6 bg-border" />
-              <div className="px-4 py-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-sm font-medium text-center">
-                <p>Maria Santos</p>
-                <p className="text-xs text-muted-foreground">Elite • 8,750 BV</p>
-              </div>
-              <div className="w-px h-6 bg-border" />
-              <div className="flex gap-6">
-                <div className="flex flex-col items-center">
-                  <div className="w-px h-4 bg-border" />
-                  <div className="px-3 py-1.5 rounded-md bg-blue-500/5 border border-blue-500/20 text-xs text-center">
-                    <p className="font-medium">Emily</p>
-                    <p className="text-muted-foreground">Basic</p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="w-px h-4 bg-border" />
-                  <div className="px-3 py-1.5 rounded-md bg-blue-500/5 border border-blue-500/20 text-xs text-center">
-                    <p className="font-medium">Sophia</p>
-                    <p className="text-muted-foreground">Pro</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <Separator className="my-4" />
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="text-center p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
-            <p className="text-xs text-muted-foreground mb-1">Total Left BV</p>
-            <p className="text-xl font-bold text-emerald-600">24,500</p>
-            <p className="text-xs text-muted-foreground">Product: 16,200 • Membership: 8,300</p>
-          </div>
-          <div className="text-center p-4 rounded-lg bg-blue-500/5 border border-blue-500/20">
-            <p className="text-xs text-muted-foreground mb-1">Total Right BV</p>
-            <p className="text-xl font-bold text-blue-600">21,800</p>
-            <p className="text-xs text-muted-foreground">Product: 14,500 • Membership: 7,300</p>
-          </div>
-          <div className="text-center p-4 rounded-lg bg-accent/5 border border-accent/20">
-            <p className="text-xs text-muted-foreground mb-1">Carry Forward (Left)</p>
-            <p className="text-xl font-bold text-accent">2,700</p>
-            <p className="text-xs text-muted-foreground">Matched: 21,800 BV</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
+const BinaryTreePanel = () => <BinaryTreeExplorer />;
 
 // ─── Commissions Panel (Spec-Correct Rates) ───
 const CommissionsPanel = () => (
