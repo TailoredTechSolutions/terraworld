@@ -1258,7 +1258,7 @@ const BusinessCentreLanding = () => {
                 transition={{ duration: 0.5, ease: cubicSmooth }}
               >
                 <SectionHeader icon={CreditCard} title="Payout Oversight" id="admin-payouts" />
-                <div className="mt-4"><AdminPayoutOversightPanel /></div>
+                <div className="mt-4"><AdminPayoutOversightPanel pendingCount={adminPendingWithdrawals} pendingAmount={adminPendingAmount} /></div>
               </motion.section>
 
               <motion.section
