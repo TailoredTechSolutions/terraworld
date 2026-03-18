@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "./PageTransition";
 import ProtectedRoute from "./ProtectedRoute";
@@ -38,7 +38,7 @@ const OrderConfirmation = lazyRetry(() => import("@/pages/OrderConfirmation"));
 const DriverDashboard = lazyRetry(() => import("@/pages/DriverDashboard"));
 const AdminDashboard = lazyRetry(() => import("@/pages/AdminDashboard"));
 const AdminBackOffice = lazyRetry(() => import("@/pages/AdminBackOffice"));
-const MemberDashboard = lazyRetry(() => import("@/pages/MemberDashboard"));
+// MemberDashboard removed — consolidated into Business Centre
 const FarmerDashboard = lazyRetry(() => import("@/pages/FarmerDashboard"));
 const BuyerDashboard = lazyRetry(() => import("@/pages/BuyerDashboard"));
 const AuthPage = lazyRetry(() => import("@/pages/AuthPage"));
@@ -82,8 +82,8 @@ const AnimatedRoutes = () => {
           <Route path="/farm/:farmId" element={<P><FarmDetailPage /></P>} />
           <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
           <Route path="/business-centre/auth" element={<P><BusinessCentreAuth /></P>} />
-          <Route path="/business-centre" element={<RoleProtectedRoute allowedRoles={['affiliate', 'admin']}><P><BusinessCentreLanding /></P></RoleProtectedRoute>} />
-          <Route path="/business-centre/dashboard" element={<RoleProtectedRoute allowedRoles={['affiliate', 'admin']}><P><BusinessCentreLanding /></P></RoleProtectedRoute>} />
+          <Route path="/business-centre" element={<RoleProtectedRoute allowedRoles={['affiliate', 'member', 'admin']}><P><BusinessCentreLanding /></P></RoleProtectedRoute>} />
+          <Route path="/business-centre/dashboard" element={<RoleProtectedRoute allowedRoles={['affiliate', 'member', 'admin']}><P><BusinessCentreLanding /></P></RoleProtectedRoute>} />
           <Route path="/checkout" element={<P><CheckoutPage /></P>} />
           <Route path="/order-confirmation" element={<P><OrderConfirmation /></P>} />
           <Route path="/auth" element={<P><AuthPage /></P>} />
@@ -95,7 +95,8 @@ const AnimatedRoutes = () => {
           <Route path="/driver" element={<RoleProtectedRoute allowedRoles={['driver']}><P><DriverDashboard /></P></RoleProtectedRoute>} />
           <Route path="/admin" element={<RoleProtectedRoute allowedRoles={['admin']}><P><AdminBackOffice /></P></RoleProtectedRoute>} />
           <Route path="/admin/legacy" element={<RoleProtectedRoute allowedRoles={['admin']}><P><AdminDashboard /></P></RoleProtectedRoute>} />
-          <Route path="/member" element={<RoleProtectedRoute allowedRoles={['member']}><P><MemberDashboard /></P></RoleProtectedRoute>} />
+          {/* /member redirects to Business Centre */}
+          <Route path="/member" element={<Navigate to="/business-centre" replace />} />
           <Route path="/farmer" element={<RoleProtectedRoute allowedRoles={['farmer']}><P><FarmerDashboard /></P></RoleProtectedRoute>} />
 
           {/* Terra / Company */}
