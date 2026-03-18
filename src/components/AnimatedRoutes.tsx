@@ -44,6 +44,26 @@ const BCWallet = lazyRetry(() => import("@/pages/business-centre/BCWallet"));
 const BCTokenRewards = lazyRetry(() => import("@/pages/business-centre/BCTokenRewards"));
 const BCMarketing = lazyRetry(() => import("@/pages/business-centre/BCMarketing"));
 const BCSupport = lazyRetry(() => import("@/pages/business-centre/BCSupport"));
+const BCEarnings = lazyRetry(() => import("@/pages/business-centre/BCEarnings"));
+const BCWithdrawals = lazyRetry(() => import("@/pages/business-centre/BCWithdrawals"));
+const BCStatements = lazyRetry(() => import("@/pages/business-centre/BCStatements"));
+
+// Admin extended pages (named exports → wrapped default)
+const BCReports = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCReports })));
+const BCPackageManager = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCPackageManager })));
+const BCRankManager = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCRankManager })));
+const BCWalletControls = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCWalletControls })));
+const BCManualPlacement = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCManualPlacement })));
+const BCGlobalConfig = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCGlobalConfig })));
+
+// Existing admin pages (named exports)
+const BCMemberSearch = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCMemberSearch })));
+const BCCommissionRuns = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCCommissionRuns })));
+const BCPayoutOversight = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCPayoutOversight })));
+const BCCompliance = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCCompliance })));
+const BCSystemSettings = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCSystemSettings })));
+const BCSecurity = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCSecurity })));
+const BCAuditLogs = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCAuditLogs })));
 
 
 import { BusinessCentreProvider } from "@/contexts/BusinessCentreContext";
