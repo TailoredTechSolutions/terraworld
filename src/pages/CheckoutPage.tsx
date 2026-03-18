@@ -104,6 +104,7 @@ const CheckoutPage = () => {
 
   const productSubtotal = getProductSubtotal();
   const couponSubtotal = getCouponSubtotal();
+  const upgradeSubtotal = getUpgradeSubtotal();
   const platformFeePercent = 0.20;
   const commissionPercent = 0.10;
   const vatPercent = 0.12;
@@ -112,7 +113,7 @@ const CheckoutPage = () => {
   const subtotalBeforeVAT = productSubtotal + platformFee + commission;
   const vat = subtotalBeforeVAT * vatPercent;
   const deliveryFee = (hasProducts && deliveryEstimate?.estimated_fee) ? deliveryEstimate.estimated_fee : 0;
-  const total = subtotalBeforeVAT + vat + deliveryFee + couponSubtotal;
+  const total = subtotalBeforeVAT + vat + deliveryFee + couponSubtotal + upgradeSubtotal;
 
   const defaultPickupLat = 14.5547;
   const defaultPickupLng = 121.0244;
