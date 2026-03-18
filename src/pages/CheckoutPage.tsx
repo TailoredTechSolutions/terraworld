@@ -74,7 +74,8 @@ const CheckoutPage = () => {
 
   const hasProducts = items.length > 0;
   const hasCoupons = couponItems.length > 0;
-  const isCouponOnly = !hasProducts && hasCoupons;
+  const hasUpgrade = upgradeItem !== null;
+  const isDigitalOnly = !hasProducts && (hasCoupons || hasUpgrade);
 
   useEffect(() => {
     (async () => {
