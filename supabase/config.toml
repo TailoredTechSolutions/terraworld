@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.delivery-booking]
 verify_jwt = false
+
+[functions.binary-tree]
+verify_jwt = false
