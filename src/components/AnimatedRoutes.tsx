@@ -53,6 +53,11 @@ const BCStatements = lazyRetry(() => import("@/pages/business-centre/BCStatement
 const BCUsersRoles = lazyRetry(() => import("@/pages/business-centre/BCUsersRoles"));
 const BCMarketplace = lazyRetry(() => import("@/pages/business-centre/BCMarketplace"));
 const BCLogistics = lazyRetry(() => import("@/pages/business-centre/BCLogistics"));
+const BCFinancialManagement = lazyRetry(() => import("@/pages/business-centre/BCFinancialManagement"));
+const BCMLMSystem = lazyRetry(() => import("@/pages/business-centre/BCMLMSystem"));
+const BCTokenomics = lazyRetry(() => import("@/pages/business-centre/BCTokenomics"));
+const BCCustomerService = lazyRetry(() => import("@/pages/business-centre/BCCustomerService"));
+const BCComplianceAudit = lazyRetry(() => import("@/pages/business-centre/BCComplianceAudit"));
 
 // Admin extended pages
 const BCReports = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCReports })));
