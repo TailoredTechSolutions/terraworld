@@ -72,7 +72,7 @@ const BCLogistics = () => {
 
   const activeDeliveries = bookings.filter(b => ["pending", "confirmed", "in_transit"].includes(b.booking_status)).length;
   const completedDeliveries = bookings.filter(b => b.booking_status === "completed").length;
-  const onlineDrivers = drivers.filter(d => d.status === "available" || d.status === "busy").length;
+  const onlineDrivers = drivers.filter(d => d.status === "online" || d.status === "delivering").length;
 
   return (
     <div className="space-y-6">
