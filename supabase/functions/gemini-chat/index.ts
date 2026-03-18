@@ -44,9 +44,9 @@ Deno.serve(async (req) => {
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     
     if (!GEMINI_API_KEY) {
-      console.error('GEMINI_API_KEY is not configured');
+      console.error('[gemini-chat] GEMINI_API_KEY is not configured');
       return new Response(
-        JSON.stringify({ error: 'GEMINI_API_KEY is not configured' }),
+        JSON.stringify({ error: 'AI service is not configured. Please contact support.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
