@@ -911,7 +911,7 @@ const BusinessCentreLanding = () => {
     const uid = user.id;
 
     // Fetch wallet
-    supabase.from("wallets").select("available_balance, pending_balance, total_withdrawn")
+    supabase.from("wallets").select("available_balance, pending_balance, total_withdrawn, internal_balance")
       .eq("user_id", uid).maybeSingle().then(({ data }) => { if (data) setWalletData(data); });
 
     // Fetch membership
