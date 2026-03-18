@@ -107,69 +107,53 @@ const CONNECTOR_COLORS: Record<string, string> = {
 };
 
 // ── API helpers ──
-async function fetchTree(userId: string, depth: number): Promise<TreeNode | null> {
+function apiUrl(params: string): string {
   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-  const url = `https://${projectId}.supabase.co/functions/v1/binary-tree?action=root&userId=${userId}&depth=${depth}`;
+  return `https://${projectId}.supabase.co/functions/v1/binary-tree?${params}`;
+}
+
+async function apiHeaders(): Promise<Record<string, string>> {
   const session = await supabase.auth.getSession();
-  const token = session.data.session?.access_token;
-  const resp = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    },
-  });
+  return {
+    Authorization: `Bearer ${session.data.session?.access_token}`,
+    "Content-Type": "application/json",
+    apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+  };
+}
+
+async function fetchTree(userId: string, depth: number): Promise<TreeNode | null> {
+  const resp = await fetch(apiUrl(`action=root&userId=${userId}&depth=${depth}`), { headers: await apiHeaders() });
   if (!resp.ok) return null;
   const json = await resp.json();
   return json.tree || null;
 }
 
 async function fetchBranch(userId: string): Promise<TreeNode | null> {
-  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-  const url = `https://${projectId}.supabase.co/functions/v1/binary-tree?action=root&userId=${userId}&depth=2`;
-  const session = await supabase.auth.getSession();
-  const token = session.data.session?.access_token;
-  const resp = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    },
-  });
+  const resp = await fetch(apiUrl(`action=children&userId=${userId}&depth=2`), { headers: await apiHeaders() });
   if (!resp.ok) return null;
   const json = await resp.json();
   return json.tree || null;
 }
 
 async function fetchMemberDetail(userId: string): Promise<MemberDetail | null> {
-  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-  const url = `https://${projectId}.supabase.co/functions/v1/binary-tree?action=member-detail&userId=${userId}`;
-  const session = await supabase.auth.getSession();
-  const token = session.data.session?.access_token;
-  const resp = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    },
-  });
+  const resp = await fetch(apiUrl(`action=member-detail&userId=${userId}`), { headers: await apiHeaders() });
   if (!resp.ok) return null;
   const json = await resp.json();
   return json.detail || null;
 }
 
+async function fetchAncestryPath(userId: string): Promise<BreadcrumbItem[]> {
+  const resp = await fetch(apiUrl(`action=ancestry&userId=${userId}`), { headers: await apiHeaders() });
+  if (!resp.ok) return [];
+  const json = await resp.json();
+  return (json.path || []).map((p: { user_id: string; full_name: string }) => ({
+    userId: p.user_id,
+    name: p.full_name,
+  }));
+}
+
 async function searchMembers(query: string): Promise<SearchResult[]> {
-  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-  const url = `https://${projectId}.supabase.co/functions/v1/binary-tree?action=search&q=${encodeURIComponent(query)}`;
-  const session = await supabase.auth.getSession();
-  const token = session.data.session?.access_token;
-  const resp = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    },
-  });
+  const resp = await fetch(apiUrl(`action=search&q=${encodeURIComponent(query)}`), { headers: await apiHeaders() });
   if (!resp.ok) return [];
   const json = await resp.json();
   return json.results || [];
