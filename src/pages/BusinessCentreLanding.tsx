@@ -919,8 +919,14 @@ const BusinessCentreLanding = () => {
       .eq("user_id", uid).maybeSingle().then(({ data }) => { if (data) setMembership(data); });
 
     // Fetch total earnings
-    supabase.from("payout_ledger").select("net_amount").eq("user_id", uid)
-      .then(({ data }) => { if (data) setTotalEarnings(data.reduce((s, r) => s + Number(r.net_amount), 0)); });
+    supabase.from("payout_ledger").select("net_amount, bonus_type, payout_period, source_order_id").eq("user_id", uid)
+      .order("created_at", { ascending: false }).limit(20)
+      .then(({ data }) => {
+        if (data) {
+          setTotalEarnings(data.reduce((s, r) => s + Number(r.net_amount), 0));
+          setRecentEarnings(data as any);
+        }
+      });
 
     // Fetch BV stats
     supabase.from("bv_ledger").select("bv_amount, leg").eq("user_id", uid)
