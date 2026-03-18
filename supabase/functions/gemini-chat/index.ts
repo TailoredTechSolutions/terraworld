@@ -44,9 +44,9 @@ Deno.serve(async (req) => {
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     
     if (!GEMINI_API_KEY) {
-      console.error('GEMINI_API_KEY is not configured');
+      console.error('[gemini-chat] GEMINI_API_KEY is not configured');
       return new Response(
-        JSON.stringify({ error: 'GEMINI_API_KEY is not configured' }),
+        JSON.stringify({ error: 'AI service is not configured. Please contact support.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -95,8 +95,8 @@ Deno.serve(async (req) => {
       const errorText = await response.text();
       console.error('Gemini API error:', response.status, errorText);
       return new Response(
-        JSON.stringify({ error: `Gemini API error: ${response.status}`, details: errorText }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'AI service encountered an error. Please try again.' }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -113,9 +113,9 @@ Deno.serve(async (req) => {
       );
     }
   } catch (error) {
-    console.error('Edge function error:', error);
+    console.error('[gemini-chat] error:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ error: 'An internal error occurred. Please try again.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

@@ -79,8 +79,8 @@ Deno.serve(async (req) => {
 
       if (rpcError) {
         console.error("[wallet-ledger] RPC error:", rpcError);
-        return new Response(JSON.stringify({ error: rpcError.message }), {
-          status: rpcError.message.includes("not found") ? 404 : 500,
+        return new Response(JSON.stringify({ error: "Failed to process wallet entry. Please try again." }), {
+          status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
 
       if (rpcError) {
         console.error("[wallet-ledger] Reversal RPC error:", rpcError);
-        return new Response(JSON.stringify({ error: rpcError.message }), {
+        return new Response(JSON.stringify({ error: "Failed to process reversal. Please try again." }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -167,9 +167,9 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("[wallet-ledger] Error:", error);
+    console.error("[wallet-ledger] error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: "An internal error occurred. Please try again." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
