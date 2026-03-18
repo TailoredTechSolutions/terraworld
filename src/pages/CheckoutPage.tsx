@@ -134,8 +134,8 @@ const CheckoutPage = () => {
     e.preventDefault();
     setFormErrors({});
 
-    const schema = isCouponOnly ? couponOnlySchema : checkoutSchema;
-    const dataToValidate = isCouponOnly 
+    const schema = isDigitalOnly ? couponOnlySchema : checkoutSchema;
+    const dataToValidate = isDigitalOnly 
       ? { firstName: formData.firstName, lastName: formData.lastName, email: formData.email, phone: formData.phone }
       : formData;
 
