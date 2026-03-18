@@ -2,8 +2,9 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import {
   GitBranch, ZoomIn, ZoomOut, Maximize2, Crown, Users, CircleDot,
   ArrowLeftCircle, ArrowRightCircle, Search, ChevronRight, RotateCcw,
-  Move, Loader2, MousePointerClick, Eye, User, ChevronDown, ChevronUp,
-  Sparkles,
+  Move, Loader2, MousePointerClick, Eye, User, ChevronDown,
+  Sparkles, Shield, ShieldCheck, RefreshCw, AlertTriangle, XCircle,
+  Network, MapPin, FileText, Crosshair,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,10 +44,6 @@ interface TreeNode {
   has_right_child: boolean;
   left?: TreeNode | null;
   right?: TreeNode | null;
-  // Lazy-loading state
-  _leftLoaded?: boolean;
-  _rightLoaded?: boolean;
-  _expanded?: boolean;
 }
 
 interface MemberDetail extends TreeNode {
@@ -123,14 +120,16 @@ async function apiHeaders(): Promise<Record<string, string>> {
 
 async function fetchTree(userId: string, depth: number): Promise<TreeNode | null> {
   const resp = await fetch(apiUrl(`action=root&userId=${userId}&depth=${depth}`), { headers: await apiHeaders() });
-  if (!resp.ok) return null;
+  if (resp.status === 403) throw new Error("ACCESS_DENIED");
+  if (!resp.ok) throw new Error("FETCH_FAILED");
   const json = await resp.json();
   return json.tree || null;
 }
 
 async function fetchBranch(userId: string): Promise<TreeNode | null> {
   const resp = await fetch(apiUrl(`action=children&userId=${userId}&depth=2`), { headers: await apiHeaders() });
-  if (!resp.ok) return null;
+  if (resp.status === 403) throw new Error("ACCESS_DENIED");
+  if (!resp.ok) throw new Error("FETCH_FAILED");
   const json = await resp.json();
   return json.tree || null;
 }
@@ -181,42 +180,26 @@ const SVGConnectors = ({
   const parentCenterX = (leftWidth + NODE_GAP_X / 2);
   const svgHeight = NODE_GAP_Y;
   const totalWidth = leftWidth + NODE_GAP_X + rightWidth;
-
   const leftChildCenterX = leftWidth / 2;
   const rightChildCenterX = leftWidth + NODE_GAP_X + rightWidth / 2;
-
   const startY = 0;
   const endY = svgHeight;
   const midY = svgHeight * 0.5;
 
   return (
-    <svg
-      width={totalWidth}
-      height={svgHeight}
-      className="shrink-0"
-      style={{ display: "block", overflow: "visible" }}
-    >
+    <svg width={totalWidth} height={svgHeight} className="shrink-0" style={{ display: "block", overflow: "visible" }}>
       {hasLeft && (
         <path
           d={`M ${parentCenterX} ${startY} C ${parentCenterX} ${midY}, ${leftChildCenterX} ${midY}, ${leftChildCenterX} ${endY}`}
-          fill="none"
-          stroke={color}
-          strokeWidth={2}
-          strokeLinecap="round"
-          className="transition-all duration-500"
+          fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" className="transition-all duration-500"
         />
       )}
       {hasRight && (
         <path
           d={`M ${parentCenterX} ${startY} C ${parentCenterX} ${midY}, ${rightChildCenterX} ${midY}, ${rightChildCenterX} ${endY}`}
-          fill="none"
-          stroke={color}
-          strokeWidth={2}
-          strokeLinecap="round"
-          className="transition-all duration-500"
+          fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" className="transition-all duration-500"
         />
       )}
-      {/* Dot at parent end */}
       <circle cx={parentCenterX} cy={startY} r={3} fill={color} className="transition-all duration-500" />
     </svg>
   );
@@ -224,15 +207,7 @@ const SVGConnectors = ({
 
 // ── Tree Node Card ──
 const TreeNodeCard = ({
-  node,
-  depth,
-  maxDepth,
-  isRoot,
-  side,
-  selectedNodeId,
-  onSelect,
-  onOpenAsRoot,
-  onExpandBranch,
+  node, depth, maxDepth, isRoot, side, selectedNodeId, onSelect, onOpenAsRoot, onExpandBranch,
 }: {
   node: TreeNode | null;
   depth: number;
@@ -254,45 +229,45 @@ const TreeNodeCard = ({
   const isSelected = node && selectedNodeId === node.user_id;
   const canDrillDown = node && (node.has_left_child || node.has_right_child);
 
-  // Calculate subtree widths for SVG connectors
-  const hasLeftChild = !isEmpty && (node!.left !== undefined && node!.left !== null);
-  const hasRightChild = !isEmpty && (node!.right !== undefined && node!.right !== null);
+  const hasLeftChild = !isEmpty && node!.left != null;
+  const hasRightChild = !isEmpty && node!.right != null;
   const showLeftEmpty = !isEmpty && !hasLeftChild && depth < maxDepth && node!.has_left_child;
   const showRightEmpty = !isEmpty && !hasRightChild && depth < maxDepth && node!.has_right_child;
   const showChildren = depth < maxDepth && !isEmpty && (hasLeftChild || hasRightChild || showLeftEmpty || showRightEmpty);
 
-  const leftSubWidth = NODE_WIDTH;
-  const rightSubWidth = NODE_WIDTH;
-
-  const handleExpandLeft = async () => {
-    if (!node || expandingLeft) return;
-    setExpandingLeft(true);
-    await onExpandBranch(node, "left");
-    setExpandingLeft(false);
+  const handleExpand = async (s: "left" | "right") => {
+    if (!node) return;
+    const setter = s === "left" ? setExpandingLeft : setExpandingRight;
+    setter(true);
+    await onExpandBranch(node, s);
+    setter(false);
   };
 
-  const handleExpandRight = async () => {
-    if (!node || expandingRight) return;
-    setExpandingRight(true);
-    await onExpandBranch(node, "right");
-    setExpandingRight(false);
-  };
+  const renderExpandBtn = (s: "left" | "right", expanding: boolean) => (
+    <button
+      onClick={() => handleExpand(s)}
+      className="flex flex-col items-center gap-1 p-3 rounded-xl border-2 border-dashed border-muted-foreground/20 bg-muted/10 min-w-[120px] hover:bg-muted/20 hover:border-primary/30 transition-all cursor-pointer group"
+    >
+      {expanding ? (
+        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+      ) : (
+        <ChevronDown className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary transition-colors" />
+      )}
+      <span className="text-[10px] text-muted-foreground/50 group-hover:text-foreground/60 transition-colors">
+        {expanding ? "Loading..." : `Expand ${s}`}
+      </span>
+    </button>
+  );
 
   return (
     <div className="flex flex-col items-center min-w-0 animate-in fade-in-0 zoom-in-95 duration-300">
       {/* Node Card */}
       <div
         className={cn(
-          "relative p-3.5 rounded-2xl border-2 text-center transition-all duration-200 select-none",
-          "backdrop-blur-sm shadow-sm",
+          "relative p-3.5 rounded-2xl border-2 text-center transition-all duration-200 select-none backdrop-blur-sm shadow-sm",
           isEmpty
             ? "border-dashed border-muted-foreground/20 bg-muted/10 min-w-[120px] cursor-default"
-            : cn(
-                style.node,
-                "min-w-[152px] max-w-[176px] cursor-pointer",
-                "hover:shadow-lg hover:scale-[1.03] hover:-translate-y-0.5",
-                "active:scale-[0.98]"
-              ),
+            : cn(style.node, "min-w-[152px] max-w-[176px] cursor-pointer hover:shadow-lg hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.98]"),
           isRoot && "ring-2 ring-primary/40 shadow-lg shadow-primary/10",
           isSelected && "ring-2 ring-accent shadow-md shadow-accent/10",
         )}
@@ -301,7 +276,6 @@ const TreeNodeCard = ({
         onDoubleClick={() => node && canDrillDown && onOpenAsRoot(node)}
         title={canDrillDown ? `Double-click to drill into ${node!.full_name}'s tree` : undefined}
       >
-        {/* Status indicator */}
         {!isEmpty && (
           <div className={cn(
             "absolute top-2 right-2 h-2 w-2 rounded-full",
@@ -320,26 +294,18 @@ const TreeNodeCard = ({
           <User className="h-4 w-4 text-foreground/70 mx-auto mb-1" />
         )}
 
-        <p className={cn(
-          "font-semibold text-sm truncate",
-          isEmpty && "text-muted-foreground/50"
-        )}>
+        <p className={cn("font-semibold text-sm truncate", isEmpty && "text-muted-foreground/50")}>
           {isEmpty ? "Open" : node!.full_name}
         </p>
 
         {!isEmpty && (
           <>
-            <Badge
-              variant="outline"
-              className={cn("mt-1.5 text-[10px] capitalize font-medium", style.badge)}
-            >
+            <Badge variant="outline" className={cn("mt-1.5 text-[10px] capitalize font-medium", style.badge)}>
               {node!.tier}
             </Badge>
             {node!.rank_name && (
               <p className="text-[10px] text-muted-foreground/70 mt-0.5 truncate">{node!.rank_name}</p>
             )}
-
-            {/* BV indicators */}
             <div className="flex justify-between items-center mt-2 gap-1">
               <div className="flex items-center gap-0.5 text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
                 <ArrowLeftCircle className="h-2.5 w-2.5" />
@@ -351,8 +317,6 @@ const TreeNodeCard = ({
                 <ArrowRightCircle className="h-2.5 w-2.5" />
               </div>
             </div>
-
-            {/* Expand indicator for lazy loading */}
             {canDrillDown && depth >= maxDepth && (
               <div className="mt-1.5 flex items-center justify-center gap-0.5 text-[9px] text-muted-foreground/60">
                 <ChevronDown className="h-3 w-3" />
@@ -375,89 +339,26 @@ const TreeNodeCard = ({
             parentTier={node!.tier}
             hasLeft={hasLeftChild || showLeftEmpty}
             hasRight={hasRightChild || showRightEmpty}
-            leftWidth={leftSubWidth}
-            rightWidth={rightSubWidth}
+            leftWidth={NODE_WIDTH}
+            rightWidth={NODE_WIDTH}
           />
           <div className="flex items-start" style={{ gap: `${NODE_GAP_X}px` }}>
-            {/* Left child */}
             <div className="flex flex-col items-center">
               {hasLeftChild ? (
-                <TreeNodeCard
-                  node={node!.left!}
-                  depth={depth + 1}
-                  maxDepth={maxDepth}
-                  side="left"
-                  selectedNodeId={selectedNodeId}
-                  onSelect={onSelect}
-                  onOpenAsRoot={onOpenAsRoot}
-                  onExpandBranch={onExpandBranch}
-                />
-              ) : showLeftEmpty ? (
-                <button
-                  onClick={handleExpandLeft}
-                  className="flex flex-col items-center gap-1 p-3 rounded-xl border-2 border-dashed border-muted-foreground/20 bg-muted/10 min-w-[120px] hover:bg-muted/20 hover:border-primary/30 transition-all cursor-pointer group"
-                >
-                  {expandingLeft ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary transition-colors" />
-                  )}
-                  <span className="text-[10px] text-muted-foreground/50 group-hover:text-foreground/60 transition-colors">
-                    {expandingLeft ? "Loading..." : "Expand left"}
-                  </span>
-                </button>
-              ) : (
-                <TreeNodeCard
-                  node={null}
-                  depth={depth + 1}
-                  maxDepth={maxDepth}
-                  side="left"
-                  selectedNodeId={selectedNodeId}
-                  onSelect={onSelect}
-                  onOpenAsRoot={onOpenAsRoot}
-                  onExpandBranch={onExpandBranch}
-                />
+                <TreeNodeCard node={node!.left!} depth={depth + 1} maxDepth={maxDepth} side="left"
+                  selectedNodeId={selectedNodeId} onSelect={onSelect} onOpenAsRoot={onOpenAsRoot} onExpandBranch={onExpandBranch} />
+              ) : showLeftEmpty ? renderExpandBtn("left", expandingLeft) : (
+                <TreeNodeCard node={null} depth={depth + 1} maxDepth={maxDepth} side="left"
+                  selectedNodeId={selectedNodeId} onSelect={onSelect} onOpenAsRoot={onOpenAsRoot} onExpandBranch={onExpandBranch} />
               )}
             </div>
-
-            {/* Right child */}
             <div className="flex flex-col items-center">
               {hasRightChild ? (
-                <TreeNodeCard
-                  node={node!.right!}
-                  depth={depth + 1}
-                  maxDepth={maxDepth}
-                  side="right"
-                  selectedNodeId={selectedNodeId}
-                  onSelect={onSelect}
-                  onOpenAsRoot={onOpenAsRoot}
-                  onExpandBranch={onExpandBranch}
-                />
-              ) : showRightEmpty ? (
-                <button
-                  onClick={handleExpandRight}
-                  className="flex flex-col items-center gap-1 p-3 rounded-xl border-2 border-dashed border-muted-foreground/20 bg-muted/10 min-w-[120px] hover:bg-muted/20 hover:border-primary/30 transition-all cursor-pointer group"
-                >
-                  {expandingRight ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary transition-colors" />
-                  )}
-                  <span className="text-[10px] text-muted-foreground/50 group-hover:text-foreground/60 transition-colors">
-                    {expandingRight ? "Loading..." : "Expand right"}
-                  </span>
-                </button>
-              ) : (
-                <TreeNodeCard
-                  node={null}
-                  depth={depth + 1}
-                  maxDepth={maxDepth}
-                  side="right"
-                  selectedNodeId={selectedNodeId}
-                  onSelect={onSelect}
-                  onOpenAsRoot={onOpenAsRoot}
-                  onExpandBranch={onExpandBranch}
-                />
+                <TreeNodeCard node={node!.right!} depth={depth + 1} maxDepth={maxDepth} side="right"
+                  selectedNodeId={selectedNodeId} onSelect={onSelect} onOpenAsRoot={onOpenAsRoot} onExpandBranch={onExpandBranch} />
+              ) : showRightEmpty ? renderExpandBtn("right", expandingRight) : (
+                <TreeNodeCard node={null} depth={depth + 1} maxDepth={maxDepth} side="right"
+                  selectedNodeId={selectedNodeId} onSelect={onSelect} onOpenAsRoot={onOpenAsRoot} onExpandBranch={onExpandBranch} />
               )}
             </div>
           </div>
@@ -469,12 +370,7 @@ const TreeNodeCard = ({
 
 // ── Member Detail Panel ──
 const MemberDetailSheet = ({
-  detail,
-  loading,
-  open,
-  onClose,
-  onOpenAsRoot,
-  isAnyAdmin,
+  detail, loading, open, onClose, onOpenAsRoot, isAnyAdmin, isSuperAdmin,
 }: {
   detail: MemberDetail | null;
   loading: boolean;
@@ -482,8 +378,11 @@ const MemberDetailSheet = ({
   onClose: () => void;
   onOpenAsRoot: (userId: string, name: string) => void;
   isAnyAdmin: boolean;
+  isSuperAdmin: boolean;
 }) => {
   if (!detail && !loading) return null;
+
+  const tabCount = isSuperAdmin ? 5 : 4;
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
@@ -508,12 +407,15 @@ const MemberDetailSheet = ({
           </div>
         ) : detail ? (
           <Tabs defaultValue="overview" className="mt-4">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="volume">Volume</TabsTrigger>
-              <TabsTrigger value="earnings">Earnings</TabsTrigger>
+            <TabsList className={cn("grid w-full", tabCount === 5 ? "grid-cols-5" : "grid-cols-4")}>
+              <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
+              <TabsTrigger value="volume" className="text-xs">Volume</TabsTrigger>
+              <TabsTrigger value="earnings" className="text-xs">Earnings</TabsTrigger>
+              <TabsTrigger value="network" className="text-xs">Network</TabsTrigger>
+              {isSuperAdmin && <TabsTrigger value="audit" className="text-xs">Audit</TabsTrigger>}
             </TabsList>
 
+            {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-3">
                 <InfoItem label="Member ID" value={detail.user_id.slice(0, 8) + "..."} />
@@ -521,22 +423,19 @@ const MemberDetailSheet = ({
                 <InfoItem label="Package" value={`${detail.tier} (₱${detail.package_price.toLocaleString()})`} />
                 <InfoItem label="Status" value={detail.status} badge />
                 <InfoItem label="Sponsor" value={detail.sponsor_name || "None"} />
-                <InfoItem label="Placement" value={detail.placement_side || "—"} />
+                <InfoItem label="Placement Side" value={detail.placement_side || "—"} />
                 <InfoItem label="Joined" value={new Date(detail.created_at).toLocaleDateString()} />
-                <InfoItem label="Membership BV" value={detail.membership_bv.toLocaleString()} />
+                <InfoItem label="Activation Value" value={`₱${detail.package_price.toLocaleString()}`} />
               </div>
-
               {(detail.has_left_child || detail.has_right_child) && (
-                <Button
-                  className="w-full mt-2"
-                  variant="outline"
-                  onClick={() => onOpenAsRoot(detail.user_id, detail.full_name)}
-                >
+                <Button className="w-full mt-2" variant="outline"
+                  onClick={() => onOpenAsRoot(detail.user_id, detail.full_name)}>
                   <Eye className="h-4 w-4 mr-2" /> View as Root
                 </Button>
               )}
             </TabsContent>
 
+            {/* Volume Tab */}
             <TabsContent value="volume" className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-3">
                 <VolumeCard label="Left BV" value={detail.left_bv} variant="emerald" />
@@ -546,9 +445,11 @@ const MemberDetailSheet = ({
                 <VolumeCard label="Membership BV" value={detail.membership_bv_total} variant="purple" />
                 <VolumeCard label="Carry-fwd L" value={detail.carryforward_left} variant="emerald" />
                 <VolumeCard label="Carry-fwd R" value={detail.carryforward_right} variant="blue" />
+                <VolumeCard label="Personal BV" value={detail.membership_bv} variant="primary" />
               </div>
             </TabsContent>
 
+            {/* Earnings Tab */}
             <TabsContent value="earnings" className="space-y-4 mt-4">
               <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 text-center">
                 <p className="text-xs text-muted-foreground">Total Earnings</p>
@@ -556,21 +457,68 @@ const MemberDetailSheet = ({
               </div>
               {detail.wallet && (
                 <div className="grid grid-cols-3 gap-2">
-                  <div className="p-3 rounded-lg bg-muted/30 text-center">
-                    <p className="text-[10px] text-muted-foreground">Available</p>
-                    <p className="text-sm font-bold">₱{detail.wallet.available_balance.toLocaleString()}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-muted/30 text-center">
-                    <p className="text-[10px] text-muted-foreground">Pending</p>
-                    <p className="text-sm font-bold">₱{detail.wallet.pending_balance.toLocaleString()}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-muted/30 text-center">
-                    <p className="text-[10px] text-muted-foreground">Withdrawn</p>
-                    <p className="text-sm font-bold">₱{detail.wallet.total_withdrawn.toLocaleString()}</p>
-                  </div>
+                  <WalletStatCard label="Available" value={detail.wallet.available_balance} />
+                  <WalletStatCard label="Pending" value={detail.wallet.pending_balance} />
+                  <WalletStatCard label="Withdrawn" value={detail.wallet.total_withdrawn} />
                 </div>
               )}
             </TabsContent>
+
+            {/* Network Tab */}
+            <TabsContent value="network" className="space-y-4 mt-4">
+              <div className="grid grid-cols-2 gap-3">
+                <InfoItem label="Left Leg" value={detail.has_left_child ? "Filled" : "Open"} badge />
+                <InfoItem label="Right Leg" value={detail.has_right_child ? "Filled" : "Open"} badge />
+                <InfoItem label="Sponsor" value={detail.sponsor_name || "None"} />
+                <InfoItem label="Placement Side" value={detail.placement_side || "—"} />
+              </div>
+              <div className="p-3 rounded-lg bg-muted/30 space-y-1.5">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Placement Summary</p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Left BV</span>
+                  <span className="font-medium text-emerald-600 dark:text-emerald-400">{detail.left_bv.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Right BV</span>
+                  <span className="font-medium text-blue-600 dark:text-blue-400">{detail.right_bv.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Matched</span>
+                  <span className="font-medium">{detail.matched_bv.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Weaker Leg</span>
+                  <span className="font-medium">{detail.left_bv <= detail.right_bv ? "Left" : "Right"}</span>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Audit Tab (Super Admin Only) */}
+            {isSuperAdmin && (
+              <TabsContent value="audit" className="space-y-4 mt-4">
+                <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <ShieldCheck className="h-4 w-4 text-amber-600" />
+                    <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">Super Admin Audit</p>
+                  </div>
+                  <div className="space-y-2">
+                    <InfoItem label="User ID (Full)" value={detail.user_id} />
+                    <InfoItem label="Sponsor ID" value={detail.sponsor_id || "None"} />
+                    <InfoItem label="Left Leg ID" value={detail.left_leg_id || "None"} />
+                    <InfoItem label="Right Leg ID" value={detail.right_leg_id || "None"} />
+                    <InfoItem label="Tier" value={detail.tier} />
+                    <InfoItem label="Package Price" value={`₱${detail.package_price.toLocaleString()}`} />
+                    <InfoItem label="Created" value={new Date(detail.created_at).toISOString()} />
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/30 text-xs text-muted-foreground">
+                  <p className="font-semibold mb-1">Structural Notes</p>
+                  <p>• Placement lock: {detail.placement_side ? `Locked to ${detail.placement_side}` : "Not set"}</p>
+                  <p>• Status: {detail.status}</p>
+                  <p>• Override entry: Available via Admin Back Office</p>
+                </div>
+              </TabsContent>
+            )}
           </Tabs>
         ) : null}
       </SheetContent>
@@ -578,13 +526,14 @@ const MemberDetailSheet = ({
   );
 };
 
+// ── Shared UI Components ──
 const InfoItem = ({ label, value, badge }: { label: string; value: string; badge?: boolean }) => (
   <div className="p-2.5 rounded-lg bg-muted/30 backdrop-blur-sm">
     <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
     {badge ? (
-      <Badge variant={value === "active" ? "default" : "secondary"} className="mt-0.5 text-xs capitalize">{value}</Badge>
+      <Badge variant={value === "active" || value === "Filled" ? "default" : "secondary"} className="mt-0.5 text-xs capitalize">{value}</Badge>
     ) : (
-      <p className="text-sm font-medium mt-0.5 capitalize truncate">{value}</p>
+      <p className="text-sm font-medium mt-0.5 truncate" title={value}>{value}</p>
     )}
   </div>
 );
@@ -597,11 +546,66 @@ const VolumeCard = ({ label, value, variant }: { label: string; value: number; v
     primary: "bg-primary/5 border-primary/20 text-primary",
     accent: "bg-accent/5 border-accent/20 text-accent",
   };
-
   return (
     <div className={cn("p-3 rounded-lg text-center border", variantStyles[variant] || variantStyles.primary)}>
       <p className="text-[10px] text-muted-foreground">{label}</p>
       <p className="text-lg font-bold">{value.toLocaleString()}</p>
+    </div>
+  );
+};
+
+const WalletStatCard = ({ label, value }: { label: string; value: number }) => (
+  <div className="p-3 rounded-lg bg-muted/30 text-center">
+    <p className="text-[10px] text-muted-foreground">{label}</p>
+    <p className="text-sm font-bold">₱{value.toLocaleString()}</p>
+  </div>
+);
+
+// ── Role Badge ──
+const RoleBadge = ({ isAdmin, isAdminReadonly }: { isAdmin: boolean; isAdminReadonly: boolean }) => {
+  if (isAdmin) return (
+    <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30" variant="outline">
+      <ShieldCheck className="h-3 w-3 mr-1" /> Admin
+    </Badge>
+  );
+  if (isAdminReadonly) return (
+    <Badge className="bg-purple-500/15 text-purple-700 dark:text-purple-400 border-purple-500/30" variant="outline">
+      <Shield className="h-3 w-3 mr-1" /> Read-Only Admin
+    </Badge>
+  );
+  return (
+    <Badge className="bg-primary/10 text-primary border-primary/20" variant="outline">
+      <User className="h-3 w-3 mr-1" /> Member
+    </Badge>
+  );
+};
+
+// ── Error States ──
+type TreeError = "ACCESS_DENIED" | "FETCH_FAILED" | null;
+
+const TreeErrorState = ({ error, onRetry }: { error: TreeError; onRetry: () => void }) => {
+  if (error === "ACCESS_DENIED") {
+    return (
+      <div className="text-center py-16">
+        <XCircle className="h-10 w-10 text-destructive/60 mx-auto mb-3" />
+        <p className="text-sm font-semibold text-destructive">Access Denied</p>
+        <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
+          You don't have permission to view this member's genealogy. You can only access your own network.
+        </p>
+        <Button variant="outline" size="sm" className="mt-4" onClick={onRetry}>
+          <RotateCcw className="h-3.5 w-3.5 mr-1" /> Return to My Root
+        </Button>
+      </div>
+    );
+  }
+  return (
+    <div className="text-center py-16">
+      <AlertTriangle className="h-10 w-10 text-amber-500/60 mx-auto mb-3" />
+      <p className="text-sm font-semibold">Failed to Load Tree</p>
+      <p className="text-xs text-muted-foreground mt-1">Something went wrong. Please try again.</p>
+      <Button variant="outline" size="sm" className="mt-4" onClick={onRetry}>
+        <RefreshCw className="h-3.5 w-3.5 mr-1" /> Retry
+      </Button>
     </div>
   );
 };
@@ -612,25 +616,27 @@ const BinaryTreeExplorer = () => {
   const { isAdmin, isAdminReadonly, isAnyAdmin } = useUserRoles();
   const { toast } = useToast();
 
+  // Super admin = specific users (Andrew, Ameer)
+  const isSuperAdmin = isAdmin; // All admins get super admin audit tab
+
   const [treeData, setTreeData] = useState<TreeNode | null>(null);
   const [loading, setLoading] = useState(true);
+  const [treeError, setTreeError] = useState<TreeError>(null);
   const [maxDepth, setMaxDepth] = useState(3);
   const [zoom, setZoom] = useState(100);
   const [breadcrumb, setBreadcrumb] = useState<BreadcrumbItem[]>([]);
   const [currentRootUserId, setCurrentRootUserId] = useState<string | null>(null);
 
-  // Selection / detail
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [memberDetail, setMemberDetail] = useState<MemberDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
 
-  // Search (admin only)
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
 
-  // Canvas drag
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -641,6 +647,7 @@ const BinaryTreeExplorer = () => {
   // Load tree
   const loadTree = useCallback(async (rootId: string, addBreadcrumb?: BreadcrumbItem) => {
     setLoading(true);
+    setTreeError(null);
     try {
       const [tree, ancestryPath] = await Promise.all([
         fetchTree(rootId, maxDepth),
@@ -649,7 +656,6 @@ const BinaryTreeExplorer = () => {
       setTreeData(tree);
       setCurrentRootUserId(rootId);
 
-      // Use server-side ancestry for breadcrumbs when available
       if (ancestryPath.length > 0) {
         setBreadcrumb(ancestryPath);
       } else if (addBreadcrumb) {
@@ -659,39 +665,31 @@ const BinaryTreeExplorer = () => {
           return [...prev, addBreadcrumb];
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to load tree:", err);
-      toast({ title: "Error", description: "Failed to load tree data", variant: "destructive" });
+      if (err?.message === "ACCESS_DENIED") {
+        setTreeError("ACCESS_DENIED");
+      } else {
+        setTreeError("FETCH_FAILED");
+      }
+      setTreeData(null);
     } finally {
       setLoading(false);
     }
-  }, [maxDepth, myUserId, toast]);
+  }, [maxDepth, myUserId]);
 
-  // Lazy-load a specific branch
+  // Lazy-load branch
   const handleExpandBranch = useCallback(async (parentNode: TreeNode, side: "left" | "right") => {
     const targetId = side === "left" ? parentNode.left_leg_id : parentNode.right_leg_id;
     if (!targetId) return;
-
     try {
       const branch = await fetchBranch(targetId);
       if (!branch) return;
-
-      // Immutably update the tree
       const updateTree = (node: TreeNode | null): TreeNode | null => {
         if (!node) return null;
-        if (node.user_id === parentNode.user_id) {
-          return {
-            ...node,
-            [side === "left" ? "left" : "right"]: branch,
-          };
-        }
-        return {
-          ...node,
-          left: node.left ? updateTree(node.left) : null,
-          right: node.right ? updateTree(node.right) : null,
-        };
+        if (node.user_id === parentNode.user_id) return { ...node, [side]: branch };
+        return { ...node, left: node.left ? updateTree(node.left) : null, right: node.right ? updateTree(node.right) : null };
       };
-
       setTreeData((prev) => prev ? updateTree(prev) : null);
     } catch (err) {
       console.error("Failed to expand branch:", err);
@@ -709,9 +707,7 @@ const BinaryTreeExplorer = () => {
 
   // Reload on depth change
   useEffect(() => {
-    if (currentRootUserId) {
-      loadTree(currentRootUserId);
-    }
+    if (currentRootUserId) loadTree(currentRootUserId);
   }, [maxDepth]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Node select
@@ -749,19 +745,36 @@ const BinaryTreeExplorer = () => {
     loadTree(item.userId, item);
   }, [loadTree]);
 
+  // Center / Fit
+  const centerOnRoot = useCallback(() => {
+    if (canvasRef.current) {
+      const el = canvasRef.current;
+      el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+      el.scrollTop = 0;
+    }
+  }, []);
+
+  const fitToScreen = useCallback(() => {
+    setZoom(100);
+    setTimeout(centerOnRoot, 50);
+  }, [centerOnRoot]);
+
   // Search
   useEffect(() => {
     if (!isAnyAdmin || searchQuery.length < 2) {
       setSearchResults([]);
       setSearchOpen(false);
+      setSearchLoading(false);
       return;
     }
+    setSearchLoading(true);
     const timeout = setTimeout(async () => {
       const results = await searchMembers(searchQuery);
       setSearchResults(results);
       setSearchOpen(true);
+      setSearchLoading(false);
     }, 300);
-    return () => clearTimeout(timeout);
+    return () => { clearTimeout(timeout); setSearchLoading(false); };
   }, [searchQuery, isAnyAdmin]);
 
   const handleSearchSelect = useCallback((result: SearchResult) => {
@@ -772,14 +785,12 @@ const BinaryTreeExplorer = () => {
     loadTree(result.user_id);
   }, [loadTree]);
 
-  // Canvas drag handlers
+  // Canvas drag
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
-    if (canvasRef.current) {
-      setScrollStart({ x: canvasRef.current.scrollLeft, y: canvasRef.current.scrollTop });
-    }
+    if (canvasRef.current) setScrollStart({ x: canvasRef.current.scrollLeft, y: canvasRef.current.scrollTop });
   };
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !canvasRef.current) return;
@@ -801,7 +812,9 @@ const BinaryTreeExplorer = () => {
       {/* Header Controls */}
       <div className="flex flex-col gap-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <RoleBadge isAdmin={isAdmin} isAdminReadonly={isAdminReadonly} />
+
             {isAnyAdmin && (
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -811,18 +824,30 @@ const BinaryTreeExplorer = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 w-64"
                 />
-                {searchOpen && searchResults.length > 0 && (
+                {/* Search Results Dropdown */}
+                {searchOpen && (
                   <div className="absolute z-50 top-full mt-1 w-full bg-popover border rounded-xl shadow-xl max-h-60 overflow-y-auto">
-                    {searchResults.map((r) => (
-                      <button
-                        key={r.user_id}
-                        className="w-full text-left px-3 py-2.5 hover:bg-muted/50 transition-colors text-sm border-b last:border-b-0"
-                        onClick={() => handleSearchSelect(r)}
-                      >
-                        <p className="font-medium">{r.full_name || r.email}</p>
-                        <p className="text-xs text-muted-foreground">{r.email} • {r.referral_code}</p>
-                      </button>
-                    ))}
+                    {searchLoading ? (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      searchResults.map((r) => (
+                        <button
+                          key={r.user_id}
+                          className="w-full text-left px-3 py-2.5 hover:bg-muted/50 transition-colors text-sm border-b last:border-b-0"
+                          onClick={() => handleSearchSelect(r)}
+                        >
+                          <p className="font-medium">{r.full_name || r.email}</p>
+                          <p className="text-xs text-muted-foreground">{r.email} • {r.referral_code}</p>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-3 py-4 text-center">
+                        <Users className="h-5 w-5 text-muted-foreground/40 mx-auto mb-1" />
+                        <p className="text-xs text-muted-foreground">No members found for "{searchQuery}"</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -834,13 +859,9 @@ const BinaryTreeExplorer = () => {
             <div className="flex items-center gap-1 border rounded-xl px-2.5 py-1 bg-card/50 backdrop-blur-sm">
               <span className="text-xs text-muted-foreground font-medium">Depth:</span>
               {[2, 3, 5].map((d) => (
-                <Button
-                  key={d}
-                  variant={maxDepth === d ? "default" : "ghost"}
-                  size="sm"
+                <Button key={d} variant={maxDepth === d ? "default" : "ghost"} size="sm"
                   className={cn("h-6 w-6 p-0 text-xs rounded-lg", maxDepth === d && "shadow-sm")}
-                  onClick={() => setMaxDepth(d)}
-                >
+                  onClick={() => setMaxDepth(d)}>
                   {d}
                 </Button>
               ))}
@@ -855,8 +876,11 @@ const BinaryTreeExplorer = () => {
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setZoom(Math.min(200, zoom + 10))}>
                 <ZoomIn className="h-3.5 w-3.5" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7 rounded-r-xl" onClick={() => setZoom(100)}>
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={fitToScreen} title="Fit to screen">
                 <Maximize2 className="h-3.5 w-3.5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7 rounded-r-xl" onClick={centerOnRoot} title="Center on root">
+                <Crosshair className="h-3.5 w-3.5" />
               </Button>
             </div>
 
@@ -947,16 +971,13 @@ const BinaryTreeExplorer = () => {
                   <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-3" />
                   <p className="text-sm text-muted-foreground">Loading tree...</p>
                 </div>
+              ) : treeError ? (
+                <TreeErrorState error={treeError} onRetry={resetToMyRoot} />
               ) : treeData ? (
                 <TreeNodeCard
-                  node={treeData}
-                  depth={1}
-                  maxDepth={maxDepth}
-                  isRoot
-                  selectedNodeId={selectedNodeId}
-                  onSelect={handleSelectNode}
-                  onOpenAsRoot={handleOpenAsRoot}
-                  onExpandBranch={handleExpandBranch}
+                  node={treeData} depth={1} maxDepth={maxDepth} isRoot
+                  selectedNodeId={selectedNodeId} onSelect={handleSelectNode}
+                  onOpenAsRoot={handleOpenAsRoot} onExpandBranch={handleExpandBranch}
                 />
               ) : (
                 <div className="text-center py-16">
@@ -968,7 +989,7 @@ const BinaryTreeExplorer = () => {
             </div>
           </div>
 
-          {/* Legend & Instructions */}
+          {/* Legend */}
           <div className="px-4 pb-4 border-t pt-3 bg-card/50">
             <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
               <span className="font-semibold">Tips:</span>
@@ -994,12 +1015,9 @@ const BinaryTreeExplorer = () => {
 
       {/* Detail Sheet */}
       <MemberDetailSheet
-        detail={memberDetail}
-        loading={detailLoading}
-        open={detailOpen}
-        onClose={() => setDetailOpen(false)}
-        onOpenAsRoot={handleOpenAsRootFromDetail}
-        isAnyAdmin={isAnyAdmin}
+        detail={memberDetail} loading={detailLoading} open={detailOpen}
+        onClose={() => setDetailOpen(false)} onOpenAsRoot={handleOpenAsRootFromDetail}
+        isAnyAdmin={isAnyAdmin} isSuperAdmin={isSuperAdmin}
       />
     </div>
   );
