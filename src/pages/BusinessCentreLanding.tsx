@@ -803,7 +803,7 @@ const AdminCommissionRunsPanel = () => (
   </Card>
 );
 
-const AdminPayoutOversightPanel = () => (
+const AdminPayoutOversightPanel = ({ pendingCount, pendingAmount }: { pendingCount: number; pendingAmount: number }) => (
   <Card className="border-border/40">
     <CardHeader className="px-5 pt-4 pb-2">
       <CardTitle className="text-sm flex items-center gap-2"><CreditCard className="h-4 w-4 text-primary" /> Payout Oversight</CardTitle>
@@ -811,9 +811,9 @@ const AdminPayoutOversightPanel = () => (
     <CardContent className="px-5 pb-4 space-y-3">
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Pending Withdrawals", value: "18" },
-          { label: "Total Pending Amount", value: "₱127,840" },
-          { label: "Avg Processing Time", value: "1.2 days" },
+          { label: "Pending Withdrawals", value: pendingCount.toString() },
+          { label: "Total Pending Amount", value: `₱${pendingAmount.toLocaleString()}` },
+          { label: "Status", value: pendingCount > 0 ? "Action Needed" : "All Clear" },
         ].map((s) => (
           <div key={s.label} className="text-center p-3 rounded-xl border border-border/40 bg-card">
             <p className="text-sm font-bold font-display text-foreground">{s.value}</p>
