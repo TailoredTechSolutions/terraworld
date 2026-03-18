@@ -1,28 +1,39 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 import {
   Users, Search, Loader2, Shield, UserPlus, Eye, Crown,
-  Tractor, ShoppingCart, Truck, Star, UserCheck
+  Tractor, ShoppingCart, Truck, Star, UserCheck, Pencil, Trash2, Plus
 } from "lucide-react";
 
+const ALL_ROLES = ["admin", "admin_readonly", "farmer", "buyer", "business_buyer", "driver", "member", "affiliate"] as const;
+
 const BCUsersRoles = () => {
-  const { isAdmin, isAnyAdmin, isAdminReadonly } = useUserRoles();
+  const { isAdmin, isAnyAdmin } = useUserRoles();
   const { hasPermission } = usePermissions();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [addRoleDialog, setAddRoleDialog] = useState<{ userId: string; name: string } | null>(null);
+  const [selectedNewRole, setSelectedNewRole] = useState<string>("");
+  const [deleteConfirm, setDeleteConfirm] = useState<{ userId: string; role: string; name: string } | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const canManage = isAdmin || hasPermission("manage_roles");
 
-  // Fetch all profiles with roles
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["bc-users", roleFilter],
     queryFn: async () => {
@@ -58,7 +69,6 @@ const BCUsersRoles = () => {
     enabled: isAnyAdmin,
   });
 
-  // Role counts
   const { data: roleCounts = {} } = useQuery({
     queryKey: ["bc-role-counts"],
     queryFn: async () => {
@@ -80,13 +90,66 @@ const BCUsersRoles = () => {
 
   const roleIcon = (role: string) => {
     switch (role) {
-      case "admin": return <Crown className="h-3 w-3" />;
-      case "admin_readonly": return <Eye className="h-3 w-3" />;
-      case "farmer": return <Tractor className="h-3 w-3" />;
-      case "buyer": return <ShoppingCart className="h-3 w-3" />;
-      case "driver": return <Truck className="h-3 w-3" />;
-      case "member": case "affiliate": return <Star className="h-3 w-3" />;
-      default: return <Users className="h-3 w-3" />;
+      case "admin": return <Crown className="h-3.5 w-3.5" />;
+      case "admin_readonly": return <Eye className="h-3.5 w-3.5" />;
+      case "farmer": return <Tractor className="h-3.5 w-3.5" />;
+      case "buyer": case "business_buyer": return <ShoppingCart className="h-3.5 w-3.5" />;
+      case "driver": return <Truck className="h-3.5 w-3.5" />;
+      case "member": case "affiliate": return <Star className="h-3.5 w-3.5" />;
+      default: return <Users className="h-3.5 w-3.5" />;
+    }
+  };
+
+  const roleColor = (role: string) => {
+    switch (role) {
+      case "admin": return "border-amber-500/40 text-amber-600 bg-amber-500/5";
+      case "admin_readonly": return "border-purple-500/40 text-purple-600 bg-purple-500/5";
+      case "farmer": return "border-emerald-500/40 text-emerald-600 bg-emerald-500/5";
+      case "buyer": case "business_buyer": return "border-blue-500/40 text-blue-600 bg-blue-500/5";
+      case "driver": return "border-orange-500/40 text-orange-600 bg-orange-500/5";
+      case "member": case "affiliate": return "border-primary/40 text-primary bg-primary/5";
+      default: return "";
+    }
+  };
+
+  const handleAddRole = async () => {
+    if (!addRoleDialog || !selectedNewRole) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("user_roles").insert({
+        user_id: addRoleDialog.userId,
+        role: selectedNewRole as any,
+      });
+      if (error) throw error;
+      toast({ title: "Role Added", description: `Added ${selectedNewRole} role to ${addRoleDialog.name}` });
+      queryClient.invalidateQueries({ queryKey: ["bc-users"] });
+      queryClient.invalidateQueries({ queryKey: ["bc-role-counts"] });
+      setAddRoleDialog(null);
+      setSelectedNewRole("");
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to add role", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteRole = async () => {
+    if (!deleteConfirm) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("user_roles")
+        .delete()
+        .eq("user_id", deleteConfirm.userId)
+        .eq("role", deleteConfirm.role as any);
+      if (error) throw error;
+      toast({ title: "Role Removed", description: `Removed ${deleteConfirm.role} from ${deleteConfirm.name}` });
+      queryClient.invalidateQueries({ queryKey: ["bc-users"] });
+      queryClient.invalidateQueries({ queryKey: ["bc-role-counts"] });
+      setDeleteConfirm(null);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to remove role", variant: "destructive" });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -113,26 +176,27 @@ const BCUsersRoles = () => {
       </div>
 
       {/* Role Summary Cards */}
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
         {[
-          { role: "all", label: "All Users", count: Object.values(roleCounts).reduce((a, b) => a + b, 0) },
-          { role: "admin", label: "Admins", count: (roleCounts["admin"] || 0) + (roleCounts["admin_readonly"] || 0) },
-          { role: "farmer", label: "Farmers", count: roleCounts["farmer"] || 0 },
-          { role: "buyer", label: "Buyers", count: roleCounts["buyer"] || 0 },
-          { role: "driver", label: "Drivers", count: roleCounts["driver"] || 0 },
-          { role: "affiliate", label: "Affiliates", count: (roleCounts["affiliate"] || 0) + (roleCounts["member"] || 0) },
+          { role: "all", label: "All Users", count: Object.values(roleCounts).reduce((a: number, b: number) => a + b, 0), icon: Users },
+          { role: "admin", label: "Admins", count: (roleCounts["admin"] || 0) + (roleCounts["admin_readonly"] || 0), icon: Crown },
+          { role: "farmer", label: "Farmers", count: roleCounts["farmer"] || 0, icon: Tractor },
+          { role: "buyer", label: "Buyers", count: roleCounts["buyer"] || 0, icon: ShoppingCart },
+          { role: "driver", label: "Drivers", count: roleCounts["driver"] || 0, icon: Truck },
+          { role: "affiliate", label: "Affiliates", count: (roleCounts["affiliate"] || 0) + (roleCounts["member"] || 0), icon: Star },
         ].map(r => (
           <button
             key={r.role}
             onClick={() => setRoleFilter(r.role)}
-            className={`p-3 rounded-xl border text-center transition-all ${
+            className={`p-4 rounded-xl border text-center transition-all ${
               roleFilter === r.role
-                ? "border-primary bg-primary/10 text-primary"
+                ? "border-primary bg-primary/10 text-primary shadow-sm"
                 : "border-border/40 hover:border-primary/30"
             }`}
           >
-            <p className="text-lg font-bold font-display">{r.count}</p>
-            <p className="text-[10px] text-muted-foreground">{r.label}</p>
+            <r.icon className="h-5 w-5 mx-auto mb-1.5 opacity-70" />
+            <p className="text-xl font-bold font-display">{r.count}</p>
+            <p className="text-xs text-muted-foreground">{r.label}</p>
           </button>
         ))}
       </div>
@@ -145,10 +209,10 @@ const BCUsersRoles = () => {
             placeholder="Search by name or email..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-10"
           />
         </div>
-        <Badge variant="secondary">{filteredUsers.length} users</Badge>
+        <Badge variant="secondary" className="text-sm px-3 py-1">{filteredUsers.length} users</Badge>
       </div>
 
       {/* User Table */}
@@ -159,36 +223,60 @@ const BCUsersRoles = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Roles</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Joined</TableHead>
+                <TableHead className="text-sm font-semibold">Name</TableHead>
+                <TableHead className="text-sm font-semibold">Email</TableHead>
+                <TableHead className="text-sm font-semibold">Roles</TableHead>
+                <TableHead className="text-sm font-semibold">Phone</TableHead>
+                <TableHead className="text-sm font-semibold">Joined</TableHead>
+                {canManage && <TableHead className="text-sm font-semibold text-right">Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.map(user => (
-                <TableRow key={user.user_id}>
-                  <TableCell className="font-medium">{user.full_name || "—"}</TableCell>
-                  <TableCell className="text-muted-foreground text-xs">{user.email}</TableCell>
+              {filteredUsers.map(user_row => (
+                <TableRow key={user_row.user_id}>
+                  <TableCell className="font-medium text-sm">{user_row.full_name || "—"}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{user_row.email}</TableCell>
                   <TableCell>
-                    <div className="flex gap-1 flex-wrap">
-                      {user.roles.map((r: string) => (
-                        <Badge key={r} variant="outline" className="text-[10px] gap-1">
+                    <div className="flex gap-1.5 flex-wrap">
+                      {user_row.roles.map((r: string) => (
+                        <Badge key={r} variant="outline" className={`text-xs gap-1 px-2 py-0.5 ${roleColor(r)}`}>
                           {roleIcon(r)} {r}
+                          {canManage && (
+                            <button
+                              onClick={() => setDeleteConfirm({ userId: user_row.user_id, role: r, name: user_row.full_name || user_row.email })}
+                              className="ml-0.5 hover:text-destructive transition-colors"
+                            >
+                              <Trash2 className="h-2.5 w-2.5" />
+                            </button>
+                          )}
                         </Badge>
                       ))}
                     </div>
                   </TableCell>
-                  <TableCell className="text-xs">{user.phone || "—"}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {new Date(user.created_at).toLocaleDateString()}
+                  <TableCell className="text-sm">{user_row.phone || "—"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {new Date(user_row.created_at).toLocaleDateString()}
                   </TableCell>
+                  {canManage && (
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs gap-1"
+                        onClick={() => {
+                          setAddRoleDialog({ userId: user_row.user_id, name: user_row.full_name || user_row.email });
+                          setSelectedNewRole("");
+                        }}
+                      >
+                        <Plus className="h-3 w-3" /> Add Role
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
               {filteredUsers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     No users found matching your criteria.
                   </TableCell>
                 </TableRow>
@@ -197,6 +285,50 @@ const BCUsersRoles = () => {
           </Table>
         </Card>
       )}
+
+      {/* Add Role Dialog */}
+      <Dialog open={!!addRoleDialog} onOpenChange={(o) => !o && setAddRoleDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Role to {addRoleDialog?.name}</DialogTitle>
+            <DialogDescription>Select a role to assign to this user.</DialogDescription>
+          </DialogHeader>
+          <Select value={selectedNewRole} onValueChange={setSelectedNewRole}>
+            <SelectTrigger><SelectValue placeholder="Select a role..." /></SelectTrigger>
+            <SelectContent>
+              {ALL_ROLES.map(r => (
+                <SelectItem key={r} value={r} className="capitalize">{r.replace("_", " ")}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddRoleDialog(null)}>Cancel</Button>
+            <Button onClick={handleAddRole} disabled={!selectedNewRole || saving}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+              Add Role
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Role Confirmation */}
+      <Dialog open={!!deleteConfirm} onOpenChange={(o) => !o && setDeleteConfirm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove Role</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove the <strong>{deleteConfirm?.role}</strong> role from <strong>{deleteConfirm?.name}</strong>?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteRole} disabled={saving}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+              Remove Role
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
