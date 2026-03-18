@@ -142,6 +142,7 @@ const AnimatedRoutes = () => {
             <Route path="logistics" element={<BCLogistics />} />
 
             {/* Module 5: Financial Management */}
+            <Route path="financial-management" element={<BCFinancialManagement />} />
             <Route path="earnings" element={<BCEarnings />} />
             <Route path="wallet" element={<BCWallet />} />
             <Route path="withdrawals" element={<BCWithdrawals />} />
