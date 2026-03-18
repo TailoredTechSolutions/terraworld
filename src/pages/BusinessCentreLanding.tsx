@@ -1080,7 +1080,7 @@ const BusinessCentreLanding = () => {
             transition={{ duration: 0.5, ease: cubicSmooth }}
           >
             <SectionHeader icon={LayoutDashboard} title="Business Centre Overview" id="dashboard" />
-            <div className="mt-4"><DashboardPanel /></div>
+            <div className="mt-4"><DashboardPanel data={businessData} /></div>
           </motion.section>
 
           {/* Network */}
