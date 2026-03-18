@@ -517,7 +517,7 @@ const BCMLMSystem = () => {
                         <TableCell className="text-xs">{cp.payout_period}</TableCell>
                         <TableCell className="text-right text-xs font-medium">₱{Number(cp.pool_amount).toLocaleString()}</TableCell>
                         <TableCell className="text-right text-xs">₱{Number(cp.membership_bv_payout).toLocaleString()}</TableCell>
-                        <TableCell><Badge variant="outline" className={cn("text-[9px]", cp.fail_safe_triggered ? "border-amber-500/30 text-amber-600" : "border-emerald-500/30 text-emerald-600")}>{cp.fail_safe_triggered ? "Triggered" : "OK"}</Badge></TableCell>
+                        <TableCell><Badge variant="outline" className={cn("text-[9px]", (cp as any).failsafe_ratio && Number((cp as any).failsafe_ratio) >= 0.75 ? "border-amber-500/30 text-amber-600" : "border-emerald-500/30 text-emerald-600")}>{(cp as any).failsafe_ratio && Number((cp as any).failsafe_ratio) >= 0.75 ? "Triggered" : "OK"}</Badge></TableCell>
                         <TableCell><Badge variant="outline" className="text-[9px]">{cp.is_processed ? "Completed" : "Pending"}</Badge></TableCell>
                       </TableRow>
                     ))}
