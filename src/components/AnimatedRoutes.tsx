@@ -53,6 +53,11 @@ const BCStatements = lazyRetry(() => import("@/pages/business-centre/BCStatement
 const BCUsersRoles = lazyRetry(() => import("@/pages/business-centre/BCUsersRoles"));
 const BCMarketplace = lazyRetry(() => import("@/pages/business-centre/BCMarketplace"));
 const BCLogistics = lazyRetry(() => import("@/pages/business-centre/BCLogistics"));
+const BCFinancialManagement = lazyRetry(() => import("@/pages/business-centre/BCFinancialManagement"));
+const BCMLMSystem = lazyRetry(() => import("@/pages/business-centre/BCMLMSystem"));
+const BCTokenomics = lazyRetry(() => import("@/pages/business-centre/BCTokenomics"));
+const BCCustomerService = lazyRetry(() => import("@/pages/business-centre/BCCustomerService"));
+const BCComplianceAudit = lazyRetry(() => import("@/pages/business-centre/BCComplianceAudit"));
 
 // Admin extended pages
 const BCReports = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCReports })));
@@ -137,6 +142,7 @@ const AnimatedRoutes = () => {
             <Route path="logistics" element={<BCLogistics />} />
 
             {/* Module 5: Financial Management */}
+            <Route path="financial-management" element={<BCFinancialManagement />} />
             <Route path="earnings" element={<BCEarnings />} />
             <Route path="wallet" element={<BCWallet />} />
             <Route path="withdrawals" element={<BCWithdrawals />} />
@@ -145,6 +151,7 @@ const AnimatedRoutes = () => {
             <Route path="wallet-controls" element={<BCWalletControls />} />
 
             {/* Module 6: MLM System */}
+            <Route path="mlm-system" element={<BCMLMSystem />} />
             <Route path="binary-tree" element={<BCBinaryTree />} />
             <Route path="network" element={<BCNetwork />} />
             <Route path="referrals" element={<BCReferrals />} />
@@ -158,6 +165,7 @@ const AnimatedRoutes = () => {
             <Route path="manual-placement" element={<BCManualPlacement />} />
 
             {/* Module 7: Tokenomics & Rewards */}
+            <Route path="tokenomics" element={<BCTokenomics />} />
             <Route path="token-rewards" element={<BCTokenRewards />} />
 
             {/* Module 8: Coupons & Promotions */}
@@ -165,12 +173,14 @@ const AnimatedRoutes = () => {
             <Route path="marketing" element={<BCMarketing />} />
 
             {/* Module 9: Customer Service */}
+            <Route path="customer-service" element={<BCCustomerService />} />
             <Route path="support" element={<BCSupport />} />
 
             {/* Module 10: Reports & Analytics */}
             <Route path="reports" element={<BCReports />} />
 
             {/* Module 11: Compliance & Security */}
+            <Route path="compliance-audit" element={<BCComplianceAudit />} />
             <Route path="compliance" element={<BCCompliance />} />
             <Route path="security-roles" element={<BCSecurity />} />
 

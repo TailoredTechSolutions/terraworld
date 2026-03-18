@@ -107,8 +107,9 @@ const ADMIN_SECTIONS: { title: string; moduleNumber: number; items: NavItem[] }[
     title: "5. Financial Management",
     moduleNumber: 5,
     items: [
-      { id: "earnings", label: "Earnings Overview", icon: DollarSign, path: "/business-centre/earnings" },
-      { id: "wallet", label: "Wallet Overview", icon: Wallet, path: "/business-centre/wallet" },
+      { id: "financial-mgmt", label: "Financial Overview", icon: DollarSign, path: "/business-centre/financial-management", adminOnly: true },
+      { id: "earnings", label: "Earnings", icon: DollarSign, path: "/business-centre/earnings" },
+      { id: "wallet", label: "Wallet", icon: Wallet, path: "/business-centre/wallet" },
       { id: "withdrawals", label: "Withdrawals", icon: ArrowUpRight, path: "/business-centre/withdrawals" },
       { id: "statements", label: "Statements", icon: FileText, path: "/business-centre/statements" },
       { id: "payout-oversight", label: "Payout Oversight", icon: CreditCard, path: "/business-centre/payout-oversight", adminOnly: true },
@@ -119,6 +120,7 @@ const ADMIN_SECTIONS: { title: string; moduleNumber: number; items: NavItem[] }[
     title: "6. MLM System",
     moduleNumber: 6,
     items: [
+      { id: "mlm-system", label: "MLM Overview", icon: GitBranch, path: "/business-centre/mlm-system", adminOnly: true },
       { id: "binary-tree", label: "Binary Tree", icon: GitBranch, path: "/business-centre/binary-tree" },
       { id: "network", label: "Network", icon: Link2, path: "/business-centre/network" },
       { id: "referrals", label: "Referrals", icon: Share2, path: "/business-centre/referrals" },
@@ -136,6 +138,7 @@ const ADMIN_SECTIONS: { title: string; moduleNumber: number; items: NavItem[] }[
     title: "7. Tokenomics",
     moduleNumber: 7,
     items: [
+      { id: "tokenomics", label: "Tokenomics Admin", icon: Coins, path: "/business-centre/tokenomics", adminOnly: true },
       { id: "token-rewards", label: "Token Rewards", icon: Coins, path: "/business-centre/token-rewards" },
     ],
   },
@@ -151,6 +154,7 @@ const ADMIN_SECTIONS: { title: string; moduleNumber: number; items: NavItem[] }[
     title: "9. Customer Service",
     moduleNumber: 9,
     items: [
+      { id: "customer-service", label: "Service Console", icon: HelpCircle, path: "/business-centre/customer-service", adminOnly: true },
       { id: "support", label: "Support Queue", icon: HelpCircle, path: "/business-centre/support" },
     ],
   },
@@ -165,7 +169,7 @@ const ADMIN_SECTIONS: { title: string; moduleNumber: number; items: NavItem[] }[
     title: "11. Compliance & Security",
     moduleNumber: 11,
     items: [
-      { id: "compliance", label: "Compliance", icon: Scale, path: "/business-centre/compliance", adminOnly: true },
+      { id: "compliance-audit", label: "Compliance & Audit", icon: Scale, path: "/business-centre/compliance-audit", adminOnly: true },
       { id: "security-roles", label: "Security & Roles", icon: Lock, path: "/business-centre/security-roles", superAdminOnly: true },
     ],
   },
