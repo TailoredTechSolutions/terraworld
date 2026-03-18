@@ -948,6 +948,42 @@ const BusinessCentreLanding = () => {
       });
   }, [user]);
 
+  // Admin-only: fetch system-wide data
+  useEffect(() => {
+    if (!user || !isAnyAdmin) return;
+
+    // Pending withdrawals
+    supabase.from("withdrawal_requests").select("amount", { count: "exact" })
+      .eq("status", "pending")
+      .then(({ data, count }) => {
+        setAdminPendingWithdrawals(count || 0);
+        setAdminPendingAmount(data ? data.reduce((s, r) => s + Number(r.amount), 0) : 0);
+      });
+
+    // Total members
+    supabase.from("memberships").select("id", { count: "exact", head: true })
+      .then(({ count }) => setAdminTotalMembers(count || 0));
+
+    // Recent audit logs (super admin only)
+    if (isAdmin) {
+      supabase.from("audit_log").select("action, entity_type, created_at")
+        .order("created_at", { ascending: false }).limit(10)
+        .then(({ data }) => { if (data) setAdminAuditLogs(data); });
+    }
+  }, [user, isAnyAdmin, isAdmin]);
+
+  // Build shared data object for panels
+  const businessData: BusinessData = {
+    walletData,
+    membership,
+    totalEarnings,
+    binaryStats,
+    tokenBalance,
+    referralCode,
+    recentEarnings,
+    isAnyAdmin,
+  };
+
   useEffect(() => {
     const sectionIds = NAV_ITEMS.map(n => n.id);
     const observer = new IntersectionObserver(
