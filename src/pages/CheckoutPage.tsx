@@ -290,8 +290,8 @@ const CheckoutPage = () => {
                 Checkout
               </h1>
               <p className="text-muted-foreground">
-                {isCouponOnly 
-                  ? "Complete your coupon purchase"
+                {isDigitalOnly 
+                  ? "Complete your coupon or upgrade purchase"
                   : "Complete your order for fresh farm produce"
                 }
               </p>
@@ -301,8 +301,8 @@ const CheckoutPage = () => {
               {/* Contact / Delivery Information */}
               <div className="glass-card p-6 rounded-2xl space-y-4">
                 <h2 className="font-display text-lg font-semibold flex items-center gap-2">
-                  {isCouponOnly ? <User className="h-5 w-5 text-primary" /> : <Truck className="h-5 w-5 text-primary" />}
-                  {isCouponOnly ? "Contact Information" : "Delivery Information"}
+                  {isDigitalOnly ? <User className="h-5 w-5 text-primary" /> : <Truck className="h-5 w-5 text-primary" />}
+                  {isDigitalOnly ? "Contact Information" : "Delivery Information"}
                 </h2>
                 
                 <div className="grid sm:grid-cols-2 gap-4">
