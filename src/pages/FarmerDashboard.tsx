@@ -239,4 +239,22 @@ const FarmerDashboardInner = () => {
   );
 };
 
+const FarmerDashboard = () => {
+  const { isAnyAdmin } = useUserRoles();
+
+  if (isAnyAdmin) {
+    return (
+      <AdminDashboardWrapper
+        roleFilter="farmer"
+        title="Farmer Management"
+        description="View and manage all registered farmers on the platform"
+      >
+        {(/* selectedUserId, selectedUserEmail */) => <FarmerDashboardInner />}
+      </AdminDashboardWrapper>
+    );
+  }
+
+  return <FarmerDashboardInner />;
+};
+
 export default FarmerDashboard;

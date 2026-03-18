@@ -26,7 +26,7 @@ import BuyerProfilePanel from "@/components/buyer/BuyerProfilePanel";
 import BuyerNotificationsPanel from "@/components/buyer/BuyerNotificationsPanel";
 import BuyerSupportPanel from "@/components/buyer/BuyerSupportPanel";
 
-const BuyerDashboard = () => {
+const BuyerDashboardInner = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "home";
   const [activeTab, setActiveTab] = useState(initialTab);

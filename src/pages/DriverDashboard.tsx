@@ -57,7 +57,7 @@ const demoNotifications = [
   { id: "dn3", title: "Earnings Updated", message: "₱850 has been added to your wallet for completed deliveries", is_read: true, created_at: new Date(Date.now() - 48 * 3600000).toISOString() },
 ];
 
-const DriverDashboard = () => {
+const DriverDashboardInner = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
