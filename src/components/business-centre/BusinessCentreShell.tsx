@@ -154,6 +154,7 @@ const ADMIN_SECTIONS: { title: string; moduleNumber: number; items: NavItem[] }[
     title: "9. Customer Service",
     moduleNumber: 9,
     items: [
+      { id: "customer-service", label: "Service Console", icon: HelpCircle, path: "/business-centre/customer-service", adminOnly: true },
       { id: "support", label: "Support Queue", icon: HelpCircle, path: "/business-centre/support" },
     ],
   },
