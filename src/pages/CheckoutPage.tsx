@@ -603,6 +603,40 @@ const CheckoutPage = () => {
                 </div>
               )}
 
+              {/* Upgrade Section */}
+              {hasUpgrade && upgradeItem && (
+                <div className="space-y-3">
+                  {(hasProducts || hasCoupons) && <Separator className="bg-glass-border" />}
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <Award className="h-4 w-4" />
+                    Rank Upgrade
+                  </div>
+                  <div className="glass-card rounded-xl border border-primary/30 overflow-hidden">
+                    <div className="flex items-center gap-3 p-3">
+                      <div className="h-14 w-14 rounded-lg overflow-hidden border border-glass-border flex-shrink-0">
+                        <img src={upgradeItem.image} alt={upgradeItem.targetTier} className="h-full w-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm capitalize">Upgrade to {upgradeItem.targetTier}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{upgradeItem.bvGenerated.toLocaleString()} BV</Badge>
+                          <span className="text-[10px] text-muted-foreground">{upgradeItem.benefits}</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          ₱{upgradeItem.currentValue.toLocaleString()} → ₱{upgradeItem.targetPrice.toLocaleString()} (pay difference)
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <p className="font-semibold text-sm text-primary">₱{upgradeItem.upgradeCost.toLocaleString()}</p>
+                        <button onClick={() => setUpgrade(null)} className="text-muted-foreground hover:text-destructive transition-colors">
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <Separator className="bg-glass-border" />
 
               {/* Price Breakdown */}
@@ -647,6 +681,13 @@ const CheckoutPage = () => {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Coupons Subtotal</span>
                     <span className="font-medium text-emerald-600">₱{couponSubtotal.toLocaleString()}</span>
+                  </div>
+                )}
+
+                {hasUpgrade && upgradeItem && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Rank Upgrade</span>
+                    <span className="font-medium text-primary">₱{upgradeSubtotal.toLocaleString()}</span>
                   </div>
                 )}
 
