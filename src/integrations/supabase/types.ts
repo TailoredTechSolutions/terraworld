@@ -41,6 +41,48 @@ export type Database = {
         }
         Relationships: []
       }
+      approval_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          module: string
+          reason: string | null
+          request_payload: Json
+          requested_by: string
+          status: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          module: string
+          reason?: string | null
+          request_payload?: Json
+          requested_by: string
+          status?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          module?: string
+          reason?: string | null
+          request_payload?: Json
+          requested_by?: string
+          status?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
@@ -571,6 +613,57 @@ export type Database = {
             columns: ["shop_product_id"]
             isOneToOne: false
             referencedRelation: "shop_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disputes: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string | null
+          resolution_notes: string | null
+          resolution_status: string
+          resolved_at: string | null
+          resolved_by: string | null
+          ticket_id: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          resolution_notes?: string | null
+          resolution_status?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          ticket_id?: string | null
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          resolution_notes?: string | null
+          resolution_status?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          ticket_id?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disputes_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
             referencedColumns: ["id"]
           },
         ]
@@ -1598,6 +1691,48 @@ export type Database = {
           },
         ]
       }
+      promotion_campaigns: {
+        Row: {
+          config: Json | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string | null
+          id: string
+          kpi_target: Json | null
+          name: string
+          starts_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          kpi_target?: Json | null
+          name: string
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          kpi_target?: Json | null
+          name?: string
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ranks: {
         Row: {
           badge_color: string
@@ -1850,6 +1985,129 @@ export type Database = {
           },
         ]
       }
+      token_allocations: {
+        Row: {
+          allocation_amount: number
+          allocation_percent: number
+          bucket_code: string
+          bucket_name: string
+          created_at: string
+          distributed_amount: number
+          id: string
+          released_amount: number
+          remaining_amount: number
+          updated_at: string
+        }
+        Insert: {
+          allocation_amount?: number
+          allocation_percent?: number
+          bucket_code: string
+          bucket_name: string
+          created_at?: string
+          distributed_amount?: number
+          id?: string
+          released_amount?: number
+          remaining_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          allocation_amount?: number
+          allocation_percent?: number
+          bucket_code?: string
+          bucket_name?: string
+          created_at?: string
+          distributed_amount?: number
+          id?: string
+          released_amount?: number
+          remaining_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      token_burn_events: {
+        Row: {
+          created_at: string
+          id: string
+          reference_id: string | null
+          source_type: string
+          tokens_burned: number
+          tx_hash: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reference_id?: string | null
+          source_type: string
+          tokens_burned: number
+          tx_hash?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reference_id?: string | null
+          source_type?: string
+          tokens_burned?: number
+          tx_hash?: string | null
+        }
+        Relationships: []
+      }
+      token_issuances: {
+        Row: {
+          bucket_id: string | null
+          id: string
+          issued_at: string
+          issued_by: string | null
+          recipient_user_id: string
+          reference_id: string | null
+          reference_type: string | null
+          reward_php: number
+          rule_id: string | null
+          token_price_php: number
+          tokens_issued: number
+        }
+        Insert: {
+          bucket_id?: string | null
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          recipient_user_id: string
+          reference_id?: string | null
+          reference_type?: string | null
+          reward_php: number
+          rule_id?: string | null
+          token_price_php: number
+          tokens_issued: number
+        }
+        Update: {
+          bucket_id?: string | null
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          recipient_user_id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          reward_php?: number
+          rule_id?: string | null
+          token_price_php?: number
+          tokens_issued?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "token_issuances_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "token_allocations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "token_issuances_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "token_reward_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       token_ledger: {
         Row: {
           created_at: string
@@ -1877,6 +2135,66 @@ export type Database = {
           token_market_price?: number
           tokens_issued?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      token_market_snapshots: {
+        Row: {
+          captured_at: string
+          id: string
+          price_php: number
+          source: string
+        }
+        Insert: {
+          captured_at?: string
+          id?: string
+          price_php: number
+          source?: string
+        }
+        Update: {
+          captured_at?: string
+          id?: string
+          price_php?: number
+          source?: string
+        }
+        Relationships: []
+      }
+      token_reward_rules: {
+        Row: {
+          basis_type: string
+          code: string
+          created_at: string
+          daily_cap: number | null
+          id: string
+          is_active: boolean
+          name: string
+          qualification_rules: Json | null
+          reward_php: number
+          updated_at: string
+        }
+        Insert: {
+          basis_type: string
+          code: string
+          created_at?: string
+          daily_cap?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          qualification_rules?: Json | null
+          reward_php?: number
+          updated_at?: string
+        }
+        Update: {
+          basis_type?: string
+          code?: string
+          created_at?: string
+          daily_cap?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          qualification_rules?: Json | null
+          reward_php?: number
+          updated_at?: string
         }
         Relationships: []
       }
