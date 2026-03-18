@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Farm } from "@/data/products";
+import {
   Star,
   MapPin,
   Phone,
@@ -15,6 +16,7 @@ import { Farm } from "@/data/products";
   ExternalLink,
   Sprout,
   BadgeCheck,
+  Store,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
