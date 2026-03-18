@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useCartStore, CartItem } from "@/store/cartStore";
-import { Minus, Plus, Trash2, ShoppingBag, Truck } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, Truck, Ticket } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 const PLATFORM_FEE_RATE = 0.20;
