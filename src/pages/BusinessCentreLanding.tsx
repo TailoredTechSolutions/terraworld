@@ -29,17 +29,32 @@ import { useRef, useState, useEffect } from "react";
 
 const cubicSmooth = [0.22, 1, 0.36, 1] as const;
 
-// ─── Section Navigation ───
-const NAV_ITEMS = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+// ─── Section Navigation (base items for all roles) ───
+const BASE_NAV_ITEMS = [
+  { id: "dashboard", label: "Overview", icon: LayoutDashboard },
   { id: "network", label: "Network", icon: Users },
   { id: "binary", label: "Binary Tree", icon: GitBranch },
   { id: "commissions", label: "Commissions", icon: DollarSign },
   { id: "referral", label: "Referrals", icon: Share2 },
-  { id: "rank", label: "Rank", icon: Award },
+  { id: "rank", label: "Rank & Activation", icon: Award },
   { id: "payout", label: "Wallet", icon: Wallet },
   { id: "marketing", label: "Marketing", icon: Megaphone },
   { id: "support", label: "Support", icon: HelpCircle },
+];
+
+// Admin-only sections shown below a divider
+const ADMIN_NAV_ITEMS = [
+  { id: "admin-members", label: "Member Search", icon: Search },
+  { id: "admin-commissions", label: "Commission Runs", icon: BarChart3 },
+  { id: "admin-payouts", label: "Payout Oversight", icon: CreditCard },
+  { id: "admin-compliance", label: "Compliance", icon: Scale },
+  { id: "admin-settings", label: "System Settings", icon: Settings },
+];
+
+// Super Admin additional sections
+const SUPERADMIN_NAV_ITEMS = [
+  { id: "admin-security", label: "Security & Roles", icon: Lock },
+  { id: "admin-audit", label: "Audit Logs", icon: FileText },
 ];
 
 const scrollTo = (id: string) => {
