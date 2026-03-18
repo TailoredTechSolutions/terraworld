@@ -13,7 +13,8 @@ import {
   ArrowLeft, 
   Truck, 
   ShieldCheck,
-  Lock
+  Lock,
+  Wallet
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
