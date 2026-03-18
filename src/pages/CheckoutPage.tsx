@@ -649,24 +649,15 @@ const CheckoutPage = () => {
                       <span className="font-medium">₱{productSubtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        Platform Fee
-                        <span className="text-xs glass-badge-accent px-1.5 py-0.5 rounded-full">20%</span>
-                      </span>
+                      <span className="text-muted-foreground">Platform Fee</span>
                       <span className="font-medium text-accent">₱{platformFee.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        Commission
-                        <span className="text-xs glass-badge-accent px-1.5 py-0.5 rounded-full">10%</span>
-                      </span>
+                      <span className="text-muted-foreground">Commission</span>
                       <span className="font-medium text-accent">₱{commission.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        VAT
-                        <span className="text-xs glass-badge-accent px-1.5 py-0.5 rounded-full">12%</span>
-                      </span>
+                      <span className="text-muted-foreground">Tax</span>
                       <span className="font-medium">₱{vat.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
