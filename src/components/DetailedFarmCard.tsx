@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Farm } from "@/data/products";
 import {
   Star,
@@ -15,6 +16,7 @@ import {
   ExternalLink,
   Sprout,
   BadgeCheck,
+  Store,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,7 +29,28 @@ interface DetailedFarmCardProps {
   className?: string;
 }
 
+// Map static farm IDs to normalized DB slugs
+const farmSlugMap: Record<string, string> = {
+  "saymayat-vegetable": "saymayat-vegetable-farming",
+  "urban-garden-pines": "urban-garden-under-the-pines",
+  "la-faustino-farm": "la-faustino-farm",
+  "pcjeam-farm": "pcjeam-farm",
+  "dulche-chocolates": "dulche-chocolates-inc",
+  "csb-family-farm": "csb-family-farm",
+  "fit-fab-farm": "fit-and-fab-farm",
+  "mls-harvest-farm": "mls-harvest-farm",
+  "atok-highlands-farm": "atok-highlands-vegetable-farm",
+  "kibungan-green-terraces": "kibungan-green-terraces",
+  "bakun-valley-farm": "bakun-valley-organic-farm",
+  "mankayan-root-farm": "mankayan-root-crops-farm",
+  "bsu-strawberry-farm": "bsu-strawberry-farm",
+  "itogon-mixed-farm": "itogon-riverside-mixed-farm",
+  "tublay-berry-farm": "tublay-berry-and-greens-farm",
+  "pinsao-urban-farm": "pinsao-urban-vegetable-garden",
+};
+
 const DetailedFarmCard = ({ farm, isSelected, onSelect, className }: DetailedFarmCardProps) => {
+  const navigate = useNavigate();
   const isATICertified = farm.program === "ATI Learning Site";
   const isPhilGAP = farm.program === "PhilGAP Certified";
   const distance = farm.distance || 5;
@@ -218,17 +241,30 @@ const DetailedFarmCard = ({ farm, isSelected, onSelect, className }: DetailedFar
           ) : (
             <div />
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 text-xs gap-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.open(`https://www.google.com/maps?q=${farm.latitude},${farm.longitude}`, "_blank");
-            }}
-          >
-            <ExternalLink className="h-3 w-3" /> Directions
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(`https://www.google.com/maps?q=${farm.latitude},${farm.longitude}`, "_blank");
+              }}
+            >
+              <ExternalLink className="h-3 w-3" /> Map
+            </Button>
+            <Button
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                const slug = farmSlugMap[farm.id] || farm.id;
+                navigate(`/farms/${slug}`);
+              }}
+            >
+              <Store className="h-3 w-3" /> View Farm
+            </Button>
+          </div>
         </div>
       </div>
     </div>

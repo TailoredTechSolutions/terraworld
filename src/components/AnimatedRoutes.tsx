@@ -122,7 +122,8 @@ const AnimatedRoutes = () => {
           <Route path="/product/:id" element={<P><ProductDetail /></P>} />
           <Route path="/product/:id/offers" element={<P><ProductOffersPage /></P>} />
           <Route path="/map" element={<P><MapPage /></P>} />
-          <Route path="/farm/:farmId" element={<P><FarmDetailPage /></P>} />
+          <Route path="/farms/:farmSlug" element={<P><FarmDetailPage /></P>} />
+          <Route path="/farm/:farmSlug" element={<P><FarmDetailPage /></P>} />
           <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
           <Route path="/business-centre/auth" element={<P><BusinessCentreAuth /></P>} />
 
