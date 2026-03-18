@@ -14,8 +14,8 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuTrigger } from
+"@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Header = () => {
@@ -27,7 +27,7 @@ const Header = () => {
 
   const getInitials = (name: string | null | undefined) => {
     if (!name) return "U";
-    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+    return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
   };
 
   const handleSignOut = async () => {
@@ -38,7 +38,7 @@ const Header = () => {
   const closeMobile = () => setIsMobileMenuOpen(false);
 
   const getDashboardLinks = () => {
-    const links: { path: string; label: string; icon: React.ComponentType<{ className?: string }> }[] = [];
+    const links: {path: string;label: string;icon: React.ComponentType<{className?: string;}>;}[] = [];
 
     if (isAnyAdmin) {
       // Admins/Super Admins get access to ALL dashboards
@@ -57,17 +57,17 @@ const Header = () => {
     return links;
   };
 
-  const extraDesktopLinks = user && isAnyAdmin
-    ? [{ path: "/business-centre", label: "Business Centre" }]
-    : [];
+  const extraDesktopLinks = user && isAnyAdmin ?
+  [{ path: "/business-centre", label: "Business Centre" }] :
+  [];
 
   return (
-  <>
+    <>
     <header className="sticky top-0 z-50 w-full glass-navbar">
       <div className="container flex h-[68px] items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group" onClick={closeMobile}>
-          <img src={terraLogo} alt="Terra Farming" width={44} height={44} className="h-11 w-11 object-contain transition-transform group-hover:scale-105 rounded-lg" />
+          <img alt="Terra Farming" width={44} height={44} className="h-11 w-11 transition-transform group-hover:scale-105 rounded-lg object-cover" src="/lovable-uploads/8cb444ea-2373-4b75-88be-b663c27fcfc1.png" />
           <div className="flex items-center gap-2">
             <span className="font-display text-xl font-bold text-foreground tracking-tight">Terra Farming</span>
             <span className="hidden sm:block h-4 w-px bg-border" />
@@ -83,8 +83,8 @@ const Header = () => {
           <ThemeToggle />
 
           {!loading && (
-            user ? (
-              <DropdownMenu>
+            user ?
+            <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="hidden md:flex rounded-full" aria-label="User menu">
                     <Avatar className="h-8 w-8">
@@ -100,54 +100,54 @@ const Header = () => {
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium">{profile?.full_name || "User"}</p>
                       <p className="text-xs text-muted-foreground">{user.email}</p>
-                      {profile?.referral_code && (
-                        <p className="text-xs text-accent font-mono">Code: {profile.referral_code}</p>
-                      )}
+                      {profile?.referral_code &&
+                    <p className="text-xs text-accent font-mono">Code: {profile.referral_code}</p>
+                    }
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuLabel className="text-xs text-muted-foreground">Dashboards</DropdownMenuLabel>
-                  {getDashboardLinks().map((dl) => (
-                    <DropdownMenuItem key={dl.path} asChild>
+                  {getDashboardLinks().map((dl) =>
+                <DropdownMenuItem key={dl.path} asChild>
                       <Link to={dl.path} className="flex items-center gap-2 cursor-pointer">
                         <dl.icon className="h-4 w-4" />
                         {dl.label}
                       </Link>
                     </DropdownMenuItem>
-                  ))}
+                )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link to="/auth">
+              </DropdownMenu> :
+
+            <Link to="/auth">
                 <Button size="sm" className="hidden md:flex gap-2 btn-liquid text-sm py-2 px-4 h-auto">
                   <LogIn className="h-4 w-4" />
                   Sign In
                 </Button>
-              </Link>
-            )
-          )}
+              </Link>)
+
+            }
 
           <Button variant="ghost" size="icon" className="relative" onClick={toggleCart} aria-label="Shopping cart">
             <ShoppingCart className="h-5 w-5" />
-            {totalItems > 0 && (
+            {totalItems > 0 &&
               <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-medium text-accent-foreground shadow-glow-accent">
                 {totalItems}
               </span>
-            )}
+              }
           </Button>
 
           <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-          >
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}>
+              
             {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
@@ -155,18 +155,18 @@ const Header = () => {
     </header>
 
     {/* Mobile Full-Page Menu — rendered OUTSIDE header to avoid backdrop-filter containment */}
-    {isMobileMenuOpen && (
+    {isMobileMenuOpen &&
       <MobileMenuDrawer
         user={user}
         profile={profile}
         userEmail={user?.email}
         dashboardLinks={getDashboardLinks()}
         onClose={closeMobile}
-        onSignOut={handleSignOut}
-      />
-    )}
-  </>
-  );
+        onSignOut={handleSignOut} />
+
+      }
+  </>);
+
 };
 
 export default Header;
