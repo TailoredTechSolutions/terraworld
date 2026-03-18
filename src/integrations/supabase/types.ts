@@ -214,6 +214,50 @@ export type Database = {
         }
         Relationships: []
       }
+      burn_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          source_reference: string | null
+          source_type: string
+          token_amount: number
+          treasury_account_id: string | null
+          tx_hash: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          source_reference?: string | null
+          source_type: string
+          token_amount: number
+          treasury_account_id?: string | null
+          tx_hash?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          source_reference?: string | null
+          source_type?: string
+          token_amount?: number
+          treasury_account_id?: string | null
+          tx_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "burn_events_treasury_account_id_fkey"
+            columns: ["treasury_account_id"]
+            isOneToOne: false
+            referencedRelation: "treasury_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       buyer_addresses: {
         Row: {
           address_line1: string
@@ -1565,6 +1609,33 @@ export type Database = {
           tax_id?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      ledger_reversals: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          original_entry_id: string
+          reason: string
+          reversal_entry_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          original_entry_id: string
+          reason: string
+          reversal_entry_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          original_entry_id?: string
+          reason?: string
+          reversal_entry_id?: string | null
         }
         Relationships: []
       }
@@ -3034,6 +3105,48 @@ export type Database = {
           },
         ]
       }
+      settlement_cycles: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          cycle_code: string
+          gross_settlement_php: number
+          id: string
+          logistics_settlement_php: number
+          merchant_settlement_php: number
+          period_end: string
+          period_start: string
+          status: string
+          treasury_allocation_php: number
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          cycle_code: string
+          gross_settlement_php?: number
+          id?: string
+          logistics_settlement_php?: number
+          merchant_settlement_php?: number
+          period_end: string
+          period_start: string
+          status?: string
+          treasury_allocation_php?: number
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          cycle_code?: string
+          gross_settlement_php?: number
+          id?: string
+          logistics_settlement_php?: number
+          merchant_settlement_php?: number
+          period_end?: string
+          period_start?: string
+          status?: string
+          treasury_allocation_php?: number
+        }
+        Relationships: []
+      }
       shop_products: {
         Row: {
           created_at: string
@@ -3422,6 +3535,145 @@ export type Database = {
         }
         Relationships: []
       }
+      treasury_accounts: {
+        Row: {
+          asset_type: string
+          code: string
+          created_at: string
+          current_balance: number
+          id: string
+          name: string
+          status: string
+          treasury_type: string
+        }
+        Insert: {
+          asset_type?: string
+          code: string
+          created_at?: string
+          current_balance?: number
+          id?: string
+          name: string
+          status?: string
+          treasury_type: string
+        }
+        Update: {
+          asset_type?: string
+          code?: string
+          created_at?: string
+          current_balance?: number
+          id?: string
+          name?: string
+          status?: string
+          treasury_type?: string
+        }
+        Relationships: []
+      }
+      treasury_movements: {
+        Row: {
+          amount: number
+          approved_by: string | null
+          asset_type: string
+          created_at: string
+          created_by: string | null
+          id: string
+          movement_type: string
+          reason_code: string
+          reference_id: string | null
+          reference_type: string | null
+          treasury_account_id: string
+        }
+        Insert: {
+          amount: number
+          approved_by?: string | null
+          asset_type?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          movement_type: string
+          reason_code: string
+          reference_id?: string | null
+          reference_type?: string | null
+          treasury_account_id: string
+        }
+        Update: {
+          amount?: number
+          approved_by?: string | null
+          asset_type?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          movement_type?: string
+          reason_code?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          treasury_account_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treasury_movements_treasury_account_id_fkey"
+            columns: ["treasury_account_id"]
+            isOneToOne: false
+            referencedRelation: "treasury_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      treasury_release_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          asset_type: string
+          created_at: string
+          governance_mode: string
+          id: string
+          purpose: string
+          released_at: string | null
+          released_by: string | null
+          requested_amount: number
+          requested_by: string | null
+          status: string
+          treasury_account_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          asset_type?: string
+          created_at?: string
+          governance_mode?: string
+          id?: string
+          purpose: string
+          released_at?: string | null
+          released_by?: string | null
+          requested_amount: number
+          requested_by?: string | null
+          status?: string
+          treasury_account_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          asset_type?: string
+          created_at?: string
+          governance_mode?: string
+          id?: string
+          purpose?: string
+          released_at?: string | null
+          released_by?: string | null
+          requested_amount?: number
+          requested_by?: string | null
+          status?: string
+          treasury_account_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treasury_release_requests_treasury_account_id_fkey"
+            columns: ["treasury_account_id"]
+            isOneToOne: false
+            referencedRelation: "treasury_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -3568,6 +3820,71 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_adjustment_requests: {
+        Row: {
+          adjustment_type: string
+          amount: number
+          applied_at: string | null
+          asset_type: string
+          created_at: string
+          final_approved_at: string | null
+          final_approved_by: string | null
+          first_approved_at: string | null
+          first_approved_by: string | null
+          id: string
+          reason: string
+          reference_id: string | null
+          reference_type: string | null
+          requested_by: string
+          status: string
+          wallet_id: string
+        }
+        Insert: {
+          adjustment_type: string
+          amount: number
+          applied_at?: string | null
+          asset_type?: string
+          created_at?: string
+          final_approved_at?: string | null
+          final_approved_by?: string | null
+          first_approved_at?: string | null
+          first_approved_by?: string | null
+          id?: string
+          reason: string
+          reference_id?: string | null
+          reference_type?: string | null
+          requested_by: string
+          status?: string
+          wallet_id: string
+        }
+        Update: {
+          adjustment_type?: string
+          amount?: number
+          applied_at?: string | null
+          asset_type?: string
+          created_at?: string
+          final_approved_at?: string | null
+          final_approved_by?: string | null
+          first_approved_at?: string | null
+          first_approved_by?: string | null
+          id?: string
+          reason?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          requested_by?: string
+          status?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_adjustment_requests_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wallet_transactions: {
         Row: {
           actor_id: string | null
@@ -3657,6 +3974,80 @@ export type Database = {
         }
         Relationships: []
       }
+      withdrawal_batch_items: {
+        Row: {
+          batch_id: string
+          id: string
+          withdrawal_id: string
+        }
+        Insert: {
+          batch_id: string
+          id?: string
+          withdrawal_id: string
+        }
+        Update: {
+          batch_id?: string
+          id?: string
+          withdrawal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawal_batch_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "withdrawal_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      withdrawal_batches: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          batch_code: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          fee_amount: number
+          gross_amount: number
+          id: string
+          item_count: number
+          method: string
+          net_amount: number
+          status: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          batch_code: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          fee_amount?: number
+          gross_amount?: number
+          id?: string
+          item_count?: number
+          method: string
+          net_amount?: number
+          status?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          batch_code?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          fee_amount?: number
+          gross_amount?: number
+          id?: string
+          item_count?: number
+          method?: string
+          net_amount?: number
+          status?: string
+        }
+        Relationships: []
+      }
       withdrawal_requests: {
         Row: {
           account_details: Json | null
@@ -3718,6 +4109,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      withdrawal_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_status: string
+          old_status: string | null
+          reason: string | null
+          withdrawal_id: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status: string
+          old_status?: string | null
+          reason?: string | null
+          withdrawal_id: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string
+          old_status?: string | null
+          reason?: string | null
+          withdrawal_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
