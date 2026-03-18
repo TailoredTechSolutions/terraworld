@@ -103,7 +103,7 @@ const CartDrawer = () => {
           </SheetTitle>
         </SheetHeader>
 
-        {items.length === 0 ? (
+        {!hasItems() ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center py-12">
             <div className="h-20 w-20 rounded-full glass-card flex items-center justify-center mb-4 shadow-glow-primary">
               <ShoppingBag className="h-10 w-10 text-muted-foreground" />
