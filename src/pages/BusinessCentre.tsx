@@ -241,7 +241,6 @@ const NetworkPanel = () => (
 );
 
 // ─── Binary Tree Panel ── now uses the interactive explorer
-import BinaryTreeExplorer from "@/components/member/BinaryTreeExplorer";
 
 const BinaryTreePanel = () => <BinaryTreeExplorer />;
 
