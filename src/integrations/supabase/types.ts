@@ -400,6 +400,72 @@ export type Database = {
           },
         ]
       }
+      campaign_coupon_links: {
+        Row: {
+          campaign_id: string
+          coupon_id: string
+          id: string
+        }
+        Insert: {
+          campaign_id: string
+          coupon_id: string
+          id?: string
+        }
+        Update: {
+          campaign_id?: string
+          coupon_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_coupon_links_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "promotion_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_coupon_links_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_reward_rule_links: {
+        Row: {
+          campaign_id: string
+          id: string
+          reward_rule_id: string
+        }
+        Insert: {
+          campaign_id: string
+          id?: string
+          reward_rule_id: string
+        }
+        Update: {
+          campaign_id?: string
+          id?: string
+          reward_rule_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_reward_rule_links_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "promotion_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_reward_rule_links_reward_rule_id_fkey"
+            columns: ["reward_rule_id"]
+            isOneToOne: false
+            referencedRelation: "token_reward_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       carry_forward_ledger: {
         Row: {
           created_at: string
@@ -763,6 +829,54 @@ export type Database = {
         }
         Relationships: []
       }
+      coupon_abuse_flags: {
+        Row: {
+          coupon_id: string | null
+          created_at: string
+          flagged_by: string | null
+          id: string
+          reason: string
+          redemption_id: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          coupon_id?: string | null
+          created_at?: string
+          flagged_by?: string | null
+          id?: string
+          reason: string
+          redemption_id?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          coupon_id?: string | null
+          created_at?: string
+          flagged_by?: string | null
+          id?: string
+          reason?: string
+          redemption_id?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_abuse_flags_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_abuse_flags_redemption_id_fkey"
+            columns: ["redemption_id"]
+            isOneToOne: false
+            referencedRelation: "coupon_redemptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupon_packages: {
         Row: {
           bonus_percent: number
@@ -869,6 +983,113 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      coupon_redemptions: {
+        Row: {
+          coupon_id: string
+          discount_applied: number
+          id: string
+          redeemed_at: string
+          reference_id: string | null
+          reference_type: string | null
+          status: string
+          token_bonus_issued: number | null
+          user_id: string
+        }
+        Insert: {
+          coupon_id: string
+          discount_applied?: number
+          id?: string
+          redeemed_at?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string
+          token_bonus_issued?: number | null
+          user_id: string
+        }
+        Update: {
+          coupon_id?: string
+          discount_applied?: number
+          id?: string
+          redeemed_at?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string
+          token_bonus_issued?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_redemptions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupons: {
+        Row: {
+          applies_to: string
+          audience_type: string
+          code: string
+          created_at: string
+          created_by: string | null
+          discount_value: number | null
+          ends_at: string | null
+          id: string
+          is_stackable: boolean
+          max_discount: number | null
+          name: string
+          per_user_limit: number | null
+          starts_at: string | null
+          status: string
+          token_bonus_php: number | null
+          type: string
+          updated_at: string
+          usage_limit: number | null
+        }
+        Insert: {
+          applies_to: string
+          audience_type: string
+          code: string
+          created_at?: string
+          created_by?: string | null
+          discount_value?: number | null
+          ends_at?: string | null
+          id?: string
+          is_stackable?: boolean
+          max_discount?: number | null
+          name: string
+          per_user_limit?: number | null
+          starts_at?: string | null
+          status?: string
+          token_bonus_php?: number | null
+          type: string
+          updated_at?: string
+          usage_limit?: number | null
+        }
+        Update: {
+          applies_to?: string
+          audience_type?: string
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          discount_value?: number | null
+          ends_at?: string | null
+          id?: string
+          is_stackable?: boolean
+          max_discount?: number | null
+          name?: string
+          per_user_limit?: number | null
+          starts_at?: string | null
+          status?: string
+          token_bonus_php?: number | null
+          type?: string
+          updated_at?: string
+          usage_limit?: number | null
+        }
+        Relationships: []
       }
       delivery_bookings: {
         Row: {
@@ -3328,9 +3549,11 @@ export type Database = {
           allocation_percent: number
           bucket_code: string
           bucket_name: string
+          burned_amount: number
           created_at: string
           distributed_amount: number
           id: string
+          is_locked: boolean
           released_amount: number
           remaining_amount: number
           updated_at: string
@@ -3340,9 +3563,11 @@ export type Database = {
           allocation_percent?: number
           bucket_code: string
           bucket_name: string
+          burned_amount?: number
           created_at?: string
           distributed_amount?: number
           id?: string
+          is_locked?: boolean
           released_amount?: number
           remaining_amount?: number
           updated_at?: string
@@ -3352,9 +3577,11 @@ export type Database = {
           allocation_percent?: number
           bucket_code?: string
           bucket_name?: string
+          burned_amount?: number
           created_at?: string
           distributed_amount?: number
           id?: string
+          is_locked?: boolean
           released_amount?: number
           remaining_amount?: number
           updated_at?: string
@@ -3363,68 +3590,145 @@ export type Database = {
       }
       token_burn_events: {
         Row: {
+          bucket_id: string | null
           created_at: string
+          created_by: string | null
           id: string
+          notes: string | null
           reference_id: string | null
           source_type: string
+          token_amount: number | null
           tokens_burned: number
           tx_hash: string | null
         }
         Insert: {
+          bucket_id?: string | null
           created_at?: string
+          created_by?: string | null
           id?: string
+          notes?: string | null
           reference_id?: string | null
           source_type: string
+          token_amount?: number | null
           tokens_burned: number
           tx_hash?: string | null
         }
         Update: {
+          bucket_id?: string | null
           created_at?: string
+          created_by?: string | null
           id?: string
+          notes?: string | null
           reference_id?: string | null
           source_type?: string
+          token_amount?: number | null
           tokens_burned?: number
           tx_hash?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "token_burn_events_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "token_allocations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      token_issuance_reversals: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          original_issuance_id: string
+          reason: string
+          reversal_issuance_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          original_issuance_id: string
+          reason: string
+          reversal_issuance_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          original_issuance_id?: string
+          reason?: string
+          reversal_issuance_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "token_issuance_reversals_original_issuance_id_fkey"
+            columns: ["original_issuance_id"]
+            isOneToOne: false
+            referencedRelation: "token_issuances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "token_issuance_reversals_reversal_issuance_id_fkey"
+            columns: ["reversal_issuance_id"]
+            isOneToOne: false
+            referencedRelation: "token_issuances"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       token_issuances: {
         Row: {
           bucket_id: string | null
+          created_at: string
           id: string
           issued_at: string
           issued_by: string | null
+          recipient_id: string | null
+          recipient_type: string
           recipient_user_id: string
           reference_id: string | null
           reference_type: string | null
           reward_php: number
+          reward_rule_id: string | null
           rule_id: string | null
+          status: string
           token_price_php: number
           tokens_issued: number
         }
         Insert: {
           bucket_id?: string | null
+          created_at?: string
           id?: string
           issued_at?: string
           issued_by?: string | null
+          recipient_id?: string | null
+          recipient_type?: string
           recipient_user_id: string
           reference_id?: string | null
           reference_type?: string | null
           reward_php: number
+          reward_rule_id?: string | null
           rule_id?: string | null
+          status?: string
           token_price_php: number
           tokens_issued: number
         }
         Update: {
           bucket_id?: string | null
+          created_at?: string
           id?: string
           issued_at?: string
           issued_by?: string | null
+          recipient_id?: string | null
+          recipient_type?: string
           recipient_user_id?: string
           reference_id?: string | null
           reference_type?: string | null
           reward_php?: number
+          reward_rule_id?: string | null
           rule_id?: string | null
+          status?: string
           token_price_php?: number
           tokens_issued?: number
         }
@@ -3434,6 +3738,13 @@ export type Database = {
             columns: ["bucket_id"]
             isOneToOne: false
             referencedRelation: "token_allocations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "token_issuances_reward_rule_id_fkey"
+            columns: ["reward_rule_id"]
+            isOneToOne: false
+            referencedRelation: "token_reward_rules"
             referencedColumns: ["id"]
           },
           {
@@ -3496,12 +3807,66 @@ export type Database = {
         }
         Relationships: []
       }
+      token_reserve_releases: {
+        Row: {
+          allocation_id: string
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          governance_mode: string
+          id: string
+          purpose: string
+          released_at: string | null
+          released_by: string | null
+          requested_amount: number
+          requested_by: string | null
+          status: string
+        }
+        Insert: {
+          allocation_id: string
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          governance_mode?: string
+          id?: string
+          purpose: string
+          released_at?: string | null
+          released_by?: string | null
+          requested_amount: number
+          requested_by?: string | null
+          status?: string
+        }
+        Update: {
+          allocation_id?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          governance_mode?: string
+          id?: string
+          purpose?: string
+          released_at?: string | null
+          released_by?: string | null
+          requested_amount?: number
+          requested_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "token_reserve_releases_allocation_id_fkey"
+            columns: ["allocation_id"]
+            isOneToOne: false
+            referencedRelation: "token_allocations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       token_reward_rules: {
         Row: {
           basis_type: string
           code: string
           created_at: string
           daily_cap: number | null
+          distribution_bucket_id: string | null
           id: string
           is_active: boolean
           name: string
@@ -3514,6 +3879,7 @@ export type Database = {
           code: string
           created_at?: string
           daily_cap?: number | null
+          distribution_bucket_id?: string | null
           id?: string
           is_active?: boolean
           name: string
@@ -3526,6 +3892,7 @@ export type Database = {
           code?: string
           created_at?: string
           daily_cap?: number | null
+          distribution_bucket_id?: string | null
           id?: string
           is_active?: boolean
           name?: string
@@ -3533,7 +3900,60 @@ export type Database = {
           reward_php?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "token_reward_rules_distribution_bucket_id_fkey"
+            columns: ["distribution_bucket_id"]
+            isOneToOne: false
+            referencedRelation: "token_allocations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      token_wallet_postings: {
+        Row: {
+          burn_event_id: string | null
+          created_at: string
+          id: string
+          issuance_id: string | null
+          ledger_entry_id: string | null
+          posting_type: string
+          wallet_id: string | null
+        }
+        Insert: {
+          burn_event_id?: string | null
+          created_at?: string
+          id?: string
+          issuance_id?: string | null
+          ledger_entry_id?: string | null
+          posting_type: string
+          wallet_id?: string | null
+        }
+        Update: {
+          burn_event_id?: string | null
+          created_at?: string
+          id?: string
+          issuance_id?: string | null
+          ledger_entry_id?: string | null
+          posting_type?: string
+          wallet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "token_wallet_postings_burn_event_id_fkey"
+            columns: ["burn_event_id"]
+            isOneToOne: false
+            referencedRelation: "token_burn_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "token_wallet_postings_issuance_id_fkey"
+            columns: ["issuance_id"]
+            isOneToOne: false
+            referencedRelation: "token_issuances"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       treasury_accounts: {
         Row: {
