@@ -33,49 +33,7 @@ const AffiliatePage = lazyRetry(() => import("@/pages/AffiliatePage"));
 const BusinessCentreAuth = lazyRetry(() => import("@/pages/BusinessCentreAuth"));
 const BusinessCentreShell = lazyRetry(() => import("@/components/business-centre/BusinessCentreShell"));
 
-// Business Centre pages
-const BCOverview = lazyRetry(() => import("@/pages/business-centre/BCOverview"));
-const BCBinaryTree = lazyRetry(() => import("@/pages/business-centre/BCBinaryTree"));
-const BCNetwork = lazyRetry(() => import("@/pages/business-centre/BCNetwork"));
-const BCCommissions = lazyRetry(() => import("@/pages/business-centre/BCCommissions"));
-const BCReferrals = lazyRetry(() => import("@/pages/business-centre/BCReferrals"));
-const BCRankActivation = lazyRetry(() => import("@/pages/business-centre/BCRankActivation"));
-const BCCoupons = lazyRetry(() => import("@/pages/business-centre/BCCoupons"));
-const BCWallet = lazyRetry(() => import("@/pages/business-centre/BCWallet"));
-const BCTokenRewards = lazyRetry(() => import("@/pages/business-centre/BCTokenRewards"));
-const BCMarketing = lazyRetry(() => import("@/pages/business-centre/BCMarketing"));
-const BCSupport = lazyRetry(() => import("@/pages/business-centre/BCSupport"));
-const BCEarnings = lazyRetry(() => import("@/pages/business-centre/BCEarnings"));
-const BCWithdrawals = lazyRetry(() => import("@/pages/business-centre/BCWithdrawals"));
-const BCStatements = lazyRetry(() => import("@/pages/business-centre/BCStatements"));
-
-// New 12-module admin pages
-const BCUsersRoles = lazyRetry(() => import("@/pages/business-centre/BCUsersRoles"));
-const BCMarketplace = lazyRetry(() => import("@/pages/business-centre/BCMarketplace"));
-const BCLogistics = lazyRetry(() => import("@/pages/business-centre/BCLogistics"));
-const BCFinancialManagement = lazyRetry(() => import("@/pages/business-centre/BCFinancialManagement"));
-const BCMLMSystem = lazyRetry(() => import("@/pages/business-centre/BCMLMSystem"));
-const BCTokenomics = lazyRetry(() => import("@/pages/business-centre/BCTokenomics"));
-const BCCustomerService = lazyRetry(() => import("@/pages/business-centre/BCCustomerService"));
-const BCComplianceAudit = lazyRetry(() => import("@/pages/business-centre/BCComplianceAudit"));
-
-// Admin extended pages
-const BCReportsAnalytics = lazyRetry(() => import("@/pages/business-centre/BCReportsAnalytics"));
-const BCPackageManager = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCPackageManager })));
-const BCRankManager = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCRankManager })));
-const BCWalletControls = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCWalletControls })));
-const BCManualPlacement = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCManualPlacement })));
-const BCGlobalConfig = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCGlobalConfig })));
-
-// Existing admin pages (named exports)
-const BCMemberSearch = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCMemberSearch })));
-const BCCommissionRuns = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCCommissionRuns })));
-const BCPayoutOversight = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCPayoutOversight })));
-const BCCompliance = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCCompliance })));
-const BCSystemSettings = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCSystemSettings })));
-const BCSecurity = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCSecurity })));
-const BCAuditLogs = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCAuditLogs })));
-const BCControlCenter = lazyRetry(() => import("@/pages/business-centre/BCControlCenter"));
+// Business Centre pages are now loaded inline by BusinessCentreShell
 
 import { BusinessCentreProvider } from "@/contexts/BusinessCentreContext";
 const CheckoutPage = lazyRetry(() => import("@/pages/CheckoutPage"));
