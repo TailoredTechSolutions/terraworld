@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useCartStore } from "@/store/cartStore";
 import { cn } from "@/lib/utils";
 import {
   Ticket, ShoppingBag, BarChart3, Loader2, TrendingUp,
-  Coins, CheckCircle2, ArrowUpRight, Zap, Star, Crown, Rocket
+  Coins, ArrowUpRight, Zap, Star, Crown, Rocket, ShoppingCart
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -102,10 +104,11 @@ const TIER_CONFIG: Record<string, {
 const CouponsPanel = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const addCoupon = useCartStore((s) => s.addCoupon);
   const [packages, setPackages] = useState<CouponPackage[]>([]);
   const [purchases, setPurchases] = useState<CouponPurchase[]>([]);
   const [loading, setLoading] = useState(true);
-  const [purchasing, setPurchasing] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("buy");
 
   useEffect(() => {
@@ -125,30 +128,30 @@ const CouponsPanel = () => {
     setLoading(false);
   };
 
-  const handlePurchase = async (pkg: CouponPackage) => {
+  const handleAddToBasket = (pkg: CouponPackage) => {
     if (!user) {
       toast({ title: "Please sign in", variant: "destructive" });
       return;
     }
-    setPurchasing(pkg.id);
-    try {
-      const { data, error } = await supabase.functions.invoke("purchase-coupon", {
-        body: { package_id: pkg.id },
-      });
-      if (error) throw new Error(error.message);
-      if (!data?.success) throw new Error(data?.error || "Purchase failed");
 
-      toast({
-        title: "Coupon Purchased! 🎉",
-        description: `${TIER_CONFIG[pkg.name]?.bv || pkg.price} BV generated. Your membership is now activated.`,
-      });
-      setActiveTab("my");
-      fetchData();
-    } catch (err: any) {
-      toast({ title: "Purchase Failed", description: err.message, variant: "destructive" });
-    } finally {
-      setPurchasing(null);
-    }
+    const config = TIER_CONFIG[pkg.name];
+    addCoupon({
+      id: `coupon-${pkg.id}-${Date.now()}`,
+      packageId: pkg.id,
+      name: pkg.name,
+      price: pkg.price,
+      bv: config?.bv || pkg.price,
+      reward: config?.reward || pkg.description || "",
+      image: config?.bg || starterBg,
+      recipient: "self",
+    });
+
+    toast({
+      title: "Added to Basket 🛒",
+      description: `${pkg.name} added. Redirecting to checkout…`,
+    });
+
+    navigate("/checkout");
   };
 
   // Analytics
@@ -189,8 +192,7 @@ const CouponsPanel = () => {
             <CouponHeroCard
               key={pkg.id}
               pkg={pkg}
-              purchasing={purchasing}
-              onPurchase={handlePurchase}
+              onAddToBasket={handleAddToBasket}
             />
           ))}
         </div>
@@ -310,12 +312,10 @@ const CouponsPanel = () => {
 // ── Premium Coupon Hero Card ──
 const CouponHeroCard = ({
   pkg,
-  purchasing,
-  onPurchase,
+  onAddToBasket,
 }: {
   pkg: CouponPackage;
-  purchasing: string | null;
-  onPurchase: (pkg: CouponPackage) => void;
+  onAddToBasket: (pkg: CouponPackage) => void;
 }) => {
   const config = TIER_CONFIG[pkg.name];
   const fallbackGradient = "from-stone-900/90 via-stone-800/70 to-stone-900/90";
@@ -331,12 +331,11 @@ const CouponHeroCard = ({
   return (
     <div
       className={cn(
-        "group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300",
+        "group relative rounded-2xl overflow-hidden transition-all duration-300",
         "hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]",
         "border",
         border
       )}
-      onClick={() => !purchasing && onPurchase(pkg)}
     >
       {/* Hero Background */}
       {bgImage && (
@@ -388,14 +387,10 @@ const CouponHeroCard = ({
               "bg-white/15 hover:bg-white/25 text-white border border-white/20"
             )}
             variant="ghost"
-            disabled={purchasing === pkg.id}
+            onClick={() => onAddToBasket(pkg)}
           >
-            {purchasing === pkg.id ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-            )}
-            {purchasing === pkg.id ? "Processing..." : "Purchase"}
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Add to Basket
           </Button>
         </div>
       </div>
