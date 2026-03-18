@@ -1594,6 +1594,104 @@ export type Database = {
         }
         Relationships: []
       }
+      farm_catalog_products: {
+        Row: {
+          category_id: string | null
+          created_at: string | null
+          description: string | null
+          farm_id: string
+          id: string
+          image_url: string | null
+          is_available: boolean | null
+          is_featured: boolean | null
+          name: string
+          price: number | null
+          slug: string
+          sort_order: number | null
+          stock_quantity: number | null
+          unit: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          farm_id: string
+          id?: string
+          image_url?: string | null
+          is_available?: boolean | null
+          is_featured?: boolean | null
+          name: string
+          price?: number | null
+          slug: string
+          sort_order?: number | null
+          stock_quantity?: number | null
+          unit?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          farm_id?: string
+          id?: string
+          image_url?: string | null
+          is_available?: boolean | null
+          is_featured?: boolean | null
+          name?: string
+          price?: number | null
+          slug?: string
+          sort_order?: number | null
+          stock_quantity?: number | null
+          unit?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "farm_catalog_products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "farm_catalog_products_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      farm_certifications: {
+        Row: {
+          certification_name: string
+          created_at: string | null
+          farm_id: string
+          id: string
+        }
+        Insert: {
+          certification_name: string
+          created_at?: string | null
+          farm_id: string
+          id?: string
+        }
+        Update: {
+          certification_name?: string
+          created_at?: string | null
+          farm_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "farm_certifications_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       farm_products: {
         Row: {
           created_at: string
@@ -1658,6 +1756,35 @@ export type Database = {
           },
         ]
       }
+      farm_specialties: {
+        Row: {
+          created_at: string | null
+          farm_id: string
+          id: string
+          specialty_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          farm_id: string
+          id?: string
+          specialty_name: string
+        }
+        Update: {
+          created_at?: string | null
+          farm_id?: string
+          id?: string
+          specialty_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "farm_specialties_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       farmers: {
         Row: {
           created_at: string
@@ -1712,6 +1839,102 @@ export type Database = {
           status?: Database["public"]["Enums"]["farmer_status"] | null
           total_sales?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      farms: {
+        Row: {
+          banner_url: string | null
+          certificate_code: string | null
+          created_at: string | null
+          delivery_available: boolean | null
+          delivery_eta_max: number | null
+          delivery_eta_min: number | null
+          delivery_fee_php: number | null
+          description: string | null
+          distance_km: number | null
+          elevation_meters: number | null
+          established_year: number | null
+          farm_type: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          land_area_hectares: number | null
+          latitude: number | null
+          longitude: number | null
+          municipality: string | null
+          name: string
+          opening_hours: string | null
+          owner_name: string | null
+          phone: string | null
+          pickup_available: boolean | null
+          province: string | null
+          rating: number | null
+          review_count: number | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          banner_url?: string | null
+          certificate_code?: string | null
+          created_at?: string | null
+          delivery_available?: boolean | null
+          delivery_eta_max?: number | null
+          delivery_eta_min?: number | null
+          delivery_fee_php?: number | null
+          description?: string | null
+          distance_km?: number | null
+          elevation_meters?: number | null
+          established_year?: number | null
+          farm_type?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          land_area_hectares?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          municipality?: string | null
+          name: string
+          opening_hours?: string | null
+          owner_name?: string | null
+          phone?: string | null
+          pickup_available?: boolean | null
+          province?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          banner_url?: string | null
+          certificate_code?: string | null
+          created_at?: string | null
+          delivery_available?: boolean | null
+          delivery_eta_max?: number | null
+          delivery_eta_min?: number | null
+          delivery_fee_php?: number | null
+          description?: string | null
+          distance_km?: number | null
+          elevation_meters?: number | null
+          established_year?: number | null
+          farm_type?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          land_area_hectares?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          municipality?: string | null
+          name?: string
+          opening_hours?: string | null
+          owner_name?: string | null
+          phone?: string | null
+          pickup_available?: boolean | null
+          province?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -3179,6 +3402,30 @@ export type Database = {
           terra_fee_value?: number
           transport_config?: Json
           transport_mode?: string
+        }
+        Relationships: []
+      }
+      product_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          slug: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number | null
         }
         Relationships: []
       }
