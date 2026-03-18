@@ -524,9 +524,9 @@ const CommissionsPanel = () => (
 );
 
 // ─── Referral Panel ───
-const ReferralPanel = () => {
+const ReferralPanel = ({ referralCode }: { referralCode: string }) => {
   const { toast } = useToast();
-  const referralLink = "https://terrafarming.app/register?ref=TERRA-PRO-7X4K";
+  const referralLink = referralCode ? `https://terrafarming.app/register?ref=${referralCode}` : "";
 
   return (
     <div className="space-y-5">
@@ -536,51 +536,18 @@ const ReferralPanel = () => {
         </CardHeader>
         <CardContent className="px-5 pb-4 space-y-3">
           <div className="flex gap-2">
-            <Input readOnly value={referralLink} className="font-mono text-[11px] h-9" />
-            <Button size="sm" variant="outline" className="h-9 px-3" onClick={() => { navigator.clipboard.writeText(referralLink); toast({ title: "Copied!", description: "Referral link copied to clipboard" }); }}>
+            <Input readOnly value={referralLink || "Loading..."} className="font-mono text-[11px] h-9" />
+            <Button size="sm" variant="outline" className="h-9 px-3" disabled={!referralCode} onClick={() => { navigator.clipboard.writeText(referralLink); toast({ title: "Copied!", description: "Referral link copied to clipboard" }); }}>
               <Copy className="h-3.5 w-3.5" />
             </Button>
           </div>
-          <p className="text-[10px] text-muted-foreground">Share this link. When someone registers and activates a package, you earn Direct Membership Bonus (8% as Pro).</p>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { label: "Link Clicks", value: "1,847", icon: TrendingUp },
-          { label: "Registrations", value: "86", icon: Users },
-          { label: "Activated (Paid)", value: "58", icon: CheckCircle2 },
-          { label: "Conversion Rate", value: "3.1%", icon: Target },
-        ].map((s) => (
-          <div key={s.label} className="text-center p-3 rounded-xl border border-border/40 bg-card">
-            <s.icon className="h-4 w-4 text-primary mx-auto mb-1.5" />
-            <p className="text-xl font-bold font-display text-foreground">{s.value}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
-          </div>
-        ))}
-      </div>
-
-      <Card className="border-border/40">
-        <CardHeader className="px-5 pt-4 pb-2">
-          <CardTitle className="text-xs">Recent Referrals</CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-4">
-          <div className="space-y-2">
-            {[
-              { name: "Carlos Reyes", date: "Feb 01", pkg: "Starter", bonus: "₱20.00" },
-              { name: "Emily Cruz", date: "Jan 28", pkg: "Basic", bonus: "₱60.00" },
-              { name: "Sophia Lee", date: "Jan 22", pkg: "Pro", bonus: "₱240.00" },
-              { name: "Jake Tan", date: "Jan 18", pkg: "Starter", bonus: "₱20.00" },
-            ].map((r, i) => (
-              <div key={i} className="flex items-center justify-between p-2.5 rounded-lg border border-border/30 hover:bg-muted/20 transition-colors">
-                <div>
-                  <p className="font-medium text-xs">{r.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{r.date} • {r.pkg} Package</p>
-                </div>
-                <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-500/30 px-1.5 py-0">+{r.bonus}</Badge>
-              </div>
-            ))}
-          </div>
+          <p className="text-[10px] text-muted-foreground">Share this link. When someone registers and activates a package, you earn Direct Membership Bonus.</p>
+          {referralCode && (
+            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/30">
+              <span className="text-xs text-muted-foreground">Your Code:</span>
+              <code className="text-xs font-bold font-mono text-primary">{referralCode}</code>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
