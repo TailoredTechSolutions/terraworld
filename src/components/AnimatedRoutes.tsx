@@ -5,11 +5,10 @@ import PageTransition from "./PageTransition";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleProtectedRoute from "./RoleProtectedRoute";
 
-// Retry wrapper for lazy imports – reloads once on chunk failures
+// Retry wrapper for lazy imports
 function lazyRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
   return lazy(() =>
     factory().catch(() => {
-      // Force a full page reload once to clear stale chunks
       const key = "chunk-reload";
       if (!sessionStorage.getItem(key)) {
         sessionStorage.setItem(key, "1");
@@ -21,7 +20,7 @@ function lazyRetry(factory: () => Promise<{ default: React.ComponentType<any> }>
   );
 }
 
-// Only the landing page is eagerly loaded for fast initial paint
+// Only the landing page is eagerly loaded
 import Index from "@/pages/Index";
 
 // Lazy-load everything else
@@ -33,6 +32,8 @@ const FarmDetailPage = lazyRetry(() => import("@/pages/FarmDetailPage"));
 const AffiliatePage = lazyRetry(() => import("@/pages/AffiliatePage"));
 const BusinessCentreAuth = lazyRetry(() => import("@/pages/BusinessCentreAuth"));
 const BusinessCentreShell = lazyRetry(() => import("@/components/business-centre/BusinessCentreShell"));
+
+// Business Centre pages
 const BCOverview = lazyRetry(() => import("@/pages/business-centre/BCOverview"));
 const BCBinaryTree = lazyRetry(() => import("@/pages/business-centre/BCBinaryTree"));
 const BCNetwork = lazyRetry(() => import("@/pages/business-centre/BCNetwork"));
@@ -48,7 +49,12 @@ const BCEarnings = lazyRetry(() => import("@/pages/business-centre/BCEarnings"))
 const BCWithdrawals = lazyRetry(() => import("@/pages/business-centre/BCWithdrawals"));
 const BCStatements = lazyRetry(() => import("@/pages/business-centre/BCStatements"));
 
-// Admin extended pages (named exports → wrapped default)
+// New 12-module admin pages
+const BCUsersRoles = lazyRetry(() => import("@/pages/business-centre/BCUsersRoles"));
+const BCMarketplace = lazyRetry(() => import("@/pages/business-centre/BCMarketplace"));
+const BCLogistics = lazyRetry(() => import("@/pages/business-centre/BCLogistics"));
+
+// Admin extended pages
 const BCReports = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCReports })));
 const BCPackageManager = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCPackageManager })));
 const BCRankManager = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCRankManager })));
@@ -72,7 +78,6 @@ const OrderConfirmation = lazyRetry(() => import("@/pages/OrderConfirmation"));
 const DriverDashboard = lazyRetry(() => import("@/pages/DriverDashboard"));
 const AdminDashboard = lazyRetry(() => import("@/pages/AdminDashboard"));
 const AdminBackOffice = lazyRetry(() => import("@/pages/AdminBackOffice"));
-// MemberDashboard removed — consolidated into Business Centre
 const FarmerDashboard = lazyRetry(() => import("@/pages/FarmerDashboard"));
 const BuyerDashboard = lazyRetry(() => import("@/pages/BuyerDashboard"));
 const AuthPage = lazyRetry(() => import("@/pages/AuthPage"));
@@ -80,7 +85,6 @@ const ResetPasswordPage = lazyRetry(() => import("@/pages/ResetPasswordPage"));
 const KYCPage = lazyRetry(() => import("@/pages/KYCPage"));
 const NotFound = lazyRetry(() => import("@/pages/NotFound"));
 
-// Placeholder pages are lightweight, keep as static imports
 import {
   AboutPage, HowItWorksPage, ImpactPage, CareersPage, PilotBaguioPage,
   PricingPage, CategoriesPage, OrderTrackPage, QualityPolicyPage,
@@ -116,57 +120,78 @@ const AnimatedRoutes = () => {
           <Route path="/farm/:farmId" element={<P><FarmDetailPage /></P>} />
           <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
           <Route path="/business-centre/auth" element={<P><BusinessCentreAuth /></P>} />
+
+          {/* ═══ Business Centre — 12-Module Admin Domain ═══ */}
           <Route path="/business-centre" element={<RoleProtectedRoute allowedRoles={['affiliate', 'member', 'admin', 'admin_readonly']}><P><BusinessCentreProvider><BusinessCentreShell /></BusinessCentreProvider></P></RoleProtectedRoute>}>
             <Route index element={<BCOverview />} />
             <Route path="dashboard" element={<BCOverview />} />
             <Route path="overview" element={<BCOverview />} />
-            {/* Network */}
-            <Route path="binary-tree" element={<BCBinaryTree />} />
-            <Route path="network" element={<BCNetwork />} />
-            <Route path="referrals" element={<BCReferrals />} />
-            {/* Earnings & Finance */}
+
+            {/* Module 2: Users & Roles */}
+            <Route path="users" element={<BCUsersRoles />} />
+
+            {/* Module 3: Marketplace Operations */}
+            <Route path="marketplace" element={<BCMarketplace />} />
+
+            {/* Module 4: Logistics & Delivery */}
+            <Route path="logistics" element={<BCLogistics />} />
+
+            {/* Module 5: Financial Management */}
             <Route path="earnings" element={<BCEarnings />} />
-            <Route path="commissions" element={<BCCommissions />} />
             <Route path="wallet" element={<BCWallet />} />
             <Route path="withdrawals" element={<BCWithdrawals />} />
             <Route path="statements" element={<BCStatements />} />
-            <Route path="token-rewards" element={<BCTokenRewards />} />
-            {/* Growth & Access */}
+            <Route path="payout-oversight" element={<BCPayoutOversight />} />
+            <Route path="wallet-controls" element={<BCWalletControls />} />
+
+            {/* Module 6: MLM System */}
+            <Route path="binary-tree" element={<BCBinaryTree />} />
+            <Route path="network" element={<BCNetwork />} />
+            <Route path="referrals" element={<BCReferrals />} />
+            <Route path="commissions" element={<BCCommissions />} />
+            <Route path="commission-runs" element={<BCCommissionRuns />} />
             <Route path="rank-activation" element={<BCRankActivation />} />
-            <Route path="coupons" element={<BCCoupons />} />
-            <Route path="marketing" element={<BCMarketing />} />
-            {/* Support */}
-            <Route path="support" element={<BCSupport />} />
-            {/* Admin Tools */}
+            <Route path="rank-manager" element={<BCRankManager />} />
+            <Route path="package-manager" element={<BCPackageManager />} />
             <Route path="member-search" element={<BCMemberSearch />} />
             <Route path="genealogy-explorer" element={<BCBinaryTree />} />
-            <Route path="commission-runs" element={<BCCommissionRuns />} />
-            <Route path="payout-oversight" element={<BCPayoutOversight />} />
-            <Route path="reports" element={<BCReports />} />
-            <Route path="package-manager" element={<BCPackageManager />} />
-            <Route path="rank-manager" element={<BCRankManager />} />
-            {/* Super Admin */}
-            <Route path="wallet-controls" element={<BCWalletControls />} />
             <Route path="manual-placement" element={<BCManualPlacement />} />
-            <Route path="audit-logs" element={<BCAuditLogs />} />
-            <Route path="security-roles" element={<BCSecurity />} />
-            <Route path="system-settings" element={<BCSystemSettings />} />
+
+            {/* Module 7: Tokenomics & Rewards */}
+            <Route path="token-rewards" element={<BCTokenRewards />} />
+
+            {/* Module 8: Coupons & Promotions */}
+            <Route path="coupons" element={<BCCoupons />} />
+            <Route path="marketing" element={<BCMarketing />} />
+
+            {/* Module 9: Customer Service */}
+            <Route path="support" element={<BCSupport />} />
+
+            {/* Module 10: Reports & Analytics */}
+            <Route path="reports" element={<BCReports />} />
+
+            {/* Module 11: Compliance & Security */}
             <Route path="compliance" element={<BCCompliance />} />
-            <Route path="global-config" element={<BCGlobalConfig />} />
+            <Route path="security-roles" element={<BCSecurity />} />
+
+            {/* Module 12: Settings & Audit */}
             <Route path="control-center" element={<BCControlCenter />} />
+            <Route path="system-settings" element={<BCSystemSettings />} />
+            <Route path="global-config" element={<BCGlobalConfig />} />
+            <Route path="audit-logs" element={<BCAuditLogs />} />
           </Route>
+
           <Route path="/checkout" element={<P><CheckoutPage /></P>} />
           <Route path="/order-confirmation" element={<P><OrderConfirmation /></P>} />
           <Route path="/auth" element={<P><AuthPage /></P>} />
           <Route path="/reset-password" element={<P><ResetPasswordPage /></P>} />
           <Route path="/kyc" element={<P><KYCPage /></P>} />
 
-          {/* Role-protected dashboards */}
+          {/* Role-protected dashboards (output-only for users) */}
           <Route path="/buyer" element={<RoleProtectedRoute allowedRoles={['buyer']}><P><BuyerDashboard /></P></RoleProtectedRoute>} />
           <Route path="/driver" element={<RoleProtectedRoute allowedRoles={['driver']}><P><DriverDashboard /></P></RoleProtectedRoute>} />
           <Route path="/admin" element={<RoleProtectedRoute allowedRoles={['admin']}><P><AdminBackOffice /></P></RoleProtectedRoute>} />
           <Route path="/admin/legacy" element={<RoleProtectedRoute allowedRoles={['admin']}><P><AdminDashboard /></P></RoleProtectedRoute>} />
-          {/* /member redirects to Business Centre */}
           <Route path="/member" element={<Navigate to="/business-centre" replace />} />
           <Route path="/farmer" element={<RoleProtectedRoute allowedRoles={['farmer']}><P><FarmerDashboard /></P></RoleProtectedRoute>} />
 

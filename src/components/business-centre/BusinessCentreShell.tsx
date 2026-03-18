@@ -18,7 +18,7 @@ import {
   Wallet, Megaphone, HelpCircle, Search, BarChart3, CreditCard, Scale,
   Settings, Lock, FileText, Shield, Zap, Crown, UserCircle, X, Eye,
   ArrowLeft, Menu, ChevronLeft, Loader2, Coins, ArrowUpRight, Package,
-  Globe
+  Globe, Store, Truck, Link2, ToggleLeft
 } from "lucide-react";
 
 interface NavItem {
@@ -30,7 +30,9 @@ interface NavItem {
   superAdminOnly?: boolean;
 }
 
-const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
+// ─── 12-MODULE ADMIN SIDEBAR ───
+// Members see a subset; admins see the full 12-module layout
+const MEMBER_SECTIONS: { title: string; items: NavItem[] }[] = [
   {
     title: "Overview",
     items: [
@@ -38,7 +40,7 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     ],
   },
   {
-    title: "Network",
+    title: "My Network",
     items: [
       { id: "binary-tree", label: "Binary Tree", icon: GitBranch, path: "/business-centre/binary-tree" },
       { id: "network", label: "Network", icon: Users, path: "/business-centre/network" },
@@ -46,20 +48,20 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     ],
   },
   {
-    title: "Earnings & Finance",
+    title: "Finance",
     items: [
       { id: "earnings", label: "Earnings", icon: DollarSign, path: "/business-centre/earnings" },
       { id: "commissions", label: "Commissions", icon: BarChart3, path: "/business-centre/commissions" },
       { id: "wallet", label: "Wallet", icon: Wallet, path: "/business-centre/wallet" },
       { id: "withdrawals", label: "Withdrawals", icon: ArrowUpRight, path: "/business-centre/withdrawals" },
       { id: "statements", label: "Statements", icon: FileText, path: "/business-centre/statements" },
-      { id: "token-rewards", label: "Token Rewards", icon: Coins, path: "/business-centre/token-rewards" },
     ],
   },
   {
-    title: "Growth & Access",
+    title: "Growth",
     items: [
       { id: "rank-activation", label: "Rank & Activation", icon: Award, path: "/business-centre/rank-activation" },
+      { id: "token-rewards", label: "Token Rewards", icon: Coins, path: "/business-centre/token-rewards" },
       { id: "coupons", label: "Coupons", icon: Ticket, path: "/business-centre/coupons" },
       { id: "marketing", label: "Marketing", icon: Megaphone, path: "/business-centre/marketing" },
     ],
@@ -70,29 +72,111 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
       { id: "support", label: "Support", icon: HelpCircle, path: "/business-centre/support" },
     ],
   },
+];
+
+const ADMIN_SECTIONS: { title: string; moduleNumber: number; items: NavItem[] }[] = [
   {
-    title: "Admin Tools",
+    title: "1. Overview",
+    moduleNumber: 1,
     items: [
-      { id: "member-search", label: "Member Search", icon: Search, path: "/business-centre/member-search", adminOnly: true },
-      { id: "genealogy-explorer", label: "Genealogy Explorer", icon: GitBranch, path: "/business-centre/genealogy-explorer", adminOnly: true },
-      { id: "commission-runs", label: "Commission Runs", icon: CreditCard, path: "/business-centre/commission-runs", adminOnly: true },
-      { id: "payout-oversight", label: "Payout Oversight", icon: DollarSign, path: "/business-centre/payout-oversight", adminOnly: true },
-      { id: "reports", label: "Reports", icon: BarChart3, path: "/business-centre/reports", adminOnly: true },
-      { id: "package-manager", label: "Package Manager", icon: Package, path: "/business-centre/package-manager", adminOnly: true },
-      { id: "rank-manager", label: "Rank Manager", icon: Crown, path: "/business-centre/rank-manager", adminOnly: true },
+      { id: "overview", label: "Overview", icon: LayoutDashboard, path: "/business-centre/overview" },
     ],
   },
   {
-    title: "Super Admin",
+    title: "2. Users & Roles",
+    moduleNumber: 2,
     items: [
+      { id: "users", label: "User Management", icon: Users, path: "/business-centre/users", adminOnly: true },
+    ],
+  },
+  {
+    title: "3. Marketplace",
+    moduleNumber: 3,
+    items: [
+      { id: "marketplace", label: "Marketplace Ops", icon: Store, path: "/business-centre/marketplace", adminOnly: true },
+    ],
+  },
+  {
+    title: "4. Logistics",
+    moduleNumber: 4,
+    items: [
+      { id: "logistics", label: "Logistics & Delivery", icon: Truck, path: "/business-centre/logistics", adminOnly: true },
+    ],
+  },
+  {
+    title: "5. Financial Management",
+    moduleNumber: 5,
+    items: [
+      { id: "earnings", label: "Earnings Overview", icon: DollarSign, path: "/business-centre/earnings" },
+      { id: "wallet", label: "Wallet Overview", icon: Wallet, path: "/business-centre/wallet" },
+      { id: "withdrawals", label: "Withdrawals", icon: ArrowUpRight, path: "/business-centre/withdrawals" },
+      { id: "statements", label: "Statements", icon: FileText, path: "/business-centre/statements" },
+      { id: "payout-oversight", label: "Payout Oversight", icon: CreditCard, path: "/business-centre/payout-oversight", adminOnly: true },
       { id: "wallet-controls", label: "Wallet Controls", icon: Wallet, path: "/business-centre/wallet-controls", superAdminOnly: true },
+    ],
+  },
+  {
+    title: "6. MLM System",
+    moduleNumber: 6,
+    items: [
+      { id: "binary-tree", label: "Binary Tree", icon: GitBranch, path: "/business-centre/binary-tree" },
+      { id: "network", label: "Network", icon: Link2, path: "/business-centre/network" },
+      { id: "referrals", label: "Referrals", icon: Share2, path: "/business-centre/referrals" },
+      { id: "commissions", label: "Commissions", icon: BarChart3, path: "/business-centre/commissions" },
+      { id: "commission-runs", label: "Commission Runs", icon: CreditCard, path: "/business-centre/commission-runs", adminOnly: true },
+      { id: "rank-activation", label: "Rank & Activation", icon: Award, path: "/business-centre/rank-activation" },
+      { id: "rank-manager", label: "Rank Manager", icon: Crown, path: "/business-centre/rank-manager", adminOnly: true },
+      { id: "package-manager", label: "Package Manager", icon: Package, path: "/business-centre/package-manager", adminOnly: true },
+      { id: "member-search", label: "Member Search", icon: Search, path: "/business-centre/member-search", adminOnly: true },
+      { id: "genealogy-explorer", label: "Genealogy Explorer", icon: GitBranch, path: "/business-centre/genealogy-explorer", adminOnly: true },
       { id: "manual-placement", label: "Manual Placement", icon: GitBranch, path: "/business-centre/manual-placement", superAdminOnly: true },
-      { id: "control-center", label: "Control Center", icon: Shield, path: "/business-centre/control-center", superAdminOnly: true },
-      { id: "audit-logs", label: "Audit Logs", icon: FileText, path: "/business-centre/audit-logs", superAdminOnly: true },
+    ],
+  },
+  {
+    title: "7. Tokenomics",
+    moduleNumber: 7,
+    items: [
+      { id: "token-rewards", label: "Token Rewards", icon: Coins, path: "/business-centre/token-rewards" },
+    ],
+  },
+  {
+    title: "8. Coupons & Promotions",
+    moduleNumber: 8,
+    items: [
+      { id: "coupons", label: "Coupons", icon: Ticket, path: "/business-centre/coupons" },
+      { id: "marketing", label: "Marketing", icon: Megaphone, path: "/business-centre/marketing" },
+    ],
+  },
+  {
+    title: "9. Customer Service",
+    moduleNumber: 9,
+    items: [
+      { id: "support", label: "Support Queue", icon: HelpCircle, path: "/business-centre/support" },
+    ],
+  },
+  {
+    title: "10. Reports & Analytics",
+    moduleNumber: 10,
+    items: [
+      { id: "reports", label: "Reports", icon: BarChart3, path: "/business-centre/reports", adminOnly: true },
+    ],
+  },
+  {
+    title: "11. Compliance & Security",
+    moduleNumber: 11,
+    items: [
+      { id: "compliance", label: "Compliance", icon: Scale, path: "/business-centre/compliance", adminOnly: true },
       { id: "security-roles", label: "Security & Roles", icon: Lock, path: "/business-centre/security-roles", superAdminOnly: true },
+    ],
+  },
+  {
+    title: "12. Settings & Audit",
+    moduleNumber: 12,
+    items: [
+      { id: "control-center", label: "Control Center", icon: Shield, path: "/business-centre/control-center", superAdminOnly: true },
       { id: "system-settings", label: "System Settings", icon: Settings, path: "/business-centre/system-settings", superAdminOnly: true },
-      { id: "compliance", label: "Compliance", icon: Scale, path: "/business-centre/compliance", superAdminOnly: true },
       { id: "global-config", label: "Global Config", icon: Globe, path: "/business-centre/global-config", superAdminOnly: true },
+      { id: "audit-logs", label: "Audit Logs", icon: FileText, path: "/business-centre/audit-logs", superAdminOnly: true },
     ],
   },
 ];
@@ -131,23 +215,39 @@ const BusinessCentreShell = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const filteredSections = NAV_SECTIONS.filter(section => {
-    const items = section.items.filter(item => {
-      if (item.superAdminOnly && !isAdmin) return false;
-      if (item.adminOnly && !isAnyAdmin) return false;
-      if (isViewingAsMember && (item.adminOnly || item.superAdminOnly)) return false;
-      return true;
-    });
-    return items.length > 0;
-  }).map(section => ({
-    ...section,
-    items: section.items.filter(item => {
-      if (item.superAdminOnly && !isAdmin) return false;
-      if (item.adminOnly && !isAnyAdmin) return false;
-      if (isViewingAsMember && (item.adminOnly || item.superAdminOnly)) return false;
-      return true;
-    }),
-  }));
+  // Determine which sections to show
+  const useAdminLayout = isAnyAdmin && !isViewingAsMember;
+
+  const getFilteredSections = () => {
+    if (!useAdminLayout) {
+      // Member view
+      return MEMBER_SECTIONS.map(s => ({
+        title: s.title,
+        isAdmin: false,
+        items: s.items,
+      }));
+    }
+
+    // Admin view — 12 modules with permission filtering
+    return ADMIN_SECTIONS.filter(section => {
+      const items = section.items.filter(item => {
+        if (item.superAdminOnly && !isAdmin) return false;
+        if (item.adminOnly && !isAnyAdmin) return false;
+        return true;
+      });
+      return items.length > 0;
+    }).map(section => ({
+      title: section.title,
+      isAdmin: section.items.some(i => i.adminOnly || i.superAdminOnly),
+      items: section.items.filter(item => {
+        if (item.superAdminOnly && !isAdmin) return false;
+        if (item.adminOnly && !isAnyAdmin) return false;
+        return true;
+      }),
+    }));
+  };
+
+  const filteredSections = getFilteredSections();
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
@@ -221,39 +321,39 @@ const BusinessCentreShell = () => {
 
       {/* Navigation */}
       <ScrollArea className="flex-1 px-2 py-3">
-        <nav className="space-y-4">
-          {filteredSections.map((section, sIdx) => {
-            const isAdminSection = section.items.some(i => i.adminOnly || i.superAdminOnly);
-            return (
-              <div key={section.title}>
-                {isAdminSection && <Separator className="mb-3" />}
-                <p className={cn(
-                  "px-3 mb-1 text-[10px] font-semibold uppercase tracking-wider",
-                  isAdminSection ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"
-                )}>
-                  {section.title}
-                </p>
-                <div className="space-y-0.5">
-                  {section.items.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => { navigate(item.path); setSidebarOpen(false); }}
-                      className={cn(
-                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150",
-                        isActive(item.path)
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-                        (item.adminOnly || item.superAdminOnly) && !isActive(item.path) && "text-amber-600/70 dark:text-amber-400/70"
-                      )}
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{item.label}</span>
-                    </button>
-                  ))}
-                </div>
+        <nav className="space-y-3">
+          {filteredSections.map((section) => (
+            <div key={section.title}>
+              {section.isAdmin && <Separator className="mb-2" />}
+              <p className={cn(
+                "px-3 mb-1 text-[10px] font-semibold uppercase tracking-wider",
+                section.isAdmin ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"
+              )}>
+                {section.title}
+              </p>
+              <div className="space-y-0.5">
+                {section.items.map((item) => (
+                  <button
+                    key={item.id + item.path}
+                    onClick={() => { navigate(item.path); setSidebarOpen(false); }}
+                    className={cn(
+                      "w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150",
+                      isActive(item.path)
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                      (item.adminOnly || item.superAdminOnly) && !isActive(item.path) && "text-amber-600/70 dark:text-amber-400/70"
+                    )}
+                  >
+                    <item.icon className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">{item.label}</span>
+                    {item.superAdminOnly && (
+                      <Crown className="h-2.5 w-2.5 ml-auto text-amber-500/50 shrink-0" />
+                    )}
+                  </button>
+                ))}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </nav>
       </ScrollArea>
     </div>
