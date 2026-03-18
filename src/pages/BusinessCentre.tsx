@@ -711,9 +711,13 @@ const BusinessCentre = () => {
           <SectionHeader icon={Share2} title="Referrals" id="referral" />
           <ReferralPanel />
 
-          {/* Rank & Packages */}
-          <SectionHeader icon={Crown} title="Rank & Packages" id="rank" />
-          <RankPanel />
+          {/* Rank & Activation */}
+          <SectionHeader icon={Crown} title="Rank & Activation" id="rank" />
+          <RankActivationPanel />
+
+          {/* Coupons */}
+          <SectionHeader icon={Ticket} title="Coupons" id="coupons" />
+          <CouponsPanel />
 
           {/* Marketing Tools */}
           <SectionHeader icon={Megaphone} title="Marketing Tools" id="marketing" />
