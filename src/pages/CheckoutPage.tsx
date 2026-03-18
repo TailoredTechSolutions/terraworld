@@ -176,6 +176,15 @@ const CheckoutPage = () => {
         }
       }
 
+      // Process rank upgrade via edge function
+      if (hasUpgrade && upgradeItem) {
+        const { data, error } = await supabase.functions.invoke("process-upgrade", {
+          body: { target_tier: upgradeItem.targetTier },
+        });
+        if (error) throw new Error(error.message);
+        if (!data?.success) throw new Error(data?.error || "Upgrade failed");
+      }
+
       // Process product order via create-order
       if (hasProducts) {
         const orderItems = items.map((item) => ({
