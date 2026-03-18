@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import { useIsMobile } from "@/hooks/use-mobile";
+import AdminDashboardWrapper from "@/components/admin/AdminDashboardWrapper";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FarmerSidebar from "@/components/farmer/FarmerSidebar";
@@ -32,7 +34,7 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type Farmer = Tables<"farmers">;
 
-const FarmerDashboard = () => {
+const FarmerDashboardInner = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
@@ -235,6 +237,24 @@ const FarmerDashboard = () => {
       <Footer />
     </div>
   );
+};
+
+const FarmerDashboard = () => {
+  const { isAnyAdmin } = useUserRoles();
+
+  if (isAnyAdmin) {
+    return (
+      <AdminDashboardWrapper
+        roleFilter="farmer"
+        title="Farmer Management"
+        description="View and manage all registered farmers on the platform"
+      >
+        {(/* selectedUserId, selectedUserEmail */) => <FarmerDashboardInner />}
+      </AdminDashboardWrapper>
+    );
+  }
+
+  return <FarmerDashboardInner />;
 };
 
 export default FarmerDashboard;

@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import AdminDashboardWrapper from "@/components/admin/AdminDashboardWrapper";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -55,7 +57,7 @@ const demoNotifications = [
   { id: "dn3", title: "Earnings Updated", message: "₱850 has been added to your wallet for completed deliveries", is_read: true, created_at: new Date(Date.now() - 48 * 3600000).toISOString() },
 ];
 
-const DriverDashboard = () => {
+const DriverDashboardInner = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -717,6 +719,24 @@ const DriverProfile = ({ profile, driverRecord, kycStatus }: { profile: any; dri
       </Card>
     </div>
   );
+};
+
+const DriverDashboard = () => {
+  const { isAnyAdmin } = useUserRoles();
+
+  if (isAnyAdmin) {
+    return (
+      <AdminDashboardWrapper
+        roleFilter="driver"
+        title="Driver Management"
+        description="View and manage all registered drivers on the platform"
+      >
+        {() => <DriverDashboardInner />}
+      </AdminDashboardWrapper>
+    );
+  }
+
+  return <DriverDashboardInner />;
 };
 
 export default DriverDashboard;

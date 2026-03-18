@@ -6,7 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import { useIsMobile } from "@/hooks/use-mobile";
+import AdminDashboardWrapper from "@/components/admin/AdminDashboardWrapper";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BuyerSidebar from "@/components/buyer/BuyerSidebar";
@@ -24,7 +26,7 @@ import BuyerProfilePanel from "@/components/buyer/BuyerProfilePanel";
 import BuyerNotificationsPanel from "@/components/buyer/BuyerNotificationsPanel";
 import BuyerSupportPanel from "@/components/buyer/BuyerSupportPanel";
 
-const BuyerDashboard = () => {
+const BuyerDashboardInner = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "home";
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -214,6 +216,24 @@ const BuyerDashboard = () => {
       <Footer />
     </div>
   );
+};
+
+const BuyerDashboard = () => {
+  const { isAnyAdmin } = useUserRoles();
+
+  if (isAnyAdmin) {
+    return (
+      <AdminDashboardWrapper
+        roleFilter="buyer"
+        title="Buyer Management"
+        description="View and manage all registered buyers on the platform"
+      >
+        {() => <BuyerDashboardInner />}
+      </AdminDashboardWrapper>
+    );
+  }
+
+  return <BuyerDashboardInner />;
 };
 
 export default BuyerDashboard;

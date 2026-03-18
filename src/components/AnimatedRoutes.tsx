@@ -64,7 +64,7 @@ const BCCompliance = lazyRetry(() => import("@/pages/business-centre/BCAdminPage
 const BCSystemSettings = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCSystemSettings })));
 const BCSecurity = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCSecurity })));
 const BCAuditLogs = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCAuditLogs })));
-
+const BCControlCenter = lazyRetry(() => import("@/pages/business-centre/BCControlCenter"));
 
 import { BusinessCentreProvider } from "@/contexts/BusinessCentreContext";
 const CheckoutPage = lazyRetry(() => import("@/pages/CheckoutPage"));
@@ -153,6 +153,7 @@ const AnimatedRoutes = () => {
             <Route path="system-settings" element={<BCSystemSettings />} />
             <Route path="compliance" element={<BCCompliance />} />
             <Route path="global-config" element={<BCGlobalConfig />} />
+            <Route path="control-center" element={<BCControlCenter />} />
           </Route>
           <Route path="/checkout" element={<P><CheckoutPage /></P>} />
           <Route path="/order-confirmation" element={<P><OrderConfirmation /></P>} />
