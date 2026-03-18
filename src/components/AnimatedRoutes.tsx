@@ -60,7 +60,7 @@ const BCCustomerService = lazyRetry(() => import("@/pages/business-centre/BCCust
 const BCComplianceAudit = lazyRetry(() => import("@/pages/business-centre/BCComplianceAudit"));
 
 // Admin extended pages
-const BCReports = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCReports })));
+const BCReportsAnalytics = lazyRetry(() => import("@/pages/business-centre/BCReportsAnalytics"));
 const BCPackageManager = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCPackageManager })));
 const BCRankManager = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCRankManager })));
 const BCWalletControls = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCWalletControls })));
