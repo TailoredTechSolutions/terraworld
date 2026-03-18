@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import BinaryTreeExplorer from "@/components/member/BinaryTreeExplorer";
 
 
 // ─── Dashboard Panel ───
