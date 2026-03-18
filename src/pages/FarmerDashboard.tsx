@@ -34,7 +34,7 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type Farmer = Tables<"farmers">;
 
-const FarmerDashboard = () => {
+const FarmerDashboardInner = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
