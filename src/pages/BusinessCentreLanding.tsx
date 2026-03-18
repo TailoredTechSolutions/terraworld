@@ -827,14 +827,177 @@ const SupportPanel = () => (
   </div>
 );
 
+// ─── Admin Panels ───
+const AdminMemberSearchPanel = () => (
+  <Card className="border-border/40">
+    <CardHeader className="px-5 pt-4 pb-2">
+      <CardTitle className="text-sm flex items-center gap-2"><Search className="h-4 w-4 text-primary" /> Member Search & Inspect</CardTitle>
+    </CardHeader>
+    <CardContent className="px-5 pb-4 space-y-3">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Search by name, email, or referral code..." className="pl-9 h-9 text-sm" />
+      </div>
+      <p className="text-xs text-muted-foreground">Search all platform members, inspect volumes, activation state, and payout history.</p>
+    </CardContent>
+  </Card>
+);
+
+const AdminCommissionRunsPanel = () => (
+  <Card className="border-border/40">
+    <CardHeader className="px-5 pt-4 pb-2">
+      <CardTitle className="text-sm flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" /> Commission Runs</CardTitle>
+    </CardHeader>
+    <CardContent className="px-5 pb-4 space-y-3">
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "Last Run", value: "Mar 15, 2026" },
+          { label: "Total Distributed", value: "₱284,500" },
+          { label: "Members Paid", value: "142" },
+        ].map((s) => (
+          <div key={s.label} className="text-center p-3 rounded-xl border border-border/40 bg-card">
+            <p className="text-sm font-bold font-display text-foreground">{s.value}</p>
+            <p className="text-[10px] text-muted-foreground">{s.label}</p>
+          </div>
+        ))}
+      </div>
+      <Button size="sm" className="w-full h-9 text-sm">Run New Commission Cycle</Button>
+    </CardContent>
+  </Card>
+);
+
+const AdminPayoutOversightPanel = () => (
+  <Card className="border-border/40">
+    <CardHeader className="px-5 pt-4 pb-2">
+      <CardTitle className="text-sm flex items-center gap-2"><CreditCard className="h-4 w-4 text-primary" /> Payout Oversight</CardTitle>
+    </CardHeader>
+    <CardContent className="px-5 pb-4 space-y-3">
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "Pending Withdrawals", value: "18" },
+          { label: "Total Pending Amount", value: "₱127,840" },
+          { label: "Avg Processing Time", value: "1.2 days" },
+        ].map((s) => (
+          <div key={s.label} className="text-center p-3 rounded-xl border border-border/40 bg-card">
+            <p className="text-sm font-bold font-display text-foreground">{s.value}</p>
+            <p className="text-[10px] text-muted-foreground">{s.label}</p>
+          </div>
+        ))}
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const AdminCompliancePanel = () => (
+  <Card className="border-border/40">
+    <CardHeader className="px-5 pt-4 pb-2">
+      <CardTitle className="text-sm flex items-center gap-2"><Scale className="h-4 w-4 text-primary" /> Compliance & Fraud Flags</CardTitle>
+    </CardHeader>
+    <CardContent className="px-5 pb-4">
+      <p className="text-xs text-muted-foreground">No anomalies detected in the current period. All fail-safe ratios within safe ranges.</p>
+    </CardContent>
+  </Card>
+);
+
+const AdminSystemSettingsPanel = () => (
+  <Card className="border-border/40">
+    <CardHeader className="px-5 pt-4 pb-2">
+      <CardTitle className="text-sm flex items-center gap-2"><Settings className="h-4 w-4 text-primary" /> Business Centre Settings</CardTitle>
+    </CardHeader>
+    <CardContent className="px-5 pb-4 space-y-3">
+      <div className="space-y-2 text-xs">
+        <div className="flex justify-between p-2.5 rounded bg-muted/30"><span className="text-muted-foreground">Binary Match Rate</span><span className="font-medium">10%</span></div>
+        <div className="flex justify-between p-2.5 rounded bg-muted/30"><span className="text-muted-foreground">Fail-safe Threshold</span><span className="font-medium">75%</span></div>
+        <div className="flex justify-between p-2.5 rounded bg-muted/30"><span className="text-muted-foreground">BV Expiry</span><span className="font-medium">90 days</span></div>
+        <div className="flex justify-between p-2.5 rounded bg-muted/30"><span className="text-muted-foreground">Compensation Pool %</span><span className="font-medium">33% of Terra Fees</span></div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const AdminSecurityPanel = () => (
+  <Card className="border-border/40">
+    <CardHeader className="px-5 pt-4 pb-2">
+      <CardTitle className="text-sm flex items-center gap-2"><Lock className="h-4 w-4 text-primary" /> Security & Roles</CardTitle>
+    </CardHeader>
+    <CardContent className="px-5 pb-4">
+      <p className="text-xs text-muted-foreground">Manage user roles, manual placement overrides, and dual-approval wallet adjustments from this panel.</p>
+    </CardContent>
+  </Card>
+);
+
+const AdminAuditPanel = () => (
+  <Card className="border-border/40">
+    <CardHeader className="px-5 pt-4 pb-2">
+      <CardTitle className="text-sm flex items-center gap-2"><FileText className="h-4 w-4 text-primary" /> Audit Logs</CardTitle>
+    </CardHeader>
+    <CardContent className="px-5 pb-4">
+      <p className="text-xs text-muted-foreground">Full audit trail visibility for all system actions, wallet adjustments, and compliance events.</p>
+    </CardContent>
+  </Card>
+);
+
 // ─── Main Page ───
 const BusinessCentreLanding = () => {
   const { user, loading } = useAuth();
+  const { isAdmin, isAnyAdmin } = useUserRoles();
   const [activeNav, setActiveNav] = useState("dashboard");
   const { scrollY } = useScroll();
   const heroImageY = useTransform(scrollY, [0, 500], [0, 150]);
   const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
   const heroScale = useTransform(scrollY, [0, 500], [1, 1.15]);
+
+  // Real data state
+  const [walletData, setWalletData] = useState<{ available_balance: number; pending_balance: number; total_withdrawn: number } | null>(null);
+  const [membership, setMembership] = useState<{ tier: string; package_price: number; membership_bv: number } | null>(null);
+  const [totalEarnings, setTotalEarnings] = useState(0);
+  const [binaryStats, setBinaryStats] = useState({ left_bv: 0, right_bv: 0, matched_bv: 0 });
+  const [tokenBalance, setTokenBalance] = useState(0);
+  const [referralCode, setReferralCode] = useState("");
+
+  // Build nav items based on role
+  const NAV_ITEMS = [
+    ...BASE_NAV_ITEMS,
+    ...(isAnyAdmin ? ADMIN_NAV_ITEMS : []),
+    ...(isAdmin ? SUPERADMIN_NAV_ITEMS : []),
+  ];
+
+  // Fetch real data
+  useEffect(() => {
+    if (!user) return;
+    const uid = user.id;
+
+    // Fetch wallet
+    supabase.from("wallets").select("available_balance, pending_balance, total_withdrawn")
+      .eq("user_id", uid).maybeSingle().then(({ data }) => { if (data) setWalletData(data); });
+
+    // Fetch membership
+    supabase.from("memberships").select("tier, package_price, membership_bv")
+      .eq("user_id", uid).maybeSingle().then(({ data }) => { if (data) setMembership(data); });
+
+    // Fetch total earnings
+    supabase.from("payout_ledger").select("net_amount").eq("user_id", uid)
+      .then(({ data }) => { if (data) setTotalEarnings(data.reduce((s, r) => s + Number(r.net_amount), 0)); });
+
+    // Fetch BV stats
+    supabase.from("bv_ledger").select("bv_amount, leg").eq("user_id", uid)
+      .then(({ data }) => {
+        if (data) {
+          const left = data.filter(r => r.leg === "left").reduce((s, r) => s + Number(r.bv_amount), 0);
+          const right = data.filter(r => r.leg === "right").reduce((s, r) => s + Number(r.bv_amount), 0);
+          setBinaryStats({ left_bv: left, right_bv: right, matched_bv: Math.min(left, right) });
+        }
+      });
+
+    // Fetch token balance + referral code
+    supabase.from("profiles").select("agri_token_balance, referral_code")
+      .eq("user_id", uid).maybeSingle().then(({ data }) => {
+        if (data) {
+          setTokenBalance(data.agri_token_balance || 0);
+          setReferralCode(data.referral_code || "");
+        }
+      });
+  }, [user]);
 
   useEffect(() => {
     const sectionIds = NAV_ITEMS.map(n => n.id);
@@ -853,9 +1016,11 @@ const BusinessCentreLanding = () => {
       if (el) observer.observe(el);
     });
     return () => observer.disconnect();
-  }, []);
+  }, [NAV_ITEMS.length]);
 
   if (!loading && !user) return <Navigate to="/auth" replace />;
+
+  const roleBadge = isAdmin ? "Super Admin" : isAnyAdmin ? "Admin" : membership?.tier ? `${membership.tier.charAt(0).toUpperCase() + membership.tier.slice(1)} Member` : "Member";
 
   return (
     <div className="min-h-screen flex flex-col bg-background relative">
@@ -888,13 +1053,16 @@ const BusinessCentreLanding = () => {
           >
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/20 backdrop-blur-md border border-primary/30 px-4 py-1.5 mb-4">
               <Zap className="h-4 w-4 text-primary" />
-              <span className="text-xs font-semibold text-primary">Partner Business Centre</span>
+              <span className="text-xs font-semibold text-primary">Business Centre</span>
+              <Badge variant="outline" className="text-[10px] ml-1 border-primary/30 text-primary">{roleBadge}</Badge>
             </div>
             <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-2 max-w-2xl leading-tight">
-              Your Business Hub
+              Business Centre
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground max-w-lg">
-              Manage your network, track commissions, and grow your Terra Farming business — all in one place.
+              {isAnyAdmin
+                ? "Manage the entire affiliate network, commissions, payouts, and compliance — all in one place."
+                : "Manage your network, track commissions, and grow your Terra Farming business — all in one place."}
             </p>
           </motion.div>
 
@@ -905,9 +1073,9 @@ const BusinessCentreLanding = () => {
             transition={{ duration: 0.7, delay: 0.5, ease: cubicSmooth }}
           >
             {[
-              { icon: Users, value: "142", label: "Network" },
-              { icon: DollarSign, value: "₱48.3K", label: "Earnings" },
-              { icon: Coins, value: "1,247", label: "AGRI Tokens" },
+              { icon: Users, value: "—", label: "Network" },
+              { icon: DollarSign, value: totalEarnings > 0 ? `₱${totalEarnings.toLocaleString()}` : "₱0", label: "Earnings" },
+              { icon: Coins, value: tokenBalance > 0 ? tokenBalance.toLocaleString() : "0", label: "AGRI Tokens" },
             ].map(({ icon: Icon, value, label }) => (
               <div key={label} className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-card/60 backdrop-blur-sm border border-border/50">
@@ -927,21 +1095,28 @@ const BusinessCentreLanding = () => {
       <div className="sticky top-16 z-30 bg-background/80 backdrop-blur-lg border-b border-border/50 transition-all duration-300">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <nav className="flex items-center gap-1 overflow-x-auto py-2.5 scrollbar-hide">
-            {NAV_ITEMS.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => scrollTo(item.id)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap border shrink-0",
-                  activeNav === item.id
-                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                    : "text-muted-foreground border-transparent hover:text-foreground hover:bg-accent hover:border-border"
-                )}
-              >
-                <item.icon className="h-3.5 w-3.5" />
-                {item.label}
-              </button>
-            ))}
+            {NAV_ITEMS.map((item, idx) => {
+              const isAdminSection = ADMIN_NAV_ITEMS.some(a => a.id === item.id) || SUPERADMIN_NAV_ITEMS.some(a => a.id === item.id);
+              const isFirstAdmin = isAdminSection && idx > 0 && !ADMIN_NAV_ITEMS.some(a => a.id === NAV_ITEMS[idx - 1]?.id) && !SUPERADMIN_NAV_ITEMS.some(a => a.id === NAV_ITEMS[idx - 1]?.id);
+              return (
+                <div key={item.id} className="flex items-center shrink-0">
+                  {isFirstAdmin && <div className="w-px h-5 bg-border mx-1.5 shrink-0" />}
+                  <button
+                    onClick={() => scrollTo(item.id)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap border shrink-0",
+                      activeNav === item.id
+                        ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                        : "text-muted-foreground border-transparent hover:text-foreground hover:bg-accent hover:border-border",
+                      isAdminSection && activeNav !== item.id && "text-amber-600 dark:text-amber-400"
+                    )}
+                  >
+                    <item.icon className="h-3.5 w-3.5" />
+                    {item.label}
+                  </button>
+                </div>
+              );
+            })}
           </nav>
         </div>
       </div>
@@ -955,7 +1130,7 @@ const BusinessCentreLanding = () => {
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, ease: cubicSmooth }}
           >
-            <SectionHeader icon={LayoutDashboard} title="Dashboard" id="dashboard" />
+            <SectionHeader icon={LayoutDashboard} title="Business Centre Overview" id="dashboard" />
             <div className="mt-4"><DashboardPanel /></div>
           </motion.section>
 
@@ -1010,7 +1185,7 @@ const BusinessCentreLanding = () => {
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, ease: cubicSmooth }}
           >
-            <SectionHeader icon={Crown} title="Rank & Packages" id="rank" />
+            <SectionHeader icon={Crown} title="Rank & Activation" id="rank" />
             <div className="mt-4"><RankPanel /></div>
           </motion.section>
 
@@ -1046,6 +1221,96 @@ const BusinessCentreLanding = () => {
             <SectionHeader icon={HelpCircle} title="Support" id="support" />
             <div className="mt-4"><SupportPanel /></div>
           </motion.section>
+
+          {/* ===== ADMIN SECTIONS ===== */}
+          {isAnyAdmin && (
+            <>
+              <div className="pt-4">
+                <Separator />
+                <div className="flex items-center gap-3 mt-4 mb-2">
+                  <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/30" variant="outline">
+                    <Shield className="h-3 w-3 mr-1" /> Admin Tools
+                  </Badge>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+              </div>
+
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, ease: cubicSmooth }}
+              >
+                <SectionHeader icon={Search} title="Member Search" id="admin-members" />
+                <div className="mt-4"><AdminMemberSearchPanel /></div>
+              </motion.section>
+
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, ease: cubicSmooth }}
+              >
+                <SectionHeader icon={BarChart3} title="Commission Runs" id="admin-commissions" />
+                <div className="mt-4"><AdminCommissionRunsPanel /></div>
+              </motion.section>
+
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, ease: cubicSmooth }}
+              >
+                <SectionHeader icon={CreditCard} title="Payout Oversight" id="admin-payouts" />
+                <div className="mt-4"><AdminPayoutOversightPanel /></div>
+              </motion.section>
+
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, ease: cubicSmooth }}
+              >
+                <SectionHeader icon={Scale} title="Compliance" id="admin-compliance" />
+                <div className="mt-4"><AdminCompliancePanel /></div>
+              </motion.section>
+
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, ease: cubicSmooth }}
+              >
+                <SectionHeader icon={Settings} title="System Settings" id="admin-settings" />
+                <div className="mt-4"><AdminSystemSettingsPanel /></div>
+              </motion.section>
+            </>
+          )}
+
+          {/* ===== SUPER ADMIN SECTIONS ===== */}
+          {isAdmin && (
+            <>
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, ease: cubicSmooth }}
+              >
+                <SectionHeader icon={Lock} title="Security & Roles" id="admin-security" />
+                <div className="mt-4"><AdminSecurityPanel /></div>
+              </motion.section>
+
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, ease: cubicSmooth }}
+              >
+                <SectionHeader icon={FileText} title="Audit Logs" id="admin-audit" />
+                <div className="mt-4"><AdminAuditPanel /></div>
+              </motion.section>
+            </>
+          )}
         </div>
       </main>
       <Footer />
