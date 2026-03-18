@@ -642,11 +642,17 @@ const BinaryTreeExplorer = () => {
   const loadTree = useCallback(async (rootId: string, addBreadcrumb?: BreadcrumbItem) => {
     setLoading(true);
     try {
-      const tree = await fetchTree(rootId, maxDepth);
+      const [tree, ancestryPath] = await Promise.all([
+        fetchTree(rootId, maxDepth),
+        rootId !== myUserId ? fetchAncestryPath(rootId) : Promise.resolve([]),
+      ]);
       setTreeData(tree);
       setCurrentRootUserId(rootId);
 
-      if (addBreadcrumb) {
+      // Use server-side ancestry for breadcrumbs when available
+      if (ancestryPath.length > 0) {
+        setBreadcrumb(ancestryPath);
+      } else if (addBreadcrumb) {
         setBreadcrumb((prev) => {
           const existing = prev.findIndex((b) => b.userId === addBreadcrumb.userId);
           if (existing >= 0) return prev.slice(0, existing + 1);
@@ -659,7 +665,7 @@ const BinaryTreeExplorer = () => {
     } finally {
       setLoading(false);
     }
-  }, [maxDepth, toast]);
+  }, [maxDepth, myUserId, toast]);
 
   // Lazy-load a specific branch
   const handleExpandBranch = useCallback(async (parentNode: TreeNode, side: "left" | "right") => {
