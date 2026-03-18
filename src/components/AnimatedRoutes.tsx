@@ -38,7 +38,7 @@ const OrderConfirmation = lazyRetry(() => import("@/pages/OrderConfirmation"));
 const DriverDashboard = lazyRetry(() => import("@/pages/DriverDashboard"));
 const AdminDashboard = lazyRetry(() => import("@/pages/AdminDashboard"));
 const AdminBackOffice = lazyRetry(() => import("@/pages/AdminBackOffice"));
-const MemberDashboard = lazyRetry(() => import("@/pages/MemberDashboard"));
+// MemberDashboard removed — consolidated into Business Centre
 const FarmerDashboard = lazyRetry(() => import("@/pages/FarmerDashboard"));
 const BuyerDashboard = lazyRetry(() => import("@/pages/BuyerDashboard"));
 const AuthPage = lazyRetry(() => import("@/pages/AuthPage"));
