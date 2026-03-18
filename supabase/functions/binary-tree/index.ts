@@ -151,6 +151,17 @@ Deno.serve(async (req) => {
     // Service client for privileged queries
     const admin = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Helper: write audit log (fire-and-forget)
+    function logAudit(action: string, entityType: string, entityId: string | null, details: Record<string, unknown>) {
+      admin.from("audit_log").insert({
+        actor_id: callerId,
+        action,
+        entity_type: entityType,
+        entity_id: entityId,
+        details,
+      }).then(({ error }) => { if (error) console.error("audit_log error:", error); });
+    }
+
     // Role check (single query)
     const { data: roles } = await admin
       .from("user_roles")
