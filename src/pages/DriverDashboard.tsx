@@ -57,29 +57,57 @@ const demoNotifications = [
   { id: "dn3", title: "Earnings Updated", message: "₱850 has been added to your wallet for completed deliveries", is_read: true, created_at: new Date(Date.now() - 48 * 3600000).toISOString() },
 ];
 
+const SCROLL_OFFSET = 80;
+
 const DriverDashboardInner = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("home");
+  const [activeSection, setActiveSection] = useState("home");
   const [isAvailable, setIsAvailable] = useState(true);
-  const isMobile = useIsMobile();
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const mainRef = useRef<HTMLDivElement>(null);
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   const registerSection = useCallback((id: string) => (el: HTMLDivElement | null) => {
     sectionRefs.current[id] = el;
   }, []);
 
-  const handleTabChange = useCallback((tab: string) => {
-    if (isMobile) {
-      const el = sectionRefs.current[tab];
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    } else {
-      setActiveTab(tab);
+  const scrollToSection = useCallback((sectionId: string) => {
+    const el = sectionRefs.current[sectionId];
+    if (el && mainRef.current) {
+      const containerTop = mainRef.current.getBoundingClientRect().top;
+      const elTop = el.getBoundingClientRect().top;
+      const offset = elTop - containerTop + mainRef.current.scrollTop - SCROLL_OFFSET;
+      mainRef.current.scrollTo({ top: offset, behavior: "smooth" });
     }
-  }, [isMobile]);
+  }, []);
+
+  // Scroll spy
+  useEffect(() => {
+    const container = mainRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      setShowBackToTop(container.scrollTop > 400);
+      const sectionIds = Object.keys(sectionRefs.current);
+      let currentSection = sectionIds[0];
+      for (const id of sectionIds) {
+        const el = sectionRefs.current[id];
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          if (rect.top - containerRect.top <= SCROLL_OFFSET + 100) {
+            currentSection = id;
+          }
+        }
+      }
+      setActiveSection(currentSection);
+    };
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Fetch this driver's record by email
   const { data: driverRecord } = useQuery({
