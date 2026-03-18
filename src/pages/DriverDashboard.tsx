@@ -721,4 +721,22 @@ const DriverProfile = ({ profile, driverRecord, kycStatus }: { profile: any; dri
   );
 };
 
+const DriverDashboard = () => {
+  const { isAnyAdmin } = useUserRoles();
+
+  if (isAnyAdmin) {
+    return (
+      <AdminDashboardWrapper
+        roleFilter="driver"
+        title="Driver Management"
+        description="View and manage all registered drivers on the platform"
+      >
+        {() => <DriverDashboardInner />}
+      </AdminDashboardWrapper>
+    );
+  }
+
+  return <DriverDashboardInner />;
+};
+
 export default DriverDashboard;

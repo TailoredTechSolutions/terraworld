@@ -218,4 +218,22 @@ const BuyerDashboardInner = () => {
   );
 };
 
+const BuyerDashboard = () => {
+  const { isAnyAdmin } = useUserRoles();
+
+  if (isAnyAdmin) {
+    return (
+      <AdminDashboardWrapper
+        roleFilter="buyer"
+        title="Buyer Management"
+        description="View and manage all registered buyers on the platform"
+      >
+        {() => <BuyerDashboardInner />}
+      </AdminDashboardWrapper>
+    );
+  }
+
+  return <BuyerDashboardInner />;
+};
+
 export default BuyerDashboard;
