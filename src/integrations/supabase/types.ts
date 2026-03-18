@@ -1987,11 +1987,53 @@ export type Database = {
     Functions: {
       generate_asset_code: { Args: { prefix?: string }; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
+      get_ancestry_path: {
+        Args: { p_user_id: string }
+        Returns: {
+          depth: number
+          full_name: string
+          tier: string
+          user_id: string
+        }[]
+      }
+      get_subtree_flat: {
+        Args: { p_max_depth?: number; p_root_user_id: string }
+        Returns: {
+          carryforward_left: number
+          carryforward_right: number
+          child_side: string
+          created_at: string
+          depth: number
+          email: string
+          full_name: string
+          left_bv: number
+          left_leg_id: string
+          left_membership_bv: number
+          left_product_bv: number
+          matched_bv: number
+          membership_bv: number
+          package_price: number
+          parent_user_id: string
+          placement_side: string
+          rank_name: string
+          right_bv: number
+          right_leg_id: string
+          right_membership_bv: number
+          right_product_bv: number
+          sponsor_id: string
+          tier: string
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_descendant_of: {
+        Args: { p_ancestor_user_id: string; p_target_user_id: string }
         Returns: boolean
       }
       post_wallet_entry: {
