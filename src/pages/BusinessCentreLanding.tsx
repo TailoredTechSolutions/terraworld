@@ -1,6 +1,8 @@
 import { Navigate } from "react-router-dom";
 import { HERO_BADGE as terraHeroBadge, BUSINESS_CENTRE_HERO as businessCentreHero } from "@/lib/siteImages";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
@@ -19,7 +21,7 @@ import {
   CreditCard, HelpCircle, TrendingUp, ArrowUpRight, ArrowDownRight,
   Copy, Download, Crown, Search, Wallet,
   CheckCircle2, XCircle, AlertTriangle, Coins, Shield, Zap, Target,
-  BarChart3, Clock, Star, Info
+  BarChart3, Clock, Star, Info, Settings, FileText, Scale, Lock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
