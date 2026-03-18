@@ -77,6 +77,6 @@ export const accountLinks: NavLink[] = [
 // Desktop top-bar quick links
 export const topNavLinks: NavLink[] = [
   { label: "Home", href: "/" },
-  { label: "Shop", href: "/shop" },
+  { label: "Marketplace", href: "/shop" },
   { label: "Find Farms", href: "/map" },
 ];
