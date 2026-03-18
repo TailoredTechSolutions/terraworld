@@ -44,6 +44,26 @@ const BCWallet = lazyRetry(() => import("@/pages/business-centre/BCWallet"));
 const BCTokenRewards = lazyRetry(() => import("@/pages/business-centre/BCTokenRewards"));
 const BCMarketing = lazyRetry(() => import("@/pages/business-centre/BCMarketing"));
 const BCSupport = lazyRetry(() => import("@/pages/business-centre/BCSupport"));
+const BCEarnings = lazyRetry(() => import("@/pages/business-centre/BCEarnings"));
+const BCWithdrawals = lazyRetry(() => import("@/pages/business-centre/BCWithdrawals"));
+const BCStatements = lazyRetry(() => import("@/pages/business-centre/BCStatements"));
+
+// Admin extended pages (named exports → wrapped default)
+const BCReports = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCReports })));
+const BCPackageManager = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCPackageManager })));
+const BCRankManager = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCRankManager })));
+const BCWalletControls = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCWalletControls })));
+const BCManualPlacement = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCManualPlacement })));
+const BCGlobalConfig = lazyRetry(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCGlobalConfig })));
+
+// Existing admin pages (named exports)
+const BCMemberSearch = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCMemberSearch })));
+const BCCommissionRuns = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCCommissionRuns })));
+const BCPayoutOversight = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCPayoutOversight })));
+const BCCompliance = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCCompliance })));
+const BCSystemSettings = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCSystemSettings })));
+const BCSecurity = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCSecurity })));
+const BCAuditLogs = lazyRetry(() => import("@/pages/business-centre/BCAdminPages").then(m => ({ default: m.BCAuditLogs })));
 
 
 import { BusinessCentreProvider } from "@/contexts/BusinessCentreContext";
@@ -100,16 +120,39 @@ const AnimatedRoutes = () => {
             <Route index element={<BCOverview />} />
             <Route path="dashboard" element={<BCOverview />} />
             <Route path="overview" element={<BCOverview />} />
+            {/* Network */}
             <Route path="binary-tree" element={<BCBinaryTree />} />
             <Route path="network" element={<BCNetwork />} />
             <Route path="referrals" element={<BCReferrals />} />
+            {/* Earnings & Finance */}
+            <Route path="earnings" element={<BCEarnings />} />
             <Route path="commissions" element={<BCCommissions />} />
             <Route path="wallet" element={<BCWallet />} />
+            <Route path="withdrawals" element={<BCWithdrawals />} />
+            <Route path="statements" element={<BCStatements />} />
             <Route path="token-rewards" element={<BCTokenRewards />} />
+            {/* Growth & Access */}
             <Route path="rank-activation" element={<BCRankActivation />} />
             <Route path="coupons" element={<BCCoupons />} />
             <Route path="marketing" element={<BCMarketing />} />
+            {/* Support */}
             <Route path="support" element={<BCSupport />} />
+            {/* Admin Tools */}
+            <Route path="member-search" element={<BCMemberSearch />} />
+            <Route path="genealogy-explorer" element={<BCBinaryTree />} />
+            <Route path="commission-runs" element={<BCCommissionRuns />} />
+            <Route path="payout-oversight" element={<BCPayoutOversight />} />
+            <Route path="reports" element={<BCReports />} />
+            <Route path="package-manager" element={<BCPackageManager />} />
+            <Route path="rank-manager" element={<BCRankManager />} />
+            {/* Super Admin */}
+            <Route path="wallet-controls" element={<BCWalletControls />} />
+            <Route path="manual-placement" element={<BCManualPlacement />} />
+            <Route path="audit-logs" element={<BCAuditLogs />} />
+            <Route path="security-roles" element={<BCSecurity />} />
+            <Route path="system-settings" element={<BCSystemSettings />} />
+            <Route path="compliance" element={<BCCompliance />} />
+            <Route path="global-config" element={<BCGlobalConfig />} />
           </Route>
           <Route path="/checkout" element={<P><CheckoutPage /></P>} />
           <Route path="/order-confirmation" element={<P><OrderConfirmation /></P>} />

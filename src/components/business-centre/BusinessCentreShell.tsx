@@ -17,7 +17,8 @@ import {
   LayoutDashboard, Users, GitBranch, DollarSign, Share2, Award, Ticket,
   Wallet, Megaphone, HelpCircle, Search, BarChart3, CreditCard, Scale,
   Settings, Lock, FileText, Shield, Zap, Crown, UserCircle, X, Eye,
-  ArrowLeft, Menu, ChevronLeft, Loader2, Coins
+  ArrowLeft, Menu, ChevronLeft, Loader2, Coins, ArrowUpRight, Package,
+  Globe
 } from "lucide-react";
 
 interface NavItem {
@@ -47,8 +48,11 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
   {
     title: "Earnings & Finance",
     items: [
-      { id: "commissions", label: "Commissions", icon: DollarSign, path: "/business-centre/commissions" },
+      { id: "earnings", label: "Earnings", icon: DollarSign, path: "/business-centre/earnings" },
+      { id: "commissions", label: "Commissions", icon: BarChart3, path: "/business-centre/commissions" },
       { id: "wallet", label: "Wallet", icon: Wallet, path: "/business-centre/wallet" },
+      { id: "withdrawals", label: "Withdrawals", icon: ArrowUpRight, path: "/business-centre/withdrawals" },
+      { id: "statements", label: "Statements", icon: FileText, path: "/business-centre/statements" },
       { id: "token-rewards", label: "Token Rewards", icon: Coins, path: "/business-centre/token-rewards" },
     ],
   },
@@ -70,17 +74,24 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     title: "Admin Tools",
     items: [
       { id: "member-search", label: "Member Search", icon: Search, path: "/business-centre/member-search", adminOnly: true },
-      { id: "commission-runs", label: "Commission Runs", icon: BarChart3, path: "/business-centre/commission-runs", adminOnly: true },
-      { id: "payout-oversight", label: "Payout Oversight", icon: CreditCard, path: "/business-centre/payout-oversight", adminOnly: true },
-      { id: "compliance", label: "Compliance", icon: Scale, path: "/business-centre/compliance", adminOnly: true },
-      { id: "system-settings", label: "System Settings", icon: Settings, path: "/business-centre/system-settings", adminOnly: true },
+      { id: "genealogy-explorer", label: "Genealogy Explorer", icon: GitBranch, path: "/business-centre/genealogy-explorer", adminOnly: true },
+      { id: "commission-runs", label: "Commission Runs", icon: CreditCard, path: "/business-centre/commission-runs", adminOnly: true },
+      { id: "payout-oversight", label: "Payout Oversight", icon: DollarSign, path: "/business-centre/payout-oversight", adminOnly: true },
+      { id: "reports", label: "Reports", icon: BarChart3, path: "/business-centre/reports", adminOnly: true },
+      { id: "package-manager", label: "Package Manager", icon: Package, path: "/business-centre/package-manager", adminOnly: true },
+      { id: "rank-manager", label: "Rank Manager", icon: Crown, path: "/business-centre/rank-manager", adminOnly: true },
     ],
   },
   {
     title: "Super Admin",
     items: [
-      { id: "security-roles", label: "Security & Roles", icon: Lock, path: "/business-centre/security-roles", superAdminOnly: true },
+      { id: "wallet-controls", label: "Wallet Controls", icon: Wallet, path: "/business-centre/wallet-controls", superAdminOnly: true },
+      { id: "manual-placement", label: "Manual Placement", icon: GitBranch, path: "/business-centre/manual-placement", superAdminOnly: true },
       { id: "audit-logs", label: "Audit Logs", icon: FileText, path: "/business-centre/audit-logs", superAdminOnly: true },
+      { id: "security-roles", label: "Security & Roles", icon: Lock, path: "/business-centre/security-roles", superAdminOnly: true },
+      { id: "system-settings", label: "System Settings", icon: Settings, path: "/business-centre/system-settings", superAdminOnly: true },
+      { id: "compliance", label: "Compliance", icon: Scale, path: "/business-centre/compliance", superAdminOnly: true },
+      { id: "global-config", label: "Global Config", icon: Globe, path: "/business-centre/global-config", superAdminOnly: true },
     ],
   },
 ];
