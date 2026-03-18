@@ -1124,7 +1124,7 @@ const BusinessCentreLanding = () => {
             transition={{ duration: 0.5, ease: cubicSmooth }}
           >
             <SectionHeader icon={Share2} title="Referrals" id="referral" />
-            <div className="mt-4"><ReferralPanel /></div>
+            <div className="mt-4"><ReferralPanel referralCode={referralCode} /></div>
           </motion.section>
 
           {/* Rank & Packages */}
