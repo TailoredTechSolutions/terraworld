@@ -66,7 +66,7 @@ const RoleProtectedRoute = ({
               <Link to={fallbackPath}>Go Back</Link>
             </Button>
             <Button asChild>
-              <Link to="/member">Member Dashboard</Link>
+              <Link to="/business-centre">Business Centre</Link>
             </Button>
           </div>
         </div>
