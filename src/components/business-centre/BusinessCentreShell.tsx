@@ -48,8 +48,11 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
   {
     title: "Earnings & Finance",
     items: [
-      { id: "commissions", label: "Commissions", icon: DollarSign, path: "/business-centre/commissions" },
+      { id: "earnings", label: "Earnings", icon: DollarSign, path: "/business-centre/earnings" },
+      { id: "commissions", label: "Commissions", icon: BarChart3, path: "/business-centre/commissions" },
       { id: "wallet", label: "Wallet", icon: Wallet, path: "/business-centre/wallet" },
+      { id: "withdrawals", label: "Withdrawals", icon: ArrowUpRight, path: "/business-centre/withdrawals" },
+      { id: "statements", label: "Statements", icon: FileText, path: "/business-centre/statements" },
       { id: "token-rewards", label: "Token Rewards", icon: Coins, path: "/business-centre/token-rewards" },
     ],
   },
