@@ -58,7 +58,7 @@ const CheckoutPage = () => {
   const [deliveryEstimate, setDeliveryEstimate] = useState<DeliveryEstimate | null>(null);
 
   // Fetch internal wallet balance
-  useState(() => {
+  useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -71,7 +71,7 @@ const CheckoutPage = () => {
       }
       setLoadingWallet(false);
     })();
-  });
+  }, []);
   
   // Form state
   const [formData, setFormData] = useState({
