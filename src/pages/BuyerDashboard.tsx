@@ -1,13 +1,11 @@
-import { useState, useRef, useCallback } from "react";
-import { useSearchParams, Link } from "react-router-dom";
-import { Loader2, User, ShoppingBag, Wallet, Coins, Users, TrendingUp } from "lucide-react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { Loader2, User, ShoppingBag, Wallet, Coins, Users, TrendingUp, ArrowUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
-import { useIsMobile } from "@/hooks/use-mobile";
 import AdminDashboardWrapper from "@/components/admin/AdminDashboardWrapper";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -26,47 +24,27 @@ import BuyerProfilePanel from "@/components/buyer/BuyerProfilePanel";
 import BuyerNotificationsPanel from "@/components/buyer/BuyerNotificationsPanel";
 import BuyerSupportPanel from "@/components/buyer/BuyerSupportPanel";
 
+const SCROLL_OFFSET = 80;
+
 const BuyerDashboardInner = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") || "home";
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const [activeSection, setActiveSection] = useState("home");
   const { user, profile, loading } = useAuth();
-  const isMobile = useIsMobile();
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const mainRef = useRef<HTMLDivElement>(null);
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   // Fetch real-time KPI data for hero badges
   const { data: kpiData } = useQuery({
     queryKey: ["buyer-hero-kpis", user?.id],
     queryFn: async () => {
       if (!user?.id) return { orders: 0, wallet: 0, tokens: 0, referrals: 0 };
-
       const email = profile?.email || user.email;
-
       const [ordersRes, walletRes, tokensRes, referralsRes] = await Promise.all([
-        // Order count
-        supabase
-          .from("orders")
-          .select("*", { count: "exact", head: true })
-          .eq("customer_email", email || ""),
-        // Wallet balance
-        supabase
-          .from("wallets")
-          .select("available_balance")
-          .eq("user_id", user.id)
-          .maybeSingle(),
-        // Token balance from profile
-        supabase
-          .from("profiles")
-          .select("agri_token_balance")
-          .eq("user_id", user.id)
-          .maybeSingle(),
-        // Referral count
-        supabase
-          .from("profiles")
-          .select("*", { count: "exact", head: true })
-          .eq("referred_by", profile?.id || ""),
+        supabase.from("orders").select("*", { count: "exact", head: true }).eq("customer_email", email || ""),
+        supabase.from("wallets").select("available_balance").eq("user_id", user.id).maybeSingle(),
+        supabase.from("profiles").select("agri_token_balance").eq("user_id", user.id).maybeSingle(),
+        supabase.from("profiles").select("*", { count: "exact", head: true }).eq("referred_by", profile?.id || ""),
       ]);
-
       return {
         orders: ordersRes.count || 0,
         wallet: Number(walletRes.data?.available_balance || 0),
@@ -82,17 +60,44 @@ const BuyerDashboardInner = () => {
     sectionRefs.current[id] = el;
   }, []);
 
-  const handleTabChange = useCallback((tab: string) => {
-    if (isMobile) {
-      const el = sectionRefs.current[tab];
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    } else {
-      setActiveTab(tab);
-      setSearchParams({ tab });
+  const scrollToSection = useCallback((sectionId: string) => {
+    const el = sectionRefs.current[sectionId];
+    if (el && mainRef.current) {
+      const containerTop = mainRef.current.getBoundingClientRect().top;
+      const elTop = el.getBoundingClientRect().top;
+      const offset = elTop - containerTop + mainRef.current.scrollTop - SCROLL_OFFSET;
+      mainRef.current.scrollTo({ top: offset, behavior: "smooth" });
     }
-  }, [isMobile, setSearchParams]);
+  }, []);
+
+  // Scroll spy
+  useEffect(() => {
+    const container = mainRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      setShowBackToTop(container.scrollTop > 400);
+
+      const sectionIds = Object.keys(sectionRefs.current);
+      let currentSection = sectionIds[0];
+
+      for (const id of sectionIds) {
+        const el = sectionRefs.current[id];
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          if (rect.top - containerRect.top <= SCROLL_OFFSET + 100) {
+            currentSection = id;
+          }
+        }
+      }
+
+      setActiveSection(currentSection);
+    };
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
 
   if (loading) {
     return (
@@ -129,35 +134,8 @@ const BuyerDashboardInner = () => {
     );
   }
 
-  const getPageTitle = () => {
-    const titles: Record<string, string> = {
-      home: "Dashboard", shop: "Shop", orders: "My Orders",
-      wallet: "Wallet & Payments", tokens: "Token Rewards",
-      referrals: "Referral Tracking", profile: "My Profile",
-      notifications: "Notifications", support: "Support & Disputes",
-    };
-    return titles[activeTab] || "Dashboard";
-  };
-
-  // Desktop: standard tab-based rendering
-  const renderDesktopContent = () => {
-    switch (activeTab) {
-      case "home": return <BuyerOverviewPanel userId={user.id} onTabChange={handleTabChange} />;
-      case "shop": return <BuyerShopPanel />;
-      case "orders": return <BuyerOrdersPanel userId={user.id} />;
-      case "wallet": return <BuyerWalletPanel userId={user.id} />;
-      case "tokens": return <BuyerTokensPanel userId={user.id} />;
-      case "referrals": return <BuyerReferralsPanel userId={user.id} referralCode={profile?.referral_code || ""} />;
-      case "profile": return <BuyerProfilePanel userId={user.id} />;
-      case "notifications": return <BuyerNotificationsPanel userId={user.id} />;
-      case "support": return <BuyerSupportPanel />;
-      default: return <BuyerOverviewPanel userId={user.id} onTabChange={handleTabChange} />;
-    }
-  };
-
-  // Mobile: all sections stacked
-  const mobileSections = [
-    { id: "home", label: "Overview", component: <BuyerOverviewPanel userId={user.id} onTabChange={handleTabChange} /> },
+  const sections = [
+    { id: "home", label: "Overview", component: <BuyerOverviewPanel userId={user.id} onTabChange={scrollToSection} /> },
     { id: "shop", label: "Shop", component: <BuyerShopPanel /> },
     { id: "orders", label: "My Orders", component: <BuyerOrdersPanel userId={user.id} /> },
     { id: "wallet", label: "Wallet & Payments", component: <BuyerWalletPanel userId={user.id} /> },
@@ -172,8 +150,8 @@ const BuyerDashboardInner = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <div className="flex-1 flex">
-        <BuyerSidebar activeTab={activeTab} onTabChange={handleTabChange} />
-        <main className="flex-1 overflow-auto">
+        <BuyerSidebar activeTab={activeSection} onTabChange={scrollToSection} />
+        <main ref={mainRef} className="flex-1 overflow-auto relative">
           <div className="container max-w-6xl mx-auto px-4 py-6">
             {/* Cinematic Hero Banner */}
             <DashboardHero
@@ -189,28 +167,34 @@ const BuyerDashboardInner = () => {
               ]}
             />
 
-            {isMobile ? (
-              <div className="space-y-8">
-                {mobileSections.map((section) => (
-                  <div
-                    key={section.id}
-                    ref={registerSection(section.id)}
-                    className="scroll-mt-4"
-                  >
-                    <h2 className="text-lg font-semibold mb-3 sticky top-0 bg-background/95 backdrop-blur-sm py-2 z-10 border-b border-border">
-                      {section.label}
-                    </h2>
-                    {section.component}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <>
-                <h2 className="text-2xl font-bold mb-6">{getPageTitle()}</h2>
-                {renderDesktopContent()}
-              </>
-            )}
+            {/* All sections rendered vertically */}
+            <div className="space-y-10">
+              {sections.map((section) => (
+                <div
+                  key={section.id}
+                  id={`buyer-${section.id}`}
+                  ref={registerSection(section.id)}
+                  className="scroll-mt-20"
+                >
+                  <h2 className="text-xl font-bold mb-4 sticky top-0 bg-background/95 backdrop-blur-sm py-3 z-10 border-b border-border">
+                    {section.label}
+                  </h2>
+                  {section.component}
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Back to Top */}
+          {showBackToTop && (
+            <Button
+              size="icon"
+              className="fixed bottom-6 right-6 z-50 rounded-full shadow-lg"
+              onClick={() => mainRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
+            >
+              <ArrowUp className="h-4 w-4" />
+            </Button>
+          )}
         </main>
       </div>
       <Footer />

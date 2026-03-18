@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
-import { useIsMobile } from "@/hooks/use-mobile";
 import AdminDashboardWrapper from "@/components/admin/AdminDashboardWrapper";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -21,41 +20,70 @@ import FarmerOrdersPanel from "@/components/farmer/FarmerOrdersPanel";
 import FarmerTokensPanel from "@/components/farmer/FarmerTokensPanel";
 import FarmerReferralsPanel from "@/components/farmer/FarmerReferralsPanel";
 import FarmerPricingPanel from "@/components/farmer/FarmerPricingPanel";
-import StatusChip from "@/components/backoffice/StatusChip";
 import DashboardHero from "@/components/DashboardHero";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   Tractor, MapPin, Phone, Mail,
-  AlertCircle, Loader2, Package, DollarSign, Star, Truck,
+  AlertCircle, Loader2, Package, DollarSign, Star, Truck, ArrowUp,
 } from "lucide-react";
 import farmsHero from "@/assets/farms-hero.jpg";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Farmer = Tables<"farmers">;
 
+const SCROLL_OFFSET = 80;
+
 const FarmerDashboardInner = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState("overview");
-  const isMobile = useIsMobile();
+  const [activeSection, setActiveSection] = useState("overview");
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const mainRef = useRef<HTMLDivElement>(null);
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   const registerSection = useCallback((id: string) => (el: HTMLDivElement | null) => {
     sectionRefs.current[id] = el;
   }, []);
 
-  const handleTabChange = useCallback((tab: string) => {
-    if (isMobile) {
-      // On mobile, scroll to section
-      const el = sectionRefs.current[tab];
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    } else {
-      setActiveTab(tab);
+  const scrollToSection = useCallback((sectionId: string) => {
+    const el = sectionRefs.current[sectionId];
+    if (el && mainRef.current) {
+      const containerTop = mainRef.current.getBoundingClientRect().top;
+      const elTop = el.getBoundingClientRect().top;
+      const offset = elTop - containerTop + mainRef.current.scrollTop - SCROLL_OFFSET;
+      mainRef.current.scrollTo({ top: offset, behavior: "smooth" });
     }
-  }, [isMobile]);
+  }, []);
+
+  // Scroll spy
+  useEffect(() => {
+    const container = mainRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      setShowBackToTop(container.scrollTop > 400);
+      
+      const sectionIds = Object.keys(sectionRefs.current);
+      let currentSection = sectionIds[0];
+      
+      for (const id of sectionIds) {
+        const el = sectionRefs.current[id];
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          if (rect.top - containerRect.top <= SCROLL_OFFSET + 100) {
+            currentSection = id;
+          }
+        }
+      }
+      
+      setActiveSection(currentSection);
+    };
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const { data: farmer, isLoading: farmerLoading } = useQuery({
     queryKey: ["farmer-profile", user?.email],
@@ -143,41 +171,8 @@ const FarmerDashboardInner = () => {
     );
   }
 
-  // Desktop: tab-based rendering (unchanged)
-  const renderDesktopContent = () => {
-    switch (activeTab) {
-      case "overview":
-        return <FarmerOverviewPanel farmerId={farmer.id} userId={user!.id} onNavigate={setActiveTab} />;
-      case "products":
-        return <FarmerProductsPanel farmerId={farmer.id} />;
-      case "pricing":
-        return <FarmerPricingPanel farmerId={farmer.id} />;
-      case "orders":
-        return <FarmerOrdersPanel farmerId={farmer.id} />;
-      case "earnings":
-        return <FarmerEarningsPanel farmerId={farmer.id} userId={user!.id} />;
-      case "withdrawals":
-        return <FarmerWithdrawalPanel userId={user!.id} />;
-      case "delivery":
-        return <FarmerDeliveryPanel farmerId={farmer.id} />;
-      case "tokens":
-        return <FarmerTokensPanel userId={user!.id} />;
-      case "referrals":
-        return <FarmerReferralsPanel userId={user!.id} referralCode={profile?.referral_code || ""} />;
-      case "notifications":
-        return <FarmerNotificationsPanel userId={user!.id} />;
-      case "support":
-        return <FarmerSupportPanel userId={user!.id} />;
-      case "profile":
-        return <FarmerProfilePanel farmer={farmer} />;
-      default:
-        return <FarmerOverviewPanel farmerId={farmer.id} userId={user!.id} onNavigate={setActiveTab} />;
-    }
-  };
-
-  // Mobile: all sections stacked
-  const mobileSections = [
-    { id: "overview", label: "Farm Overview", component: <FarmerOverviewPanel farmerId={farmer.id} userId={user!.id} onNavigate={handleTabChange} /> },
+  const sections = [
+    { id: "overview", label: "Farm Overview", component: <FarmerOverviewPanel farmerId={farmer.id} userId={user!.id} onNavigate={scrollToSection} /> },
     { id: "products", label: "Product Listings", component: <FarmerProductsPanel farmerId={farmer.id} /> },
     { id: "pricing", label: "Pricing", component: <FarmerPricingPanel farmerId={farmer.id} /> },
     { id: "orders", label: "Orders", component: <FarmerOrdersPanel farmerId={farmer.id} /> },
@@ -195,8 +190,8 @@ const FarmerDashboardInner = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <div className="flex-1 flex">
-        <FarmerSidebar activeTab={activeTab} onTabChange={handleTabChange} />
-        <main className="flex-1 overflow-auto">
+        <FarmerSidebar activeTab={activeSection} onTabChange={scrollToSection} />
+        <main ref={mainRef} className="flex-1 overflow-auto relative">
           <div className="max-w-6xl mx-auto px-4 py-6">
             {/* Cinematic Hero Banner */}
             <DashboardHero
@@ -212,26 +207,34 @@ const FarmerDashboardInner = () => {
               ]}
             />
 
-            {/* Content */}
-            {isMobile ? (
-              <div className="space-y-8">
-                {mobileSections.map((section) => (
-                  <div
-                    key={section.id}
-                    ref={registerSection(section.id)}
-                    className="scroll-mt-4"
-                  >
-                    <h2 className="text-lg font-semibold mb-3 sticky top-0 bg-background/95 backdrop-blur-sm py-2 z-10 border-b border-border">
-                      {section.label}
-                    </h2>
-                    {section.component}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              renderDesktopContent()
-            )}
+            {/* All sections rendered vertically */}
+            <div className="space-y-10">
+              {sections.map((section) => (
+                <div
+                  key={section.id}
+                  id={`farmer-${section.id}`}
+                  ref={registerSection(section.id)}
+                  className="scroll-mt-20"
+                >
+                  <h2 className="text-xl font-bold mb-4 sticky top-0 bg-background/95 backdrop-blur-sm py-3 z-10 border-b border-border">
+                    {section.label}
+                  </h2>
+                  {section.component}
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Back to Top */}
+          {showBackToTop && (
+            <Button
+              size="icon"
+              className="fixed bottom-6 right-6 z-50 rounded-full shadow-lg"
+              onClick={() => mainRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
+            >
+              <ArrowUp className="h-4 w-4" />
+            </Button>
+          )}
         </main>
       </div>
       <Footer />
@@ -249,7 +252,7 @@ const FarmerDashboard = () => {
         title="Farmer Management"
         description="View and manage all registered farmers on the platform"
       >
-        {(/* selectedUserId, selectedUserEmail */) => <FarmerDashboardInner />}
+        {() => <FarmerDashboardInner />}
       </AdminDashboardWrapper>
     );
   }
