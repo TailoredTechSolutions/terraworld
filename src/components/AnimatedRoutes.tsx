@@ -44,6 +44,9 @@ const BCWallet = lazyRetry(() => import("@/pages/business-centre/BCWallet"));
 const BCTokenRewards = lazyRetry(() => import("@/pages/business-centre/BCTokenRewards"));
 const BCMarketing = lazyRetry(() => import("@/pages/business-centre/BCMarketing"));
 const BCSupport = lazyRetry(() => import("@/pages/business-centre/BCSupport"));
+
+
+import { BusinessCentreProvider } from "@/contexts/BusinessCentreContext";
 const CheckoutPage = lazyRetry(() => import("@/pages/CheckoutPage"));
 const OrderConfirmation = lazyRetry(() => import("@/pages/OrderConfirmation"));
 const DriverDashboard = lazyRetry(() => import("@/pages/DriverDashboard"));
@@ -93,8 +96,21 @@ const AnimatedRoutes = () => {
           <Route path="/farm/:farmId" element={<P><FarmDetailPage /></P>} />
           <Route path="/affiliate" element={<P><AffiliatePage /></P>} />
           <Route path="/business-centre/auth" element={<P><BusinessCentreAuth /></P>} />
-          <Route path="/business-centre" element={<RoleProtectedRoute allowedRoles={['affiliate', 'member', 'admin', 'admin_readonly']}><P><BusinessCentreShell /></P></RoleProtectedRoute>} />
-          <Route path="/business-centre/dashboard" element={<RoleProtectedRoute allowedRoles={['affiliate', 'member', 'admin', 'admin_readonly']}><P><BusinessCentreShell /></P></RoleProtectedRoute>} />
+          <Route path="/business-centre" element={<RoleProtectedRoute allowedRoles={['affiliate', 'member', 'admin', 'admin_readonly']}><P><BusinessCentreProvider><BusinessCentreShell /></BusinessCentreProvider></P></RoleProtectedRoute>}>
+            <Route index element={<BCOverview />} />
+            <Route path="dashboard" element={<BCOverview />} />
+            <Route path="overview" element={<BCOverview />} />
+            <Route path="binary-tree" element={<BCBinaryTree />} />
+            <Route path="network" element={<BCNetwork />} />
+            <Route path="referrals" element={<BCReferrals />} />
+            <Route path="commissions" element={<BCCommissions />} />
+            <Route path="wallet" element={<BCWallet />} />
+            <Route path="token-rewards" element={<BCTokenRewards />} />
+            <Route path="rank-activation" element={<BCRankActivation />} />
+            <Route path="coupons" element={<BCCoupons />} />
+            <Route path="marketing" element={<BCMarketing />} />
+            <Route path="support" element={<BCSupport />} />
+          </Route>
           <Route path="/checkout" element={<P><CheckoutPage /></P>} />
           <Route path="/order-confirmation" element={<P><OrderConfirmation /></P>} />
           <Route path="/auth" element={<P><AuthPage /></P>} />
