@@ -124,11 +124,35 @@ const CartDrawer = () => {
         ) : (
           <>
             <div className="flex-1 overflow-y-auto -mx-6 px-6">
-              <div className="divide-y divide-glass-border">
-                {items.map((item) => (
-                  <CartItemRow key={item.product.id} item={item} />
-                ))}
-              </div>
+              {items.length > 0 && (
+                <div className="divide-y divide-glass-border">
+                  {items.map((item) => (
+                    <CartItemRow key={item.product.id} item={item} />
+                  ))}
+                </div>
+              )}
+              {couponItems.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                    <Ticket className="h-3.5 w-3.5" /> Coupons
+                  </div>
+                  {couponItems.map((c) => (
+                    <div key={c.id} className="flex items-center gap-3 p-3 rounded-xl glass-card">
+                      <div className="h-10 w-10 rounded-lg overflow-hidden border border-glass-border flex-shrink-0">
+                        <img src={c.image} alt={c.name} className="h-full w-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{c.name}</p>
+                        <Badge variant="secondary" className="text-[9px] px-1 py-0">{c.bv} BV</Badge>
+                      </div>
+                      <span className="font-semibold text-sm text-primary">₱{c.price.toLocaleString()}</span>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => removeCoupon(c.id)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="pt-4 border-t border-glass-border space-y-4">
