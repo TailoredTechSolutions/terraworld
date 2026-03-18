@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
-const TRANSITION_VIDEO = "/videos/terra-transition.mov";
+const TRANSITION_VIDEO = "/videos/hero-background.mp4";
 const VIDEO_DURATION_MS = 3000;
 
 interface VideoTransitionOverlayProps {
@@ -11,10 +11,6 @@ interface VideoTransitionOverlayProps {
   onComplete: () => void;
 }
 
-/**
- * Full-screen video transition overlay.
- * Plays the 3-second Terra branding clip, then navigates.
- */
 const VideoTransitionOverlay = ({ isActive, targetPath, onComplete }: VideoTransitionOverlayProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
@@ -24,7 +20,6 @@ const VideoTransitionOverlay = ({ isActive, targetPath, onComplete }: VideoTrans
     if (hasNavigated.current) return;
     hasNavigated.current = true;
     navigate(targetPath);
-    // Small delay so the new page starts rendering under the overlay before we fade out
     setTimeout(onComplete, 200);
   }, [navigate, targetPath, onComplete]);
 
@@ -37,13 +32,9 @@ const VideoTransitionOverlay = ({ isActive, targetPath, onComplete }: VideoTrans
     const video = videoRef.current;
     if (video) {
       video.currentTime = 0;
-      video.play().catch(() => {
-        // Video play failed (e.g. autoplay blocked) — skip to navigation
-        finish();
-      });
+      video.play().catch(() => finish());
     }
 
-    // Fallback timer in case video events don't fire
     const fallback = setTimeout(finish, VIDEO_DURATION_MS + 500);
     return () => clearTimeout(fallback);
   }, [isActive, finish]);
@@ -72,10 +63,6 @@ const VideoTransitionOverlay = ({ isActive, targetPath, onComplete }: VideoTrans
   );
 };
 
-/**
- * Hook to trigger the video transition from any component.
- * Returns [triggerTransition, overlayElement]
- */
 export const useVideoTransition = () => {
   const [state, setState] = useState<{ active: boolean; target: string }>({
     active: false,

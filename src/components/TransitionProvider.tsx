@@ -1,13 +1,16 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect, ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
-const TRANSITION_VIDEO = "/videos/terra-transition.mov";
+const TRANSITION_VIDEO = "/videos/hero-background.mp4";
 const INTRO_PLAYED_KEY = "terra_intro_played";
+const VIDEO_DURATION_MS = 3000;
 
-type TransitionTrigger = "first_visit" | "sign_in" | "sign_out";
+type TransitionTrigger = "first_visit" | "sign_in" | "sign_out" | "route_change";
 
 interface TransitionContextType {
   triggerTransition: (reason: TransitionTrigger, callback?: () => void) => void;
+  isTransitioning: boolean;
 }
 
 const TransitionContext = createContext<TransitionContextType | undefined>(undefined);
@@ -18,34 +21,30 @@ export const useTransition = () => {
   return ctx;
 };
 
-/**
- * Global video transition provider.
- * Plays the uploaded 3-second video clip on:
- *   1. First visit (before seeing any content)
- *   2. Any sign-in (any role)
- *   3. Any sign-out (any role)
- */
 export const TransitionProvider = ({ children }: { children: ReactNode }) => {
   const [active, setActive] = useState(false);
   const callbackRef = useRef<(() => void) | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hasFinished = useRef(false);
+  const location = useLocation();
+  const prevPathRef = useRef(location.pathname);
+  const isFirstRender = useRef(true);
 
-  // Check first visit on mount
-  const [firstVisitPending, setFirstVisitPending] = useState(() => {
+  // First visit: show intro immediately
+  const [firstVisitPending] = useState(() => {
     if (typeof window === "undefined") return false;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const alreadyPlayed = localStorage.getItem(INTRO_PLAYED_KEY);
     return !alreadyPlayed && !reducedMotion;
   });
 
-  // Auto-trigger first visit intro
-  useEffect(() => {
-    if (firstVisitPending) {
-      setActive(true);
-      localStorage.setItem(INTRO_PLAYED_KEY, "true");
-    }
-  }, [firstVisitPending]);
+  const finish = useCallback(() => {
+    if (hasFinished.current) return;
+    hasFinished.current = true;
+    callbackRef.current?.();
+    callbackRef.current = null;
+    setTimeout(() => setActive(false), 300);
+  }, []);
 
   const triggerTransition = useCallback((reason: TransitionTrigger, callback?: () => void) => {
     callbackRef.current = callback || null;
@@ -56,18 +55,32 @@ export const TransitionProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const finish = useCallback(() => {
-    if (hasFinished.current) return;
-    hasFinished.current = true;
-    // Execute the callback (e.g. navigation) while overlay is still visible
-    callbackRef.current?.();
-    callbackRef.current = null;
-    if (firstVisitPending) setFirstVisitPending(false);
-    // Fade out after a brief delay so the new content renders under
-    setTimeout(() => setActive(false), 300);
+  // First visit auto-trigger
+  useEffect(() => {
+    if (firstVisitPending) {
+      hasFinished.current = false;
+      setActive(true);
+      localStorage.setItem(INTRO_PLAYED_KEY, "true");
+    }
   }, [firstVisitPending]);
 
-  // When active, play the video
+  // Route change auto-trigger (skip first render)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (location.pathname !== prevPathRef.current) {
+      prevPathRef.current = location.pathname;
+      // Don't stack transitions
+      if (!active) {
+        hasFinished.current = false;
+        setActive(true);
+      }
+    }
+  }, [location.pathname, active]);
+
+  // Play video when active
   useEffect(() => {
     if (!active) {
       hasFinished.current = false;
@@ -78,18 +91,17 @@ export const TransitionProvider = ({ children }: { children: ReactNode }) => {
       video.currentTime = 0;
       video.play().catch(() => finish());
     }
-    // Fallback timer
-    const fallback = setTimeout(finish, 4000);
+    const fallback = setTimeout(finish, VIDEO_DURATION_MS + 500);
     return () => clearTimeout(fallback);
   }, [active, finish]);
 
   return (
-    <TransitionContext.Provider value={{ triggerTransition }}>
+    <TransitionContext.Provider value={{ triggerTransition, isTransitioning: active }}>
       {children}
       <AnimatePresence>
         {active && (
           <motion.div
-            className="fixed inset-0 z-[9999] bg-background"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-background"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
