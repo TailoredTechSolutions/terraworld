@@ -885,12 +885,18 @@ const BusinessCentreLanding = () => {
   const heroScale = useTransform(scrollY, [0, 500], [1, 1.15]);
 
   // Real data state
-  const [walletData, setWalletData] = useState<{ available_balance: number; pending_balance: number; total_withdrawn: number } | null>(null);
+  const [walletData, setWalletData] = useState<{ available_balance: number; pending_balance: number; total_withdrawn: number; internal_balance: number } | null>(null);
   const [membership, setMembership] = useState<{ tier: string; package_price: number; membership_bv: number } | null>(null);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [binaryStats, setBinaryStats] = useState({ left_bv: 0, right_bv: 0, matched_bv: 0 });
   const [tokenBalance, setTokenBalance] = useState(0);
   const [referralCode, setReferralCode] = useState("");
+  const [recentEarnings, setRecentEarnings] = useState<Array<{ bonus_type: string; net_amount: number; payout_period: string; source_order_id: string | null }>>([]);
+  // Admin data state
+  const [adminPendingWithdrawals, setAdminPendingWithdrawals] = useState(0);
+  const [adminPendingAmount, setAdminPendingAmount] = useState(0);
+  const [adminTotalMembers, setAdminTotalMembers] = useState(0);
+  const [adminAuditLogs, setAdminAuditLogs] = useState<Array<{ action: string; entity_type: string; created_at: string }>>([]);
 
   // Build nav items based on role
   const NAV_ITEMS = [
