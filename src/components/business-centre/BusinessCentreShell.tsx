@@ -17,7 +17,8 @@ import {
   LayoutDashboard, Users, GitBranch, DollarSign, Share2, Award, Ticket,
   Wallet, Megaphone, HelpCircle, Search, BarChart3, CreditCard, Scale,
   Settings, Lock, FileText, Shield, Zap, Crown, UserCircle, X, Eye,
-  ArrowLeft, Menu, ChevronLeft, Loader2, Coins
+  ArrowLeft, Menu, ChevronLeft, Loader2, Coins, ArrowUpRight, Package,
+  Globe
 } from "lucide-react";
 
 interface NavItem {
