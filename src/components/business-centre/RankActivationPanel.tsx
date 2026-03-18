@@ -2,16 +2,17 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import { useCartStore } from "@/store/cartStore";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
   Zap, Star, Rocket, Crown, CheckCircle2, ArrowRight, Loader2,
-  Shield, TrendingUp, Award
+  Shield, TrendingUp, Award, Search, UserCircle, X
 } from "lucide-react";
 
 import starterImg from "@/assets/ranks/starter-rank.jpg";
@@ -66,6 +67,7 @@ const TIER_CONFIG: Record<string, {
 
 const RankActivationPanel = () => {
   const { user } = useAuth();
+  const { isAdmin, isAnyAdmin, isAdminReadonly } = useUserRoles();
   const { toast } = useToast();
   const navigate = useNavigate();
   const setUpgrade = useCartStore((s) => s.setUpgrade);
@@ -73,26 +75,68 @@ const RankActivationPanel = () => {
   const [currentTier, setCurrentTier] = useState<string>("free");
   const [currentPrice, setCurrentPrice] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [memberBV, setMemberBV] = useState<number>(0);
+
+  // Admin context: view as another member
+  const [viewUserId, setViewUserId] = useState<string | null>(null);
+  const [viewUserName, setViewUserName] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Array<{ user_id: string; full_name: string; email: string }>>([]);
+  const [searching, setSearching] = useState(false);
+
+  const effectiveUserId = viewUserId || user?.id;
+  const isViewingOther = viewUserId !== null && viewUserId !== user?.id;
 
   useEffect(() => {
-    if (!user) return;
+    if (!effectiveUserId) return;
     (async () => {
+      setLoading(true);
       const { data } = await supabase
         .from("memberships")
-        .select("tier, package_price")
-        .eq("user_id", user.id)
+        .select("tier, package_price, membership_bv")
+        .eq("user_id", effectiveUserId)
         .maybeSingle();
       if (data) {
         setCurrentTier(data.tier || "free");
         setCurrentPrice(Number(data.package_price) || 0);
+        setMemberBV(Number(data.membership_bv) || 0);
+      } else {
+        setCurrentTier("free");
+        setCurrentPrice(0);
+        setMemberBV(0);
       }
       setLoading(false);
     })();
-  }, [user]);
+  }, [effectiveUserId]);
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim() || searchQuery.trim().length < 2) return;
+    setSearching(true);
+    const { data } = await supabase
+      .from("profiles")
+      .select("user_id, full_name, email")
+      .or(`full_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`)
+      .limit(10);
+    setSearchResults(data || []);
+    setSearching(false);
+  };
+
+  const selectUser = (u: { user_id: string; full_name: string; email: string }) => {
+    setViewUserId(u.user_id);
+    setViewUserName(u.full_name || u.email);
+    setSearchResults([]);
+    setSearchQuery("");
+  };
+
+  const resetView = () => {
+    setViewUserId(null);
+    setViewUserName(null);
+  };
 
   const currentIndex = TIER_ORDER.indexOf(currentTier);
 
   const handleUpgrade = (targetTier: string) => {
+    if (isViewingOther || isAdminReadonly) return;
     const config = TIER_CONFIG[targetTier];
     if (!config) return;
 
@@ -106,7 +150,7 @@ const RankActivationPanel = () => {
       currentTier,
       currentValue: currentPrice,
       upgradeCost,
-      bvGenerated: upgradeCost, // 1:1 BV from difference only
+      bvGenerated: upgradeCost,
       image: config.image,
       benefits: config.benefits,
     });
@@ -129,6 +173,83 @@ const RankActivationPanel = () => {
 
   return (
     <div className="space-y-6">
+      {/* Admin: Member Context Switcher */}
+      {isAnyAdmin && (
+        <Card className="border-border/40">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <Search className="h-4 w-4" />
+              View as Member
+            </div>
+            {isViewingOther && viewUserName && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/10 border border-primary/20">
+                <UserCircle className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium flex-1">{viewUserName}</span>
+                <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={resetView}>
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Search by name or email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                className="text-sm"
+              />
+              <Button size="sm" variant="outline" onClick={handleSearch} disabled={searching}>
+                {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
+              </Button>
+            </div>
+            {searchResults.length > 0 && (
+              <div className="border border-border rounded-lg overflow-hidden max-h-40 overflow-y-auto">
+                {searchResults.map((r) => (
+                  <button
+                    key={r.user_id}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-muted/50 transition-colors border-b border-border/30 last:border-0"
+                    onClick={() => selectUser(r)}
+                  >
+                    <span className="font-medium">{r.full_name || "—"}</span>
+                    <span className="text-muted-foreground ml-2 text-xs">{r.email}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Card className="border-border/40">
+          <CardContent className="p-4 text-center">
+            <p className="text-lg font-bold font-display text-foreground capitalize">{currentTier}</p>
+            <p className="text-[10px] text-muted-foreground">Current Rank</p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/40">
+          <CardContent className="p-4 text-center">
+            <p className="text-lg font-bold font-display text-foreground">₱{currentPrice.toLocaleString()}</p>
+            <p className="text-[10px] text-muted-foreground">Activation Value</p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/40">
+          <CardContent className="p-4 text-center">
+            <p className="text-lg font-bold font-display text-foreground">{memberBV.toLocaleString()}</p>
+            <p className="text-[10px] text-muted-foreground">Membership BV</p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/40">
+          <CardContent className="p-4 text-center">
+            <p className="text-lg font-bold font-display text-foreground capitalize">
+              {currentTier === "elite" ? "Max Rank" : TIER_ORDER[currentIndex + 1] || "—"}
+            </p>
+            <p className="text-[10px] text-muted-foreground">Next Rank Target</p>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Current Status */}
       <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
         <CardContent className="p-5">
@@ -139,10 +260,10 @@ const RankActivationPanel = () => {
             <div className="flex-1">
               <p className="text-xl font-bold font-display capitalize">{currentTier} Partner</p>
               <p className="text-xs text-muted-foreground">
-                ₱{currentPrice.toLocaleString()} Activation Value • {currentPrice.toLocaleString()} Membership BV
+                ₱{currentPrice.toLocaleString()} Activation Value • {memberBV.toLocaleString()} Membership BV
               </p>
             </div>
-            {currentTier !== "elite" && (
+            {currentTier !== "elite" && !isViewingOther && (
               <Badge variant="outline" className="text-xs">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 Upgradeable
@@ -172,7 +293,6 @@ const RankActivationPanel = () => {
                 isBelow && !isCurrent && "opacity-50"
               )}
             >
-              {/* Hero Background */}
               <img
                 src={config.image}
                 alt={tier}
@@ -180,14 +300,12 @@ const RankActivationPanel = () => {
               />
               <div className={cn("absolute inset-0 bg-gradient-to-t", config.gradient)} />
 
-              {/* Current badge */}
               {isCurrent && (
                 <div className="absolute top-3 right-3 z-20 px-2.5 py-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3" /> CURRENT
                 </div>
               )}
 
-              {/* Content */}
               <div className="relative z-10 p-5 flex flex-col min-h-[320px] justify-between">
                 <div className="flex justify-between items-start">
                   <div className={cn("p-2 rounded-xl backdrop-blur-sm", config.accentBg)}>
@@ -206,7 +324,6 @@ const RankActivationPanel = () => {
                     <p className="text-white/70 text-xs mt-0.5">{config.benefits}</p>
                   </div>
 
-                  {/* Benefits */}
                   <div className="space-y-1 text-[11px] text-white/60">
                     <div className="flex justify-between">
                       <span>Matching</span>
@@ -224,7 +341,6 @@ const RankActivationPanel = () => {
                     </p>
                   </div>
 
-                  {/* Upgrade section */}
                   {isCurrent ? (
                     <div className="w-full h-10 flex items-center justify-center text-sm text-white/60 border border-white/10 rounded-lg backdrop-blur-sm">
                       <Shield className="h-4 w-4 mr-2" /> Active
@@ -246,9 +362,10 @@ const RankActivationPanel = () => {
                         )}
                         variant="ghost"
                         onClick={() => handleUpgrade(tier)}
+                        disabled={isViewingOther || isAdminReadonly}
                       >
-                        Upgrade to {tier.charAt(0).toUpperCase() + tier.slice(1)}
-                        <ArrowRight className="h-4 w-4 ml-2" />
+                        {isViewingOther ? "Viewing Only" : `Upgrade to ${tier.charAt(0).toUpperCase() + tier.slice(1)}`}
+                        {!isViewingOther && <ArrowRight className="h-4 w-4 ml-2" />}
                       </Button>
                     </div>
                   )}

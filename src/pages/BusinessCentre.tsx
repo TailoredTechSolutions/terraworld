@@ -18,11 +18,13 @@ import {
   CreditCard, HelpCircle, Menu, TrendingUp, ArrowUpRight, ArrowDownRight,
   Copy, Download, ChevronRight, Crown, ExternalLink, Search, Wallet,
   CheckCircle2, XCircle, AlertTriangle, Coins, Shield, Zap, Target,
-  BarChart3, Clock, Calendar, Star, Gift, ArrowRight, Info
+  BarChart3, Clock, Calendar, Star, Gift, ArrowRight, Info, Ticket
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import BinaryTreeExplorer from "@/components/member/BinaryTreeExplorer";
+import RankActivationPanel from "@/components/business-centre/RankActivationPanel";
+import CouponsPanel from "@/components/business-centre/CouponsPanel";
 
 
 // ─── Dashboard Panel ───
