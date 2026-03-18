@@ -6,21 +6,46 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface CouponCartItem {
+  id: string;
+  packageId: string;
+  name: string;
+  price: number;
+  bv: number;
+  reward: string;
+  image: string;
+  recipient: 'self' | 'existing_user' | 'new_member';
+  recipientDetails?: {
+    email?: string;
+    fullName?: string;
+    phone?: string;
+    sponsorId?: string;
+  };
+}
+
 interface CartStore {
   items: CartItem[];
+  couponItems: CouponCartItem[];
   isOpen: boolean;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  addCoupon: (coupon: CouponCartItem) => void;
+  removeCoupon: (id: string) => void;
+  updateCouponRecipient: (id: string, recipient: CouponCartItem['recipient'], details?: CouponCartItem['recipientDetails']) => void;
   clearCart: () => void;
   toggleCart: () => void;
   setCartOpen: (open: boolean) => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
+  getProductSubtotal: () => number;
+  getCouponSubtotal: () => number;
+  hasItems: () => boolean;
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
+  couponItems: [],
   isOpen: false,
   
   addItem: (product, quantity = 1) => {
@@ -56,15 +81,35 @@ export const useCartStore = create<CartStore>((set, get) => ({
       ),
     }));
   },
+
+  addCoupon: (coupon) => {
+    set((state) => ({
+      couponItems: [...state.couponItems, coupon],
+    }));
+  },
+
+  removeCoupon: (id) => {
+    set((state) => ({
+      couponItems: state.couponItems.filter(c => c.id !== id),
+    }));
+  },
+
+  updateCouponRecipient: (id, recipient, details) => {
+    set((state) => ({
+      couponItems: state.couponItems.map(c =>
+        c.id === id ? { ...c, recipient, recipientDetails: details } : c
+      ),
+    }));
+  },
   
-  clearCart: () => set({ items: [] }),
+  clearCart: () => set({ items: [], couponItems: [] }),
   
   toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
   
   setCartOpen: (open) => set({ isOpen: open }),
   
   getTotalItems: () => {
-    return get().items.reduce((sum, item) => sum + item.quantity, 0);
+    return get().items.reduce((sum, item) => sum + item.quantity, 0) + get().couponItems.length;
   },
   
   getTotalPrice: () => {
@@ -72,5 +117,17 @@ export const useCartStore = create<CartStore>((set, get) => ({
       (sum, item) => sum + item.product.price * item.quantity,
       0
     );
+  },
+
+  getProductSubtotal: () => {
+    return get().items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  },
+
+  getCouponSubtotal: () => {
+    return get().couponItems.reduce((sum, c) => sum + c.price, 0);
+  },
+
+  hasItems: () => {
+    return get().items.length > 0 || get().couponItems.length > 0;
   },
 }));

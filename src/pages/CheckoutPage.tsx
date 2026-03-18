@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCartStore } from "@/store/cartStore";
+import { useCartStore, CouponCartItem } from "@/store/cartStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Badge } from "@/components/ui/badge";
 import { 
   CreditCard, 
   Smartphone, 
@@ -14,7 +15,12 @@ import {
   Truck, 
   ShieldCheck,
   Lock,
-  Wallet
+  Wallet,
+  Ticket,
+  X,
+  User,
+  UserPlus,
+  Package
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -22,6 +28,7 @@ import DeliveryProviderSelector from "@/components/checkout/DeliveryProviderSele
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { cn } from "@/lib/utils";
 
 const checkoutSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(50, "First name too long"),
@@ -35,6 +42,15 @@ const checkoutSchema = z.object({
     .regex(/^\d{4,10}$/, "Invalid postal code"),
 });
 
+// Relaxed schema for coupon-only orders (no delivery address needed)
+const couponOnlySchema = z.object({
+  firstName: z.string().trim().min(1, "First name is required").max(50, "First name too long"),
+  lastName: z.string().trim().min(1, "Last name is required").max(50, "Last name too long"),
+  email: z.string().trim().email("Invalid email address").max(255, "Email too long"),
+  phone: z.string().trim().min(10, "Phone number must be at least 10 digits").max(20, "Phone number too long")
+    .regex(/^[\d+\s()-]+$/, "Invalid phone number format"),
+});
+
 interface DeliveryEstimate {
   provider: string;
   estimated_fee: number;
@@ -46,18 +62,20 @@ interface DeliveryEstimate {
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { items, getTotalPrice, clearCart } = useCartStore();
+  const { items, couponItems, getTotalPrice, getProductSubtotal, getCouponSubtotal, clearCart, removeItem, removeCoupon, updateCouponRecipient, hasItems } = useCartStore();
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [internalBalance, setInternalBalance] = useState<number>(0);
   const [loadingWallet, setLoadingWallet] = useState(true);
   
-  // Delivery provider state
   const [selectedDeliveryProvider, setSelectedDeliveryProvider] = useState<string>("");
   const [deliveryEstimate, setDeliveryEstimate] = useState<DeliveryEstimate | null>(null);
 
-  // Fetch internal wallet balance
+  const hasProducts = items.length > 0;
+  const hasCoupons = couponItems.length > 0;
+  const isCouponOnly = !hasProducts && hasCoupons;
+
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -73,7 +91,6 @@ const CheckoutPage = () => {
     })();
   }, []);
   
-  // Form state
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -84,21 +101,20 @@ const CheckoutPage = () => {
     zip: "",
   });
 
-  const farmerSubtotal = getTotalPrice();
+  const productSubtotal = getProductSubtotal();
+  const couponSubtotal = getCouponSubtotal();
   const platformFeePercent = 0.20;
   const commissionPercent = 0.10;
   const vatPercent = 0.12;
-  const platformFee = farmerSubtotal * platformFeePercent;
-  const commission = farmerSubtotal * commissionPercent;
-  const subtotalBeforeVAT = farmerSubtotal + platformFee + commission;
+  const platformFee = productSubtotal * platformFeePercent;
+  const commission = productSubtotal * commissionPercent;
+  const subtotalBeforeVAT = productSubtotal + platformFee + commission;
   const vat = subtotalBeforeVAT * vatPercent;
-  const deliveryFee = deliveryEstimate?.estimated_fee ?? 0;
-  const total = subtotalBeforeVAT + vat + deliveryFee;
+  const deliveryFee = (hasProducts && deliveryEstimate?.estimated_fee) ? deliveryEstimate.estimated_fee : 0;
+  const total = subtotalBeforeVAT + vat + deliveryFee + couponSubtotal;
 
-  // Default coordinates for pickup (Manila farm) and delivery
   const defaultPickupLat = 14.5547;
   const defaultPickupLng = 121.0244;
-  // Default delivery coordinates (Manila center)
   const defaultDeliveryLat = 14.5995;
   const defaultDeliveryLng = 120.9842;
 
@@ -116,7 +132,12 @@ const CheckoutPage = () => {
     e.preventDefault();
     setFormErrors({});
 
-    const validation = checkoutSchema.safeParse(formData);
+    const schema = isCouponOnly ? couponOnlySchema : checkoutSchema;
+    const dataToValidate = isCouponOnly 
+      ? { firstName: formData.firstName, lastName: formData.lastName, email: formData.email, phone: formData.phone }
+      : formData;
+
+    const validation = schema.safeParse(dataToValidate);
     if (!validation.success) {
       const errors: Record<string, string> = {};
       validation.error.errors.forEach((err) => {
@@ -126,10 +147,10 @@ const CheckoutPage = () => {
       return;
     }
 
-    if (!selectedDeliveryProvider) {
+    if (hasProducts && !selectedDeliveryProvider) {
       toast({
         title: "Select Delivery Service",
-        description: "Please choose a delivery provider (Lalamove or Grab) before placing your order.",
+        description: "Please choose a delivery provider for your product order.",
         variant: "destructive",
       });
       return;
@@ -138,48 +159,81 @@ const CheckoutPage = () => {
     setIsProcessing(true);
     
     try {
-      const orderItems = items.map((item) => ({
-        id: item.product.id,
-        name: item.product.name,
-        quantity: item.quantity,
-        price: item.product.price,
-        farmId: item.product.farmId,
-        farmName: item.product.farmName,
-      }));
+      // Process coupon purchases via edge function
+      if (hasCoupons) {
+        for (const coupon of couponItems) {
+          const { data, error } = await supabase.functions.invoke("purchase-coupon", {
+            body: { 
+              package_id: coupon.packageId,
+              recipient: coupon.recipient,
+              recipient_details: coupon.recipientDetails || {},
+            },
+          });
+          if (error) throw new Error(error.message);
+          if (!data?.success) throw new Error(data?.error || "Coupon purchase failed");
+        }
+      }
 
-      const { data, error } = await supabase.functions.invoke('create-order', {
-        body: {
-          customer_name: `${formData.firstName} ${formData.lastName}`.trim(),
-          customer_phone: formData.phone,
-          customer_email: formData.email || null,
-          delivery_address: `${formData.address}, ${formData.city} ${formData.zip}`.trim(),
-          items: orderItems,
-          payment_method: paymentMethod,
-          delivery_provider: selectedDeliveryProvider,
-          delivery_fee: deliveryFee,
-          notes: null,
-        },
-      });
+      // Process product order via create-order
+      if (hasProducts) {
+        const orderItems = items.map((item) => ({
+          id: item.product.id,
+          name: item.product.name,
+          quantity: item.quantity,
+          price: item.product.price,
+          farmId: item.product.farmId,
+          farmName: item.product.farmName,
+        }));
 
-      if (error) throw new Error(error.message || 'Failed to create order');
-      if (!data?.success || !data?.order) throw new Error(data?.error || 'Order creation failed');
+        const { data, error } = await supabase.functions.invoke('create-order', {
+          body: {
+            customer_name: `${formData.firstName} ${formData.lastName}`.trim(),
+            customer_phone: formData.phone,
+            customer_email: formData.email || null,
+            delivery_address: `${formData.address}, ${formData.city} ${formData.zip}`.trim(),
+            items: orderItems,
+            payment_method: paymentMethod,
+            delivery_provider: selectedDeliveryProvider,
+            delivery_fee: deliveryFee,
+            notes: null,
+          },
+        });
 
-      clearCart();
-      navigate("/order-confirmation", { 
-        state: { 
-          orderId: data.order.order_number,
-          total: data.order.total,
-          paymentMethod,
-          deliveryProvider: selectedDeliveryProvider,
-          items: items.length,
-          customerName: `${formData.firstName} ${formData.lastName}`,
-          deliveryAddress: `${formData.address}, ${formData.city} ${formData.zip}`,
-        } 
-      });
+        if (error) throw new Error(error.message || 'Failed to create order');
+        if (!data?.success || !data?.order) throw new Error(data?.error || 'Order creation failed');
+
+        clearCart();
+        navigate("/order-confirmation", { 
+          state: { 
+            orderId: data.order.order_number,
+            total: data.order.total,
+            paymentMethod,
+            deliveryProvider: selectedDeliveryProvider,
+            items: items.length,
+            coupons: couponItems.length,
+            customerName: `${formData.firstName} ${formData.lastName}`,
+            deliveryAddress: `${formData.address}, ${formData.city} ${formData.zip}`,
+          } 
+        });
+      } else {
+        // Coupon-only completion
+        clearCart();
+        navigate("/order-confirmation", {
+          state: {
+            orderId: `CPN-${Date.now()}`,
+            total: couponSubtotal,
+            paymentMethod,
+            coupons: couponItems.length,
+            customerName: `${formData.firstName} ${formData.lastName}`,
+          }
+        });
+      }
 
       toast({
         title: "Order placed successfully!",
-        description: `Your order ${data.order.order_number} has been confirmed.`,
+        description: hasCoupons 
+          ? `${couponItems.length} coupon(s) activated. BV credited to your account.`
+          : "Your order has been confirmed.",
       });
 
     } catch (error) {
@@ -194,14 +248,14 @@ const CheckoutPage = () => {
     }
   };
 
-  if (items.length === 0) {
+  if (!hasItems()) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
         <main className="flex-1 container mx-auto px-4 py-16 text-center">
           <div className="glass-card p-12 rounded-2xl max-w-md mx-auto">
             <h1 className="font-display text-2xl font-bold mb-4">Your cart is empty</h1>
-            <p className="text-muted-foreground mb-6">Add some products before checking out.</p>
+            <p className="text-muted-foreground mb-6">Add some products or coupons before checking out.</p>
             <Button onClick={() => navigate("/")} className="btn-liquid">
               Continue Shopping
             </Button>
@@ -234,40 +288,37 @@ const CheckoutPage = () => {
                 Checkout
               </h1>
               <p className="text-muted-foreground">
-                Complete your order for fresh farm produce
+                {isCouponOnly 
+                  ? "Complete your coupon purchase"
+                  : "Complete your order for fresh farm produce"
+                }
               </p>
             </div>
 
             <form id="checkout-form" onSubmit={handleSubmit} className="space-y-8">
-              {/* Delivery Information */}
+              {/* Contact / Delivery Information */}
               <div className="glass-card p-6 rounded-2xl space-y-4">
                 <h2 className="font-display text-lg font-semibold flex items-center gap-2">
-                  <Truck className="h-5 w-5 text-primary" />
-                  Delivery Information
+                  {isCouponOnly ? <User className="h-5 w-5 text-primary" /> : <Truck className="h-5 w-5 text-primary" />}
+                  {isCouponOnly ? "Contact Information" : "Delivery Information"}
                 </h2>
                 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
                     <Input 
-                      id="firstName" 
-                      placeholder="Juan" 
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      className="glass-card border-glass-border focus:border-primary"
-                      required 
+                      id="firstName" placeholder="Juan" 
+                      value={formData.firstName} onChange={handleInputChange}
+                      className="glass-card border-glass-border focus:border-primary" required 
                     />
                     {formErrors.firstName && <p className="text-sm text-destructive">{formErrors.firstName}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name</Label>
                     <Input 
-                      id="lastName" 
-                      placeholder="Dela Cruz" 
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      className="glass-card border-glass-border focus:border-primary"
-                      required 
+                      id="lastName" placeholder="Dela Cruz" 
+                      value={formData.lastName} onChange={handleInputChange}
+                      className="glass-card border-glass-border focus:border-primary" required 
                     />
                     {formErrors.lastName && <p className="text-sm text-destructive">{formErrors.lastName}</p>}
                   </div>
@@ -276,13 +327,9 @@ const CheckoutPage = () => {
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="juan@example.com" 
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="glass-card border-glass-border focus:border-primary"
-                    required 
+                    id="email" type="email" placeholder="juan@example.com" 
+                    value={formData.email} onChange={handleInputChange}
+                    className="glass-card border-glass-border focus:border-primary" required 
                   />
                   {formErrors.email && <p className="text-sm text-destructive">{formErrors.email}</p>}
                 </div>
@@ -290,67 +337,61 @@ const CheckoutPage = () => {
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
                   <Input 
-                    id="phone" 
-                    type="tel" 
-                    placeholder="+63 917 123 4567" 
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="glass-card border-glass-border focus:border-primary"
-                    required 
+                    id="phone" type="tel" placeholder="+63 917 123 4567" 
+                    value={formData.phone} onChange={handleInputChange}
+                    className="glass-card border-glass-border focus:border-primary" required 
                   />
                   {formErrors.phone && <p className="text-sm text-destructive">{formErrors.phone}</p>}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="address">Delivery Address</Label>
-                  <Input 
-                    id="address" 
-                    placeholder="123 Main Street, Barangay..." 
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    className="glass-card border-glass-border focus:border-primary"
-                    required 
-                  />
-                  {formErrors.address && <p className="text-sm text-destructive">{formErrors.address}</p>}
-                </div>
+                {/* Address fields only for product orders */}
+                {hasProducts && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="address">Delivery Address</Label>
+                      <Input 
+                        id="address" placeholder="123 Main Street, Barangay..." 
+                        value={formData.address} onChange={handleInputChange}
+                        className="glass-card border-glass-border focus:border-primary" required 
+                      />
+                      {formErrors.address && <p className="text-sm text-destructive">{formErrors.address}</p>}
+                    </div>
 
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input 
-                      id="city" 
-                      placeholder="Manila" 
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      className="glass-card border-glass-border focus:border-primary"
-                      required 
-                    />
-                    {formErrors.city && <p className="text-sm text-destructive">{formErrors.city}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="zip">Postal Code</Label>
-                    <Input 
-                      id="zip" 
-                      placeholder="1000" 
-                      value={formData.zip}
-                      onChange={handleInputChange}
-                      className="glass-card border-glass-border focus:border-primary"
-                      required 
-                    />
-                    {formErrors.zip && <p className="text-sm text-destructive">{formErrors.zip}</p>}
-                  </div>
-                </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="city">City</Label>
+                        <Input 
+                          id="city" placeholder="Manila" 
+                          value={formData.city} onChange={handleInputChange}
+                          className="glass-card border-glass-border focus:border-primary" required 
+                        />
+                        {formErrors.city && <p className="text-sm text-destructive">{formErrors.city}</p>}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="zip">Postal Code</Label>
+                        <Input 
+                          id="zip" placeholder="1000" 
+                          value={formData.zip} onChange={handleInputChange}
+                          className="glass-card border-glass-border focus:border-primary" required 
+                        />
+                        {formErrors.zip && <p className="text-sm text-destructive">{formErrors.zip}</p>}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
-              {/* Delivery Provider Selection */}
-              <DeliveryProviderSelector
-                pickupLat={defaultPickupLat}
-                pickupLng={defaultPickupLng}
-                deliveryLat={defaultDeliveryLat}
-                deliveryLng={defaultDeliveryLng}
-                onProviderSelect={handleDeliveryProviderSelect}
-                selectedProvider={selectedDeliveryProvider}
-              />
+              {/* Delivery Provider Selection – only for product orders */}
+              {hasProducts && (
+                <DeliveryProviderSelector
+                  pickupLat={defaultPickupLat}
+                  pickupLng={defaultPickupLng}
+                  deliveryLat={defaultDeliveryLat}
+                  deliveryLng={defaultDeliveryLng}
+                  onProviderSelect={handleDeliveryProviderSelect}
+                  selectedProvider={selectedDeliveryProvider}
+                />
+              )}
 
               {/* Payment Method */}
               <div className="glass-card p-6 rounded-2xl space-y-4">
@@ -360,53 +401,34 @@ const CheckoutPage = () => {
                 </h2>
 
                 <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
-                  <label 
-                    className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover ${
-                      paymentMethod === "card" 
-                        ? "border-2 border-primary bg-primary/10 shadow-glow-primary" 
-                        : "border border-glass-border glass-card"
-                    }`}
-                  >
+                  <label className={cn(
+                    "flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover",
+                    paymentMethod === "card" ? "border-2 border-primary bg-primary/10 shadow-glow-primary" : "border border-glass-border glass-card"
+                  )}>
                     <RadioGroupItem value="card" id="card" />
                     <CreditCard className="h-5 w-5 text-primary" />
                     <div className="flex-1">
                       <p className="font-medium">Credit / Debit Card</p>
                       <p className="text-sm text-muted-foreground">Visa, Mastercard, JCB</p>
                     </div>
-                    <div className="flex gap-1">
-                      <div className="h-6 w-10 bg-gradient-to-r from-primary/80 to-primary rounded text-primary-foreground text-[8px] font-bold flex items-center justify-center">VISA</div>
-                      <div className="h-6 w-10 bg-gradient-to-r from-destructive/80 to-destructive rounded flex items-center justify-center">
-                        <div className="flex -space-x-1">
-                          <div className="h-3 w-3 bg-destructive rounded-full opacity-80" />
-                          <div className="h-3 w-3 bg-accent rounded-full opacity-80" />
-                        </div>
-                      </div>
-                    </div>
                   </label>
 
-                  <label 
-                    className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover ${
-                      paymentMethod === "gcash" 
-                        ? "border-2 border-primary bg-primary/10 shadow-glow-primary" 
-                        : "border border-glass-border glass-card"
-                    }`}
-                  >
+                  <label className={cn(
+                    "flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover",
+                    paymentMethod === "gcash" ? "border-2 border-primary bg-primary/10 shadow-glow-primary" : "border border-glass-border glass-card"
+                  )}>
                     <RadioGroupItem value="gcash" id="gcash" />
                     <Smartphone className="h-5 w-5 text-primary" />
                     <div className="flex-1">
                       <p className="font-medium">GCash</p>
                       <p className="text-sm text-muted-foreground">Pay with your GCash wallet</p>
                     </div>
-                    <div className="h-6 w-14 bg-primary rounded text-primary-foreground text-[10px] font-bold flex items-center justify-center">GCash</div>
                   </label>
 
-                  <label 
-                    className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover ${
-                      paymentMethod === "internal_wallet" 
-                        ? "border-2 border-primary bg-primary/10 shadow-glow-primary" 
-                        : "border border-glass-border glass-card"
-                    }`}
-                  >
+                  <label className={cn(
+                    "flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover",
+                    paymentMethod === "internal_wallet" ? "border-2 border-primary bg-primary/10 shadow-glow-primary" : "border border-glass-border glass-card"
+                  )}>
                     <RadioGroupItem value="internal_wallet" id="internal_wallet" />
                     <Wallet className="h-5 w-5 text-emerald-600" />
                     <div className="flex-1">
@@ -415,23 +437,18 @@ const CheckoutPage = () => {
                         {loadingWallet ? "Loading..." : `Balance: ₱${internalBalance.toLocaleString()}`}
                       </p>
                     </div>
-                    <div className="h-6 w-14 bg-emerald-600 rounded text-white text-[10px] font-bold flex items-center justify-center">Wallet</div>
                   </label>
 
-                  <label 
-                    className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover ${
-                      paymentMethod === "crypto" 
-                        ? "border-2 border-primary bg-primary/10 shadow-glow-primary" 
-                        : "border border-glass-border glass-card"
-                    }`}
-                  >
+                  <label className={cn(
+                    "flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover",
+                    paymentMethod === "crypto" ? "border-2 border-primary bg-primary/10 shadow-glow-primary" : "border border-glass-border glass-card"
+                  )}>
                     <RadioGroupItem value="crypto" id="crypto" />
                     <Bitcoin className="h-5 w-5 text-accent" />
                     <div className="flex-1">
                       <p className="font-medium">Cryptocurrency</p>
-                      <p className="text-sm text-muted-foreground">BTC, ETH, USDC via Coinbase</p>
+                      <p className="text-sm text-muted-foreground">BTC, ETH, USDC</p>
                     </div>
-                    <div className="h-6 w-6 bg-accent rounded-full text-accent-foreground text-[10px] font-bold flex items-center justify-center">₿</div>
                   </label>
                 </RadioGroup>
 
@@ -462,7 +479,7 @@ const CheckoutPage = () => {
                           <span className="text-destructive">Remaining to Pay</span>
                           <span className="font-semibold text-destructive">₱{(total - internalBalance).toFixed(2)}</span>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">Insufficient balance. Please top up via Coupons in Business Centre or choose another payment method.</p>
+                        <p className="text-xs text-muted-foreground mt-1">Insufficient balance. Top up via Coupons or choose another method.</p>
                       </div>
                     )}
                   </div>
@@ -474,13 +491,7 @@ const CheckoutPage = () => {
                 <div className="space-y-4 p-5 rounded-xl glass-card border border-glass-border">
                   <div className="space-y-2">
                     <Label htmlFor="cardNumber">Card Number</Label>
-                    <Input 
-                      id="cardNumber" 
-                      placeholder="4242 4242 4242 4242" 
-                      maxLength={19}
-                      className="glass-card border-glass-border focus:border-primary"
-                      required 
-                    />
+                    <Input id="cardNumber" placeholder="4242 4242 4242 4242" maxLength={19} className="glass-card border-glass-border focus:border-primary" required />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -498,7 +509,7 @@ const CheckoutPage = () => {
               <Button 
                 type="submit" 
                 className="w-full btn-liquid-accent h-14 rounded-xl text-lg font-semibold"
-                disabled={isProcessing || !selectedDeliveryProvider}
+                disabled={isProcessing || (hasProducts && !selectedDeliveryProvider)}
               >
                 {isProcessing ? (
                   <span className="flex items-center gap-2">
@@ -520,80 +531,114 @@ const CheckoutPage = () => {
             </form>
           </div>
 
-          {/* Order Summary */}
+          {/* ── Order Summary ── */}
           <div className="lg:sticky lg:top-24 h-fit">
             <div className="glass-card rounded-2xl border border-glass-border p-6 space-y-6 shadow-glass">
               <h2 className="font-display text-lg font-semibold">Order Summary</h2>
 
-              <div className="space-y-4 max-h-[300px] overflow-y-auto">
-                {items.map((item) => (
-                  <div key={item.product.id} className="flex gap-3 glass-card p-3 rounded-xl">
-                    <div className="h-16 w-16 rounded-lg overflow-hidden border border-glass-border flex-shrink-0">
-                      <img 
-                        src={item.product.image} 
-                        alt={item.product.name}
-                        loading="lazy"
-                        decoding="async"
-                        className="h-full w-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/placeholder.svg';
-                        }}
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{item.product.name}</p>
-                      <p className="text-xs text-muted-foreground">{item.product.farmName}</p>
-                      <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
-                    </div>
-                    <p className="font-semibold text-sm text-primary">
-                      ₱{(item.product.price * item.quantity).toFixed(2)}
-                    </p>
+              {/* Products Section */}
+              {hasProducts && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <Package className="h-4 w-4" />
+                    Products ({items.length})
                   </div>
-                ))}
-              </div>
+                  <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                    {items.map((item) => (
+                      <div key={item.product.id} className="flex gap-3 glass-card p-3 rounded-xl">
+                        <div className="h-14 w-14 rounded-lg overflow-hidden border border-glass-border flex-shrink-0">
+                          <img 
+                            src={item.product.image} 
+                            alt={item.product.name}
+                            loading="lazy" decoding="async"
+                            className="h-full w-full object-cover"
+                            onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{item.product.name}</p>
+                          <p className="text-xs text-muted-foreground">{item.product.farmName} · Qty: {item.quantity}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <p className="font-semibold text-sm text-primary">₱{(item.product.price * item.quantity).toFixed(2)}</p>
+                          <button onClick={() => removeItem(item.product.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Coupons Section */}
+              {hasCoupons && (
+                <div className="space-y-3">
+                  {hasProducts && <Separator className="bg-glass-border" />}
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <Ticket className="h-4 w-4" />
+                    Coupons ({couponItems.length})
+                  </div>
+                  <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                    {couponItems.map((coupon) => (
+                      <CouponCheckoutItem
+                        key={coupon.id}
+                        coupon={coupon}
+                        onRemove={() => removeCoupon(coupon.id)}
+                        onUpdateRecipient={(r, d) => updateCouponRecipient(coupon.id, r, d)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <Separator className="bg-glass-border" />
 
+              {/* Price Breakdown */}
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Base Product Price</span>
-                  <span className="font-medium">₱{farmerSubtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground flex items-center gap-1">
-                    Platform Service Fee
-                    <span className="text-xs glass-badge-accent px-1.5 py-0.5 rounded-full">20%</span>
-                  </span>
-                  <span className="font-medium text-accent">₱{platformFee.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground flex items-center gap-1">
-                    Commission
-                    <span className="text-xs glass-badge-accent px-1.5 py-0.5 rounded-full">10%</span>
-                  </span>
-                  <span className="font-medium text-accent">₱{commission.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground flex items-center gap-1">
-                    VAT
-                    <span className="text-xs glass-badge-accent px-1.5 py-0.5 rounded-full">12%</span>
-                  </span>
-                  <span className="font-medium">₱{vat.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground flex items-center gap-1">
-                    Transportation Fee
-                    {selectedDeliveryProvider && (
-                      <span className="text-xs glass-badge-primary px-1.5 py-0.5 rounded-full capitalize">
-                        {selectedDeliveryProvider}
+                {hasProducts && (
+                  <>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Products Subtotal</span>
+                      <span className="font-medium">₱{productSubtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        Platform Fee
+                        <span className="text-xs glass-badge-accent px-1.5 py-0.5 rounded-full">20%</span>
                       </span>
-                    )}
-                  </span>
-                  <span className="font-medium">
-                    {deliveryFee > 0 ? `₱${deliveryFee.toFixed(2)}` : "Select provider"}
-                  </span>
-                </div>
+                      <span className="font-medium text-accent">₱{platformFee.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        Commission
+                        <span className="text-xs glass-badge-accent px-1.5 py-0.5 rounded-full">10%</span>
+                      </span>
+                      <span className="font-medium text-accent">₱{commission.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        VAT
+                        <span className="text-xs glass-badge-accent px-1.5 py-0.5 rounded-full">12%</span>
+                      </span>
+                      <span className="font-medium">₱{vat.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Transportation</span>
+                      <span className="font-medium">
+                        {deliveryFee > 0 ? `₱${deliveryFee.toFixed(2)}` : "Select provider"}
+                      </span>
+                    </div>
+                  </>
+                )}
+
+                {hasCoupons && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Coupons Subtotal</span>
+                    <span className="font-medium text-emerald-600">₱{couponSubtotal.toLocaleString()}</span>
+                  </div>
+                )}
+
                 <Separator className="bg-glass-border" />
                 <div className="flex justify-between text-base pt-2">
                   <span className="font-semibold">Total Payable</span>
@@ -601,18 +646,32 @@ const CheckoutPage = () => {
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl glass-card-accent border border-primary/30 text-sm shadow-glow-primary">
-                <div className="flex items-center gap-2 text-primary font-medium mb-1">
-                  <Truck className="h-4 w-4" />
-                  Estimated Delivery
+              {hasProducts && (
+                <div className="p-4 rounded-xl glass-card-accent border border-primary/30 text-sm shadow-glow-primary">
+                  <div className="flex items-center gap-2 text-primary font-medium mb-1">
+                    <Truck className="h-4 w-4" />
+                    Estimated Delivery
+                  </div>
+                  <p className="text-muted-foreground">
+                    {deliveryEstimate 
+                      ? `~${deliveryEstimate.estimated_eta_minutes} minutes via ${selectedDeliveryProvider}`
+                      : "Select a delivery provider to see estimate"
+                    }
+                  </p>
                 </div>
-                <p className="text-muted-foreground">
-                  {deliveryEstimate 
-                    ? `~${deliveryEstimate.estimated_eta_minutes} minutes via ${selectedDeliveryProvider}`
-                    : "Select a delivery provider to see estimate"
-                  }
-                </p>
-              </div>
+              )}
+
+              {hasCoupons && (
+                <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-sm">
+                  <div className="flex items-center gap-2 text-emerald-600 font-medium mb-1">
+                    <Ticket className="h-4 w-4" />
+                    Coupon Fulfillment
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    Coupons are digital. BV & rewards are credited instantly after purchase.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -625,17 +684,132 @@ const CheckoutPage = () => {
           <p className="text-lg font-bold text-primary">₱{total.toFixed(2)}</p>
         </div>
         <Button 
-          type="submit"
-          form="checkout-form"
+          type="submit" form="checkout-form"
           className="btn-liquid-accent h-11 rounded-xl font-semibold px-6"
-          disabled={isProcessing || !selectedDeliveryProvider}
+          disabled={isProcessing || (hasProducts && !selectedDeliveryProvider)}
         >
           {isProcessing ? "Processing..." : "Place Order"}
         </Button>
       </div>
-      <div className="lg:hidden h-20" /> {/* Spacer for sticky bar */}
+      <div className="lg:hidden h-20" />
 
       <Footer />
+    </div>
+  );
+};
+
+// ── Coupon Line Item with Recipient Selection ──
+const CouponCheckoutItem = ({
+  coupon,
+  onRemove,
+  onUpdateRecipient,
+}: {
+  coupon: CouponCartItem;
+  onRemove: () => void;
+  onUpdateRecipient: (r: CouponCartItem['recipient'], d?: CouponCartItem['recipientDetails']) => void;
+}) => {
+  const [recipientType, setRecipientType] = useState<CouponCartItem['recipient']>(coupon.recipient);
+  const [recipientEmail, setRecipientEmail] = useState(coupon.recipientDetails?.email || "");
+  const [recipientName, setRecipientName] = useState(coupon.recipientDetails?.fullName || "");
+  const [recipientPhone, setRecipientPhone] = useState(coupon.recipientDetails?.phone || "");
+
+  const handleRecipientChange = (value: string) => {
+    const r = value as CouponCartItem['recipient'];
+    setRecipientType(r);
+    if (r === "self") {
+      onUpdateRecipient(r);
+    }
+  };
+
+  const handleDetailBlur = () => {
+    onUpdateRecipient(recipientType, {
+      email: recipientEmail,
+      fullName: recipientName,
+      phone: recipientPhone,
+    });
+  };
+
+  return (
+    <div className="glass-card rounded-xl border border-glass-border overflow-hidden">
+      {/* Coupon header */}
+      <div className="flex items-center gap-3 p-3">
+        <div className="h-12 w-12 rounded-lg overflow-hidden border border-glass-border flex-shrink-0">
+          <img src={coupon.image} alt={coupon.name} className="h-full w-full object-cover" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-medium text-sm">{coupon.name}</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{coupon.bv.toLocaleString()} BV</Badge>
+            <span className="text-[10px] text-muted-foreground">{coupon.reward}</span>
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <p className="font-semibold text-sm text-primary">₱{coupon.price.toLocaleString()}</p>
+          <button onClick={onRemove} className="text-muted-foreground hover:text-destructive transition-colors">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Recipient selection */}
+      <div className="border-t border-glass-border p-3 space-y-2">
+        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Recipient</p>
+        <RadioGroup value={recipientType} onValueChange={handleRecipientChange} className="space-y-1.5">
+          <label className="flex items-center gap-2 text-xs cursor-pointer">
+            <RadioGroupItem value="self" className="h-3.5 w-3.5" />
+            <User className="h-3 w-3 text-muted-foreground" />
+            Use for Myself
+          </label>
+          <label className="flex items-center gap-2 text-xs cursor-pointer">
+            <RadioGroupItem value="existing_user" className="h-3.5 w-3.5" />
+            <User className="h-3 w-3 text-muted-foreground" />
+            Assign to Existing User
+          </label>
+          <label className="flex items-center gap-2 text-xs cursor-pointer">
+            <RadioGroupItem value="new_member" className="h-3.5 w-3.5" />
+            <UserPlus className="h-3 w-3 text-muted-foreground" />
+            Assign to New Member / Buyer
+          </label>
+        </RadioGroup>
+
+        {recipientType === "existing_user" && (
+          <div className="pt-1.5 space-y-2">
+            <Input 
+              placeholder="User email or mobile" 
+              value={recipientEmail} 
+              onChange={(e) => setRecipientEmail(e.target.value)}
+              onBlur={handleDetailBlur}
+              className="h-8 text-xs glass-card border-glass-border"
+            />
+          </div>
+        )}
+
+        {recipientType === "new_member" && (
+          <div className="pt-1.5 space-y-2">
+            <Input 
+              placeholder="Full name" 
+              value={recipientName} 
+              onChange={(e) => setRecipientName(e.target.value)}
+              onBlur={handleDetailBlur}
+              className="h-8 text-xs glass-card border-glass-border"
+            />
+            <Input 
+              placeholder="Email" 
+              value={recipientEmail} 
+              onChange={(e) => setRecipientEmail(e.target.value)}
+              onBlur={handleDetailBlur}
+              className="h-8 text-xs glass-card border-glass-border"
+            />
+            <Input 
+              placeholder="Mobile number" 
+              value={recipientPhone} 
+              onChange={(e) => setRecipientPhone(e.target.value)}
+              onBlur={handleDetailBlur}
+              className="h-8 text-xs glass-card border-glass-border"
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
