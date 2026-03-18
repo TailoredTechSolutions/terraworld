@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
+import CouponsPanel from "@/components/business-centre/CouponsPanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +20,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import {
   LayoutDashboard, Users, GitBranch, DollarSign, Share2, Award, Megaphone,
   CreditCard, HelpCircle, TrendingUp, ArrowUpRight, ArrowDownRight,
-  Copy, Download, Crown, Search, Wallet,
+  Copy, Download, Crown, Search, Wallet, Ticket,
   CheckCircle2, XCircle, AlertTriangle, Coins, Shield, Zap, Target,
   BarChart3, Clock, Star, Info, Settings, FileText, Scale, Lock
 } from "lucide-react";
