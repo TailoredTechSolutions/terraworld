@@ -3,16 +3,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import {
-  Ticket, ShoppingBag, BarChart3, Loader2, Wallet, TrendingUp,
-  Coins, CheckCircle2, ArrowUpRight, Zap
+  Ticket, ShoppingBag, BarChart3, Loader2, TrendingUp,
+  Coins, CheckCircle2, ArrowUpRight, Zap, Star, Crown, Rocket
 } from "lucide-react";
 import { format } from "date-fns";
+
+import starterBg from "@/assets/coupons/starter-coupon-bg.jpg";
+import basicBg from "@/assets/coupons/basic-coupon-bg.jpg";
+import proBg from "@/assets/coupons/pro-coupon-bg.jpg";
+import eliteBg from "@/assets/coupons/elite-coupon-bg.jpg";
 
 interface CouponPackage {
   id: string;
@@ -42,6 +46,58 @@ interface CouponPurchase {
   expires_at: string | null;
   created_at: string;
 }
+
+const TIER_CONFIG: Record<string, {
+  bg: string;
+  accent: string;
+  accentBg: string;
+  border: string;
+  gradient: string;
+  icon: typeof Star;
+  reward: string;
+  bv: number;
+}> = {
+  "Starter Coupon": {
+    bg: starterBg,
+    accent: "text-emerald-400",
+    accentBg: "bg-emerald-500/20",
+    border: "border-emerald-500/30",
+    gradient: "from-emerald-900/90 via-emerald-800/70 to-emerald-900/90",
+    icon: Zap,
+    reward: "Activation",
+    bv: 500,
+  },
+  "Basic Coupon": {
+    bg: basicBg,
+    accent: "text-amber-400",
+    accentBg: "bg-amber-500/20",
+    border: "border-amber-500/30",
+    gradient: "from-amber-900/90 via-stone-800/70 to-amber-900/90",
+    icon: Star,
+    reward: "Unlock Level",
+    bv: 1000,
+  },
+  "Pro Coupon": {
+    bg: proBg,
+    accent: "text-green-400",
+    accentBg: "bg-green-500/20",
+    border: "border-green-500/30",
+    gradient: "from-green-900/90 via-green-800/70 to-green-900/90",
+    icon: Rocket,
+    reward: "Higher Matching",
+    bv: 3000,
+  },
+  "Elite Coupon": {
+    bg: eliteBg,
+    accent: "text-yellow-400",
+    accentBg: "bg-yellow-500/20",
+    border: "border-yellow-500/30",
+    gradient: "from-yellow-900/90 via-amber-800/70 to-yellow-900/90",
+    icon: Crown,
+    reward: "Max Earning",
+    bv: 5000,
+  },
+};
 
 const CouponsPanel = () => {
   const { user } = useAuth();
@@ -84,7 +140,7 @@ const CouponsPanel = () => {
 
       toast({
         title: "Coupon Purchased! 🎉",
-        description: `₱${data.breakdown.internal_wallet_credit.toLocaleString()} credited to your Internal Wallet. ${data.breakdown.bv_generated} BV generated.`,
+        description: `${TIER_CONFIG[pkg.name]?.bv || pkg.price} BV generated. Your membership is now activated.`,
       });
       setActiveTab("my");
       fetchData();
@@ -112,9 +168,6 @@ const CouponsPanel = () => {
     );
   }
 
-  const consumerPkgs = packages.filter((p) => p.name.startsWith("Consumer") || p.name.startsWith("Farm"));
-  const affiliatePkgs = packages.filter((p) => p.name.startsWith("Affiliate"));
-
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
       <TabsList className="grid grid-cols-3 w-full max-w-md">
@@ -131,30 +184,16 @@ const CouponsPanel = () => {
 
       {/* ── BUY COUPONS ── */}
       <TabsContent value="buy" className="space-y-6">
-        {/* Consumer Coupons */}
-        <div>
-          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-            <Wallet className="h-4 w-4 text-primary" /> Consumer & Farm Credit Coupons
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {consumerPkgs.map((pkg) => (
-              <CouponCard key={pkg.id} pkg={pkg} purchasing={purchasing} onPurchase={handlePurchase} />
-            ))}
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {packages.map((pkg) => (
+            <CouponHeroCard
+              key={pkg.id}
+              pkg={pkg}
+              purchasing={purchasing}
+              onPurchase={handlePurchase}
+            />
+          ))}
         </div>
-
-        {affiliatePkgs.length > 0 && (
-          <div>
-            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-              <Zap className="h-4 w-4 text-primary" /> Affiliate Coupons
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {affiliatePkgs.map((pkg) => (
-                <CouponCard key={pkg.id} pkg={pkg} purchasing={purchasing} onPurchase={handlePurchase} />
-              ))}
-            </div>
-          </div>
-        )}
       </TabsContent>
 
       {/* ── MY COUPONS ── */}
@@ -190,7 +229,6 @@ const CouponsPanel = () => {
                       <th className="text-left py-2.5 px-3 text-muted-foreground font-medium">Date</th>
                       <th className="text-left py-2.5 px-3 text-muted-foreground font-medium">Package</th>
                       <th className="text-right py-2.5 px-3 text-muted-foreground font-medium">Paid</th>
-                      <th className="text-right py-2.5 px-3 text-muted-foreground font-medium">Remaining</th>
                       <th className="text-right py-2.5 px-3 text-muted-foreground font-medium">BV</th>
                       <th className="text-right py-2.5 px-3 text-muted-foreground font-medium">Status</th>
                     </tr>
@@ -204,9 +242,8 @@ const CouponsPanel = () => {
                         </td>
                         <td className="py-2.5 px-3 text-right">₱{Number(p.price_paid).toLocaleString()}</td>
                         <td className="py-2.5 px-3 text-right font-semibold text-emerald-600">
-                          ₱{Number(p.balance_remaining).toLocaleString()}
+                          {Number(p.bv_generated).toLocaleString()} BV
                         </td>
-                        <td className="py-2.5 px-3 text-right">{Number(p.bv_generated).toLocaleString()}</td>
                         <td className="py-2.5 px-3 text-right">
                           <Badge
                             variant={p.status === "active" ? "default" : "secondary"}
@@ -253,10 +290,10 @@ const CouponsPanel = () => {
           </CardHeader>
           <CardContent className="px-5 pb-4 space-y-2">
             {[
-              { label: "Usable Wallet Value", value: `₱${purchases.reduce((s, p) => s + p.usable_value, 0).toLocaleString()}` },
-              { label: "Terra Fee → BV", value: `₱${purchases.reduce((s, p) => s + p.terra_fee, 0).toLocaleString()} → ${totalBV.toLocaleString()} BV` },
+              { label: "Total BV Generated", value: `${totalBV.toLocaleString()} BV` },
               { label: "Token Rewards", value: `${totalTokens.toFixed(1)} AGRI` },
-              { label: "Bonus Credits", value: `₱${purchases.reduce((s, p) => s + p.bonus_value, 0).toLocaleString()}` },
+              { label: "Total Invested", value: `₱${totalPurchased.toLocaleString()}` },
+              { label: "Coupon Purchases", value: `${purchases.length} coupon(s)` },
             ].map((r) => (
               <div key={r.label} className="flex justify-between text-xs p-2.5 rounded bg-muted/30">
                 <span className="text-muted-foreground">{r.label}</span>
@@ -270,8 +307,8 @@ const CouponsPanel = () => {
   );
 };
 
-// ── Coupon Card Component ──
-const CouponCard = ({
+// ── Premium Coupon Hero Card ──
+const CouponHeroCard = ({
   pkg,
   purchasing,
   onPurchase,
@@ -280,81 +317,89 @@ const CouponCard = ({
   purchasing: string | null;
   onPurchase: (pkg: CouponPackage) => void;
 }) => {
-  const usableValue = Math.round((pkg.price * pkg.usable_value_percent) / 100);
-  const terraFee = Math.round((pkg.price * pkg.terra_fee_percent) / 100);
-  const tokenReward = Math.round((pkg.price * pkg.token_reward_percent) / 100);
-  const bonus = Math.round((pkg.price * pkg.bonus_percent) / 100);
-
-  const isAffiliate = pkg.bv_type === "membership";
+  const config = TIER_CONFIG[pkg.name];
+  const fallbackGradient = "from-stone-900/90 via-stone-800/70 to-stone-900/90";
+  const gradient = config?.gradient || fallbackGradient;
+  const bgImage = config?.bg;
+  const Icon = config?.icon || Star;
+  const reward = config?.reward || pkg.description || "";
+  const bv = config?.bv || pkg.price;
+  const accent = config?.accent || "text-emerald-400";
+  const accentBg = config?.accentBg || "bg-emerald-500/20";
+  const border = config?.border || "border-border/40";
 
   return (
-    <Card className={cn(
-      "border-border/40 hover:border-primary/40 transition-all",
-      isAffiliate && "border-purple-500/20"
-    )}>
-      <CardContent className="p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-bold font-display">{pkg.name}</p>
-            {pkg.description && (
-              <p className="text-[10px] text-muted-foreground mt-0.5">{pkg.description}</p>
-            )}
+    <div
+      className={cn(
+        "group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300",
+        "hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]",
+        "border",
+        border
+      )}
+      onClick={() => !purchasing && onPurchase(pkg)}
+    >
+      {/* Hero Background */}
+      {bgImage && (
+        <img
+          src={bgImage}
+          alt={pkg.name}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+      )}
+
+      {/* Gradient Overlay */}
+      <div className={cn("absolute inset-0 bg-gradient-to-t", gradient)} />
+
+      {/* Content */}
+      <div className="relative z-10 p-5 flex flex-col min-h-[280px] justify-between">
+        {/* Top: Badge */}
+        <div className="flex justify-between items-start">
+          <div className={cn("p-2 rounded-xl backdrop-blur-sm", accentBg)}>
+            <Icon className={cn("h-5 w-5", accent)} />
           </div>
-          <Badge variant="outline" className={cn(
-            "text-[10px] px-1.5 py-0",
-            isAffiliate ? "border-purple-500/30 text-purple-600" : "border-emerald-500/30 text-emerald-600"
+          <Badge className={cn(
+            "text-[10px] px-2 py-0.5 backdrop-blur-sm border-0",
+            accentBg, accent
           )}>
-            {isAffiliate ? "Membership BV" : "Product BV"}
+            {bv.toLocaleString()} BV
           </Badge>
         </div>
 
-        <div className="text-center py-2">
-          <p className="text-2xl font-bold text-primary">₱{pkg.price.toLocaleString()}</p>
-        </div>
+        {/* Bottom: Info + CTA */}
+        <div className="space-y-3">
+          <div>
+            <h3 className="text-xl font-bold text-white font-display tracking-tight">
+              {pkg.name.replace(" Coupon", "")}
+            </h3>
+            <p className="text-white/70 text-xs mt-0.5">{reward}</p>
+          </div>
 
-        <Separator />
-
-        <div className="space-y-1.5 text-[11px]">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Wallet Credit</span>
-            <span className="font-medium text-emerald-600">₱{(usableValue + bonus).toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Terra Fee → BV</span>
-            <span className="font-medium">₱{terraFee} → {terraFee} BV</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Token Reward</span>
-            <span className="font-medium text-accent">₱{tokenReward} value</span>
-          </div>
-          {bonus > 0 && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Bonus Credit</span>
-              <span className="font-medium text-primary">+₱{bonus}</span>
+          <div className="flex items-end justify-between">
+            <div>
+              <p className={cn("text-2xl font-bold font-display", accent)}>
+                ₱{pkg.price.toLocaleString()}
+              </p>
             </div>
-          )}
-          {pkg.expiry_days && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Valid For</span>
-              <span className="font-medium">{pkg.expiry_days} days</span>
-            </div>
-          )}
-        </div>
+          </div>
 
-        <Button
-          className="w-full h-9 text-xs"
-          disabled={purchasing === pkg.id}
-          onClick={() => onPurchase(pkg)}
-        >
-          {purchasing === pkg.id ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
-          ) : (
-            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-          )}
-          {purchasing === pkg.id ? "Processing..." : "Buy Now"}
-        </Button>
-      </CardContent>
-    </Card>
+          <Button
+            className={cn(
+              "w-full h-10 text-sm font-semibold backdrop-blur-sm transition-all",
+              "bg-white/15 hover:bg-white/25 text-white border border-white/20"
+            )}
+            variant="ghost"
+            disabled={purchasing === pkg.id}
+          >
+            {purchasing === pkg.id ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+            )}
+            {purchasing === pkg.id ? "Processing..." : "Purchase"}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 };
 
