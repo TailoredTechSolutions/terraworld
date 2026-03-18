@@ -1,5 +1,3 @@
-
-
 ## Mobile Responsiveness Audit & Fix Plan
 
 ### Current State Assessment
@@ -34,52 +32,44 @@ The footer grid `md:grid-cols-4` drops to single column. This is functional but 
 
 ---
 
-### Implementation Plan
+## 🔒 Business Centre Architecture Lock
 
-#### A. Farmer Dashboard - Add Sidebar Navigation (Highest Priority)
-- Create `FarmerSidebar.tsx` following the same pattern as `BuyerSidebar.tsx` and `MemberSidebar.tsx`
-- On mobile: floating menu button that opens a Sheet with all 12 tabs
-- On desktop: collapsible sidebar
-- Update `FarmerDashboard.tsx` to use sidebar layout instead of `TabsList`
+The Business Centre (`/business-centre/*`) is the **single unified application shell** for Affiliates, Admins, and Super Admins. This structure is locked.
 
-#### B. Map Page Mobile Fixes
-- Refactor location banner: stack text and button vertically on mobile with `flex-col sm:flex-row`
-- Increase mobile map height from `aspect-[4/3]` to `aspect-[3/4]` or a fixed `min-h-[400px]` on mobile
-- Limit farm sidebar to a horizontal scroll card strip on mobile
+### Non-Negotiable Rules
+- **ONE Business Centre** — no duplicates, no replacements, no parallel dashboards
+- All roles (Member, Admin, Super Admin) share the **same layout** — differences are data visibility and permissions only
+- New features **must plug into** the existing Main Content Area via the sidebar navigation
+- Never move pages outside `/business-centre/`
+- Never remove existing pages when adding features
 
-#### C. Product Detail Mobile Fixes
-- Reduce gap: `gap-6 lg:gap-12` instead of `gap-12`
-- Reduce breadcrumb margin: `mb-4 lg:mb-8`
-- Make price section more compact on mobile
+### Locked Sidebar Structure
 
-#### D. Admin Tables - Horizontal Scroll
-- Wrap all `<Table>` components in admin panels with `overflow-x-auto` containers
-- This affects: `renderFarmersTab()`, `renderDriversTab()`, `renderOrdersTab()`, and sub-panels
+| Section | Pages |
+|---------|-------|
+| Overview | Overview |
+| Network | Binary Tree, Network, Referrals |
+| Earnings & Finance | Commissions, Wallet, Token Rewards, Marketing |
+| Growth & Access | Rank & Activation, Coupons |
+| Support | Support |
+| Admin (admin only) | Member Search, Genealogy Explorer, Commission Runs, Payout Oversight, Reports |
+| Super Admin (super_admin only) | Wallet Controls, Manual Placement, Audit Logs, Security & Roles, System Settings |
 
-#### E. Index Page - How It Works Grid
-- Change from `grid-cols-1 md:grid-cols-4` to `grid-cols-2 md:grid-cols-4` for a tighter mobile layout
+### Locked Layout
+- Left Sidebar (navigation)
+- Top Header (role badge, search for admins)
+- Main Content Area (page content renders here via `<Outlet />`)
+- Optional Right Panel (detail drawers)
 
-#### F. Footer - Mobile 2-Column Links
-- Change link sections from `grid-cols-1 md:grid-cols-4` to `grid-cols-2 md:grid-cols-4` so the three link columns (Shop, For Farmers, Support) display in a 2-column grid on mobile
+### Safe Update Rule
+When modifying or adding features:
+1. Preserve ALL existing pages and navigation
+2. Only extend functionality — never restructure
+3. New pages get a route under `/business-centre/` and a sidebar entry
+4. If a change risks breaking the shell — **do not apply it**
 
-#### G. Checkout Page - Mobile Summary
-- Add a sticky bottom bar on mobile showing the total and "Place Order" button, so users always see the total without scrolling
-
----
-
-### Technical Details
-
-**Files to create:**
-- `src/components/farmer/FarmerSidebar.tsx` (new, based on BuyerSidebar pattern)
-
-**Files to modify:**
-- `src/pages/FarmerDashboard.tsx` - Replace TabsList with FarmerSidebar layout
-- `src/pages/MapPage.tsx` - Fix location banner and map height on mobile
-- `src/pages/ProductDetail.tsx` - Reduce spacing for mobile
-- `src/pages/Index.tsx` - 2-col "How It Works" grid on mobile
-- `src/pages/AdminDashboard.tsx` - Add overflow-x-auto to table containers
-- `src/components/Footer.tsx` - 2-col mobile grid for link sections
-- `src/pages/CheckoutPage.tsx` - Mobile-friendly order summary
-
-**No database changes required.**
-
+### Key Files
+- `src/components/business-centre/BusinessCentreShell.tsx` — shell layout + sidebar nav
+- `src/components/AnimatedRoutes.tsx` — route definitions
+- `src/contexts/BusinessCentreContext.tsx` — shared state
+- `src/pages/business-centre/*` — individual page components
