@@ -247,6 +247,113 @@ export type Database = {
         }
         Relationships: []
       }
+      coupon_packages: {
+        Row: {
+          bonus_percent: number
+          bv_type: string
+          created_at: string
+          description: string | null
+          expiry_days: number | null
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          terra_fee_percent: number
+          token_reward_percent: number
+          updated_at: string
+          usable_value_percent: number
+        }
+        Insert: {
+          bonus_percent?: number
+          bv_type?: string
+          created_at?: string
+          description?: string | null
+          expiry_days?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price: number
+          terra_fee_percent?: number
+          token_reward_percent?: number
+          updated_at?: string
+          usable_value_percent?: number
+        }
+        Update: {
+          bonus_percent?: number
+          bv_type?: string
+          created_at?: string
+          description?: string | null
+          expiry_days?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          terra_fee_percent?: number
+          token_reward_percent?: number
+          updated_at?: string
+          usable_value_percent?: number
+        }
+        Relationships: []
+      }
+      coupon_purchases: {
+        Row: {
+          balance_remaining: number
+          bonus_value: number
+          bv_generated: number
+          created_at: string
+          expires_at: string | null
+          id: string
+          package_id: string
+          price_paid: number
+          status: string
+          terra_fee: number
+          token_reward: number
+          updated_at: string
+          usable_value: number
+          user_id: string
+        }
+        Insert: {
+          balance_remaining: number
+          bonus_value?: number
+          bv_generated?: number
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          package_id: string
+          price_paid: number
+          status?: string
+          terra_fee: number
+          token_reward?: number
+          updated_at?: string
+          usable_value: number
+          user_id: string
+        }
+        Update: {
+          balance_remaining?: number
+          bonus_value?: number
+          bv_generated?: number
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          package_id?: string
+          price_paid?: number
+          status?: string
+          terra_fee?: number
+          token_reward?: number
+          updated_at?: string
+          usable_value?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_purchases_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "coupon_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       delivery_bookings: {
         Row: {
           booking_status: Database["public"]["Enums"]["delivery_booking_status"]
@@ -1736,6 +1843,7 @@ export type Database = {
           available_balance: number
           created_at: string
           id: string
+          internal_balance: number
           pending_balance: number
           total_withdrawn: number
           updated_at: string
@@ -1745,6 +1853,7 @@ export type Database = {
           available_balance?: number
           created_at?: string
           id?: string
+          internal_balance?: number
           pending_balance?: number
           total_withdrawn?: number
           updated_at?: string
@@ -1754,6 +1863,7 @@ export type Database = {
           available_balance?: number
           created_at?: string
           id?: string
+          internal_balance?: number
           pending_balance?: number
           total_withdrawn?: number
           updated_at?: string
