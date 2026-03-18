@@ -277,6 +277,30 @@ export type Database = {
           },
         ]
       }
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+          status?: string
+        }
+        Relationships: []
+      }
       compensation_pools: {
         Row: {
           created_at: string
@@ -515,6 +539,38 @@ export type Database = {
           },
         ]
       }
+      delivery_events: {
+        Row: {
+          created_at: string
+          delivery_booking_id: string
+          event_payload: Json
+          event_type: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_booking_id: string
+          event_payload?: Json
+          event_type: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          delivery_booking_id?: string
+          event_payload?: Json
+          event_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_events_delivery_booking_id_fkey"
+            columns: ["delivery_booking_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       delivery_zones: {
         Row: {
           base_fee: number
@@ -664,6 +720,44 @@ export type Database = {
             columns: ["ticket_id"]
             isOneToOne: false
             referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_performance_daily: {
+        Row: {
+          assigned_count: number
+          avg_delivery_minutes: number | null
+          delivered_count: number
+          driver_id: string
+          failed_count: number
+          id: string
+          stat_date: string
+        }
+        Insert: {
+          assigned_count?: number
+          avg_delivery_minutes?: number | null
+          delivered_count?: number
+          driver_id: string
+          failed_count?: number
+          id?: string
+          stat_date: string
+        }
+        Update: {
+          assigned_count?: number
+          avg_delivery_minutes?: number | null
+          delivered_count?: number
+          driver_id?: string
+          failed_count?: number
+          id?: string
+          stat_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_performance_daily_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
             referencedColumns: ["id"]
           },
         ]
@@ -842,6 +936,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      inventory_movements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          movement_type: string
+          product_id: string
+          qty: number
+          reason: string | null
+          reference_id: string | null
+          reference_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          movement_type: string
+          product_id: string
+          qty: number
+          reason?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          movement_type?: string
+          product_id?: string
+          qty?: number
+          reason?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       kyc_documents: {
         Row: {
@@ -1329,6 +1467,91 @@ export type Database = {
           },
         ]
       }
+      payment_reconciliation: {
+        Row: {
+          id: string
+          notes: string | null
+          payment_transaction_id: string
+          reconciled_amount: number
+          reconciled_at: string | null
+          reconciled_by: string | null
+          reconciliation_status: string
+          variance_amount: number
+        }
+        Insert: {
+          id?: string
+          notes?: string | null
+          payment_transaction_id: string
+          reconciled_amount: number
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          reconciliation_status?: string
+          variance_amount?: number
+        }
+        Update: {
+          id?: string
+          notes?: string | null
+          payment_transaction_id?: string
+          reconciled_amount?: number
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          reconciliation_status?: string
+          variance_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_reconciliation_payment_transaction_id_fkey"
+            columns: ["payment_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "payment_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          order_id: string | null
+          payload: Json
+          provider: string
+          provider_reference: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: string
+          order_id?: string | null
+          payload?: Json
+          provider: string
+          provider_reference?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          order_id?: string | null
+          payload?: Json
+          provider?: string
+          provider_reference?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payout_entries: {
         Row: {
           amount: number
@@ -1426,6 +1649,51 @@ export type Database = {
           },
         ]
       }
+      payout_records: {
+        Row: {
+          created_at: string
+          fee_amount: number
+          gross_amount: number
+          id: string
+          net_amount: number
+          paid_at: string | null
+          payment_reference: string | null
+          recipient_id: string
+          recipient_type: string
+          source_id: string | null
+          source_type: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          fee_amount?: number
+          gross_amount: number
+          id?: string
+          net_amount: number
+          paid_at?: string | null
+          payment_reference?: string | null
+          recipient_id: string
+          recipient_type: string
+          source_id?: string | null
+          source_type: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          fee_amount?: number
+          gross_amount?: number
+          id?: string
+          net_amount?: number
+          paid_at?: string | null
+          payment_reference?: string | null
+          recipient_id?: string
+          recipient_type?: string
+          source_id?: string | null
+          source_type?: string
+          status?: string
+        }
+        Relationships: []
+      }
       payout_runs: {
         Row: {
           created_at: string
@@ -1522,6 +1790,51 @@ export type Database = {
           setting_value?: Json
           updated_at?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      pricing_rules: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          rule_name: string
+          starts_at: string | null
+          tax_mode: string
+          tax_value: number
+          terra_fee_mode: string
+          terra_fee_value: number
+          transport_config: Json
+          transport_mode: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          rule_name: string
+          starts_at?: string | null
+          tax_mode?: string
+          tax_value?: number
+          terra_fee_mode?: string
+          terra_fee_value?: number
+          transport_config?: Json
+          transport_mode?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          rule_name?: string
+          starts_at?: string | null
+          tax_mode?: string
+          tax_value?: number
+          terra_fee_mode?: string
+          terra_fee_value?: number
+          transport_config?: Json
+          transport_mode?: string
         }
         Relationships: []
       }
@@ -1777,6 +2090,108 @@ export type Database = {
           required_right_leg_bv?: number
         }
         Relationships: []
+      }
+      refund_cases: {
+        Row: {
+          approved_amount: number | null
+          created_at: string
+          id: string
+          order_id: string
+          processed_at: string | null
+          processed_by: string | null
+          reason: string | null
+          requested_amount: number
+          status: string
+          ticket_id: string | null
+        }
+        Insert: {
+          approved_amount?: number | null
+          created_at?: string
+          id?: string
+          order_id: string
+          processed_at?: string | null
+          processed_by?: string | null
+          reason?: string | null
+          requested_amount: number
+          status?: string
+          ticket_id?: string | null
+        }
+        Update: {
+          approved_amount?: number | null
+          created_at?: string
+          id?: string
+          order_id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          reason?: string | null
+          requested_amount?: number
+          status?: string
+          ticket_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refund_cases_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refund_cases_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      return_cases: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          processed_at: string | null
+          processed_by: string | null
+          reason: string | null
+          status: string
+          ticket_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          processed_at?: string | null
+          processed_by?: string | null
+          reason?: string | null
+          status?: string
+          ticket_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          reason?: string | null
+          status?: string
+          ticket_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "return_cases_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "return_cases_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       role_permissions: {
         Row: {
