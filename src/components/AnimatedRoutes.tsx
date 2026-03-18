@@ -180,6 +180,7 @@ const AnimatedRoutes = () => {
             <Route path="reports" element={<BCReports />} />
 
             {/* Module 11: Compliance & Security */}
+            <Route path="compliance-audit" element={<BCComplianceAudit />} />
             <Route path="compliance" element={<BCCompliance />} />
             <Route path="security-roles" element={<BCSecurity />} />
 
