@@ -79,8 +79,8 @@ Deno.serve(async (req) => {
 
       if (rpcError) {
         console.error("[wallet-ledger] RPC error:", rpcError);
-        return new Response(JSON.stringify({ error: rpcError.message }), {
-          status: rpcError.message.includes("not found") ? 404 : 500,
+        return new Response(JSON.stringify({ error: "Failed to process wallet entry. Please try again." }), {
+          status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
