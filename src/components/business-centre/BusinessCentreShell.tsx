@@ -120,6 +120,7 @@ const ADMIN_SECTIONS: { title: string; moduleNumber: number; items: NavItem[] }[
     title: "6. MLM System",
     moduleNumber: 6,
     items: [
+      { id: "mlm-system", label: "MLM Overview", icon: GitBranch, path: "/business-centre/mlm-system", adminOnly: true },
       { id: "binary-tree", label: "Binary Tree", icon: GitBranch, path: "/business-centre/binary-tree" },
       { id: "network", label: "Network", icon: Link2, path: "/business-centre/network" },
       { id: "referrals", label: "Referrals", icon: Share2, path: "/business-centre/referrals" },
