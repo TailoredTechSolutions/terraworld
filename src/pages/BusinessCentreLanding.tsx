@@ -1191,6 +1191,17 @@ const BusinessCentreLanding = () => {
             <div className="mt-4"><RankPanel /></div>
           </motion.section>
 
+          {/* Coupons */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, ease: cubicSmooth }}
+          >
+            <SectionHeader icon={Ticket} title="Coupons" id="coupons" />
+            <div className="mt-4"><CouponsPanel /></div>
+          </motion.section>
+
           {/* Wallet & Payouts */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
