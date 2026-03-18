@@ -20,7 +20,8 @@ import {
   X,
   User,
   UserPlus,
-  Package
+  Package,
+  Award
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
