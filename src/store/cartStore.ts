@@ -23,9 +23,22 @@ export interface CouponCartItem {
   };
 }
 
+export interface UpgradeCartItem {
+  id: string;
+  targetTier: string;
+  targetPrice: number;
+  currentTier: string;
+  currentValue: number;
+  upgradeCost: number;
+  bvGenerated: number;
+  image: string;
+  benefits: string;
+}
+
 interface CartStore {
   items: CartItem[];
   couponItems: CouponCartItem[];
+  upgradeItem: UpgradeCartItem | null;
   isOpen: boolean;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (productId: string) => void;
@@ -33,6 +46,7 @@ interface CartStore {
   addCoupon: (coupon: CouponCartItem) => void;
   removeCoupon: (id: string) => void;
   updateCouponRecipient: (id: string, recipient: CouponCartItem['recipient'], details?: CouponCartItem['recipientDetails']) => void;
+  setUpgrade: (upgrade: UpgradeCartItem | null) => void;
   clearCart: () => void;
   toggleCart: () => void;
   setCartOpen: (open: boolean) => void;
@@ -40,12 +54,14 @@ interface CartStore {
   getTotalPrice: () => number;
   getProductSubtotal: () => number;
   getCouponSubtotal: () => number;
+  getUpgradeSubtotal: () => number;
   hasItems: () => boolean;
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
   couponItems: [],
+  upgradeItem: null,
   isOpen: false,
   
   addItem: (product, quantity = 1) => {
@@ -102,7 +118,9 @@ export const useCartStore = create<CartStore>((set, get) => ({
     }));
   },
   
-  clearCart: () => set({ items: [], couponItems: [] }),
+  setUpgrade: (upgrade) => set({ upgradeItem: upgrade }),
+
+  clearCart: () => set({ items: [], couponItems: [], upgradeItem: null }),
   
   toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
   
@@ -127,7 +145,11 @@ export const useCartStore = create<CartStore>((set, get) => ({
     return get().couponItems.reduce((sum, c) => sum + c.price, 0);
   },
 
+  getUpgradeSubtotal: () => {
+    return get().upgradeItem?.upgradeCost || 0;
+  },
+
   hasItems: () => {
-    return get().items.length > 0 || get().couponItems.length > 0;
+    return get().items.length > 0 || get().couponItems.length > 0 || get().upgradeItem !== null;
   },
 }));

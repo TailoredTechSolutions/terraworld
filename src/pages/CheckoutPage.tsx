@@ -20,7 +20,8 @@ import {
   X,
   User,
   UserPlus,
-  Package
+  Package,
+  Award
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -62,7 +63,7 @@ interface DeliveryEstimate {
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { items, couponItems, getTotalPrice, getProductSubtotal, getCouponSubtotal, clearCart, removeItem, removeCoupon, updateCouponRecipient, hasItems } = useCartStore();
+  const { items, couponItems, upgradeItem, getTotalPrice, getProductSubtotal, getCouponSubtotal, getUpgradeSubtotal, clearCart, removeItem, removeCoupon, updateCouponRecipient, setUpgrade, hasItems } = useCartStore();
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -74,7 +75,8 @@ const CheckoutPage = () => {
 
   const hasProducts = items.length > 0;
   const hasCoupons = couponItems.length > 0;
-  const isCouponOnly = !hasProducts && hasCoupons;
+  const hasUpgrade = upgradeItem !== null;
+  const isDigitalOnly = !hasProducts && (hasCoupons || hasUpgrade);
 
   useEffect(() => {
     (async () => {
@@ -103,6 +105,7 @@ const CheckoutPage = () => {
 
   const productSubtotal = getProductSubtotal();
   const couponSubtotal = getCouponSubtotal();
+  const upgradeSubtotal = getUpgradeSubtotal();
   const platformFeePercent = 0.20;
   const commissionPercent = 0.10;
   const vatPercent = 0.12;
@@ -111,7 +114,7 @@ const CheckoutPage = () => {
   const subtotalBeforeVAT = productSubtotal + platformFee + commission;
   const vat = subtotalBeforeVAT * vatPercent;
   const deliveryFee = (hasProducts && deliveryEstimate?.estimated_fee) ? deliveryEstimate.estimated_fee : 0;
-  const total = subtotalBeforeVAT + vat + deliveryFee + couponSubtotal;
+  const total = subtotalBeforeVAT + vat + deliveryFee + couponSubtotal + upgradeSubtotal;
 
   const defaultPickupLat = 14.5547;
   const defaultPickupLng = 121.0244;
@@ -132,8 +135,8 @@ const CheckoutPage = () => {
     e.preventDefault();
     setFormErrors({});
 
-    const schema = isCouponOnly ? couponOnlySchema : checkoutSchema;
-    const dataToValidate = isCouponOnly 
+    const schema = isDigitalOnly ? couponOnlySchema : checkoutSchema;
+    const dataToValidate = isDigitalOnly 
       ? { firstName: formData.firstName, lastName: formData.lastName, email: formData.email, phone: formData.phone }
       : formData;
 
@@ -172,6 +175,15 @@ const CheckoutPage = () => {
           if (error) throw new Error(error.message);
           if (!data?.success) throw new Error(data?.error || "Coupon purchase failed");
         }
+      }
+
+      // Process rank upgrade via edge function
+      if (hasUpgrade && upgradeItem) {
+        const { data, error } = await supabase.functions.invoke("process-upgrade", {
+          body: { target_tier: upgradeItem.targetTier },
+        });
+        if (error) throw new Error(error.message);
+        if (!data?.success) throw new Error(data?.error || "Upgrade failed");
       }
 
       // Process product order via create-order
@@ -288,8 +300,8 @@ const CheckoutPage = () => {
                 Checkout
               </h1>
               <p className="text-muted-foreground">
-                {isCouponOnly 
-                  ? "Complete your coupon purchase"
+                {isDigitalOnly 
+                  ? "Complete your coupon or upgrade purchase"
                   : "Complete your order for fresh farm produce"
                 }
               </p>
@@ -299,8 +311,8 @@ const CheckoutPage = () => {
               {/* Contact / Delivery Information */}
               <div className="glass-card p-6 rounded-2xl space-y-4">
                 <h2 className="font-display text-lg font-semibold flex items-center gap-2">
-                  {isCouponOnly ? <User className="h-5 w-5 text-primary" /> : <Truck className="h-5 w-5 text-primary" />}
-                  {isCouponOnly ? "Contact Information" : "Delivery Information"}
+                  {isDigitalOnly ? <User className="h-5 w-5 text-primary" /> : <Truck className="h-5 w-5 text-primary" />}
+                  {isDigitalOnly ? "Contact Information" : "Delivery Information"}
                 </h2>
                 
                 <div className="grid sm:grid-cols-2 gap-4">
@@ -592,6 +604,40 @@ const CheckoutPage = () => {
                 </div>
               )}
 
+              {/* Upgrade Section */}
+              {hasUpgrade && upgradeItem && (
+                <div className="space-y-3">
+                  {(hasProducts || hasCoupons) && <Separator className="bg-glass-border" />}
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <Award className="h-4 w-4" />
+                    Rank Upgrade
+                  </div>
+                  <div className="glass-card rounded-xl border border-primary/30 overflow-hidden">
+                    <div className="flex items-center gap-3 p-3">
+                      <div className="h-14 w-14 rounded-lg overflow-hidden border border-glass-border flex-shrink-0">
+                        <img src={upgradeItem.image} alt={upgradeItem.targetTier} className="h-full w-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm capitalize">Upgrade to {upgradeItem.targetTier}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{upgradeItem.bvGenerated.toLocaleString()} BV</Badge>
+                          <span className="text-[10px] text-muted-foreground">{upgradeItem.benefits}</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          ₱{upgradeItem.currentValue.toLocaleString()} → ₱{upgradeItem.targetPrice.toLocaleString()} (pay difference)
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <p className="font-semibold text-sm text-primary">₱{upgradeItem.upgradeCost.toLocaleString()}</p>
+                        <button onClick={() => setUpgrade(null)} className="text-muted-foreground hover:text-destructive transition-colors">
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <Separator className="bg-glass-border" />
 
               {/* Price Breakdown */}
@@ -636,6 +682,13 @@ const CheckoutPage = () => {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Coupons Subtotal</span>
                     <span className="font-medium text-emerald-600">₱{couponSubtotal.toLocaleString()}</span>
+                  </div>
+                )}
+
+                {hasUpgrade && upgradeItem && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Rank Upgrade</span>
+                    <span className="font-medium text-primary">₱{upgradeSubtotal.toLocaleString()}</span>
                   </div>
                 )}
 
