@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.binary-tree]
 verify_jwt = false
+
+[functions.anthropic-chat]
+verify_jwt = false
