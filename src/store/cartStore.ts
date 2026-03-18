@@ -118,7 +118,9 @@ export const useCartStore = create<CartStore>((set, get) => ({
     }));
   },
   
-  clearCart: () => set({ items: [], couponItems: [] }),
+  setUpgrade: (upgrade) => set({ upgradeItem: upgrade }),
+
+  clearCart: () => set({ items: [], couponItems: [], upgradeItem: null }),
   
   toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
   
