@@ -173,6 +173,7 @@ const AnimatedRoutes = () => {
             <Route path="marketing" element={<BCMarketing />} />
 
             {/* Module 9: Customer Service */}
+            <Route path="customer-service" element={<BCCustomerService />} />
             <Route path="support" element={<BCSupport />} />
 
             {/* Module 10: Reports & Analytics */}
