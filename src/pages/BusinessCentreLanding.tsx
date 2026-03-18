@@ -74,129 +74,144 @@ const SectionHeader = ({ icon: Icon, title, id }: { icon: React.ElementType; tit
   </div>
 );
 
+// ─── Types for data-driven panels ───
+interface BusinessData {
+  walletData: { available_balance: number; pending_balance: number; total_withdrawn: number; internal_balance: number } | null;
+  membership: { tier: string; package_price: number; membership_bv: number } | null;
+  totalEarnings: number;
+  binaryStats: { left_bv: number; right_bv: number; matched_bv: number };
+  tokenBalance: number;
+  referralCode: string;
+  recentEarnings: Array<{ bonus_type: string; net_amount: number; payout_period: string; source_order_id: string | null }>;
+  isAnyAdmin: boolean;
+}
+
 // ─── Dashboard Panel ───
-const DashboardPanel = () => (
-  <div className="space-y-5">
-    <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
-      <CardContent className="p-5">
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-primary/20">
-            <Crown className="h-7 w-7 text-primary" />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-lg font-bold font-display text-foreground">Welcome back, Partner!</h2>
-            <p className="text-sm text-muted-foreground">Pro Package • Binary Active • <span className="text-primary font-medium">3 Matching Levels</span></p>
-          </div>
-          <Badge className="hidden sm:flex bg-emerald-500/10 text-emerald-600 border-emerald-500/30" variant="outline">
-            <CheckCircle2 className="h-3 w-3 mr-1" /> Qualified
-          </Badge>
-        </div>
-      </CardContent>
-    </Card>
+const DashboardPanel = ({ data }: { data: BusinessData }) => {
+  const tier = data.membership?.tier || "free";
+  const tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1);
+  const carryForward = Math.abs(data.binaryStats.left_bv - data.binaryStats.right_bv);
 
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      {[
-        { title: "Total Earnings", value: "₱48,325.50", change: "+₱6,240 this week", up: true, icon: DollarSign, accent: "text-emerald-600 bg-emerald-500/10" },
-        { title: "Active Downline", value: "142", change: "+12 this month", up: true, icon: Users, accent: "text-blue-600 bg-blue-500/10" },
-        { title: "Binary BV (L / R)", value: "24,500 / 21,800", change: "2,700 carry-forward", up: true, icon: GitBranch, accent: "text-purple-600 bg-purple-500/10" },
-        { title: "AGRI Tokens", value: "1,247.5", change: "≈ ₱12,475 value", up: true, icon: Coins, accent: "text-accent bg-accent/10" },
-      ].map((stat) => (
-        <Card key={stat.title} className="border-border/40">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className={cn("p-1.5 rounded-lg", stat.accent)}>
-                <stat.icon className="h-4 w-4" />
-              </div>
-              <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                {stat.up ? <ArrowUpRight className="h-3 w-3 text-emerald-500" /> : <ArrowDownRight className="h-3 w-3 text-destructive" />}
-                {stat.change}
-              </span>
+  return (
+    <div className="space-y-5">
+      <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
+        <CardContent className="p-5">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-primary/20">
+              <Crown className="h-7 w-7 text-primary" />
             </div>
-            <p className="text-xl font-bold font-display text-foreground leading-tight">{stat.value}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">{stat.title}</p>
-          </CardContent>
-        </Card>
-      ))}
+            <div className="flex-1">
+              <h2 className="text-lg font-bold font-display text-foreground">
+                {data.isAnyAdmin ? "System Overview" : "Welcome back, Partner!"}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {tierLabel} Package • Binary {data.binaryStats.matched_bv > 0 ? "Active" : "Inactive"}
+              </p>
+            </div>
+            <Badge className="hidden sm:flex bg-emerald-500/10 text-emerald-600 border-emerald-500/30" variant="outline">
+              <CheckCircle2 className="h-3 w-3 mr-1" /> {tier !== "free" ? "Qualified" : "Free Tier"}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { title: "Total Earnings", value: `₱${data.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, change: "All time", up: true, icon: DollarSign, accent: "text-emerald-600 bg-emerald-500/10" },
+          { title: "Binary BV (L / R)", value: `${data.binaryStats.left_bv.toLocaleString()} / ${data.binaryStats.right_bv.toLocaleString()}`, change: `${carryForward.toLocaleString()} carry-forward`, up: true, icon: GitBranch, accent: "text-purple-600 bg-purple-500/10" },
+          { title: "Wallet Balance", value: `₱${(data.walletData?.available_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, change: `₱${(data.walletData?.pending_balance || 0).toLocaleString()} pending`, up: true, icon: Wallet, accent: "text-blue-600 bg-blue-500/10" },
+          { title: "AGRI Tokens", value: data.tokenBalance.toLocaleString(), change: "Non-cash reward", up: true, icon: Coins, accent: "text-accent bg-accent/10" },
+        ].map((stat) => (
+          <Card key={stat.title} className="border-border/40">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className={cn("p-1.5 rounded-lg", stat.accent)}>
+                  <stat.icon className="h-4 w-4" />
+                </div>
+                <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                  {stat.up ? <ArrowUpRight className="h-3 w-3 text-emerald-500" /> : <ArrowDownRight className="h-3 w-3 text-destructive" />}
+                  {stat.change}
+                </span>
+              </div>
+              <p className="text-xl font-bold font-display text-foreground leading-tight">{stat.value}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{stat.title}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="border-border/40">
+        <CardHeader className="pb-2 px-5 pt-4">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Shield className="h-4 w-4 text-primary" /> Qualification Status
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-5 pb-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+            {[
+              { label: "Paid Member", met: tier !== "free", detail: tier !== "free" ? `${tierLabel} Package Active` : "No package" },
+              { label: "Left Leg BV", met: data.binaryStats.left_bv > 0, detail: `${data.binaryStats.left_bv.toLocaleString()} BV` },
+              { label: "Right Leg BV", met: data.binaryStats.right_bv > 0, detail: `${data.binaryStats.right_bv.toLocaleString()} BV` },
+              { label: "Matched BV", met: data.binaryStats.matched_bv > 0, detail: `${data.binaryStats.matched_bv.toLocaleString()} BV matched` },
+            ].map((q) => (
+              <div key={q.label} className={cn(
+                "flex items-center gap-2 p-2.5 rounded-lg border",
+                q.met ? "border-emerald-500/20 bg-emerald-500/5" : "border-destructive/20 bg-destructive/5"
+              )}>
+                {q.met ? <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" /> : <XCircle className="h-4 w-4 text-destructive shrink-0" />}
+                <div>
+                  <p className="text-xs font-medium leading-tight">{q.label}</p>
+                  <p className="text-[10px] text-muted-foreground">{q.detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-border/40">
+        <CardHeader className="px-5 pt-4 pb-2">
+          <CardTitle className="text-sm">Recent Earnings</CardTitle>
+        </CardHeader>
+        <CardContent className="px-5 pb-4">
+          {data.recentEarnings.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No earnings recorded yet. Start building your network!</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-2.5 px-2 text-muted-foreground font-medium text-xs">Period</th>
+                    <th className="text-left py-2.5 px-2 text-muted-foreground font-medium text-xs">Type</th>
+                    <th className="text-right py-2.5 px-2 text-muted-foreground font-medium text-xs">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.recentEarnings.slice(0, 10).map((row, i) => (
+                    <tr key={i} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
+                      <td className="py-2.5 px-2 text-muted-foreground text-xs">{row.payout_period}</td>
+                      <td className="py-2.5 px-2">
+                        <div className="flex items-center gap-2">
+                          <div className={cn("w-1.5 h-1.5 rounded-full",
+                            row.bonus_type === "direct_product" ? "bg-emerald-500" :
+                            row.bonus_type === "binary" ? "bg-blue-500" :
+                            row.bonus_type === "matching" ? "bg-purple-500" : "bg-amber-500"
+                          )} />
+                          <span className="text-xs font-medium">{row.bonus_type.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</span>
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-2 text-right font-semibold text-xs">₱{Number(row.net_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
-
-    <Card className="border-border/40">
-      <CardHeader className="pb-2 px-5 pt-4">
-        <CardTitle className="text-sm flex items-center gap-2">
-          <Shield className="h-4 w-4 text-primary" /> Qualification Status
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-5 pb-4">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-          {[
-            { label: "Paid Member", met: true, detail: "Pro Package Active" },
-            { label: "Left Leg Active", met: true, detail: "Alex Rivera (L1)" },
-            { label: "Right Leg Active", met: true, detail: "Maria Santos (L1)" },
-            { label: "Product BV Generated", met: true, detail: "3,200 BV this period" },
-          ].map((q) => (
-            <div key={q.label} className={cn(
-              "flex items-center gap-2 p-2.5 rounded-lg border",
-              q.met ? "border-emerald-500/20 bg-emerald-500/5" : "border-destructive/20 bg-destructive/5"
-            )}>
-              {q.met ? <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" /> : <XCircle className="h-4 w-4 text-destructive shrink-0" />}
-              <div>
-                <p className="text-xs font-medium leading-tight">{q.label}</p>
-                <p className="text-[10px] text-muted-foreground">{q.detail}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-
-    <Card className="border-border/40">
-      <CardHeader className="px-5 pt-4 pb-2">
-        <CardTitle className="text-sm">Recent Earnings</CardTitle>
-      </CardHeader>
-      <CardContent className="px-5 pb-4">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-2.5 px-2 text-muted-foreground font-medium text-xs">Date</th>
-                <th className="text-left py-2.5 px-2 text-muted-foreground font-medium text-xs">Type</th>
-                <th className="text-left py-2.5 px-2 text-muted-foreground font-medium text-xs hidden sm:table-cell">Source</th>
-                <th className="text-right py-2.5 px-2 text-muted-foreground font-medium text-xs">Amount</th>
-                <th className="text-right py-2.5 px-2 text-muted-foreground font-medium text-xs">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { date: "Mar 01", type: "Direct Product", source: "Order #TF-8842", amount: "₱660.00", status: "Paid", color: "bg-emerald-500" },
-                { date: "Mar 01", type: "Binary Pairing", source: "Matched 4,500 BV", amount: "₱450.00", status: "Paid", color: "bg-blue-500" },
-                { date: "Feb 28", type: "Matching Bonus", source: "L1 – Alex Rivera", amount: "₱45.00", status: "Paid", color: "bg-purple-500" },
-                { date: "Feb 28", type: "Direct Membership", source: "Emily Cruz (Basic)", amount: "₱80.00", status: "Paid", color: "bg-amber-500" },
-                { date: "Feb 27", type: "Direct Product", source: "Order #TF-8801", amount: "₱396.00", status: "Paid", color: "bg-emerald-500" },
-                { date: "Feb 27", type: "Binary Pairing", source: "Matched 3,200 BV", amount: "₱320.00", status: "Paid", color: "bg-blue-500" },
-                { date: "Feb 26", type: "Token Reward", source: "BV Activity Bonus", amount: "12.5 AGRI", status: "Issued", color: "bg-accent" },
-              ].map((row, i) => (
-                <tr key={i} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
-                  <td className="py-2.5 px-2 text-muted-foreground text-xs">{row.date}</td>
-                  <td className="py-2.5 px-2">
-                    <div className="flex items-center gap-2">
-                      <div className={cn("w-1.5 h-1.5 rounded-full", row.color)} />
-                      <span className="text-xs font-medium">{row.type}</span>
-                    </div>
-                  </td>
-                  <td className="py-2.5 px-2 text-muted-foreground text-xs hidden sm:table-cell">{row.source}</td>
-                  <td className="py-2.5 px-2 text-right font-semibold text-xs">{row.amount}</td>
-                  <td className="py-2.5 px-2 text-right">
-                    <Badge variant={row.status === "Paid" ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">{row.status}</Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
-
+  );
+};
 // ─── Network Panel ───
 const NetworkPanel = () => (
   <div className="space-y-5">
@@ -509,9 +524,9 @@ const CommissionsPanel = () => (
 );
 
 // ─── Referral Panel ───
-const ReferralPanel = () => {
+const ReferralPanel = ({ referralCode }: { referralCode: string }) => {
   const { toast } = useToast();
-  const referralLink = "https://terrafarming.app/register?ref=TERRA-PRO-7X4K";
+  const referralLink = referralCode ? `https://terrafarming.app/register?ref=${referralCode}` : "";
 
   return (
     <div className="space-y-5">
@@ -521,51 +536,18 @@ const ReferralPanel = () => {
         </CardHeader>
         <CardContent className="px-5 pb-4 space-y-3">
           <div className="flex gap-2">
-            <Input readOnly value={referralLink} className="font-mono text-[11px] h-9" />
-            <Button size="sm" variant="outline" className="h-9 px-3" onClick={() => { navigator.clipboard.writeText(referralLink); toast({ title: "Copied!", description: "Referral link copied to clipboard" }); }}>
+            <Input readOnly value={referralLink || "Loading..."} className="font-mono text-[11px] h-9" />
+            <Button size="sm" variant="outline" className="h-9 px-3" disabled={!referralCode} onClick={() => { navigator.clipboard.writeText(referralLink); toast({ title: "Copied!", description: "Referral link copied to clipboard" }); }}>
               <Copy className="h-3.5 w-3.5" />
             </Button>
           </div>
-          <p className="text-[10px] text-muted-foreground">Share this link. When someone registers and activates a package, you earn Direct Membership Bonus (8% as Pro).</p>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { label: "Link Clicks", value: "1,847", icon: TrendingUp },
-          { label: "Registrations", value: "86", icon: Users },
-          { label: "Activated (Paid)", value: "58", icon: CheckCircle2 },
-          { label: "Conversion Rate", value: "3.1%", icon: Target },
-        ].map((s) => (
-          <div key={s.label} className="text-center p-3 rounded-xl border border-border/40 bg-card">
-            <s.icon className="h-4 w-4 text-primary mx-auto mb-1.5" />
-            <p className="text-xl font-bold font-display text-foreground">{s.value}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
-          </div>
-        ))}
-      </div>
-
-      <Card className="border-border/40">
-        <CardHeader className="px-5 pt-4 pb-2">
-          <CardTitle className="text-xs">Recent Referrals</CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-4">
-          <div className="space-y-2">
-            {[
-              { name: "Carlos Reyes", date: "Feb 01", pkg: "Starter", bonus: "₱20.00" },
-              { name: "Emily Cruz", date: "Jan 28", pkg: "Basic", bonus: "₱60.00" },
-              { name: "Sophia Lee", date: "Jan 22", pkg: "Pro", bonus: "₱240.00" },
-              { name: "Jake Tan", date: "Jan 18", pkg: "Starter", bonus: "₱20.00" },
-            ].map((r, i) => (
-              <div key={i} className="flex items-center justify-between p-2.5 rounded-lg border border-border/30 hover:bg-muted/20 transition-colors">
-                <div>
-                  <p className="font-medium text-xs">{r.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{r.date} • {r.pkg} Package</p>
-                </div>
-                <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-500/30 px-1.5 py-0">+{r.bonus}</Badge>
-              </div>
-            ))}
-          </div>
+          <p className="text-[10px] text-muted-foreground">Share this link. When someone registers and activates a package, you earn Direct Membership Bonus.</p>
+          {referralCode && (
+            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/30">
+              <span className="text-xs text-muted-foreground">Your Code:</span>
+              <code className="text-xs font-bold font-mono text-primary">{referralCode}</code>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -626,121 +608,73 @@ const RankPanel = () => (
 );
 
 // ─── Wallet & Payout Panel ───
-const PayoutPanel = () => (
-  <div className="space-y-5">
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      {[
-        { label: "Cash Balance", value: "₱18,425.50", icon: Wallet, accent: "text-emerald-600 bg-emerald-500/10" },
-        { label: "Internal Wallet", value: "₱0.00", icon: Ticket, accent: "text-primary bg-primary/10" },
-        { label: "Pending Commissions", value: "₱3,280.00", icon: Clock, accent: "text-amber-600 bg-amber-500/10" },
-        { label: "Total Withdrawn", value: "₱26,620.00", icon: ArrowUpRight, accent: "text-blue-600 bg-blue-500/10" },
-      ].map((w) => (
-        <Card key={w.label} className="border-border/40">
-          <CardContent className="p-4">
-            <div className={cn("p-1.5 rounded-lg w-fit mb-2", w.accent)}>
-              <w.icon className="h-4 w-4" />
+const PayoutPanel = ({ data }: { data: BusinessData }) => {
+  const fmt = (n: number) => `₱${n.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: "Cash Balance", value: fmt(data.walletData?.available_balance || 0), icon: Wallet, accent: "text-emerald-600 bg-emerald-500/10" },
+          { label: "Internal Wallet", value: fmt(data.walletData?.internal_balance || 0), icon: Ticket, accent: "text-primary bg-primary/10" },
+          { label: "Pending", value: fmt(data.walletData?.pending_balance || 0), icon: Clock, accent: "text-amber-600 bg-amber-500/10" },
+          { label: "Total Withdrawn", value: fmt(data.walletData?.total_withdrawn || 0), icon: ArrowUpRight, accent: "text-blue-600 bg-blue-500/10" },
+        ].map((w) => (
+          <Card key={w.label} className="border-border/40">
+            <CardContent className="p-4">
+              <div className={cn("p-1.5 rounded-lg w-fit mb-2", w.accent)}>
+                <w.icon className="h-4 w-4" />
+              </div>
+              <p className="text-xl font-bold font-display text-foreground">{w.value}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{w.label}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card className="border-border/40">
+          <CardHeader className="px-5 pt-4 pb-2">
+            <CardTitle className="text-sm">Payment Methods</CardTitle>
+          </CardHeader>
+          <CardContent className="px-5 pb-4 space-y-3">
+            <div className="p-3 rounded-lg border border-border/40 space-y-1">
+              <span className="font-medium text-xs">Bank Transfer</span>
+              <p className="text-[10px] text-muted-foreground">Configure your bank details for withdrawals</p>
             </div>
-            <p className="text-xl font-bold font-display text-foreground">{w.value}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">{w.label}</p>
+            <div className="p-3 rounded-lg border border-border/40 space-y-1">
+              <span className="font-medium text-xs">GCash</span>
+              <p className="text-[10px] text-muted-foreground">Configure your GCash for faster payouts</p>
+            </div>
+            <div className="flex justify-between text-xs p-2.5 rounded-lg bg-muted/30">
+              <span className="text-muted-foreground">Minimum Withdrawal</span>
+              <span className="font-medium">₱500</span>
+            </div>
           </CardContent>
         </Card>
-      ))}
+
+        <Card className="border-accent/20">
+          <CardHeader className="px-5 pt-4 pb-2">
+            <CardTitle className="text-xs flex items-center gap-2">
+              <Coins className="h-3.5 w-3.5 text-accent" /> AGRI Token Wallet
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="px-5 pb-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-lg bg-accent/5 text-center">
+                <p className="text-xl font-bold text-accent">{data.tokenBalance.toLocaleString()}</p>
+                <p className="text-[10px] text-muted-foreground">Token Balance</p>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/30 text-center">
+                <p className="text-xl font-bold text-foreground">₱10.00</p>
+                <p className="text-[10px] text-muted-foreground">Current Market Price</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
-
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <Card className="border-border/40">
-        <CardHeader className="px-5 pt-4 pb-2">
-          <CardTitle className="text-sm">Payment Methods</CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-4 space-y-3">
-          <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="font-medium text-xs">Bank Transfer</span>
-              <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30 text-[10px] px-1.5 py-0" variant="outline">Primary</Badge>
-            </div>
-            <p className="text-[10px] text-muted-foreground">BDO Unibank • **** 4832 • Juan Dela Cruz</p>
-          </div>
-          <div className="p-3 rounded-lg border border-border/40 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="font-medium text-xs">GCash</span>
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0">Available</Badge>
-            </div>
-            <p className="text-[10px] text-muted-foreground">+63 917 XXX X832</p>
-          </div>
-          <div className="flex justify-between text-xs p-2.5 rounded-lg bg-muted/30">
-            <span className="text-muted-foreground">Minimum Withdrawal</span>
-            <span className="font-medium">₱500</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="border-border/40">
-        <CardHeader className="px-5 pt-4 pb-2">
-          <CardTitle className="text-xs">Recent Withdrawals</CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-4">
-          <div className="space-y-2">
-            {[
-              { date: "Feb 25", method: "Bank Transfer", amount: "₱10,000", fee: "₱200", net: "₱9,800", status: "Paid" },
-              { date: "Feb 10", method: "GCash", amount: "₱5,000", fee: "₱100", net: "₱4,900", status: "Paid" },
-              { date: "Jan 28", method: "Bank Transfer", amount: "₱8,000", fee: "₱160", net: "₱7,840", status: "Paid" },
-              { date: "Jan 15", method: "GCash", amount: "₱3,620", fee: "₱72.40", net: "₱3,547.60", status: "Paid" },
-            ].map((w, i) => (
-              <div key={i} className="flex items-center justify-between p-2.5 rounded-lg border border-border/30 hover:bg-muted/20 transition-colors">
-                <div>
-                  <p className="font-medium text-xs">{w.method}</p>
-                  <p className="text-[10px] text-muted-foreground">{w.date} • Fee: {w.fee}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-xs">{w.net}</p>
-                  <Badge variant="default" className="text-[9px] px-1 py-0">{w.status}</Badge>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-
-    <Card className="border-accent/20">
-      <CardHeader className="px-5 pt-4 pb-2">
-        <CardTitle className="text-xs flex items-center gap-2">
-          <Coins className="h-3.5 w-3.5 text-accent" /> AGRI Token Wallet
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-5 pb-4">
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <div className="p-3 rounded-lg bg-accent/5 text-center">
-            <p className="text-xl font-bold text-accent">1,247.5</p>
-            <p className="text-[10px] text-muted-foreground">Token Balance</p>
-          </div>
-          <div className="p-3 rounded-lg bg-muted/30 text-center">
-            <p className="text-xl font-bold text-foreground">₱10.00</p>
-            <p className="text-[10px] text-muted-foreground">Current Market Price</p>
-          </div>
-        </div>
-        <div className="space-y-1.5">
-          {[
-            { date: "Feb 28", reason: "BV Activity Reward", php: "₱125", tokens: "12.5 AGRI" },
-            { date: "Feb 21", reason: "Consumer Onboarding", php: "₱50", tokens: "5.0 AGRI" },
-            { date: "Feb 14", reason: "Farmer Referral Reward", php: "₱200", tokens: "20.0 AGRI" },
-          ].map((t, i) => (
-            <div key={i} className="flex items-center justify-between text-[10px] p-2 rounded bg-muted/15">
-              <div>
-                <span className="text-muted-foreground">{t.date}</span>
-                <span className="ml-2 font-medium">{t.reason}</span>
-              </div>
-              <div className="text-right">
-                <span className="text-muted-foreground">{t.php} → </span>
-                <span className="font-bold text-accent">{t.tokens}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
+  );
+};
 
 // ─── Marketing Panel ───
 const MarketingPanel = () => (
@@ -869,7 +803,7 @@ const AdminCommissionRunsPanel = () => (
   </Card>
 );
 
-const AdminPayoutOversightPanel = () => (
+const AdminPayoutOversightPanel = ({ pendingCount, pendingAmount }: { pendingCount: number; pendingAmount: number }) => (
   <Card className="border-border/40">
     <CardHeader className="px-5 pt-4 pb-2">
       <CardTitle className="text-sm flex items-center gap-2"><CreditCard className="h-4 w-4 text-primary" /> Payout Oversight</CardTitle>
@@ -877,9 +811,9 @@ const AdminPayoutOversightPanel = () => (
     <CardContent className="px-5 pb-4 space-y-3">
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Pending Withdrawals", value: "18" },
-          { label: "Total Pending Amount", value: "₱127,840" },
-          { label: "Avg Processing Time", value: "1.2 days" },
+          { label: "Pending Withdrawals", value: pendingCount.toString() },
+          { label: "Total Pending Amount", value: `₱${pendingAmount.toLocaleString()}` },
+          { label: "Status", value: pendingCount > 0 ? "Action Needed" : "All Clear" },
         ].map((s) => (
           <div key={s.label} className="text-center p-3 rounded-xl border border-border/40 bg-card">
             <p className="text-sm font-bold font-display text-foreground">{s.value}</p>
@@ -951,12 +885,18 @@ const BusinessCentreLanding = () => {
   const heroScale = useTransform(scrollY, [0, 500], [1, 1.15]);
 
   // Real data state
-  const [walletData, setWalletData] = useState<{ available_balance: number; pending_balance: number; total_withdrawn: number } | null>(null);
+  const [walletData, setWalletData] = useState<{ available_balance: number; pending_balance: number; total_withdrawn: number; internal_balance: number } | null>(null);
   const [membership, setMembership] = useState<{ tier: string; package_price: number; membership_bv: number } | null>(null);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [binaryStats, setBinaryStats] = useState({ left_bv: 0, right_bv: 0, matched_bv: 0 });
   const [tokenBalance, setTokenBalance] = useState(0);
   const [referralCode, setReferralCode] = useState("");
+  const [recentEarnings, setRecentEarnings] = useState<Array<{ bonus_type: string; net_amount: number; payout_period: string; source_order_id: string | null }>>([]);
+  // Admin data state
+  const [adminPendingWithdrawals, setAdminPendingWithdrawals] = useState(0);
+  const [adminPendingAmount, setAdminPendingAmount] = useState(0);
+  const [adminTotalMembers, setAdminTotalMembers] = useState(0);
+  const [adminAuditLogs, setAdminAuditLogs] = useState<Array<{ action: string; entity_type: string; created_at: string }>>([]);
 
   // Build nav items based on role
   const NAV_ITEMS = [
@@ -971,7 +911,7 @@ const BusinessCentreLanding = () => {
     const uid = user.id;
 
     // Fetch wallet
-    supabase.from("wallets").select("available_balance, pending_balance, total_withdrawn")
+    supabase.from("wallets").select("available_balance, pending_balance, total_withdrawn, internal_balance")
       .eq("user_id", uid).maybeSingle().then(({ data }) => { if (data) setWalletData(data); });
 
     // Fetch membership
@@ -979,8 +919,14 @@ const BusinessCentreLanding = () => {
       .eq("user_id", uid).maybeSingle().then(({ data }) => { if (data) setMembership(data); });
 
     // Fetch total earnings
-    supabase.from("payout_ledger").select("net_amount").eq("user_id", uid)
-      .then(({ data }) => { if (data) setTotalEarnings(data.reduce((s, r) => s + Number(r.net_amount), 0)); });
+    supabase.from("payout_ledger").select("net_amount, bonus_type, payout_period, source_order_id").eq("user_id", uid)
+      .order("created_at", { ascending: false }).limit(20)
+      .then(({ data }) => {
+        if (data) {
+          setTotalEarnings(data.reduce((s, r) => s + Number(r.net_amount), 0));
+          setRecentEarnings(data as any);
+        }
+      });
 
     // Fetch BV stats
     supabase.from("bv_ledger").select("bv_amount, leg").eq("user_id", uid)
@@ -1001,6 +947,42 @@ const BusinessCentreLanding = () => {
         }
       });
   }, [user]);
+
+  // Admin-only: fetch system-wide data
+  useEffect(() => {
+    if (!user || !isAnyAdmin) return;
+
+    // Pending withdrawals
+    supabase.from("withdrawal_requests").select("amount", { count: "exact" })
+      .eq("status", "pending")
+      .then(({ data, count }) => {
+        setAdminPendingWithdrawals(count || 0);
+        setAdminPendingAmount(data ? data.reduce((s, r) => s + Number(r.amount), 0) : 0);
+      });
+
+    // Total members
+    supabase.from("memberships").select("id", { count: "exact", head: true })
+      .then(({ count }) => setAdminTotalMembers(count || 0));
+
+    // Recent audit logs (super admin only)
+    if (isAdmin) {
+      supabase.from("audit_log").select("action, entity_type, created_at")
+        .order("created_at", { ascending: false }).limit(10)
+        .then(({ data }) => { if (data) setAdminAuditLogs(data); });
+    }
+  }, [user, isAnyAdmin, isAdmin]);
+
+  // Build shared data object for panels
+  const businessData: BusinessData = {
+    walletData,
+    membership,
+    totalEarnings,
+    binaryStats,
+    tokenBalance,
+    referralCode,
+    recentEarnings,
+    isAnyAdmin,
+  };
 
   useEffect(() => {
     const sectionIds = NAV_ITEMS.map(n => n.id);
@@ -1134,7 +1116,7 @@ const BusinessCentreLanding = () => {
             transition={{ duration: 0.5, ease: cubicSmooth }}
           >
             <SectionHeader icon={LayoutDashboard} title="Business Centre Overview" id="dashboard" />
-            <div className="mt-4"><DashboardPanel /></div>
+            <div className="mt-4"><DashboardPanel data={businessData} /></div>
           </motion.section>
 
           {/* Network */}
@@ -1178,7 +1160,7 @@ const BusinessCentreLanding = () => {
             transition={{ duration: 0.5, ease: cubicSmooth }}
           >
             <SectionHeader icon={Share2} title="Referrals" id="referral" />
-            <div className="mt-4"><ReferralPanel /></div>
+            <div className="mt-4"><ReferralPanel referralCode={referralCode} /></div>
           </motion.section>
 
           {/* Rank & Packages */}
@@ -1211,7 +1193,7 @@ const BusinessCentreLanding = () => {
             transition={{ duration: 0.5, ease: cubicSmooth }}
           >
             <SectionHeader icon={Wallet} title="Wallet & Payouts" id="payout" />
-            <div className="mt-4"><PayoutPanel /></div>
+            <div className="mt-4"><PayoutPanel data={businessData} /></div>
           </motion.section>
 
           {/* Marketing */}
@@ -1276,7 +1258,7 @@ const BusinessCentreLanding = () => {
                 transition={{ duration: 0.5, ease: cubicSmooth }}
               >
                 <SectionHeader icon={CreditCard} title="Payout Oversight" id="admin-payouts" />
-                <div className="mt-4"><AdminPayoutOversightPanel /></div>
+                <div className="mt-4"><AdminPayoutOversightPanel pendingCount={adminPendingWithdrawals} pendingAmount={adminPendingAmount} /></div>
               </motion.section>
 
               <motion.section
