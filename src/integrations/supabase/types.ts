@@ -271,6 +271,47 @@ export type Database = {
         }
         Relationships: []
       }
+      bv_expiry_events: {
+        Row: {
+          bv_type: string
+          expired_at: string
+          expired_bv: number
+          id: string
+          leg_side: string
+          reason: string | null
+          user_id: string
+          volume_id: string
+        }
+        Insert: {
+          bv_type: string
+          expired_at?: string
+          expired_bv: number
+          id?: string
+          leg_side: string
+          reason?: string | null
+          user_id: string
+          volume_id: string
+        }
+        Update: {
+          bv_type?: string
+          expired_at?: string
+          expired_bv?: number
+          id?: string
+          leg_side?: string
+          reason?: string | null
+          user_id?: string
+          volume_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bv_expiry_events_volume_id_fkey"
+            columns: ["volume_id"]
+            isOneToOne: false
+            referencedRelation: "volumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bv_ledger: {
         Row: {
           bv_amount: number
@@ -315,6 +356,65 @@ export type Database = {
           },
         ]
       }
+      carry_forward_ledger: {
+        Row: {
+          created_at: string
+          id: string
+          left_membership_bv_after: number
+          left_membership_bv_before: number
+          left_product_bv_after: number
+          left_product_bv_before: number
+          matched_membership_bv: number
+          matched_product_bv: number
+          right_membership_bv_after: number
+          right_membership_bv_before: number
+          right_product_bv_after: number
+          right_product_bv_before: number
+          run_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          left_membership_bv_after?: number
+          left_membership_bv_before?: number
+          left_product_bv_after?: number
+          left_product_bv_before?: number
+          matched_membership_bv?: number
+          matched_product_bv?: number
+          right_membership_bv_after?: number
+          right_membership_bv_before?: number
+          right_product_bv_after?: number
+          right_product_bv_before?: number
+          run_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          left_membership_bv_after?: number
+          left_membership_bv_before?: number
+          left_product_bv_after?: number
+          left_product_bv_before?: number
+          matched_membership_bv?: number
+          matched_product_bv?: number
+          right_membership_bv_after?: number
+          right_membership_bv_before?: number
+          right_product_bv_after?: number
+          right_product_bv_before?: number
+          run_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carry_forward_ledger_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "commission_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -338,6 +438,247 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      commission_lines: {
+        Row: {
+          binary_cap_applied: number
+          binary_cap_limit: number
+          binary_membership_paid: number
+          binary_product_paid: number
+          binary_total_before_cap: number
+          binary_total_paid: number
+          carry_left_membership_bv: number
+          carry_left_product_bv: number
+          carry_right_membership_bv: number
+          carry_right_product_bv: number
+          created_at: string
+          id: string
+          left_membership_bv: number
+          left_product_bv: number
+          matched_membership_bv: number
+          matched_product_bv: number
+          qualification_passed: boolean
+          right_membership_bv: number
+          right_product_bv: number
+          run_id: string
+          statement_json: Json
+          user_id: string
+        }
+        Insert: {
+          binary_cap_applied?: number
+          binary_cap_limit?: number
+          binary_membership_paid?: number
+          binary_product_paid?: number
+          binary_total_before_cap?: number
+          binary_total_paid?: number
+          carry_left_membership_bv?: number
+          carry_left_product_bv?: number
+          carry_right_membership_bv?: number
+          carry_right_product_bv?: number
+          created_at?: string
+          id?: string
+          left_membership_bv?: number
+          left_product_bv?: number
+          matched_membership_bv?: number
+          matched_product_bv?: number
+          qualification_passed?: boolean
+          right_membership_bv?: number
+          right_product_bv?: number
+          run_id: string
+          statement_json?: Json
+          user_id: string
+        }
+        Update: {
+          binary_cap_applied?: number
+          binary_cap_limit?: number
+          binary_membership_paid?: number
+          binary_product_paid?: number
+          binary_total_before_cap?: number
+          binary_total_paid?: number
+          carry_left_membership_bv?: number
+          carry_left_product_bv?: number
+          carry_right_membership_bv?: number
+          carry_right_product_bv?: number
+          created_at?: string
+          id?: string
+          left_membership_bv?: number
+          left_product_bv?: number
+          matched_membership_bv?: number
+          matched_product_bv?: number
+          qualification_passed?: boolean
+          right_membership_bv?: number
+          right_product_bv?: number
+          run_id?: string
+          statement_json?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_lines_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "commission_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commission_reversals: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          original_run_id: string
+          reason: string
+          reversal_run_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          original_run_id: string
+          reason: string
+          reversal_run_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          original_run_id?: string
+          reason?: string
+          reversal_run_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_reversals_original_run_id_fkey"
+            columns: ["original_run_id"]
+            isOneToOne: false
+            referencedRelation: "commission_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_reversals_reversal_run_id_fkey"
+            columns: ["reversal_run_id"]
+            isOneToOne: false
+            referencedRelation: "commission_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commission_runs: {
+        Row: {
+          adjusted_cycle_value: number
+          base_cycle_value: number
+          binary_after_caps_total: number
+          binary_before_caps_total: number
+          compensation_pool: number
+          completed_at: string | null
+          created_at: string
+          direct_membership_bonus_total: number
+          direct_product_bonus_total: number
+          fail_safe_triggered: boolean
+          id: string
+          initiated_by: string | null
+          matching_total: number
+          membership_binary_required: number
+          membership_payout_ratio: number
+          notes: string | null
+          period_end: string
+          period_start: string
+          run_code: string
+          run_type: string
+          status: string
+          total_terra_fee: number
+        }
+        Insert: {
+          adjusted_cycle_value?: number
+          base_cycle_value?: number
+          binary_after_caps_total?: number
+          binary_before_caps_total?: number
+          compensation_pool?: number
+          completed_at?: string | null
+          created_at?: string
+          direct_membership_bonus_total?: number
+          direct_product_bonus_total?: number
+          fail_safe_triggered?: boolean
+          id?: string
+          initiated_by?: string | null
+          matching_total?: number
+          membership_binary_required?: number
+          membership_payout_ratio?: number
+          notes?: string | null
+          period_end: string
+          period_start: string
+          run_code: string
+          run_type?: string
+          status?: string
+          total_terra_fee?: number
+        }
+        Update: {
+          adjusted_cycle_value?: number
+          base_cycle_value?: number
+          binary_after_caps_total?: number
+          binary_before_caps_total?: number
+          compensation_pool?: number
+          completed_at?: string | null
+          created_at?: string
+          direct_membership_bonus_total?: number
+          direct_product_bonus_total?: number
+          fail_safe_triggered?: boolean
+          id?: string
+          initiated_by?: string | null
+          matching_total?: number
+          membership_binary_required?: number
+          membership_payout_ratio?: number
+          notes?: string | null
+          period_end?: string
+          period_start?: string
+          run_code?: string
+          run_type?: string
+          status?: string
+          total_terra_fee?: number
+        }
+        Relationships: []
+      }
+      commission_statements: {
+        Row: {
+          created_at: string
+          id: string
+          run_id: string
+          statement_data: Json
+          statement_period_end: string
+          statement_period_start: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          run_id: string
+          statement_data?: Json
+          statement_period_end: string
+          statement_period_start: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          run_id?: string
+          statement_data?: Json
+          statement_period_end?: string
+          statement_period_start?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_statements_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "commission_runs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       compensation_pools: {
         Row: {
@@ -707,6 +1048,50 @@ export type Database = {
             columns: ["shop_product_id"]
             isOneToOne: false
             referencedRelation: "shop_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      direct_bonus_lines: {
+        Row: {
+          base_amount: number
+          bonus_paid: number
+          created_at: string
+          id: string
+          rate: number
+          run_id: string
+          source_id: string | null
+          source_type: string
+          user_id: string
+        }
+        Insert: {
+          base_amount: number
+          bonus_paid: number
+          created_at?: string
+          id?: string
+          rate: number
+          run_id: string
+          source_id?: string | null
+          source_type: string
+          user_id: string
+        }
+        Update: {
+          base_amount?: number
+          bonus_paid?: number
+          created_at?: string
+          id?: string
+          rate?: number
+          run_id?: string
+          source_id?: string | null
+          source_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "direct_bonus_lines_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "commission_runs"
             referencedColumns: ["id"]
           },
         ]
@@ -1215,6 +1600,53 @@ export type Database = {
           target_user_id?: string
         }
         Relationships: []
+      }
+      matching_lines: {
+        Row: {
+          created_at: string
+          downline_binary_paid: number
+          downline_user_id: string
+          id: string
+          level_no: number
+          matching_paid: number
+          matching_rate: number
+          qualification_passed: boolean
+          run_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          downline_binary_paid: number
+          downline_user_id: string
+          id?: string
+          level_no: number
+          matching_paid: number
+          matching_rate: number
+          qualification_passed?: boolean
+          run_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          downline_binary_paid?: number
+          downline_user_id?: string
+          id?: string
+          level_no?: number
+          matching_paid?: number
+          matching_rate?: number
+          qualification_passed?: boolean
+          run_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matching_lines_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "commission_runs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       member_package_history: {
         Row: {
@@ -1901,6 +2333,50 @@ export type Database = {
             columns: ["source_order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payout_postings: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          posted_at: string | null
+          posting_status: string
+          posting_type: string
+          run_id: string
+          source_line_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          posted_at?: string | null
+          posting_status?: string
+          posting_type: string
+          run_id: string
+          source_line_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          posted_at?: string | null
+          posting_status?: string
+          posting_type?: string
+          run_id?: string
+          source_line_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_postings_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "commission_runs"
             referencedColumns: ["id"]
           },
         ]
