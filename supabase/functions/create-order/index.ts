@@ -11,7 +11,7 @@ const TERRA_FEE_RATE = 0.30; // 30% Terra service fee
 
 // Validation schema for order input
 const orderItemSchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
   name: z.string().max(200),
   quantity: z.number().int().positive().max(100),
   price: z.number().positive().max(1000000),
