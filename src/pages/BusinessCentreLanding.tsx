@@ -628,9 +628,10 @@ const RankPanel = () => (
 // ─── Wallet & Payout Panel ───
 const PayoutPanel = () => (
   <div className="space-y-5">
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
       {[
-        { label: "Available Balance", value: "₱18,425.50", icon: Wallet, accent: "text-emerald-600 bg-emerald-500/10" },
+        { label: "Cash Balance", value: "₱18,425.50", icon: Wallet, accent: "text-emerald-600 bg-emerald-500/10" },
+        { label: "Internal Wallet", value: "₱0.00", icon: Ticket, accent: "text-primary bg-primary/10" },
         { label: "Pending Commissions", value: "₱3,280.00", icon: Clock, accent: "text-amber-600 bg-amber-500/10" },
         { label: "Total Withdrawn", value: "₱26,620.00", icon: ArrowUpRight, accent: "text-blue-600 bg-blue-500/10" },
       ].map((w) => (
