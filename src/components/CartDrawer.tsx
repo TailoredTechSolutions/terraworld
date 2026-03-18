@@ -83,14 +83,15 @@ const CartItemRow = ({ item }: { item: CartItem }) => {
 
 const CartDrawer = () => {
   const navigate = useNavigate();
-  const { isOpen, setCartOpen, items, getTotalPrice, clearCart } = useCartStore();
+  const { isOpen, setCartOpen, items, couponItems, getTotalPrice, getCouponSubtotal, clearCart, removeCoupon, hasItems } = useCartStore();
   const farmerSubtotal = getTotalPrice();
+  const couponSubtotal = getCouponSubtotal();
   const platformFee = farmerSubtotal * PLATFORM_FEE_RATE;
   const commission = farmerSubtotal * COMMISSION_RATE;
   const subtotalBeforeVAT = farmerSubtotal + platformFee + commission;
   const vat = subtotalBeforeVAT * VAT_RATE;
   const deliveryFee = farmerSubtotal > 0 ? 45 : 0;
-  const total = subtotalBeforeVAT + vat + deliveryFee;
+  const total = subtotalBeforeVAT + vat + deliveryFee + couponSubtotal;
 
   return (
     <Sheet open={isOpen} onOpenChange={setCartOpen}>
