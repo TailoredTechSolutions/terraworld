@@ -87,6 +87,7 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     items: [
       { id: "wallet-controls", label: "Wallet Controls", icon: Wallet, path: "/business-centre/wallet-controls", superAdminOnly: true },
       { id: "manual-placement", label: "Manual Placement", icon: GitBranch, path: "/business-centre/manual-placement", superAdminOnly: true },
+      { id: "control-center", label: "Control Center", icon: Shield, path: "/business-centre/control-center", superAdminOnly: true },
       { id: "audit-logs", label: "Audit Logs", icon: FileText, path: "/business-centre/audit-logs", superAdminOnly: true },
       { id: "security-roles", label: "Security & Roles", icon: Lock, path: "/business-centre/security-roles", superAdminOnly: true },
       { id: "system-settings", label: "System Settings", icon: Settings, path: "/business-centre/system-settings", superAdminOnly: true },

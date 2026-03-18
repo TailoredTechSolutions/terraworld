@@ -153,6 +153,7 @@ const AnimatedRoutes = () => {
             <Route path="system-settings" element={<BCSystemSettings />} />
             <Route path="compliance" element={<BCCompliance />} />
             <Route path="global-config" element={<BCGlobalConfig />} />
+            <Route path="control-center" element={<BCControlCenter />} />
           </Route>
           <Route path="/checkout" element={<P><CheckoutPage /></P>} />
           <Route path="/order-confirmation" element={<P><OrderConfirmation /></P>} />
