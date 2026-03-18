@@ -46,7 +46,6 @@ const Header = () => {
       links.push({ path: "/buyer", label: "Buyer Dashboard", icon: ShoppingBag });
       links.push({ path: "/farmer", label: "Farmer Dashboard", icon: Tractor });
       links.push({ path: "/driver", label: "Driver Dashboard", icon: Truck });
-      links.push({ path: "/member", label: "Member Dashboard", icon: Users });
       links.push({ path: "/business-centre", label: "Business Centre", icon: Briefcase });
     } else {
       if (isBuyer) links.push({ path: "/buyer", label: "Buyer Dashboard", icon: ShoppingBag });
