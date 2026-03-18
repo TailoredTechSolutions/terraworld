@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import {
   Package, Truck, CheckCircle, Clock, DollarSign, Star,
   MapPin, Phone, Loader2, User,
-  Bell, LifeBuoy, ShieldCheck, AlertCircle, Play, Navigation,
+  Bell, LifeBuoy, ShieldCheck, AlertCircle, Play, Navigation, ArrowUp,
 } from "lucide-react";
 import { format } from "date-fns";
 import type { Tables } from "@/integrations/supabase/types";
