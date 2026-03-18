@@ -79,6 +79,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_sessions: {
+        Row: {
+          ended_at: string | null
+          id: string
+          ip_address: unknown
+          is_active: boolean
+          started_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          ended_at?: string | null
+          id?: string
+          ip_address?: unknown
+          is_active?: boolean
+          started_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          ended_at?: string | null
+          id?: string
+          ip_address?: unknown
+          is_active?: boolean
+          started_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       approval_requests: {
         Row: {
           approved_at: string | null
@@ -829,6 +859,39 @@ export type Database = {
         }
         Relationships: []
       }
+      country_rules: {
+        Row: {
+          country_code: string
+          id: string
+          is_allowed: boolean
+          kyc_required: boolean
+          notes: string | null
+          updated_at: string
+          updated_by: string | null
+          withdrawals_allowed: boolean
+        }
+        Insert: {
+          country_code: string
+          id?: string
+          is_allowed?: boolean
+          kyc_required?: boolean
+          notes?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          withdrawals_allowed?: boolean
+        }
+        Update: {
+          country_code?: string
+          id?: string
+          is_allowed?: boolean
+          kyc_required?: boolean
+          notes?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          withdrawals_allowed?: boolean
+        }
+        Relationships: []
+      }
       coupon_abuse_flags: {
         Row: {
           coupon_id: string | null
@@ -1088,6 +1151,33 @@ export type Database = {
           type?: string
           updated_at?: string
           usage_limit?: number | null
+        }
+        Relationships: []
+      }
+      data_integrity_checks: {
+        Row: {
+          check_code: string
+          details: Json
+          executed_at: string
+          id: string
+          module: string
+          status: string
+        }
+        Insert: {
+          check_code: string
+          details?: Json
+          executed_at?: string
+          id?: string
+          module: string
+          status: string
+        }
+        Update: {
+          check_code?: string
+          details?: Json
+          executed_at?: string
+          id?: string
+          module?: string
+          status?: string
         }
         Relationships: []
       }
@@ -1625,6 +1715,81 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_flags: {
+        Row: {
+          config: Json
+          flag_code: string
+          flag_name: string
+          id: string
+          is_enabled: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          config?: Json
+          flag_code: string
+          flag_name: string
+          id?: string
+          is_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          config?: Json
+          flag_code?: string
+          flag_name?: string
+          id?: string
+          is_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      fraud_flags: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          module: string
+          reason: string
+          resolved_at: string | null
+          rule_code: string | null
+          severity: string
+          status: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          module: string
+          reason: string
+          resolved_at?: string | null
+          rule_code?: string | null
+          severity?: string
+          status?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          module?: string
+          reason?: string
+          resolved_at?: string | null
+          rule_code?: string | null
+          severity?: string
+          status?: string
+        }
+        Relationships: []
+      }
       genealogy_snapshots: {
         Row: {
           id: string
@@ -1652,6 +1817,51 @@ export type Database = {
           right_count?: number
           snapshot_date?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      high_risk_actions: {
+        Row: {
+          action_code: string
+          approval_required: boolean
+          approval_status: string
+          approved_by: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          executed_at: string | null
+          id: string
+          module: string
+          reason: string | null
+          requested_by: string | null
+        }
+        Insert: {
+          action_code: string
+          approval_required?: boolean
+          approval_status?: string
+          approved_by?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          executed_at?: string | null
+          id?: string
+          module: string
+          reason?: string | null
+          requested_by?: string | null
+        }
+        Update: {
+          action_code?: string
+          approval_required?: boolean
+          approval_status?: string
+          approved_by?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          executed_at?: string | null
+          id?: string
+          module?: string
+          reason?: string | null
+          requested_by?: string | null
         }
         Relationships: []
       }
@@ -1830,6 +2040,36 @@ export type Database = {
           tax_id?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      kyc_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          profile_id: string
+          review_status: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          profile_id: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          profile_id?: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
         }
         Relationships: []
       }
@@ -2787,6 +3027,44 @@ export type Database = {
         }
         Relationships: []
       }
+      placement_lock_events: {
+        Row: {
+          changed_by: string | null
+          commission_run_id: string | null
+          created_at: string
+          id: string
+          lock_status: string
+          member_id: string
+          reason: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          commission_run_id?: string | null
+          created_at?: string
+          id?: string
+          lock_status: string
+          member_id: string
+          reason?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          commission_run_id?: string | null
+          created_at?: string
+          id?: string
+          lock_status?: string
+          member_id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "placement_lock_events_commission_run_id_fkey"
+            columns: ["commission_run_id"]
+            isOneToOne: false
+            referencedRelation: "commission_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       placement_requests: {
         Row: {
           approved_at: string | null
@@ -3246,6 +3524,42 @@ export type Database = {
           },
         ]
       }
+      report_exports: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          file_format: string
+          file_url: string | null
+          filter_payload: Json
+          id: string
+          report_type: string
+          requested_by: string | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          file_format: string
+          file_url?: string | null
+          filter_payload?: Json
+          id?: string
+          report_type: string
+          requested_by?: string | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          file_format?: string
+          file_url?: string | null
+          filter_payload?: Json
+          id?: string
+          report_type?: string
+          requested_by?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       return_cases: {
         Row: {
           created_at: string
@@ -3294,6 +3608,44 @@ export type Database = {
           },
         ]
       }
+      risk_reviews: {
+        Row: {
+          created_at: string
+          fraud_flag_id: string
+          id: string
+          notes: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          fraud_flag_id: string
+          id?: string
+          notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          fraud_flag_id?: string
+          id?: string
+          notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_reviews_fraud_flag_id_fkey"
+            columns: ["fraud_flag_id"]
+            isOneToOne: false
+            referencedRelation: "fraud_flags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           created_at: string
@@ -3325,6 +3677,57 @@ export type Database = {
             referencedColumns: ["key"]
           },
         ]
+      }
+      saved_report_views: {
+        Row: {
+          created_at: string
+          filter_payload: Json
+          id: string
+          name: string
+          report_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          filter_payload?: Json
+          id?: string
+          name: string
+          report_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          filter_payload?: Json
+          id?: string
+          name?: string
+          report_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      security_settings: {
+        Row: {
+          id: string
+          setting_code: string
+          setting_value: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          setting_code: string
+          setting_value: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          setting_code?: string
+          setting_value?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       settlement_cycles: {
         Row: {
@@ -4607,6 +5010,47 @@ export type Database = {
           status?: Database["public"]["Enums"]["farmer_status"] | null
           total_sales?: number | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      vw_activation_summary: {
+        Row: {
+          activation_count: number | null
+          activation_date: string | null
+          total_amount: number | null
+        }
+        Relationships: []
+      }
+      vw_bv_summary_daily: {
+        Row: {
+          bv_date: string | null
+          bv_type: string | null
+          entry_count: number | null
+          total_bv: number | null
+        }
+        Relationships: []
+      }
+      vw_package_distribution: {
+        Row: {
+          member_count: number | null
+          tier: Database["public"]["Enums"]["membership_tier"] | null
+          total_revenue: number | null
+        }
+        Relationships: []
+      }
+      vw_rank_distribution: {
+        Row: {
+          member_count: number | null
+          rank_name: string | null
+        }
+        Relationships: []
+      }
+      vw_sales_summary_daily: {
+        Row: {
+          order_count: number | null
+          sale_date: string | null
+          total_fees: number | null
+          total_revenue: number | null
         }
         Relationships: []
       }
