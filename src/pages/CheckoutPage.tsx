@@ -50,10 +50,28 @@ const CheckoutPage = () => {
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [internalBalance, setInternalBalance] = useState<number>(0);
+  const [loadingWallet, setLoadingWallet] = useState(true);
   
   // Delivery provider state
   const [selectedDeliveryProvider, setSelectedDeliveryProvider] = useState<string>("");
   const [deliveryEstimate, setDeliveryEstimate] = useState<DeliveryEstimate | null>(null);
+
+  // Fetch internal wallet balance
+  useState(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("wallets")
+          .select("internal_balance")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (data) setInternalBalance(Number(data.internal_balance) || 0);
+      }
+      setLoadingWallet(false);
+    })();
+  });
   
   // Form state
   const [formData, setFormData] = useState({
