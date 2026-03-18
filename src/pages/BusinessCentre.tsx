@@ -455,61 +455,8 @@ const ReferralPanel = () => {
   );
 };
 
-// ─── Rank & Packages Panel ───
-const RankPanel = () => (
-  <div className="space-y-6">
-    {/* Current Rank */}
-    <Card className="bg-gradient-to-br from-purple-500/10 via-primary/5 to-transparent border-purple-500/20">
-      <CardContent className="p-6">
-        <div className="flex items-center gap-4">
-          <div className="p-4 rounded-2xl bg-purple-500/20 border border-purple-500/30">
-            <Award className="h-8 w-8 text-purple-500" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold font-display">Pro Partner</p>
-            <p className="text-sm text-muted-foreground">₱3,000 Package • 3,000 Membership BV • 3 Matching Levels</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-
-    {/* Packages Grid */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {[
-        { name: "Free", price: "₱0", bv: "0 BV", binary: "—", matching: "—", cap: "—", color: "border-muted", active: false },
-        { name: "Starter", price: "₱500", bv: "500 BV", binary: "10%", matching: "L1: 10%", cap: "₱5,000/day", color: "border-emerald-500/30", active: false },
-        { name: "Basic", price: "₱1,000", bv: "1,000 BV", binary: "10%", matching: "L1: 10%, L2: 5%", cap: "₱15,000/day", color: "border-blue-500/30", active: false },
-        { name: "Pro", price: "₱3,000", bv: "3,000 BV", binary: "10%", matching: "L1: 10%, L2-L3: 5%", cap: "₱50,000/day", color: "border-purple-500/30", active: true },
-        { name: "Elite", price: "₱5,000", bv: "5,000 BV", binary: "10%", matching: "L1: 10%, L2-L5: 5%", cap: "₱250,000/day", color: "border-amber-500/30", active: false },
-      ].map((pkg) => (
-        <Card key={pkg.name} className={cn("relative overflow-hidden", pkg.color, pkg.active && "ring-2 ring-primary")}>
-          {pkg.active && (
-            <div className="absolute top-0 right-0 px-3 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-bl-lg">CURRENT</div>
-          )}
-          <CardContent className="p-5 space-y-3">
-            <div>
-              <p className="text-lg font-bold font-display">{pkg.name}</p>
-              <p className="text-2xl font-bold text-primary">{pkg.price}</p>
-            </div>
-            <Separator />
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between"><span className="text-muted-foreground">Membership BV</span><span className="font-medium">{pkg.bv}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Binary Rate</span><span className="font-medium">{pkg.binary}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Matching</span><span className="font-medium">{pkg.matching}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Daily Cap</span><span className="font-medium">{pkg.cap}</span></div>
-            </div>
-            {!pkg.active && pkg.name !== "Free" && (
-              <Button size="sm" variant="outline" className="w-full mt-2">
-                {pkg.name === "Elite" ? "Upgrade to Elite" : "Downgrade"}
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  </div>
-);
-
+// RankPanel now uses the unified RankActivationPanel component
+// (imported at top)
 // ─── Marketing Panel ───
 const MarketingPanel = () => (
   <div className="space-y-6">
