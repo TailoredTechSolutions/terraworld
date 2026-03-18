@@ -107,8 +107,9 @@ const ADMIN_SECTIONS: { title: string; moduleNumber: number; items: NavItem[] }[
     title: "5. Financial Management",
     moduleNumber: 5,
     items: [
-      { id: "earnings", label: "Earnings Overview", icon: DollarSign, path: "/business-centre/earnings" },
-      { id: "wallet", label: "Wallet Overview", icon: Wallet, path: "/business-centre/wallet" },
+      { id: "financial-mgmt", label: "Financial Overview", icon: DollarSign, path: "/business-centre/financial-management", adminOnly: true },
+      { id: "earnings", label: "Earnings", icon: DollarSign, path: "/business-centre/earnings" },
+      { id: "wallet", label: "Wallet", icon: Wallet, path: "/business-centre/wallet" },
       { id: "withdrawals", label: "Withdrawals", icon: ArrowUpRight, path: "/business-centre/withdrawals" },
       { id: "statements", label: "Statements", icon: FileText, path: "/business-centre/statements" },
       { id: "payout-oversight", label: "Payout Oversight", icon: CreditCard, path: "/business-centre/payout-oversight", adminOnly: true },
