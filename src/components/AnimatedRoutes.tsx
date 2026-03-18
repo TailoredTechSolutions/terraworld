@@ -151,6 +151,7 @@ const AnimatedRoutes = () => {
             <Route path="wallet-controls" element={<BCWalletControls />} />
 
             {/* Module 6: MLM System */}
+            <Route path="mlm-system" element={<BCMLMSystem />} />
             <Route path="binary-tree" element={<BCBinaryTree />} />
             <Route path="network" element={<BCNetwork />} />
             <Route path="referrals" element={<BCReferrals />} />
