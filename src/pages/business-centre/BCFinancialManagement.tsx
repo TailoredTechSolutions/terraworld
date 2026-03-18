@@ -12,8 +12,8 @@ import { cn } from "@/lib/utils";
 import {
   Wallet, ArrowUpRight, DollarSign, Loader2, Search, Shield, Clock,
   CreditCard, CheckCircle2, FileText, Settings, Scale, Flame, Building2,
-  ArrowDownRight, Lock, XCircle, Package
-} from "lucide-react";
+  ArrowDownRight, Lock, XCircle, Package } from
+"lucide-react";
 
 const fmt = (n: number | string) => `₱${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const fmtToken = (n: number | string) => Number(n).toLocaleString(undefined, { minimumFractionDigits: 4 });
@@ -28,113 +28,113 @@ const BCFinancialManagement = () => {
   const { data: wallets = [], isLoading: walletsLoading } = useQuery({
     queryKey: ["bc-fin-wallets"],
     queryFn: async () => {
-      const { data } = await supabase.from("wallets").select("*, profiles!inner(full_name, email)")
-        .order("available_balance", { ascending: false }).limit(100);
+      const { data } = await supabase.from("wallets").select("*, profiles!inner(full_name, email)").
+      order("available_balance", { ascending: false }).limit(100);
       return data || [];
     },
-    enabled: isAnyAdmin,
+    enabled: isAnyAdmin
   });
 
   const { data: transactions = [], isLoading: txLoading } = useQuery({
     queryKey: ["bc-fin-transactions"],
     queryFn: async () => {
-      const { data } = await supabase.from("wallet_transactions").select("*")
-        .order("created_at", { ascending: false }).limit(100);
+      const { data } = await supabase.from("wallet_transactions").select("*").
+      order("created_at", { ascending: false }).limit(100);
       return data || [];
     },
-    enabled: isAnyAdmin,
+    enabled: isAnyAdmin
   });
 
   const { data: withdrawals = [], isLoading: wdLoading } = useQuery({
     queryKey: ["bc-fin-withdrawals"],
     queryFn: async () => {
-      const { data } = await supabase.from("withdrawal_requests")
-        .select("*, profiles:user_id(full_name, email)")
-        .order("created_at", { ascending: false }).limit(100);
+      const { data } = await supabase.from("withdrawal_requests").
+      select("*, profiles:user_id(full_name, email)").
+      order("created_at", { ascending: false }).limit(100);
       return data || [];
     },
-    enabled: isAnyAdmin,
+    enabled: isAnyAdmin
   });
 
   // ─── Phase 5 queries ───
   const { data: adjustmentRequests = [] } = useQuery({
     queryKey: ["bc-fin-adjustments"],
     queryFn: async () => {
-      const { data } = await supabase.from("wallet_adjustment_requests").select("*")
-        .order("created_at", { ascending: false }).limit(100);
+      const { data } = await supabase.from("wallet_adjustment_requests").select("*").
+      order("created_at", { ascending: false }).limit(100);
       return data || [];
     },
-    enabled: isAnyAdmin,
+    enabled: isAnyAdmin
   });
 
   const { data: ledgerReversals = [] } = useQuery({
     queryKey: ["bc-fin-reversals"],
     queryFn: async () => {
-      const { data } = await supabase.from("ledger_reversals").select("*")
-        .order("created_at", { ascending: false }).limit(100);
+      const { data } = await supabase.from("ledger_reversals").select("*").
+      order("created_at", { ascending: false }).limit(100);
       return data || [];
     },
-    enabled: isAnyAdmin,
+    enabled: isAnyAdmin
   });
 
   const { data: withdrawalBatches = [] } = useQuery({
     queryKey: ["bc-fin-batches"],
     queryFn: async () => {
-      const { data } = await supabase.from("withdrawal_batches").select("*")
-        .order("created_at", { ascending: false }).limit(50);
+      const { data } = await supabase.from("withdrawal_batches").select("*").
+      order("created_at", { ascending: false }).limit(50);
       return data || [];
     },
-    enabled: isAnyAdmin,
+    enabled: isAnyAdmin
   });
 
   const { data: treasuryAccounts = [] } = useQuery({
     queryKey: ["bc-fin-treasury"],
     queryFn: async () => {
-      const { data } = await supabase.from("treasury_accounts").select("*")
-        .order("code", { ascending: true });
+      const { data } = await supabase.from("treasury_accounts").select("*").
+      order("code", { ascending: true });
       return data || [];
     },
-    enabled: isAnyAdmin,
+    enabled: isAnyAdmin
   });
 
   const { data: treasuryMovements = [] } = useQuery({
     queryKey: ["bc-fin-treasury-movements"],
     queryFn: async () => {
-      const { data } = await supabase.from("treasury_movements").select("*")
-        .order("created_at", { ascending: false }).limit(100);
+      const { data } = await supabase.from("treasury_movements").select("*").
+      order("created_at", { ascending: false }).limit(100);
       return data || [];
     },
-    enabled: isAnyAdmin,
+    enabled: isAnyAdmin
   });
 
   const { data: releaseRequests = [] } = useQuery({
     queryKey: ["bc-fin-release-requests"],
     queryFn: async () => {
-      const { data } = await supabase.from("treasury_release_requests").select("*")
-        .order("created_at", { ascending: false }).limit(50);
+      const { data } = await supabase.from("treasury_release_requests").select("*").
+      order("created_at", { ascending: false }).limit(50);
       return data || [];
     },
-    enabled: isAnyAdmin,
+    enabled: isAnyAdmin
   });
 
   const { data: burnEvents = [] } = useQuery({
     queryKey: ["bc-fin-burns"],
     queryFn: async () => {
-      const { data } = await supabase.from("burn_events").select("*")
-        .order("created_at", { ascending: false }).limit(100);
+      const { data } = await supabase.from("burn_events").select("*").
+      order("created_at", { ascending: false }).limit(100);
       return data || [];
     },
-    enabled: isAnyAdmin,
+    enabled: isAnyAdmin
   });
 
   const { data: settlementCycles = [] } = useQuery({
     queryKey: ["bc-fin-settlements"],
     queryFn: async () => {
-      const { data } = await supabase.from("settlement_cycles").select("*")
-        .order("created_at", { ascending: false }).limit(50);
+      const { data } = await supabase.from("settlement_cycles").select("*").
+      order("created_at", { ascending: false }).limit(50);
       return data || [];
     },
-    enabled: isAnyAdmin,
+    enabled: isAnyAdmin
   });
 
   if (!isAnyAdmin) return <div className="p-8 text-center"><Shield className="h-12 w-12 text-destructive mx-auto mb-4" /><h2 className="text-xl font-bold">Access Restricted</h2></div>;
@@ -161,7 +161,7 @@ const BCFinancialManagement = () => {
       processing: "border-blue-500/30 text-blue-600",
       failed: "border-destructive/30 text-destructive",
       requested: "border-amber-500/30 text-amber-600",
-      active: "border-emerald-500/30 text-emerald-600",
+      active: "border-emerald-500/30 text-emerald-600"
     };
     return map[s] || "";
   };
@@ -175,37 +175,37 @@ const BCFinancialManagement = () => {
 
       {/* Hard rules reminder */}
       <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-        <p className="text-xs font-medium mb-1">Financial Rules:</p>
+        <p className="font-medium mb-1 text-sm">Financial Rules:</p>
         <ul className="text-[10px] text-muted-foreground grid grid-cols-2 lg:grid-cols-4 gap-1 list-disc pl-4">
-          <li>Append-only ledger — no hard deletes</li>
-          <li>Wallet adjustments require dual approval</li>
-          <li>Withdrawals: requested → approved → paid → closed</li>
-          <li>Token flows separate from cash pool</li>
-          <li>Treasury/DAO reserve tracked separately</li>
-          <li>Burns: txn fees, settlement fees, buybacks</li>
-          <li>Rollbacks only via reversal entries</li>
-          <li>All money edits fully auditable</li>
+          <li className="text-xs">Append-only ledger — no hard deletes</li>
+          <li className="text-xs">Wallet adjustments require dual approval</li>
+          <li className="text-xs">Withdrawals: requested → approved → paid → closed</li>
+          <li className="text-xs">Token flows separate from cash pool</li>
+          <li className="text-xs">Treasury/DAO reserve tracked separately</li>
+          <li className="text-xs">Burns: txn fees, settlement fees, buybacks</li>
+          <li className="text-xs">Rollbacks only via reversal entries</li>
+          <li className="text-xs">All money edits fully auditable</li>
         </ul>
       </div>
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
         {[
-          { label: "Total Balance", value: fmt(totalBalance), icon: Wallet, accent: "text-primary" },
-          { label: "Pending", value: fmt(totalPending), icon: Clock, accent: "text-amber-600" },
-          { label: "Pending WD", value: String(pendingWd.length), icon: ArrowUpRight, accent: "text-destructive" },
-          { label: "Pending Adj", value: String(pendingAdj.length), icon: Shield, accent: "text-purple-600" },
-          { label: "Treasury ₱", value: fmt(treasuryCash), icon: Building2, accent: "text-emerald-600" },
-          { label: "Treasury TKN", value: fmtToken(treasuryToken), icon: Package, accent: "text-blue-600" },
-        ].map(k => (
-          <Card key={k.label} className="border-border/40">
+        { label: "Total Balance", value: fmt(totalBalance), icon: Wallet, accent: "text-primary" },
+        { label: "Pending", value: fmt(totalPending), icon: Clock, accent: "text-amber-600" },
+        { label: "Pending WD", value: String(pendingWd.length), icon: ArrowUpRight, accent: "text-destructive" },
+        { label: "Pending Adj", value: String(pendingAdj.length), icon: Shield, accent: "text-purple-600" },
+        { label: "Treasury ₱", value: fmt(treasuryCash), icon: Building2, accent: "text-emerald-600" },
+        { label: "Treasury TKN", value: fmtToken(treasuryToken), icon: Package, accent: "text-blue-600" }].
+        map((k) =>
+        <Card key={k.label} className="border-border/40">
             <CardContent className="p-3 text-center">
               <k.icon className={cn("h-4 w-4 mx-auto mb-1", k.accent)} />
               <p className={cn("text-sm font-bold font-display", k.accent)}>{k.value}</p>
               <p className="text-[9px] text-muted-foreground">{k.label}</p>
             </CardContent>
           </Card>
-        ))}
+        )}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -229,12 +229,12 @@ const BCFinancialManagement = () => {
             <CardHeader className="px-5 pt-4 pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm">Wallet Directory</CardTitle>
-                <div className="relative w-48"><Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" /><Input placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} className="pl-7 h-7 text-xs" /></div>
+                <div className="relative w-48"><Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" /><Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-7 h-7 text-xs" /></div>
               </div>
             </CardHeader>
             <CardContent className="px-5 pb-4">
-              {walletsLoading ? <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div> : (
-                <Table>
+              {walletsLoading ? <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div> :
+              <Table>
                   <TableHeader><TableRow>
                     <TableHead className="text-xs">Owner</TableHead>
                     <TableHead className="text-xs text-right">Available</TableHead>
@@ -242,17 +242,17 @@ const BCFinancialManagement = () => {
                     <TableHead className="text-xs text-right">Withdrawn</TableHead>
                   </TableRow></TableHeader>
                   <TableBody>
-                    {wallets.filter((w: any) => !search || w.profiles?.full_name?.toLowerCase().includes(search.toLowerCase()) || w.profiles?.email?.toLowerCase().includes(search.toLowerCase())).map((w: any) => (
-                      <TableRow key={w.id}>
+                    {wallets.filter((w: any) => !search || w.profiles?.full_name?.toLowerCase().includes(search.toLowerCase()) || w.profiles?.email?.toLowerCase().includes(search.toLowerCase())).map((w: any) =>
+                  <TableRow key={w.id}>
                         <TableCell><p className="text-xs font-medium">{w.profiles?.full_name || "—"}</p><p className="text-[10px] text-muted-foreground">{w.profiles?.email}</p></TableCell>
                         <TableCell className="text-right text-xs font-medium">{fmt(w.available_balance)}</TableCell>
                         <TableCell className="text-right text-xs text-muted-foreground">{fmt(w.pending_balance)}</TableCell>
                         <TableCell className="text-right text-xs text-muted-foreground">{fmt(w.total_withdrawn)}</TableCell>
                       </TableRow>
-                    ))}
+                  )}
                   </TableBody>
                 </Table>
-              )}
+              }
             </CardContent>
           </Card>
         </TabsContent>
@@ -265,8 +265,8 @@ const BCFinancialManagement = () => {
           <Card className="border-border/40">
             <CardHeader className="px-5 pt-4 pb-2"><CardTitle className="text-sm">Ledger Explorer</CardTitle></CardHeader>
             <CardContent className="px-5 pb-4">
-              {txLoading ? <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div> : (
-                <Table>
+              {txLoading ? <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div> :
+              <Table>
                   <TableHeader><TableRow>
                     <TableHead className="text-xs">Type</TableHead>
                     <TableHead className="text-xs text-right">Amount</TableHead>
@@ -276,8 +276,8 @@ const BCFinancialManagement = () => {
                     <TableHead className="text-xs">Date</TableHead>
                   </TableRow></TableHeader>
                   <TableBody>
-                    {transactions.slice(0, 50).map((t: any) => (
-                      <TableRow key={t.id}>
+                    {transactions.slice(0, 50).map((t: any) =>
+                  <TableRow key={t.id}>
                         <TableCell><Badge variant="outline" className={cn("text-[9px]", Number(t.amount) >= 0 ? "border-emerald-500/30 text-emerald-600" : "border-destructive/30 text-destructive")}>{Number(t.amount) >= 0 ? "Credit" : "Debit"}</Badge></TableCell>
                         <TableCell className="text-right text-xs font-medium">{fmt(Math.abs(Number(t.amount)))}</TableCell>
                         <TableCell className="text-right text-xs text-muted-foreground">{fmt(t.balance_before || 0)}</TableCell>
@@ -285,10 +285,10 @@ const BCFinancialManagement = () => {
                         <TableCell className="text-xs truncate max-w-[120px] text-muted-foreground">{t.description || t.transaction_type}</TableCell>
                         <TableCell className="text-[10px] text-muted-foreground">{dt(t.created_at)}</TableCell>
                       </TableRow>
-                    ))}
+                  )}
                   </TableBody>
                 </Table>
-              )}
+              }
             </CardContent>
           </Card>
         </TabsContent>
@@ -306,8 +306,8 @@ const BCFinancialManagement = () => {
               </div>
             </CardHeader>
             <CardContent className="px-5 pb-4">
-              {adjustmentRequests.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No adjustment requests.</p> : (
-                <Table>
+              {adjustmentRequests.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No adjustment requests.</p> :
+              <Table>
                   <TableHeader><TableRow>
                     <TableHead className="text-xs">Wallet</TableHead>
                     <TableHead className="text-xs">Type</TableHead>
@@ -321,8 +321,8 @@ const BCFinancialManagement = () => {
                     <TableHead className="text-xs">Date</TableHead>
                   </TableRow></TableHeader>
                   <TableBody>
-                    {adjustmentRequests.map((a: any) => (
-                      <TableRow key={a.id}>
+                    {adjustmentRequests.map((a: any) =>
+                  <TableRow key={a.id}>
                         <TableCell className="text-[10px] font-mono">{a.wallet_id?.slice(0, 8)}</TableCell>
                         <TableCell><Badge variant="outline" className={cn("text-[9px]", a.adjustment_type === "credit" ? "border-emerald-500/30 text-emerald-600" : "border-destructive/30 text-destructive")}>{a.adjustment_type}</Badge></TableCell>
                         <TableCell className="text-xs uppercase">{a.asset_type}</TableCell>
@@ -334,10 +334,10 @@ const BCFinancialManagement = () => {
                         <TableCell><Badge variant="outline" className={cn("text-[9px]", statusBadge(a.status))}>{a.status}</Badge></TableCell>
                         <TableCell className="text-[10px] text-muted-foreground">{dt(a.created_at)}</TableCell>
                       </TableRow>
-                    ))}
+                  )}
                   </TableBody>
                 </Table>
-              )}
+              }
             </CardContent>
           </Card>
         </TabsContent>
@@ -350,8 +350,8 @@ const BCFinancialManagement = () => {
           <Card className="border-border/40">
             <CardHeader className="px-5 pt-4 pb-2"><CardTitle className="text-sm">Ledger Reversals</CardTitle></CardHeader>
             <CardContent className="px-5 pb-4">
-              {ledgerReversals.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No reversals.</p> : (
-                <Table>
+              {ledgerReversals.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No reversals.</p> :
+              <Table>
                   <TableHeader><TableRow>
                     <TableHead className="text-xs">Original Entry</TableHead>
                     <TableHead className="text-xs">Reversal Entry</TableHead>
@@ -360,18 +360,18 @@ const BCFinancialManagement = () => {
                     <TableHead className="text-xs">Date</TableHead>
                   </TableRow></TableHeader>
                   <TableBody>
-                    {ledgerReversals.map((r: any) => (
-                      <TableRow key={r.id}>
+                    {ledgerReversals.map((r: any) =>
+                  <TableRow key={r.id}>
                         <TableCell className="text-[10px] font-mono">{r.original_entry_id?.slice(0, 8)}</TableCell>
                         <TableCell className="text-[10px] font-mono">{r.reversal_entry_id?.slice(0, 8) || "—"}</TableCell>
                         <TableCell className="text-[10px] text-muted-foreground">{r.reason}</TableCell>
                         <TableCell className="text-[10px] font-mono">{r.created_by?.slice(0, 8)}</TableCell>
                         <TableCell className="text-[10px] text-muted-foreground">{dt(r.created_at)}</TableCell>
                       </TableRow>
-                    ))}
+                  )}
                   </TableBody>
                 </Table>
-              )}
+              }
             </CardContent>
           </Card>
         </TabsContent>
@@ -384,8 +384,8 @@ const BCFinancialManagement = () => {
           <Card className="border-border/40">
             <CardHeader className="px-5 pt-4 pb-2"><CardTitle className="text-sm">Withdrawal Queue</CardTitle></CardHeader>
             <CardContent className="px-5 pb-4">
-              {wdLoading ? <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div> : withdrawals.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No withdrawal requests.</p> : (
-                <Table>
+              {wdLoading ? <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div> : withdrawals.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No withdrawal requests.</p> :
+              <Table>
                   <TableHeader><TableRow>
                     <TableHead className="text-xs">Member</TableHead>
                     <TableHead className="text-xs">Method</TableHead>
@@ -396,8 +396,8 @@ const BCFinancialManagement = () => {
                     <TableHead className="text-xs">Date</TableHead>
                   </TableRow></TableHeader>
                   <TableBody>
-                    {withdrawals.map((w: any) => (
-                      <TableRow key={w.id}>
+                    {withdrawals.map((w: any) =>
+                  <TableRow key={w.id}>
                         <TableCell><p className="text-xs font-medium">{w.profiles?.full_name || "—"}</p><p className="text-[10px] text-muted-foreground">{w.profiles?.email}</p></TableCell>
                         <TableCell className="text-xs capitalize">{w.method || "e-wallet"}</TableCell>
                         <TableCell className="text-right text-xs">{fmt(w.amount)}</TableCell>
@@ -406,10 +406,10 @@ const BCFinancialManagement = () => {
                         <TableCell><Badge variant="outline" className={cn("text-[9px]", statusBadge(w.status))}>{w.status}</Badge></TableCell>
                         <TableCell className="text-[10px] text-muted-foreground">{dt(w.created_at)}</TableCell>
                       </TableRow>
-                    ))}
+                  )}
                   </TableBody>
                 </Table>
-              )}
+              }
             </CardContent>
           </Card>
         </TabsContent>
@@ -422,8 +422,8 @@ const BCFinancialManagement = () => {
           </div>
           <Card className="border-border/40">
             <CardContent className="px-5 pb-4 pt-4">
-              {withdrawalBatches.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No withdrawal batches.</p> : (
-                <Table>
+              {withdrawalBatches.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No withdrawal batches.</p> :
+              <Table>
                   <TableHeader><TableRow>
                     <TableHead className="text-xs">Batch Code</TableHead>
                     <TableHead className="text-xs">Method</TableHead>
@@ -435,8 +435,8 @@ const BCFinancialManagement = () => {
                     <TableHead className="text-xs">Date</TableHead>
                   </TableRow></TableHeader>
                   <TableBody>
-                    {withdrawalBatches.map((b: any) => (
-                      <TableRow key={b.id}>
+                    {withdrawalBatches.map((b: any) =>
+                  <TableRow key={b.id}>
                         <TableCell className="text-xs font-mono font-medium">{b.batch_code}</TableCell>
                         <TableCell className="text-xs capitalize">{b.method}</TableCell>
                         <TableCell className="text-right text-xs">{b.item_count}</TableCell>
@@ -446,10 +446,10 @@ const BCFinancialManagement = () => {
                         <TableCell><Badge variant="outline" className={cn("text-[9px]", statusBadge(b.status))}>{b.status}</Badge></TableCell>
                         <TableCell className="text-[10px] text-muted-foreground">{dt(b.created_at)}</TableCell>
                       </TableRow>
-                    ))}
+                  )}
                   </TableBody>
                 </Table>
-              )}
+              }
             </CardContent>
           </Card>
         </TabsContent>
@@ -460,8 +460,8 @@ const BCFinancialManagement = () => {
             <strong className="text-foreground">Treasury / DAO Reserve</strong> — tracked separately from user wallets. Governs ecosystem expansion, governance, emergencies, buyback/burn. Releases via multisig/DAO approval.
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {treasuryAccounts.map((t: any) => (
-              <Card key={t.id} className="border-border/40">
+            {treasuryAccounts.map((t: any) =>
+            <Card key={t.id} className="border-border/40">
                 <CardContent className="p-3">
                   <p className="text-[9px] text-muted-foreground uppercase tracking-wider">{t.treasury_type}</p>
                   <p className="text-sm font-bold font-display mt-1">{t.asset_type === "token" ? fmtToken(t.current_balance) : fmt(t.current_balance)}</p>
@@ -469,11 +469,11 @@ const BCFinancialManagement = () => {
                   <Badge variant="outline" className={cn("text-[8px] mt-1", statusBadge(t.status))}>{t.status}</Badge>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
-          {treasuryAccounts.length === 0 && (
-            <Card className="border-border/40"><CardContent className="p-8 text-center text-xs text-muted-foreground">Treasury accounts will appear after the seed migration runs.</CardContent></Card>
-          )}
+          {treasuryAccounts.length === 0 &&
+          <Card className="border-border/40"><CardContent className="p-8 text-center text-xs text-muted-foreground">Treasury accounts will appear after the seed migration runs.</CardContent></Card>
+          }
         </TabsContent>
 
         {/* ═══ Treasury Movements ═══ */}
@@ -486,8 +486,8 @@ const BCFinancialManagement = () => {
               </div>
             </CardHeader>
             <CardContent className="px-5 pb-4">
-              {treasuryMovements.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No treasury movements.</p> : (
-                <Table>
+              {treasuryMovements.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No treasury movements.</p> :
+              <Table>
                   <TableHeader><TableRow>
                     <TableHead className="text-xs">Account</TableHead>
                     <TableHead className="text-xs">Type</TableHead>
@@ -498,8 +498,8 @@ const BCFinancialManagement = () => {
                     <TableHead className="text-xs">Date</TableHead>
                   </TableRow></TableHeader>
                   <TableBody>
-                    {treasuryMovements.map((m: any) => (
-                      <TableRow key={m.id}>
+                    {treasuryMovements.map((m: any) =>
+                  <TableRow key={m.id}>
                         <TableCell className="text-[10px] font-mono">{m.treasury_account_id?.slice(0, 8)}</TableCell>
                         <TableCell><Badge variant="outline" className={cn("text-[9px]", m.movement_type === "credit" ? "border-emerald-500/30 text-emerald-600" : m.movement_type === "burn" ? "border-destructive/30 text-destructive" : "border-muted text-muted-foreground")}>{m.movement_type}</Badge></TableCell>
                         <TableCell className="text-xs uppercase">{m.asset_type}</TableCell>
@@ -508,10 +508,10 @@ const BCFinancialManagement = () => {
                         <TableCell className="text-[10px] font-mono">{m.created_by?.slice(0, 8) || "—"}</TableCell>
                         <TableCell className="text-[10px] text-muted-foreground">{dt(m.created_at)}</TableCell>
                       </TableRow>
-                    ))}
+                  )}
                   </TableBody>
                 </Table>
-              )}
+              }
             </CardContent>
           </Card>
         </TabsContent>
@@ -529,8 +529,8 @@ const BCFinancialManagement = () => {
               </div>
             </CardHeader>
             <CardContent className="px-5 pb-4">
-              {releaseRequests.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No release requests.</p> : (
-                <Table>
+              {releaseRequests.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No release requests.</p> :
+              <Table>
                   <TableHeader><TableRow>
                     <TableHead className="text-xs">Treasury Acct</TableHead>
                     <TableHead className="text-xs text-right">Amount</TableHead>
@@ -542,8 +542,8 @@ const BCFinancialManagement = () => {
                     <TableHead className="text-xs">Date</TableHead>
                   </TableRow></TableHeader>
                   <TableBody>
-                    {releaseRequests.map((r: any) => (
-                      <TableRow key={r.id}>
+                    {releaseRequests.map((r: any) =>
+                  <TableRow key={r.id}>
                         <TableCell className="text-[10px] font-mono">{r.treasury_account_id?.slice(0, 8)}</TableCell>
                         <TableCell className="text-right text-xs font-medium">{r.asset_type === "token" ? fmtToken(r.requested_amount) : fmt(r.requested_amount)}</TableCell>
                         <TableCell className="text-xs uppercase">{r.asset_type}</TableCell>
@@ -553,10 +553,10 @@ const BCFinancialManagement = () => {
                         <TableCell className="text-[10px] font-mono">{r.requested_by?.slice(0, 8) || "—"}</TableCell>
                         <TableCell className="text-[10px] text-muted-foreground">{dt(r.created_at)}</TableCell>
                       </TableRow>
-                    ))}
+                  )}
                   </TableBody>
                 </Table>
-              )}
+              }
             </CardContent>
           </Card>
         </TabsContent>
@@ -574,8 +574,8 @@ const BCFinancialManagement = () => {
               </div>
             </CardHeader>
             <CardContent className="px-5 pb-4">
-              {burnEvents.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No burn events recorded.</p> : (
-                <Table>
+              {burnEvents.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No burn events recorded.</p> :
+              <Table>
                   <TableHeader><TableRow>
                     <TableHead className="text-xs">Source Type</TableHead>
                     <TableHead className="text-xs">Treasury Acct</TableHead>
@@ -585,8 +585,8 @@ const BCFinancialManagement = () => {
                     <TableHead className="text-xs">Date</TableHead>
                   </TableRow></TableHeader>
                   <TableBody>
-                    {burnEvents.map((b: any) => (
-                      <TableRow key={b.id}>
+                    {burnEvents.map((b: any) =>
+                  <TableRow key={b.id}>
                         <TableCell><Badge variant="outline" className="text-[9px] border-destructive/30 text-destructive">{b.source_type}</Badge></TableCell>
                         <TableCell className="text-[10px] font-mono">{b.treasury_account_id?.slice(0, 8) || "—"}</TableCell>
                         <TableCell className="text-right text-xs font-bold text-destructive">{fmtToken(b.token_amount)}</TableCell>
@@ -594,10 +594,10 @@ const BCFinancialManagement = () => {
                         <TableCell className="text-[10px] text-muted-foreground truncate max-w-[100px]">{b.notes || "—"}</TableCell>
                         <TableCell className="text-[10px] text-muted-foreground">{dt(b.created_at)}</TableCell>
                       </TableRow>
-                    ))}
+                  )}
                   </TableBody>
                 </Table>
-              )}
+              }
             </CardContent>
           </Card>
         </TabsContent>
@@ -612,8 +612,8 @@ const BCFinancialManagement = () => {
               </div>
             </CardHeader>
             <CardContent className="px-5 pb-4">
-              {settlementCycles.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No settlement cycles.</p> : (
-                <Table>
+              {settlementCycles.length === 0 ? <p className="text-xs text-muted-foreground text-center py-6">No settlement cycles.</p> :
+              <Table>
                   <TableHeader><TableRow>
                     <TableHead className="text-xs">Cycle Code</TableHead>
                     <TableHead className="text-xs">Period</TableHead>
@@ -624,8 +624,8 @@ const BCFinancialManagement = () => {
                     <TableHead className="text-xs">Status</TableHead>
                   </TableRow></TableHeader>
                   <TableBody>
-                    {settlementCycles.map((s: any) => (
-                      <TableRow key={s.id}>
+                    {settlementCycles.map((s: any) =>
+                  <TableRow key={s.id}>
                         <TableCell className="text-xs font-mono font-medium">{s.cycle_code}</TableCell>
                         <TableCell className="text-[10px] text-muted-foreground">{dt(s.period_start)} – {dt(s.period_end)}</TableCell>
                         <TableCell className="text-right text-xs">{fmt(s.gross_settlement_php)}</TableCell>
@@ -634,16 +634,16 @@ const BCFinancialManagement = () => {
                         <TableCell className="text-right text-xs font-medium">{fmt(s.treasury_allocation_php)}</TableCell>
                         <TableCell><Badge variant="outline" className={cn("text-[9px]", statusBadge(s.status))}>{s.status}</Badge></TableCell>
                       </TableRow>
-                    ))}
+                  )}
                   </TableBody>
                 </Table>
-              )}
+              }
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>);
+
 };
 
 export default BCFinancialManagement;
