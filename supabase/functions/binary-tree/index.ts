@@ -220,6 +220,12 @@ Deno.serve(async (req) => {
       }
 
       const tree = buildNestedTree((rows as FlatRow[]) || []);
+
+      // Audit: admin viewing another member's tree
+      if (isAnyAdmin && targetUserId !== callerId) {
+        logAudit("tree_view", "binary_tree", targetUserId, { action, depth, target_user_id: targetUserId });
+      }
+
       return jsonResponse({ tree });
     }
 
