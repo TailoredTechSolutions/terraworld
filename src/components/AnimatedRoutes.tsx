@@ -44,6 +44,9 @@ const BCWallet = lazyRetry(() => import("@/pages/business-centre/BCWallet"));
 const BCTokenRewards = lazyRetry(() => import("@/pages/business-centre/BCTokenRewards"));
 const BCMarketing = lazyRetry(() => import("@/pages/business-centre/BCMarketing"));
 const BCSupport = lazyRetry(() => import("@/pages/business-centre/BCSupport"));
+const BCAdminPages = lazyRetry(() => import("@/pages/business-centre/BCAdminPages"));
+
+import { BusinessCentreProvider } from "@/contexts/BusinessCentreContext";
 const CheckoutPage = lazyRetry(() => import("@/pages/CheckoutPage"));
 const OrderConfirmation = lazyRetry(() => import("@/pages/OrderConfirmation"));
 const DriverDashboard = lazyRetry(() => import("@/pages/DriverDashboard"));
