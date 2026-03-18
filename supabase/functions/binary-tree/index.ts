@@ -293,6 +293,11 @@ Deno.serve(async (req) => {
         (s: number, p: { net_amount: number }) => s + (p.net_amount || 0), 0
       );
 
+      // Audit: admin inspecting another member's detail
+      if (isAnyAdmin && targetUserId !== callerId) {
+        logAudit("tree_member_inspect", "binary_tree", targetUserId, { target_user_id: targetUserId });
+      }
+
       return jsonResponse({
         detail: {
           ...node,
