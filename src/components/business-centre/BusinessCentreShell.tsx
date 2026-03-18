@@ -169,7 +169,7 @@ const ADMIN_SECTIONS: { title: string; moduleNumber: number; items: NavItem[] }[
     title: "11. Compliance & Security",
     moduleNumber: 11,
     items: [
-      { id: "compliance", label: "Compliance", icon: Scale, path: "/business-centre/compliance", adminOnly: true },
+      { id: "compliance-audit", label: "Compliance & Audit", icon: Scale, path: "/business-centre/compliance-audit", adminOnly: true },
       { id: "security-roles", label: "Security & Roles", icon: Lock, path: "/business-centre/security-roles", superAdminOnly: true },
     ],
   },
