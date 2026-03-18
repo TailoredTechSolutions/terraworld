@@ -1157,7 +1157,7 @@ const BusinessCentreLanding = () => {
             transition={{ duration: 0.5, ease: cubicSmooth }}
           >
             <SectionHeader icon={Wallet} title="Wallet & Payouts" id="payout" />
-            <div className="mt-4"><PayoutPanel /></div>
+            <div className="mt-4"><PayoutPanel data={businessData} /></div>
           </motion.section>
 
           {/* Marketing */}
