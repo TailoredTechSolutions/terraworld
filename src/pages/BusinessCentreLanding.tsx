@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
+import CouponsPanel from "@/components/business-centre/CouponsPanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +20,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import {
   LayoutDashboard, Users, GitBranch, DollarSign, Share2, Award, Megaphone,
   CreditCard, HelpCircle, TrendingUp, ArrowUpRight, ArrowDownRight,
-  Copy, Download, Crown, Search, Wallet,
+  Copy, Download, Crown, Search, Wallet, Ticket,
   CheckCircle2, XCircle, AlertTriangle, Coins, Shield, Zap, Target,
   BarChart3, Clock, Star, Info, Settings, FileText, Scale, Lock
 } from "lucide-react";
@@ -37,6 +38,7 @@ const BASE_NAV_ITEMS = [
   { id: "commissions", label: "Commissions", icon: DollarSign },
   { id: "referral", label: "Referrals", icon: Share2 },
   { id: "rank", label: "Rank & Activation", icon: Award },
+  { id: "coupons", label: "Coupons", icon: Ticket },
   { id: "payout", label: "Wallet", icon: Wallet },
   { id: "marketing", label: "Marketing", icon: Megaphone },
   { id: "support", label: "Support", icon: HelpCircle },
@@ -626,9 +628,10 @@ const RankPanel = () => (
 // ─── Wallet & Payout Panel ───
 const PayoutPanel = () => (
   <div className="space-y-5">
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
       {[
-        { label: "Available Balance", value: "₱18,425.50", icon: Wallet, accent: "text-emerald-600 bg-emerald-500/10" },
+        { label: "Cash Balance", value: "₱18,425.50", icon: Wallet, accent: "text-emerald-600 bg-emerald-500/10" },
+        { label: "Internal Wallet", value: "₱0.00", icon: Ticket, accent: "text-primary bg-primary/10" },
         { label: "Pending Commissions", value: "₱3,280.00", icon: Clock, accent: "text-amber-600 bg-amber-500/10" },
         { label: "Total Withdrawn", value: "₱26,620.00", icon: ArrowUpRight, accent: "text-blue-600 bg-blue-500/10" },
       ].map((w) => (
@@ -1187,6 +1190,17 @@ const BusinessCentreLanding = () => {
           >
             <SectionHeader icon={Crown} title="Rank & Activation" id="rank" />
             <div className="mt-4"><RankPanel /></div>
+          </motion.section>
+
+          {/* Coupons */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, ease: cubicSmooth }}
+          >
+            <SectionHeader icon={Ticket} title="Coupons" id="coupons" />
+            <div className="mt-4"><CouponsPanel /></div>
           </motion.section>
 
           {/* Wallet & Payouts */}

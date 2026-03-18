@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCartStore } from "@/store/cartStore";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,8 @@ import {
   ArrowLeft, 
   Truck, 
   ShieldCheck,
-  Lock
+  Lock,
+  Wallet
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -49,10 +50,28 @@ const CheckoutPage = () => {
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [internalBalance, setInternalBalance] = useState<number>(0);
+  const [loadingWallet, setLoadingWallet] = useState(true);
   
   // Delivery provider state
   const [selectedDeliveryProvider, setSelectedDeliveryProvider] = useState<string>("");
   const [deliveryEstimate, setDeliveryEstimate] = useState<DeliveryEstimate | null>(null);
+
+  // Fetch internal wallet balance
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("wallets")
+          .select("internal_balance")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (data) setInternalBalance(Number(data.internal_balance) || 0);
+      }
+      setLoadingWallet(false);
+    })();
+  }, []);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -383,6 +402,24 @@ const CheckoutPage = () => {
 
                   <label 
                     className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover ${
+                      paymentMethod === "internal_wallet" 
+                        ? "border-2 border-primary bg-primary/10 shadow-glow-primary" 
+                        : "border border-glass-border glass-card"
+                    }`}
+                  >
+                    <RadioGroupItem value="internal_wallet" id="internal_wallet" />
+                    <Wallet className="h-5 w-5 text-emerald-600" />
+                    <div className="flex-1">
+                      <p className="font-medium">Internal Wallet</p>
+                      <p className="text-sm text-muted-foreground">
+                        {loadingWallet ? "Loading..." : `Balance: ₱${internalBalance.toLocaleString()}`}
+                      </p>
+                    </div>
+                    <div className="h-6 w-14 bg-emerald-600 rounded text-white text-[10px] font-bold flex items-center justify-center">Wallet</div>
+                  </label>
+
+                  <label 
+                    className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover ${
                       paymentMethod === "crypto" 
                         ? "border-2 border-primary bg-primary/10 shadow-glow-primary" 
                         : "border border-glass-border glass-card"
@@ -397,6 +434,39 @@ const CheckoutPage = () => {
                     <div className="h-6 w-6 bg-accent rounded-full text-accent-foreground text-[10px] font-bold flex items-center justify-center">₿</div>
                   </label>
                 </RadioGroup>
+
+                {/* Internal Wallet Balance Preview */}
+                {paymentMethod === "internal_wallet" && (
+                  <div className="mt-3 p-4 rounded-xl glass-card border border-emerald-500/30 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Wallet Balance</span>
+                      <span className="font-semibold text-emerald-600">₱{internalBalance.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Order Total</span>
+                      <span className="font-semibold">₱{total.toFixed(2)}</span>
+                    </div>
+                    <Separator className="bg-glass-border" />
+                    {internalBalance >= total ? (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Remaining After Purchase</span>
+                        <span className="font-semibold text-emerald-600">₱{(internalBalance - total).toFixed(2)}</span>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">From Wallet</span>
+                          <span className="font-semibold text-emerald-600">₱{internalBalance.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-destructive">Remaining to Pay</span>
+                          <span className="font-semibold text-destructive">₱{(total - internalBalance).toFixed(2)}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">Insufficient balance. Please top up via Coupons in Business Centre or choose another payment method.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Card Details */}
