@@ -241,17 +241,30 @@ const DetailedFarmCard = ({ farm, isSelected, onSelect, className }: DetailedFar
           ) : (
             <div />
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 text-xs gap-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.open(`https://www.google.com/maps?q=${farm.latitude},${farm.longitude}`, "_blank");
-            }}
-          >
-            <ExternalLink className="h-3 w-3" /> Directions
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(`https://www.google.com/maps?q=${farm.latitude},${farm.longitude}`, "_blank");
+              }}
+            >
+              <ExternalLink className="h-3 w-3" /> Map
+            </Button>
+            <Button
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                const slug = farmSlugMap[farm.id] || farm.id;
+                navigate(`/farms/${slug}`);
+              }}
+            >
+              <Store className="h-3 w-3" /> View Farm
+            </Button>
+          </div>
         </div>
       </div>
     </div>
