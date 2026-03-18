@@ -165,6 +165,7 @@ const AnimatedRoutes = () => {
             <Route path="manual-placement" element={<BCManualPlacement />} />
 
             {/* Module 7: Tokenomics & Rewards */}
+            <Route path="tokenomics" element={<BCTokenomics />} />
             <Route path="token-rewards" element={<BCTokenRewards />} />
 
             {/* Module 8: Coupons & Promotions */}
