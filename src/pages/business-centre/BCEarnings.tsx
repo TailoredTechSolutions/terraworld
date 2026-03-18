@@ -4,7 +4,7 @@ import { DollarSign, TrendingUp, Users, Layers } from "lucide-react";
 
 const BCEarnings = () => {
   const { data } = useBusinessCentre();
-  const wallet = data.wallet;
+  const wallet = data.walletData;
 
   const metrics = [
     { label: "Total Earnings", value: `₱${(wallet?.total_withdrawn ?? 0 + (wallet?.available_balance ?? 0)).toLocaleString()}`, icon: DollarSign },

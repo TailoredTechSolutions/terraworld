@@ -5,7 +5,7 @@ import { ArrowUpRight, Clock, CheckCircle } from "lucide-react";
 
 const BCWithdrawals = () => {
   const { data } = useBusinessCentre();
-  const wallet = data.wallet;
+  const wallet = data.walletData;
 
   return (
     <div className="space-y-6">
