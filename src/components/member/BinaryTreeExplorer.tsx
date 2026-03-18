@@ -82,11 +82,6 @@ const TIER_BADGE_STYLES: Record<string, string> = {
 
 // ── API helpers ──
 async function fetchTree(userId: string, depth: number): Promise<TreeNode | null> {
-  const { data, error } = await supabase.functions.invoke("binary-tree", {
-    body: null,
-    headers: {},
-  });
-  // Use query params approach
   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
   const url = `https://${projectId}.supabase.co/functions/v1/binary-tree?action=root&userId=${userId}&depth=${depth}`;
   const session = await supabase.auth.getSession();
