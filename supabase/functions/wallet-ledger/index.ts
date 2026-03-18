@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
 
       if (rpcError) {
         console.error("[wallet-ledger] Reversal RPC error:", rpcError);
-        return new Response(JSON.stringify({ error: rpcError.message }), {
+        return new Response(JSON.stringify({ error: "Failed to process reversal. Please try again." }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
