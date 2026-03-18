@@ -36,7 +36,7 @@ const AdminDashboardWrapper = ({ roleFilter, title, description, children }: Adm
       const { data: roleData, error: roleError } = await supabase
         .from("user_roles")
         .select("user_id")
-        .eq("role", roleFilter);
+        .eq("role", roleFilter as any);
       if (roleError) throw roleError;
       if (!roleData?.length) return [];
 
