@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      activation_events: {
+        Row: {
+          activation_status: string
+          amount_paid: number
+          created_at: string
+          id: string
+          package_id: string
+          payment_reference: string | null
+          user_id: string
+        }
+        Insert: {
+          activation_status?: string
+          amount_paid: number
+          created_at?: string
+          id?: string
+          package_id: string
+          payment_reference?: string | null
+          user_id: string
+        }
+        Update: {
+          activation_status?: string
+          amount_paid?: number
+          created_at?: string
+          id?: string
+          package_id?: string
+          payment_reference?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_events_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_scopes: {
         Row: {
           created_at: string
@@ -937,6 +975,36 @@ export type Database = {
         }
         Relationships: []
       }
+      genealogy_snapshots: {
+        Row: {
+          id: string
+          left_active_count: number
+          left_count: number
+          right_active_count: number
+          right_count: number
+          snapshot_date: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          left_active_count?: number
+          left_count?: number
+          right_active_count?: number
+          right_count?: number
+          snapshot_date: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          left_active_count?: number
+          left_count?: number
+          right_active_count?: number
+          right_count?: number
+          snapshot_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       inventory_movements: {
         Row: {
           created_at: string
@@ -1145,6 +1213,137 @@ export type Database = {
           notes?: string | null
           reason?: string
           target_user_id?: string
+        }
+        Relationships: []
+      }
+      member_package_history: {
+        Row: {
+          action_type: string
+          created_at: string
+          created_by: string | null
+          effective_at: string
+          expires_at: string | null
+          id: string
+          package_id: string
+          source_id: string | null
+          source_type: string | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          created_by?: string | null
+          effective_at?: string
+          expires_at?: string | null
+          id?: string
+          package_id: string
+          source_id?: string | null
+          source_type?: string | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          created_by?: string | null
+          effective_at?: string
+          expires_at?: string | null
+          id?: string
+          package_id?: string
+          source_id?: string | null
+          source_type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_package_history_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_rank_history: {
+        Row: {
+          change_type: string
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_rank_id: string | null
+          old_rank_id: string | null
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          change_type: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_rank_id?: string | null
+          old_rank_id?: string | null
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          change_type?: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_rank_id?: string | null
+          old_rank_id?: string | null
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_rank_history_new_rank_id_fkey"
+            columns: ["new_rank_id"]
+            isOneToOne: false
+            referencedRelation: "ranks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_rank_history_old_rank_id_fkey"
+            columns: ["old_rank_id"]
+            isOneToOne: false
+            referencedRelation: "ranks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_activation_status: string | null
+          new_binary_status: string | null
+          old_activation_status: string | null
+          old_binary_status: string | null
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_activation_status?: string | null
+          new_binary_status?: string | null
+          old_activation_status?: string | null
+          old_binary_status?: string | null
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_activation_status?: string | null
+          new_binary_status?: string | null
+          old_activation_status?: string | null
+          old_binary_status?: string | null
+          reason?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1467,6 +1666,63 @@ export type Database = {
           },
         ]
       }
+      packages: {
+        Row: {
+          binary_cap_daily: number
+          binary_rate: number
+          bv: number
+          code: string
+          created_at: string
+          direct_membership_bonus_rate: number
+          direct_product_bonus_rate: number
+          id: string
+          is_active: boolean
+          is_free: boolean
+          matching_levels: number
+          name: string
+          price: number
+          pv: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          binary_cap_daily?: number
+          binary_rate?: number
+          bv?: number
+          code: string
+          created_at?: string
+          direct_membership_bonus_rate?: number
+          direct_product_bonus_rate?: number
+          id?: string
+          is_active?: boolean
+          is_free?: boolean
+          matching_levels?: number
+          name: string
+          price?: number
+          pv?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          binary_cap_daily?: number
+          binary_rate?: number
+          bv?: number
+          code?: string
+          created_at?: string
+          direct_membership_bonus_rate?: number
+          direct_product_bonus_rate?: number
+          id?: string
+          is_active?: boolean
+          is_free?: boolean
+          matching_levels?: number
+          name?: string
+          price?: number
+          pv?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_reconciliation: {
         Row: {
           id: string
@@ -1763,6 +2019,48 @@ export type Database = {
         }
         Relationships: []
       }
+      placement_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          id: string
+          proposed_parent_user_id: string
+          proposed_side: string
+          reason: string | null
+          request_type: string
+          requested_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          proposed_parent_user_id: string
+          proposed_side: string
+          reason?: string | null
+          request_type: string
+          requested_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          proposed_parent_user_id?: string
+          proposed_side?: string
+          reason?: string | null
+          request_type?: string
+          requested_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       platform_settings: {
         Row: {
           created_at: string
@@ -2045,6 +2343,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      rank_qualification_snapshots: {
+        Row: {
+          id: string
+          is_qualified: boolean
+          qualification_data: Json
+          rank_id: string
+          snapshot_date: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          is_qualified?: boolean
+          qualification_data?: Json
+          rank_id: string
+          snapshot_date: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          is_qualified?: boolean
+          qualification_data?: Json
+          rank_id?: string
+          snapshot_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rank_qualification_snapshots_rank_id_fkey"
+            columns: ["rank_id"]
+            isOneToOne: false
+            referencedRelation: "ranks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ranks: {
         Row: {
@@ -2631,6 +2964,131 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      volume_balances_daily: {
+        Row: {
+          carry_left_bv: number
+          carry_right_bv: number
+          id: string
+          left_membership_bv: number
+          left_product_bv: number
+          right_membership_bv: number
+          right_product_bv: number
+          stat_date: string
+          user_id: string
+        }
+        Insert: {
+          carry_left_bv?: number
+          carry_right_bv?: number
+          id?: string
+          left_membership_bv?: number
+          left_product_bv?: number
+          right_membership_bv?: number
+          right_product_bv?: number
+          stat_date: string
+          user_id: string
+        }
+        Update: {
+          carry_left_bv?: number
+          carry_right_bv?: number
+          id?: string
+          left_membership_bv?: number
+          left_product_bv?: number
+          right_membership_bv?: number
+          right_product_bv?: number
+          stat_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      volume_propagation: {
+        Row: {
+          created_at: string
+          depth: number
+          from_user_id: string | null
+          id: string
+          leg_side: string
+          to_user_id: string
+          volume_id: string
+        }
+        Insert: {
+          created_at?: string
+          depth?: number
+          from_user_id?: string | null
+          id?: string
+          leg_side: string
+          to_user_id: string
+          volume_id: string
+        }
+        Update: {
+          created_at?: string
+          depth?: number
+          from_user_id?: string | null
+          id?: string
+          leg_side?: string
+          to_user_id?: string
+          volume_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volume_propagation_volume_id_fkey"
+            columns: ["volume_id"]
+            isOneToOne: false
+            referencedRelation: "volumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      volumes: {
+        Row: {
+          beneficiary_user_id: string
+          bv_amount: number
+          bv_type: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          leg_side: string
+          meta: Json
+          origin_user_id: string | null
+          posted_at: string
+          pv_amount: number
+          source_id: string | null
+          source_type: string
+          status: string
+        }
+        Insert: {
+          beneficiary_user_id: string
+          bv_amount?: number
+          bv_type: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          leg_side: string
+          meta?: Json
+          origin_user_id?: string | null
+          posted_at?: string
+          pv_amount?: number
+          source_id?: string | null
+          source_type: string
+          status?: string
+        }
+        Update: {
+          beneficiary_user_id?: string
+          bv_amount?: number
+          bv_type?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          leg_side?: string
+          meta?: Json
+          origin_user_id?: string | null
+          posted_at?: string
+          pv_amount?: number
+          source_id?: string | null
+          source_type?: string
+          status?: string
         }
         Relationships: []
       }

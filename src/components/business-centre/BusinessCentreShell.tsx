@@ -120,7 +120,7 @@ const ADMIN_SECTIONS: { title: string; moduleNumber: number; items: NavItem[] }[
     title: "6. MLM System",
     moduleNumber: 6,
     items: [
-      { id: "mlm-system", label: "MLM Overview", icon: GitBranch, path: "/business-centre/mlm-system", adminOnly: true },
+      { id: "mlm-system", label: "MLM Console", icon: GitBranch, path: "/business-centre/mlm-system", adminOnly: true },
       { id: "binary-tree", label: "Binary Tree", icon: GitBranch, path: "/business-centre/binary-tree" },
       { id: "network", label: "Network", icon: Link2, path: "/business-centre/network" },
       { id: "referrals", label: "Referrals", icon: Share2, path: "/business-centre/referrals" },
@@ -131,7 +131,7 @@ const ADMIN_SECTIONS: { title: string; moduleNumber: number; items: NavItem[] }[
       { id: "package-manager", label: "Package Manager", icon: Package, path: "/business-centre/package-manager", adminOnly: true },
       { id: "member-search", label: "Member Search", icon: Search, path: "/business-centre/member-search", adminOnly: true },
       { id: "genealogy-explorer", label: "Genealogy Explorer", icon: GitBranch, path: "/business-centre/genealogy-explorer", adminOnly: true },
-      { id: "manual-placement", label: "Manual Placement", icon: GitBranch, path: "/business-centre/manual-placement", superAdminOnly: true },
+      { id: "manual-placement", label: "Placement Console", icon: GitBranch, path: "/business-centre/manual-placement", superAdminOnly: true },
     ],
   },
   {
