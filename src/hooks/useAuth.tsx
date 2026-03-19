@@ -83,12 +83,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: string, 
     fullName?: string, 
     referralCode?: string,
-    registrationRole?: string
+    registrationRole?: string,
+    extraMeta?: Record<string, string>
   ) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
-      email,
+      email: email.trim(),
       password,
       options: {
         emailRedirectTo: redirectUrl,
@@ -96,6 +97,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           full_name: fullName || "",
           referral_code: referralCode || "",
           registration_role: registrationRole || "buyer",
+          ...(extraMeta || {}),
         },
       },
     });
