@@ -81,7 +81,7 @@ export function useAggregatedProducts() {
       // Fetch products and farms in parallel
       const [productsRes, farmersRes] = await Promise.all([
         supabase.from("products").select("id, name, description, category, unit, image_url").in("id", productIds),
-        supabase.from("farmers_public").select("id, name, rating, latitude, longitude, location").in("id", farmIds),
+        supabase.from("farmers_public").select("id, name, rating, location").in("id", farmIds),
       ]);
 
       if (productsRes.error) throw productsRes.error;
