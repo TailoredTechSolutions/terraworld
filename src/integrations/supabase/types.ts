@@ -5218,14 +5218,11 @@ export type Database = {
           description: string | null
           id: string | null
           image_url: string | null
-          latitude: number | null
           location: string | null
-          longitude: number | null
           name: string | null
           products_count: number | null
           rating: number | null
           status: Database["public"]["Enums"]["farmer_status"] | null
-          total_sales: number | null
           updated_at: string | null
         }
         Insert: {
@@ -5233,14 +5230,11 @@ export type Database = {
           description?: string | null
           id?: string | null
           image_url?: string | null
-          latitude?: number | null
           location?: string | null
-          longitude?: number | null
           name?: string | null
           products_count?: number | null
           rating?: number | null
           status?: Database["public"]["Enums"]["farmer_status"] | null
-          total_sales?: number | null
           updated_at?: string | null
         }
         Update: {
@@ -5248,14 +5242,11 @@ export type Database = {
           description?: string | null
           id?: string | null
           image_url?: string | null
-          latitude?: number | null
           location?: string | null
-          longitude?: number | null
           name?: string | null
           products_count?: number | null
           rating?: number | null
           status?: Database["public"]["Enums"]["farmer_status"] | null
-          total_sales?: number | null
           updated_at?: string | null
         }
         Relationships: []
