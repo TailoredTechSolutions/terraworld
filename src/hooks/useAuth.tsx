@@ -19,7 +19,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName?: string, referralCode?: string, registrationRole?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName?: string, referralCode?: string, registrationRole?: string, extraMeta?: Record<string, string>) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -83,12 +83,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: string, 
     fullName?: string, 
     referralCode?: string,
-    registrationRole?: string
+    registrationRole?: string,
+    extraMeta?: Record<string, string>
   ) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
-      email,
+      email: email.trim(),
       password,
       options: {
         emailRedirectTo: redirectUrl,
@@ -96,6 +97,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           full_name: fullName || "",
           referral_code: referralCode || "",
           registration_role: registrationRole || "buyer",
+          ...(extraMeta || {}),
         },
       },
     });

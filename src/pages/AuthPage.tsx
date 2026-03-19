@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,149 +10,310 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Leaf, ArrowLeft, ShoppingBag, Tractor, Truck, ChevronDown, Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
-import { LOGO_FULL as terraLogo, AUTH_FARM_BG as authFarmBg } from "@/lib/siteImages";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Loader2, ArrowLeft, ShoppingBag, Tractor, Truck, Eye, EyeOff,
+  Check, X, Phone
+} from "lucide-react";
+import { LOGO_FULL as terraLogo, AUTH_FARM_BG as authFarmBg } from "@/lib/siteImages";
 
-const emailSchema = z.string().email("Please enter a valid email address");
-const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
-const nameSchema = z.string().min(2, "Name must be at least 2 characters").optional().or(z.literal(""));
+// ─── Validation Schemas ─────────────────────────────────────────────
+const emailSchema = z
+  .string()
+  .trim()
+  .min(1, "Email is required")
+  .email("Please enter a valid email address")
+  .max(255, "Email must be less than 255 characters")
+  .refine((v) => /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(v), {
+    message: "Email contains invalid characters",
+  });
+
+const passwordSchema = z
+  .string()
+  .min(8, "Minimum 8 characters")
+  .regex(/[A-Z]/, "At least 1 uppercase letter")
+  .regex(/[a-z]/, "At least 1 lowercase letter")
+  .regex(/[0-9]/, "At least 1 number")
+  .regex(/[^A-Za-z0-9]/, "At least 1 special character");
+
+const phoneSchema = z
+  .string()
+  .trim()
+  .min(1, "Mobile number is required")
+  .regex(/^(09|\+639)\d{9}$/, "Enter a valid PH mobile (09XXXXXXXXX or +639XXXXXXXXX)");
 
 type RegistrationRole = "buyer" | "farmer" | "driver";
 
+interface FieldErrors {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+  confirmPassword?: string;
+  terms?: string;
+  farmName?: string;
+  farmLocation?: string;
+  produceType?: string;
+  vehicleType?: string;
+  licenseNumber?: string;
+  serviceArea?: string;
+}
+
+const EMPTY_FORM = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  password: "",
+  confirmPassword: "",
+  termsAccepted: false,
+  referralCode: "",
+  // farmer fields
+  farmName: "",
+  farmLocation: "",
+  produceType: "",
+  // driver fields
+  vehicleType: "",
+  licenseNumber: "",
+  serviceArea: "",
+};
+
+// ─── Password Strength Indicator ────────────────────────────────────
+const PasswordStrength = ({ password }: { password: string }) => {
+  const rules = [
+    { label: "8+ characters", met: password.length >= 8 },
+    { label: "Uppercase", met: /[A-Z]/.test(password) },
+    { label: "Lowercase", met: /[a-z]/.test(password) },
+    { label: "Number", met: /[0-9]/.test(password) },
+    { label: "Special char", met: /[^A-Za-z0-9]/.test(password) },
+  ];
+  if (!password) return null;
+  return (
+    <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-1.5">
+      {rules.map((r) => (
+        <span key={r.label} className={`flex items-center gap-1 text-xs ${r.met ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>
+          {r.met ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+          {r.label}
+        </span>
+      ))}
+    </div>
+  );
+};
+
+// ─── Password Input with Eye Toggle ─────────────────────────────────
+const PasswordInput = ({
+  id, placeholder, value, onChange, disabled, error,
+}: {
+  id: string; placeholder: string; value: string;
+  onChange: (v: string) => void; disabled: boolean; error?: string;
+}) => {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="space-y-1">
+      <div className="relative">
+        <Input
+          id={id}
+          type={show ? "text" : "password"}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
+          autoComplete="new-password"
+          className="h-11 md:h-10 pr-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20"
+        />
+        <button
+          type="button"
+          onClick={() => setShow(!show)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+          tabIndex={-1}
+          aria-label={show ? "Hide password" : "Show password"}
+        >
+          {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </button>
+      </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
+    </div>
+  );
+};
+
+// ─── Role Card ──────────────────────────────────────────────────────
+const ROLES: { key: RegistrationRole; icon: typeof ShoppingBag; label: string; desc: string }[] = [
+  { key: "buyer", icon: ShoppingBag, label: "Buyer", desc: "Shop fresh produce" },
+  { key: "farmer", icon: Tractor, label: "Farmer", desc: "Sell your products" },
+  { key: "driver", icon: Truck, label: "Driver", desc: "Deliver orders" },
+];
+
+// ═════════════════════════════════════════════════════════════════════
+// AuthPage Component
+// ═════════════════════════════════════════════════════════════════════
 const AuthPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, signIn, signUp, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  
+
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const [registrationRole, setRegistrationRole] = useState<RegistrationRole | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  
-  // Form states
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [referralCode, setReferralCode] = useState(searchParams.get("ref") || "");
-  
-  // Error states
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [nameError, setNameError] = useState("");
+  const [form, setForm] = useState({ ...EMPTY_FORM });
+  const [errors, setErrors] = useState<FieldErrors>({});
 
-  // Pre-select role from URL param
+  // Login-specific state (separate from registration to prevent leakage)
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginEmailError, setLoginEmailError] = useState("");
+  const [loginPasswordError, setLoginPasswordError] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  // ── Reset registration form completely ──
+  const resetForm = useCallback(() => {
+    setForm({ ...EMPTY_FORM });
+    setErrors({});
+  }, []);
+
+  // Pre-select role from URL
   useEffect(() => {
-    const role = searchParams.get("role");
-    if (role === "buyer" || role === "farmer" || role === "driver") {
+    const role = searchParams.get("role") as RegistrationRole | null;
+    if (role && ["buyer", "farmer", "driver"].includes(role)) {
       setRegistrationRole(role);
       setActiveTab("register");
     }
+    const ref = searchParams.get("ref");
+    if (ref) setForm((f) => ({ ...f, referralCode: ref }));
   }, [searchParams]);
+
+  // Reset form when switching roles
+  useEffect(() => {
+    resetForm();
+  }, [registrationRole, resetForm]);
+
+  // Reset form when switching tabs
+  useEffect(() => {
+    if (activeTab === "register") {
+      resetForm();
+    } else {
+      setLoginEmail("");
+      setLoginPassword("");
+      setLoginEmailError("");
+      setLoginPasswordError("");
+    }
+  }, [activeTab, resetForm]);
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user && !authLoading) {
-      navigate("/");
-    }
+    if (user && !authLoading) navigate("/");
   }, [user, authLoading, navigate]);
 
-  const validateForm = (isSignup: boolean) => {
-    let isValid = true;
-    
-    const emailResult = emailSchema.safeParse(email);
-    if (!emailResult.success) {
-      setEmailError(emailResult.error.errors[0].message);
-      isValid = false;
-    } else {
-      setEmailError("");
-    }
-    
-    const passwordResult = passwordSchema.safeParse(password);
-    if (!passwordResult.success) {
-      setPasswordError(passwordResult.error.errors[0].message);
-      isValid = false;
-    } else {
-      setPasswordError("");
-    }
-    
-    if (isSignup && fullName) {
-      const nameResult = nameSchema.safeParse(fullName);
-      if (!nameResult.success) {
-        setNameError(nameResult.error.errors[0].message);
-        isValid = false;
-      } else {
-        setNameError("");
-      }
-    }
-    
-    return isValid;
+  // ── Field updater ──
+  const setField = (key: keyof typeof EMPTY_FORM, value: string | boolean) => {
+    setForm((f) => ({ ...f, [key]: value }));
+    // Clear error for this field on change
+    setErrors((e) => ({ ...e, [key]: undefined }));
   };
 
+  // ── Validate registration ──
+  const validateRegistration = (): boolean => {
+    const errs: FieldErrors = {};
+    if (!form.firstName.trim()) errs.firstName = "First name is required";
+    if (!form.lastName.trim()) errs.lastName = "Last name is required";
+
+    const emailResult = emailSchema.safeParse(form.email);
+    if (!emailResult.success) errs.email = emailResult.error.errors[0].message;
+
+    const phoneResult = phoneSchema.safeParse(form.phone);
+    if (!phoneResult.success) errs.phone = phoneResult.error.errors[0].message;
+
+    const pwResult = passwordSchema.safeParse(form.password);
+    if (!pwResult.success) errs.password = pwResult.error.errors[0].message;
+
+    if (form.password !== form.confirmPassword) errs.confirmPassword = "Passwords do not match";
+    if (!form.confirmPassword) errs.confirmPassword = "Please confirm your password";
+
+    if (!form.termsAccepted) errs.terms = "You must accept the Terms and Privacy Policy";
+
+    // Role-specific
+    if (registrationRole === "farmer") {
+      if (!form.farmName.trim()) errs.farmName = "Farm name is required";
+      if (!form.farmLocation.trim()) errs.farmLocation = "Farm location is required";
+      if (!form.produceType.trim()) errs.produceType = "Produce type is required";
+    }
+    if (registrationRole === "driver") {
+      if (!form.vehicleType.trim()) errs.vehicleType = "Vehicle type is required";
+      if (!form.licenseNumber.trim()) errs.licenseNumber = "License number is required";
+      if (!form.serviceArea.trim()) errs.serviceArea = "Service area is required";
+    }
+
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  // ── Handle Login ──
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm(false)) return;
+    let valid = true;
+    const emailRes = emailSchema.safeParse(loginEmail);
+    if (!emailRes.success) { setLoginEmailError(emailRes.error.errors[0].message); valid = false; } else setLoginEmailError("");
+    if (!loginPassword) { setLoginPasswordError("Password is required"); valid = false; } else setLoginPasswordError("");
+    if (!valid) return;
+
     setIsLoading(true);
-    
-    const { error } = await signIn(email, password);
-    
+    const { error } = await signIn(loginEmail.trim(), loginPassword);
     if (error) {
-      let message = "Failed to sign in";
-      if (error.message.includes("Invalid login credentials")) {
-        message = "Invalid email or password";
-      } else if (error.message.includes("Email not confirmed")) {
-        message = "Please verify your email address";
-      }
-      toast({ title: "Sign In Failed", description: message, variant: "destructive" });
+      const msg = error.message.includes("Invalid login credentials")
+        ? "Invalid email or password"
+        : error.message.includes("Email not confirmed")
+          ? "Please verify your email address"
+          : "Failed to sign in";
+      toast({ title: "Sign In Failed", description: msg, variant: "destructive" });
     } else {
       toast({ title: "Welcome back!", description: "You have successfully signed in." });
       navigate("/");
     }
-    
     setIsLoading(false);
   };
 
+  // ── Handle Signup ──
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!registrationRole) {
       toast({ title: "Select Role", description: "Please select your account type.", variant: "destructive" });
       return;
     }
-    if (!validateForm(true)) return;
+    if (!validateRegistration()) return;
+
     setIsLoading(true);
-    
-    const { error } = await signUp(email, password, fullName, referralCode, registrationRole);
-    
+    const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`;
+
+    const { error } = await signUp(
+      form.email.trim(),
+      form.password,
+      fullName,
+      form.referralCode.trim(),
+      registrationRole
+    );
+
     if (error) {
-      let message = "Failed to create account";
-      if (error.message.includes("already registered")) {
-        message = "This email is already registered. Please sign in.";
-      } else if (error.message.includes("valid email")) {
-        message = "Please enter a valid email address";
-      }
-      toast({ title: "Registration Failed", description: message, variant: "destructive" });
+      const msg = error.message.includes("already registered")
+        ? "This email is already registered. Please sign in."
+        : error.message.includes("valid email")
+          ? "Please enter a valid email address"
+          : error.message.includes("422")
+            ? "Registration failed. Please check your details and try again."
+            : `Registration failed: ${error.message}`;
+      toast({ title: "Registration Failed", description: msg, variant: "destructive" });
     } else {
-      const roleLabels: Record<string, string> = { buyer: "Buyer", farmer: "Farmer", driver: "Driver" };
-      toast({ title: "Account Created!", description: `Welcome to Terra Farming as a ${roleLabels[registrationRole]}!` });
+      const roleLabel = { buyer: "Buyer", farmer: "Farmer", driver: "Driver" }[registrationRole];
+      toast({ title: "Account Created!", description: `Welcome to Terra Farming as a ${roleLabel}!` });
+      resetForm();
       const redirectMap: Record<string, string> = { farmer: "/farmer", driver: "/driver", buyer: "/buyer" };
       navigate(redirectMap[registrationRole] || "/buyer");
     }
-    
     setIsLoading(false);
   };
 
-  const handleRegisterClick = (role: RegistrationRole) => {
-    setRegistrationRole(role);
-    setActiveTab("register");
-  };
+  // ── Input helper ──
+  const inputClass = "h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20";
 
   if (authLoading) {
     return (
@@ -164,203 +325,251 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
-      {/* Realistic Philippine highland farm background */}
+      {/* Background */}
       <div className="absolute inset-0 z-0">
-        <img 
-          src={authFarmBg} 
-          alt="" 
-          className="w-full h-full object-cover object-center md:object-center opacity-50" 
-          loading="eager"
-        />
-        {/* Light mode overlay: subtle dark gradient for readability */}
+        <img src={authFarmBg} alt="" className="w-full h-full object-cover opacity-50" loading="eager" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/25 to-black/10 dark:hidden" />
-        {/* Dark mode overlay: heavier cinematic overlay */}
         <div className="absolute inset-0 hidden dark:block bg-gradient-to-t from-black/70 via-black/55 to-black/40" />
-        {/* Mobile extra overlay for readability */}
-        <div className="absolute inset-0 bg-black/10 md:bg-transparent dark:bg-black/5 md:dark:bg-transparent" />
       </div>
 
       {/* Header */}
       <div className="container py-4 relative z-10">
         <Link to="/" className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors drop-shadow-md">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Marketplace
+          <ArrowLeft className="h-4 w-4" /> Back to Marketplace
         </Link>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-4 relative z-10 mt-[5vh] md:mt-0">
-        <Card 
+      {/* Main */}
+      <div className="flex-1 flex items-center justify-center p-4 relative z-10">
+        <Card
           className="w-[92%] max-w-md border-2 shadow-2xl relative overflow-hidden backdrop-blur-sm dark:backdrop-blur-md"
-          style={{
-            background: `linear-gradient(hsla(34,28%,74%,0.92), hsla(34,28%,74%,0.92)), url(${terraLogo}) center / cover no-repeat`,
-          }}
+          style={{ background: `linear-gradient(hsla(34,28%,74%,0.92), hsla(34,28%,74%,0.92)), url(${terraLogo}) center / cover no-repeat` }}
         >
-          {/* Dark mode override with darker overlay */}
-          <div 
+          <div
             className="absolute inset-0 z-0 pointer-events-none hidden dark:block rounded-xl"
-            style={{
-              background: `linear-gradient(hsla(20,10%,8%,0.85), hsla(20,10%,8%,0.85)), url(${terraLogo}) center / cover no-repeat`,
-            }}
+            style={{ background: `linear-gradient(hsla(20,10%,8%,0.85), hsla(20,10%,8%,0.85)), url(${terraLogo}) center / cover no-repeat` }}
           />
 
           <CardHeader className="text-center pb-2 relative z-10">
             <div className="py-6 md:py-8">
               <CardTitle className="font-display text-4xl md:text-5xl drop-shadow-sm">Welcome to Terra Farming</CardTitle>
-              <CardDescription className="font-bold text-base mt-2">
-                Join the farm-to-table revolution
-              </CardDescription>
+              <CardDescription className="font-bold text-base mt-2">Join the farm-to-table revolution</CardDescription>
             </div>
           </CardHeader>
-          
+
           <CardContent className="relative z-10">
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "register")}>
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="login">Sign In</TabsTrigger>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className={`inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${activeTab === "register" ? "bg-background text-foreground shadow" : "text-muted-foreground hover:text-foreground"}`}>
-                      Register
-                      <ChevronDown className="h-3.5 w-3.5" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="center" className="w-48">
-                    <DropdownMenuItem onClick={() => handleRegisterClick("buyer")} className="gap-2 cursor-pointer">
-                      <ShoppingBag className="h-4 w-4" />
-                      Register as Buyer
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleRegisterClick("farmer")} className="gap-2 cursor-pointer">
-                      <Tractor className="h-4 w-4" />
-                      Register as Farmer
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleRegisterClick("driver")} className="gap-2 cursor-pointer">
-                      <Truck className="h-4 w-4" />
-                      Register as Driver
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <TabsTrigger value="register">Register</TabsTrigger>
               </TabsList>
-              
+
+              {/* ── LOGIN TAB ── */}
               <TabsContent value="login">
-                <form onSubmit={handleLogin} className="space-y-4">
+                <form onSubmit={handleLogin} className="space-y-4" autoComplete="on">
                   <div className="space-y-2">
                     <Label htmlFor="login-email" className="font-bold">Email</Label>
-                    <Input id="login-email" type="email" placeholder="andrew@tailoredtech.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading} className="h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
-                    {emailError && <p className="text-sm text-destructive">{emailError}</p>}
+                    <Input
+                      id="login-email" type="email" placeholder="you@example.com"
+                      value={loginEmail}
+                      onChange={(e) => { setLoginEmail(e.target.value); setLoginEmailError(""); }}
+                      onBlur={() => setLoginEmail((v) => v.trim())}
+                      disabled={isLoading} autoComplete="email"
+                      className={inputClass}
+                    />
+                    {loginEmailError && <p className="text-sm text-destructive">{loginEmailError}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password" className="font-bold">Password</Label>
                     <div className="relative">
-                      <Input id="login-password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading} className="h-11 md:h-10 pr-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      <Input
+                        id="login-password" type={showLoginPassword ? "text" : "password"} placeholder="••••••••"
+                        value={loginPassword}
+                        onChange={(e) => { setLoginPassword(e.target.value); setLoginPasswordError(""); }}
+                        disabled={isLoading} autoComplete="current-password"
+                        className={`${inputClass} pr-10`}
+                      />
+                      <button type="button" onClick={() => setShowLoginPassword(!showLoginPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
+                        {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
-                    {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
+                    {loginPasswordError && <p className="text-sm text-destructive">{loginPasswordError}</p>}
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="remember-me" checked={rememberMe} onCheckedChange={(checked) => setRememberMe(checked === true)} />
+                    <Checkbox id="remember-me" checked={rememberMe} onCheckedChange={(c) => setRememberMe(c === true)} />
                     <Label htmlFor="remember-me" className="text-sm font-medium cursor-pointer select-none">Remember me</Label>
                   </div>
                   <Button type="submit" className="w-full h-12 md:h-10 bg-primary hover:bg-primary/90 text-base font-semibold" disabled={isLoading}>
-                    {isLoading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing In...</>) : "Sign In"}
+                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing In...</> : "Sign In"}
                   </Button>
                   <div className="text-center">
                     <button
                       type="button"
                       className="text-sm text-primary hover:underline font-semibold"
                       onClick={async () => {
-                        if (!email) { toast({ title: "Enter Email", description: "Please enter your email address first.", variant: "destructive" }); return; }
-                        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
-                        if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
-                        else { toast({ title: "Check Your Email", description: "A password reset link has been sent to your email." }); }
+                        if (!loginEmail) { toast({ title: "Enter Email", description: "Please enter your email address first.", variant: "destructive" }); return; }
+                        const { error } = await supabase.auth.resetPasswordForEmail(loginEmail.trim(), { redirectTo: `${window.location.origin}/reset-password` });
+                        if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+                        else toast({ title: "Check Your Email", description: "A password reset link has been sent." });
                       }}
-                    >
-                      Forgot your password?
-                    </button>
+                    >Forgot your password?</button>
                   </div>
                 </form>
               </TabsContent>
-              
+
+              {/* ── REGISTER TAB ── */}
               <TabsContent value="register">
                 {!registrationRole ? (
                   <div className="space-y-4 text-center py-4">
-                    <p className="text-muted-foreground font-bold">Choose your account type to get started:</p>
+                    <p className="text-muted-foreground font-bold">Choose your account type:</p>
                     <div className="grid grid-cols-3 gap-3">
-                      <button
-                        onClick={() => setRegistrationRole("buyer")}
-                        className="p-4 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
-                      >
-                        <ShoppingBag className="h-7 w-7 mx-auto text-primary" />
-                        <p className="font-semibold text-sm">Buyer</p>
-                        <p className="text-xs text-muted-foreground">Shop fresh produce</p>
-                      </button>
-                      <button
-                        onClick={() => setRegistrationRole("farmer")}
-                        className="p-4 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
-                      >
-                        <Tractor className="h-7 w-7 mx-auto text-primary" />
-                        <p className="font-semibold text-sm">Farmer</p>
-                        <p className="text-xs text-muted-foreground">Sell your products</p>
-                      </button>
-                      <button
-                        onClick={() => setRegistrationRole("driver")}
-                        className="p-4 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
-                      >
-                        <Truck className="h-7 w-7 mx-auto text-primary" />
-                        <p className="font-semibold text-sm">Driver</p>
-                        <p className="text-xs text-muted-foreground">Deliver orders</p>
-                      </button>
+                      {ROLES.map((r) => (
+                        <button
+                          key={r.key}
+                          type="button"
+                          onClick={() => setRegistrationRole(r.key)}
+                          className="p-4 rounded-xl border-2 border-border hover:border-primary transition-colors text-center space-y-2 dark:bg-[hsl(0,0%,12%)]/50"
+                        >
+                          <r.icon className="h-7 w-7 mx-auto text-primary" />
+                          <p className="font-semibold text-sm">{r.label}</p>
+                          <p className="text-xs text-muted-foreground">{r.desc}</p>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 ) : (
-                  <form onSubmit={handleSignup} className="space-y-4">
+                  <form onSubmit={handleSignup} className="space-y-3" autoComplete="off">
                     {/* Role indicator */}
                     <div className="flex items-center justify-between p-3 rounded-lg bg-secondary dark:bg-[hsl(0,0%,15%)]">
                       <div className="flex items-center gap-2">
-                        {registrationRole === "buyer" ? <ShoppingBag className="h-4 w-4 text-primary" /> : registrationRole === "driver" ? <Truck className="h-4 w-4 text-primary" /> : <Tractor className="h-4 w-4 text-primary" />}
+                        {ROLES.find((r) => r.key === registrationRole)?.icon &&
+                          (() => { const Icon = ROLES.find((r) => r.key === registrationRole)!.icon; return <Icon className="h-4 w-4 text-primary" />; })()}
                         <span className="text-sm font-medium">
                           Registering as {{ buyer: "Buyer", farmer: "Farmer", driver: "Driver" }[registrationRole]}
                         </span>
                       </div>
-                      <Button type="button" variant="ghost" size="sm" onClick={() => setRegistrationRole(null)}>
-                        Change
-                      </Button>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => setRegistrationRole(null)}>Change</Button>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-name" className="font-bold">Full Name</Label>
-                      <Input id="signup-name" type="text" placeholder="Juan dela Cruz" value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={isLoading} className="h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
-                      {nameError && <p className="text-sm text-destructive">{nameError}</p>}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-email" className="font-bold">Email</Label>
-                      <Input id="signup-email" type="email" placeholder="andrew@tailoredtech.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading} className="h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
-                      {emailError && <p className="text-sm text-destructive">{emailError}</p>}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-password" className="font-bold">Password</Label>
-                      <div className="relative">
-                        <Input id="signup-password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading} className="h-11 md:h-10 pr-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
-                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
+                    {/* ── Core fields ── */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="reg-fname" className="font-bold text-sm">First Name</Label>
+                        <Input id="reg-fname" value={form.firstName} onChange={(e) => setField("firstName", e.target.value)} disabled={isLoading} placeholder="Juan" autoComplete="off" className={inputClass} />
+                        {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
                       </div>
-                      {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
+                      <div className="space-y-1">
+                        <Label htmlFor="reg-lname" className="font-bold text-sm">Last Name</Label>
+                        <Input id="reg-lname" value={form.lastName} onChange={(e) => setField("lastName", e.target.value)} disabled={isLoading} placeholder="Dela Cruz" autoComplete="off" className={inputClass} />
+                        {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-referral" className="font-bold">
-                        Referral Code <span className="text-muted-foreground">(optional)</span>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="reg-email" className="font-bold text-sm">Email</Label>
+                      <Input
+                        id="reg-email" type="email" value={form.email}
+                        onChange={(e) => setField("email", e.target.value)}
+                        onBlur={() => setField("email", form.email.trim())}
+                        disabled={isLoading} placeholder="you@example.com" autoComplete="off"
+                        className={inputClass}
+                      />
+                      {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="reg-phone" className="font-bold text-sm">Mobile Number</Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="reg-phone" type="tel" value={form.phone}
+                          onChange={(e) => setField("phone", e.target.value.replace(/[^0-9+]/g, ""))}
+                          disabled={isLoading} placeholder="09XXXXXXXXX" autoComplete="off"
+                          className={`${inputClass} pl-9`}
+                        />
+                      </div>
+                      {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="reg-pw" className="font-bold text-sm">Password</Label>
+                      <PasswordInput id="reg-pw" placeholder="••••••••" value={form.password} onChange={(v) => setField("password", v)} disabled={isLoading} error={errors.password} />
+                      <PasswordStrength password={form.password} />
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="reg-cpw" className="font-bold text-sm">Confirm Password</Label>
+                      <PasswordInput id="reg-cpw" placeholder="••••••••" value={form.confirmPassword} onChange={(v) => setField("confirmPassword", v)} disabled={isLoading} error={errors.confirmPassword} />
+                    </div>
+
+                    {/* ── Farmer-specific fields ── */}
+                    {registrationRole === "farmer" && (
+                      <div className="space-y-3 pt-2 border-t border-border">
+                        <p className="text-sm font-bold text-primary">Farm Details</p>
+                        <div className="space-y-1">
+                          <Label htmlFor="reg-farm-name" className="font-bold text-sm">Farm Name</Label>
+                          <Input id="reg-farm-name" value={form.farmName} onChange={(e) => setField("farmName", e.target.value)} disabled={isLoading} placeholder="Green Valley Farm" autoComplete="off" className={inputClass} />
+                          {errors.farmName && <p className="text-xs text-destructive">{errors.farmName}</p>}
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="reg-farm-loc" className="font-bold text-sm">Farm Location / Address</Label>
+                          <Input id="reg-farm-loc" value={form.farmLocation} onChange={(e) => setField("farmLocation", e.target.value)} disabled={isLoading} placeholder="La Trinidad, Benguet" autoComplete="off" className={inputClass} />
+                          {errors.farmLocation && <p className="text-xs text-destructive">{errors.farmLocation}</p>}
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="reg-produce" className="font-bold text-sm">Produce Type / Category</Label>
+                          <Input id="reg-produce" value={form.produceType} onChange={(e) => setField("produceType", e.target.value)} disabled={isLoading} placeholder="Vegetables, Fruits, etc." autoComplete="off" className={inputClass} />
+                          {errors.produceType && <p className="text-xs text-destructive">{errors.produceType}</p>}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ── Driver-specific fields ── */}
+                    {registrationRole === "driver" && (
+                      <div className="space-y-3 pt-2 border-t border-border">
+                        <p className="text-sm font-bold text-primary">Driver Details</p>
+                        <div className="space-y-1">
+                          <Label htmlFor="reg-vehicle" className="font-bold text-sm">Vehicle Type</Label>
+                          <Input id="reg-vehicle" value={form.vehicleType} onChange={(e) => setField("vehicleType", e.target.value)} disabled={isLoading} placeholder="Motorcycle, Van, etc." autoComplete="off" className={inputClass} />
+                          {errors.vehicleType && <p className="text-xs text-destructive">{errors.vehicleType}</p>}
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="reg-license" className="font-bold text-sm">License Number</Label>
+                          <Input id="reg-license" value={form.licenseNumber} onChange={(e) => setField("licenseNumber", e.target.value)} disabled={isLoading} placeholder="N01-23-456789" autoComplete="off" className={inputClass} />
+                          {errors.licenseNumber && <p className="text-xs text-destructive">{errors.licenseNumber}</p>}
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="reg-area" className="font-bold text-sm">Service Area / City</Label>
+                          <Input id="reg-area" value={form.serviceArea} onChange={(e) => setField("serviceArea", e.target.value)} disabled={isLoading} placeholder="Baguio City" autoComplete="off" className={inputClass} />
+                          {errors.serviceArea && <p className="text-xs text-destructive">{errors.serviceArea}</p>}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Referral code */}
+                    <div className="space-y-1">
+                      <Label htmlFor="reg-ref" className="font-bold text-sm">
+                        Referral Code <span className="text-muted-foreground font-normal">(optional)</span>
                       </Label>
-                      <Input id="signup-referral" type="text" placeholder="ABCD1234" value={referralCode} onChange={(e) => setReferralCode(e.target.value.toUpperCase())} disabled={isLoading} className="uppercase h-11 md:h-10 dark:bg-[hsl(0,0%,12%)] dark:text-white dark:border-white/20" />
-                      <p className="text-xs text-muted-foreground">Have a friend on Terra Farming? Enter their code to connect.</p>
+                      <Input id="reg-ref" value={form.referralCode} onChange={(e) => setField("referralCode", e.target.value.toUpperCase())} disabled={isLoading} placeholder="ABCD1234" autoComplete="off" className={`${inputClass} uppercase`} />
                     </div>
-                    <Button type="submit" className="w-full h-12 md:h-10 bg-primary hover:bg-primary/90 text-base font-semibold" disabled={isLoading}>
-                      {isLoading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating Account...</>) : "Create Account"}
+
+                    {/* Terms */}
+                    <div className="flex items-start space-x-2 pt-1">
+                      <Checkbox
+                        id="terms"
+                        checked={form.termsAccepted}
+                        onCheckedChange={(c) => setField("termsAccepted", c === true)}
+                      />
+                      <Label htmlFor="terms" className="text-xs leading-tight cursor-pointer select-none">
+                        I agree to the <span className="text-primary font-semibold">Terms of Service</span> and <span className="text-primary font-semibold">Privacy Policy</span>
+                      </Label>
+                    </div>
+                    {errors.terms && <p className="text-xs text-destructive">{errors.terms}</p>}
+
+                    <Button type="submit" className="w-full h-12 md:h-10 bg-primary hover:bg-primary/90 text-base font-semibold mt-2" disabled={isLoading || !form.termsAccepted}>
+                      {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating Account...</> : "Create Account"}
                     </Button>
-                    <p className="text-xs text-center text-muted-foreground">
-                      By registering, you agree to our Terms of Service and Privacy Policy.
-                    </p>
                   </form>
                 )}
               </TabsContent>
@@ -368,7 +577,7 @@ const AuthPage = () => {
           </CardContent>
         </Card>
       </div>
-      
+
       {/* Footer */}
       <div className="container py-4 text-center relative z-10">
         <p className="text-sm text-white/80 drop-shadow-md font-medium">Terra Farming — From Dirt to Dessert 🌱</p>
