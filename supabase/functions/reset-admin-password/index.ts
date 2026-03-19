@@ -8,13 +8,12 @@ Deno.serve(async () => {
 
   const results: Record<string, string> = {};
 
-  // Reset gwaltn3y@gmail.com
   const { data: users } = await supabaseAdmin.auth.admin.listUsers();
   const target = users?.users?.find((u) => u.email === "gwaltn3y@gmail.com");
 
   if (target) {
     const { error } = await supabaseAdmin.auth.admin.updateUserById(target.id, {
-      password: "Password321$$",
+      password: "TerraSuper#2026AG!",
     });
     results["gwaltn3y@gmail.com"] = error ? `Error: ${error.message}` : "Password reset OK";
   } else {
