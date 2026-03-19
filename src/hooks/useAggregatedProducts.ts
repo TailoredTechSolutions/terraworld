@@ -102,19 +102,15 @@ export function useAggregatedProducts() {
         let etaMinutes: number | null = null;
         let deliveryFee: number | null = null;
 
-        if (location && farm.latitude && farm.longitude) {
-          distanceKm = Math.round(calculateDistance(location.lat, location.lng, farm.latitude, farm.longitude) * 10) / 10;
-          etaMinutes = computeETA(distanceKm, fp.processing_time_minutes || 30);
-          deliveryFee = computeDeliveryFee(distanceKm);
-        }
+        // Coordinates removed from public view for security; distance features unavailable here
 
         const offer: FarmOffer = {
           farmProductId: fp.id,
           farmId: fp.farm_id,
           farmName: farm.name,
           farmRating: farm.rating,
-          farmLatitude: farm.latitude,
-          farmLongitude: farm.longitude,
+          farmLatitude: null,
+          farmLongitude: null,
           farmMunicipality: farm.location || "",
           farmCertificate: null,
           price: Number(fp.price),
