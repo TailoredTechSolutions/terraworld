@@ -1,75 +1,84 @@
 from fastapi import FastAPI, APIRouter
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
-import os
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 import logging
-from pathlib import Path
-from pydantic import BaseModel, Field
-from typing import List
-import uuid
-from datetime import datetime
 
+# Import configuration
+from config.settings import settings
 
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+# Import database
+from utils.database import connect_to_mongo, close_mongo_connection
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
-
-# Create the main app without a prefix
-app = FastAPI()
-
-# Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
-
-
-# Define Models
-class StatusCheck(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-
-class StatusCheckCreate(BaseModel):
-    client_name: str
-
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.dict()
-    status_obj = StatusCheck(**status_dict)
-    _ = await db.status_checks.insert_one(status_obj.dict())
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    status_checks = await db.status_checks.find().to_list(1000)
-    return [StatusCheck(**status_check) for status_check in status_checks]
-
-# Include the router in the main app
-app.include_router(api_router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Import routes
+from routes import auth, users, products
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.INFO if not settings.DEBUG else logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup and shutdown events"""
+    # Startup
+    logger.info("Starting Terra Digital Platform API...")
+    await connect_to_mongo()
+    logger.info("API is ready!")
+    
+    yield
+    
+    # Shutdown
+    logger.info("Shutting down...")
+    await close_mongo_connection()
+    logger.info("Shutdown complete")
+
+
+# Create the main app
+app = FastAPI(
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION,
+    description="Terra Digital Platform - Farm to Market API",
+    lifespan=lifespan
+)
+
+# Create a router with the /api prefix
+api_router = APIRouter(prefix="/api")
+
+# Health check endpoint
+@api_router.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "app": settings.APP_NAME,
+        "version": settings.APP_VERSION
+    }
+
+@api_router.get("/")
+async def root():
+    """Root endpoint"""
+    return {
+        "message": "Welcome to Terra Digital Platform API",
+        "version": settings.APP_VERSION,
+        "docs": "/docs"
+    }
+
+# Include route modules
+api_router.include_router(auth.router)
+api_router.include_router(users.router)
+api_router.include_router(products.router)
+
+# Include the API router in the main app
+app.include_router(api_router)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=settings.CORS_ORIGINS.split(','),
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
