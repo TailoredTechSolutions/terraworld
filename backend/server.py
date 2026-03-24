@@ -10,7 +10,7 @@ from config.settings import settings
 from utils.database import connect_to_mongo, close_mongo_connection
 
 # Import routes
-from routes import auth, users, products, cart, orders
+from routes import auth, users, products, cart, orders, payments, payouts
 
 # Configure logging
 logging.basicConfig(
@@ -73,6 +73,9 @@ api_router.include_router(products.router)
 api_router.include_router(cart.router)
 api_router.include_router(orders.router)
 api_router.include_router(orders.farmer_router)
+api_router.include_router(payments.router)
+api_router.include_router(payouts.router)
+api_router.include_router(payouts.admin_router)
 
 # Include the API router in the main app
 app.include_router(api_router)
