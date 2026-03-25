@@ -29,7 +29,7 @@ const emailSchema = z
 
 const passwordSchema = z
   .string()
-  .min(8, "Minimum 8 characters")
+  .min(12, "Minimum 12 characters")
   .regex(/[A-Z]/, "At least 1 uppercase letter")
   .regex(/[a-z]/, "At least 1 lowercase letter")
   .regex(/[0-9]/, "At least 1 number")
@@ -81,7 +81,7 @@ const EMPTY_FORM = {
 // ─── Password Strength Indicator ────────────────────────────────────
 const PasswordStrength = ({ password }: { password: string }) => {
   const rules = [
-    { label: "8+ characters", met: password.length >= 8 },
+    { label: "12+ characters", met: password.length >= 12 },
     { label: "Uppercase", met: /[A-Z]/.test(password) },
     { label: "Lowercase", met: /[a-z]/.test(password) },
     { label: "Number", met: /[0-9]/.test(password) },
@@ -414,6 +414,47 @@ const AuthPage = () => {
                       }}
                     >Forgot your password?</button>
                   </div>
+                  
+                  {/* Divider */}
+                  <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-border" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                    </div>
+                  </div>
+                  
+                  {/* Sign In with Apple */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-12 md:h-10 bg-black hover:bg-black/90 text-white border-black font-semibold"
+                    onClick={async () => {
+                      setIsLoading(true);
+                      try {
+                        const { error } = await supabase.auth.signInWithOAuth({
+                          provider: 'apple',
+                          options: {
+                            redirectTo: `${window.location.origin}/`,
+                          },
+                        });
+                        if (error) {
+                          toast({ title: "Sign In Failed", description: error.message, variant: "destructive" });
+                        }
+                      } catch (err) {
+                        toast({ title: "Error", description: "Failed to initiate Apple Sign In", variant: "destructive" });
+                      } finally {
+                        setIsLoading(false);
+                      }
+                    }}
+                    disabled={isLoading}
+                  >
+                    <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17.05 20.28c-.98.95-2.05.88-3.08.41-1.09-.47-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.41C2.79 15.25 3.51 7.59 9.05 7.36c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.03zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                    </svg>
+                    Sign in with Apple
+                  </Button>
                 </form>
               </TabsContent>
 
@@ -436,6 +477,51 @@ const AuthPage = () => {
                         </button>
                       ))}
                     </div>
+                    
+                    {/* Divider for Apple Sign Up */}
+                    <div className="relative my-4">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-border" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">Or for drivers</span>
+                      </div>
+                    </div>
+                    
+                    {/* Sign Up with Apple (Driver only) */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full h-12 md:h-10 bg-black hover:bg-black/90 text-white border-black font-semibold"
+                      onClick={async () => {
+                        // Store the pending role for Apple OAuth
+                        sessionStorage.setItem('terra_pending_role', 'driver');
+                        setIsLoading(true);
+                        try {
+                          const { error } = await supabase.auth.signInWithOAuth({
+                            provider: 'apple',
+                            options: {
+                              redirectTo: `${window.location.origin}/`,
+                            },
+                          });
+                          if (error) {
+                            toast({ title: "Sign Up Failed", description: error.message, variant: "destructive" });
+                            sessionStorage.removeItem('terra_pending_role');
+                          }
+                        } catch (err) {
+                          toast({ title: "Error", description: "Failed to initiate Apple Sign Up", variant: "destructive" });
+                          sessionStorage.removeItem('terra_pending_role');
+                        } finally {
+                          setIsLoading(false);
+                        }
+                      }}
+                      disabled={isLoading}
+                    >
+                      <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.05 20.28c-.98.95-2.05.88-3.08.41-1.09-.47-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.41C2.79 15.25 3.51 7.59 9.05 7.36c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.03zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                      </svg>
+                      Sign up with Apple (Driver)
+                    </Button>
                   </div>
                 ) : (
                   <form onSubmit={handleSignup} className="space-y-3" autoComplete="off">

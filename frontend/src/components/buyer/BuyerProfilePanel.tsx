@@ -32,6 +32,8 @@ import {
   KeyRound,
 } from "lucide-react";
 
+import DeleteAccountSection from "@/components/DeleteAccountSection";
+
 interface BuyerAddress {
   id: string;
   label: string;
@@ -393,6 +395,9 @@ const BuyerProfilePanel = ({ userId }: { userId: string }) => {
 
       {/* Security Settings */}
       <SecuritySettingsCard />
+
+      {/* Delete Account */}
+      <DeleteAccountSection userRole="buyer" />
     </div>
   );
 };

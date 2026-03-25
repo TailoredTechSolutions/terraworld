@@ -45,6 +45,7 @@ const BCSupport = lazy(() => import("@/pages/business-centre/BCSupport"));
 const BCReportsAnalytics = lazy(() => import("@/pages/business-centre/BCReportsAnalytics"));
 const BCComplianceAudit = lazy(() => import("@/pages/business-centre/BCComplianceAudit"));
 const BCControlCenter = lazy(() => import("@/pages/business-centre/BCControlCenter"));
+const BCAccountSettings = lazy(() => import("@/pages/business-centre/BCAccountSettings"));
 
 // Admin extended
 const BCPackageManager = lazy(() => import("@/pages/business-centre/BCAdminExtended").then(m => ({ default: m.BCPackageManager })));
@@ -108,6 +109,12 @@ const MEMBER_SECTIONS: { title: string; items: NavItem[] }[] = [
     title: "Support",
     items: [
       { id: "support", label: "Support", icon: HelpCircle, component: BCSupport },
+    ],
+  },
+  {
+    title: "Account",
+    items: [
+      { id: "account-settings", label: "Account Settings", icon: UserCircle, component: BCAccountSettings },
     ],
   },
 ];

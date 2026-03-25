@@ -1,131 +1,129 @@
-# Terra Digital Platform - Product Requirements Document
+# Terra Farming - Product Requirements Document
 
 ## Original Problem Statement
-Build a production-ready, cross-platform mobile app (iOS and Android) for the "Terra Digital Platform" - a comprehensive farm-to-market system that connects farmers directly with buyers.
+Build a full-stack agricultural marketplace app called Terra Farming that connects:
+- **Farmers** who list produce for sale
+- **Buyers** who purchase produce
+- **Drivers** who handle delivery
+- **Admin/Affiliate** roles for management and referral system
 
-## Product Overview
-Terra Digital Platform is a farm-to-table marketplace connecting highland farmers in the Philippines with buyers, featuring:
-- Native-quality iOS and Android mobile apps
-- Multi-role system (Buyer, Farmer, Driver, Admin)
-- Product listing and inventory management
-- Shopping cart and checkout system
-- Multiple payment options (COD, GCash, Card, Wallet)
-- Token-based rewards and MLM referral system
-- Real-time delivery tracking
+The app must comply with Apple App Store (12+ rating) and Google Play Store guidelines.
 
 ## Tech Stack
-- **Backend**: FastAPI (Python), MongoDB, JWT Auth
-- **Mobile App**: React Native, TypeScript, Zustand, React Navigation
-- **Web Frontend**: React, Vite, Tailwind CSS, Shadcn/UI
+- **Frontend**: React + TypeScript + Vite + Tailwind CSS + Shadcn/UI
+- **Backend**: Supabase (Auth, Database, RLS, Edge Functions, RPCs)
+- **Auth**: Supabase Auth with Email/Password + Sign In with Apple OAuth
+- **Deployment**: Web app (PWA-ready for App Store wrapping)
 
 ---
 
 ## ✅ Completed Work
 
-### Phase 1-6: Backend Development (COMPLETE)
-- [x] Database Schema Design
-- [x] Auth APIs (Register, Login, Refresh, Logout)
-- [x] User Management APIs (Profile, Addresses)
-- [x] Product Catalog APIs (Categories, Products, CRUD)
-- [x] Cart Management APIs
-- [x] Order Management APIs
-- [x] Payment APIs (Mocked payment provider)
-- [x] Logistics & Delivery APIs
-- [x] Rewards & MLM System APIs
+### Authentication & Security
+- [x] Email/Password authentication
+- [x] **Sign In with Apple** - Added to login page (black Apple-branded button)
+- [x] **Sign Up with Apple (Driver)** - Added to registration for driver quick signup
+- [x] **Password policy updated to 12 characters** minimum with strength indicator
+- [x] Password must include: uppercase, lowercase, number, symbol
+- [x] Role-based routing (Buyer, Farmer, Driver, Admin, Affiliate)
+- [x] MFA support for Admin/Affiliate roles
 
-### Phase 7: Mobile App Development (IN PROGRESS)
-**Completed:**
-- [x] React Native project setup
-- [x] Navigation structure (Root, Buyer, Farmer, Driver navigators)
-- [x] Theme and styling system
-- [x] Auth screens (Login, Register, Role Selection)
-- [x] Reusable components (Button, Input, ProductCard)
-- [x] API service layer (auth, products, cart, orders, addresses, wallet)
-- [x] State management stores (auth, cart)
-- [x] **Buyer Flow Screens:**
-  - [x] HomeScreen - Dashboard with categories, featured products
-  - [x] BrowseScreen - Product grid view with search/filters
-  - [x] ProductDetailScreen - Product details with add to cart
-  - [x] CartScreen - Shopping cart management
-  - [x] CheckoutScreen - Multiple payment options (COD, GCash, Card, Wallet)
-  - [x] OrdersScreen - Order history with status tabs
-  - [x] OrderDetailScreen - Full order details and tracking
-  - [x] ProfileScreen - User profile and settings
-  - [x] RewardsScreen - Points and referral system
-- [x] FarmerNavigator placeholder
-- [x] DriverNavigator placeholder
+### Privacy & Compliance (Apple/Google Store Requirements)
+- [x] **Privacy Policy page** at `/privacy` - Public, no login required
+- [x] Covers: data collection, Sign In with Apple, security measures, children's privacy (12+)
+- [x] Footer links to Privacy Policy across all pages
+- [x] App Store rating: 12+ noted in policy
+
+### Account Deletion (REQUIRED by App Stores)
+- [x] **Delete Account component** - Reusable Danger Zone section
+- [x] Confirmation requires typing "DELETE" to proceed
+- [x] Integrated into:
+  - [x] Buyer Dashboard → Profile Panel
+  - [x] Farmer Dashboard → Profile Panel
+  - [x] Driver Dashboard → Profile section
+  - [x] Admin Back Office → System Settings → My Account tab
+  - [x] Business Centre → Account Settings (for Affiliates)
+
+### Production Security
+- [x] **Console logs stripped** from production builds via Vite terser config
+- [x] Row Level Security enabled on database tables
+- [x] Audit logging for admin impersonation
+- [x] Supabase SQL setup script created
+
+### User Dashboards
+- [x] Buyer Dashboard with orders, profile, delete account
+- [x] Farmer Dashboard with listings, orders, profile, delete account
+- [x] Driver Dashboard with deliveries, earnings, profile, delete account
+- [x] Admin Back Office with system settings and delete account
+- [x] Business Centre for Affiliates with account settings and delete account
+
+---
+
+## 📋 Pending Setup (User Action Required)
+
+### Supabase Configuration
+Run the SQL script at `/app/docs/SUPABASE_SETUP.sql` in your Supabase SQL Editor to create:
+1. `audit_log` table for admin activity logging
+2. `admin_impersonation_log` view
+3. `log_admin_impersonation()` RPC
+4. `privacy_policy_versions` table
+5. `get_current_privacy_policy()` RPC
+6. `delete_user_account()` RPC
+
+### Supabase Auth Settings (Dashboard)
+1. Go to Authentication → Settings
+2. Set minimum password length to **12**
+3. Enable **Apple** OAuth provider
+4. Configure Apple OAuth credentials from Apple Developer account
+
+### Apple Developer Setup (for Sign In with Apple)
+1. Create App ID with "Sign In with Apple" capability
+2. Create Service ID for web authentication
+3. Configure redirect URLs
+4. Add credentials to Supabase Auth
 
 ---
 
 ## 🔄 In Progress / Next Steps
 
-### P1: Farmer Role UI
-- [ ] Dashboard with sales overview
-- [ ] Product management (Add, Edit, Delete)
-- [ ] Inventory management
-- [ ] Order fulfillment screens
-- [ ] Earnings and payout views
+### P1: Admin Impersonation Audit Integration
+- [ ] Wire `log_admin_impersonation()` RPC to admin "View Dashboard" clicks
+- [ ] Display audit log in Business Centre → Compliance & Audit tab
 
-### P1: Driver Role UI
-- [ ] Delivery assignments view
-- [ ] Route navigation
-- [ ] Proof of delivery upload
-- [ ] Earnings tracking
+### P1: MFA Enforcement
+- [ ] Create `MFAGuard` wrapper component
+- [ ] Enforce MFA setup for Admin and Affiliate on first login
+- [ ] `MFAChallenge` component for subsequent logins
 
----
-
-## 📋 Backlog
-
-### P2 Features
-- [ ] File uploads for product images, profile pictures
-- [ ] Real payment gateway integration (GCash API)
-- [ ] Push notifications (FCM/APNs)
-- [ ] Google Maps integration for logistics
-
-### P3 Features
-- [ ] Admin Panel web frontend
-- [ ] Advanced analytics dashboard
-- [ ] In-app chat/messaging
-- [ ] App Store & Play Store submission prep
+### P2: PWA Manifest
+- [ ] Add `manifest.json` for PWA support
+- [ ] Add service worker for offline capability
+- [ ] Configure icons (192x192 and 512x512)
 
 ---
 
-## API Documentation
-Complete API documentation available at: `/app/docs/API_DOCUMENTATION.md`
+## 📂 Key Files Reference
 
-## Architecture Documentation
-System architecture details at: `/app/docs/ARCHITECTURE.md`
+### Frontend
+- `/app/frontend/src/pages/PrivacyPolicyPage.tsx` - Privacy Policy
+- `/app/frontend/src/components/DeleteAccountSection.tsx` - Reusable delete account
+- `/app/frontend/src/pages/AuthPage.tsx` - Auth with Apple Sign In
+- `/app/frontend/vite.config.ts` - Production security (console stripping)
 
-## Database Schema
-Full schema documentation at: `/app/docs/DATABASE_SCHEMA.md`
+### Database Setup
+- `/app/docs/SUPABASE_SETUP.sql` - All required SQL for Supabase
 
----
-
-## Key Files Reference
-
-### Backend
-- `/app/backend/server.py` - Main FastAPI application
-- `/app/backend/routes/` - API route handlers
-- `/app/backend/services/` - Business logic
-- `/app/backend/models/` - Pydantic models
-
-### Mobile App
-- `/app/mobile/src/navigation/` - Navigation setup
-- `/app/mobile/src/screens/buyer/` - Buyer UI screens
-- `/app/mobile/src/services/` - API services
-- `/app/mobile/src/store/` - Zustand stores
-- `/app/mobile/src/components/` - Reusable components
-- `/app/mobile/src/theme/` - Styling and theming
-
-### Web Frontend
-- `/app/frontend/` - React Vite application
+### Supabase Credentials
+- Project URL: `https://dkqkncczhpusknstlzrn.supabase.co`
+- Configured in: `/app/frontend/.env`
 
 ---
 
 ## Notes
-- Payment gateway is currently MOCKED - needs real GCash integration
-- Farmer and Driver navigators have placeholder screens
-- Mobile app requires Metro bundler to run (not available in preview environment)
-- All backend APIs are tested and functional
+
+- Payment processing uses external processor (exempt from Apple IAP for physical goods)
+- App rated 12+ - no gambling, mature content, or children under 12
+- Sign In with Apple required alongside email/password per Apple guidelines
+- Account deletion required per both Apple and Google store policies
 
 Last Updated: December 2025

@@ -3,7 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Shield, MapPin, Coins, DollarSign } from "lucide-react";
+import { Settings, Shield, MapPin, Coins, DollarSign, UserCircle } from "lucide-react";
+import DeleteAccountSection from "@/components/DeleteAccountSection";
 
 const PACKAGES = [
   { name: "Free", price: 0, bv: 0, matching_levels: 0, status: "active" },
@@ -31,6 +32,7 @@ const SystemSettingsSection = () => {
           <TabsTrigger value="fees" className="text-xs h-7">Fees & Tax</TabsTrigger>
           <TabsTrigger value="regions" className="text-xs h-7">Regions & Zones</TabsTrigger>
           <TabsTrigger value="features" className="text-xs h-7">Feature Flags</TabsTrigger>
+          <TabsTrigger value="account" className="text-xs h-7">My Account</TabsTrigger>
         </TabsList>
 
         <TabsContent value="packages" className="mt-3">
@@ -118,6 +120,15 @@ const SystemSettingsSection = () => {
                 <Switch defaultChecked={f.enabled} />
               </div>
             ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="account" className="mt-3">
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Manage your admin account settings. Be careful with destructive actions.
+            </p>
+            <DeleteAccountSection userRole="admin" />
           </div>
         </TabsContent>
       </Tabs>

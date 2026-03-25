@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import type { Tables } from "@/integrations/supabase/types";
+import DeleteAccountSection from "@/components/DeleteAccountSection";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
@@ -688,6 +689,9 @@ const DriverProfile = ({ profile, driverRecord, kycStatus }: { profile: any; dri
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete Account */}
+      <DeleteAccountSection userRole="driver" />
     </div>
   );
 };

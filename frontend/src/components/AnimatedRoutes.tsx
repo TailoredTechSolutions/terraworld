@@ -47,6 +47,7 @@ const AuthPage = lazyRetry(() => import("@/pages/AuthPage"));
 const ResetPasswordPage = lazyRetry(() => import("@/pages/ResetPasswordPage"));
 const KYCPage = lazyRetry(() => import("@/pages/KYCPage"));
 const NotFound = lazyRetry(() => import("@/pages/NotFound"));
+const PrivacyPolicyPage = lazyRetry(() => import("@/pages/PrivacyPolicyPage"));
 
 import {
   AboutPage, HowItWorksPage, ImpactPage, CareersPage, PilotBaguioPage,
@@ -160,8 +161,9 @@ const AnimatedRoutes = () => {
           <Route path="/contact" element={<P><ContactPage /></P>} />
 
           {/* Legal */}
+          <Route path="/privacy" element={<P><PrivacyPolicyPage /></P>} />
           <Route path="/legal/terms" element={<P><TermsPage /></P>} />
-          <Route path="/legal/privacy" element={<P><PrivacyPage /></P>} />
+          <Route path="/legal/privacy" element={<P><PrivacyPolicyPage /></P>} />
           <Route path="/legal/cookies" element={<P><CookiePolicyPage /></P>} />
           <Route path="/legal/refunds" element={<P><RefundPolicyPage /></P>} />
           <Route path="/legal/risk-disclosure" element={<P><RiskDisclosurePage /></P>} />

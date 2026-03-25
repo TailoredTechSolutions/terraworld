@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, MapPin, Phone, Mail, Save, Upload } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import DeleteAccountSection from "@/components/DeleteAccountSection";
 
 type Farmer = Tables<"farmers">;
 
@@ -166,6 +167,9 @@ const FarmerProfilePanel = ({ farmer }: FarmerProfilePanelProps) => {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Delete Account */}
+      <DeleteAccountSection userRole="farmer" />
     </div>
   );
 };

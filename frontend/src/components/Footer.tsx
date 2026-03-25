@@ -181,7 +181,7 @@ const Footer = () => {
           <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-3" aria-label="Legal links">
             {[
               { label: "Terms of Service", to: "/legal/terms" },
-              { label: "Privacy Policy", to: "/legal/privacy" },
+              { label: "Privacy Policy", to: "/privacy" },
               { label: "Cookie Policy", to: "/legal/cookies" },
               { label: "Refund & Dispute Policy", to: "/legal/refunds" },
               { label: "Risk Disclosure", to: "/legal/risk-disclosure" },
