@@ -21,15 +21,16 @@ import {
   User,
   UserPlus,
   Package,
-  Award
+  Award,
+  Banknote
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import DeliveryProviderSelector from "@/components/checkout/DeliveryProviderSelector";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
+import { orderApi, DeliveryAddress } from "@/services/api";
+import { useAuth } from "@/hooks/useAuth";
 
 const checkoutSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(50, "First name too long"),
@@ -52,46 +53,19 @@ const couponOnlySchema = z.object({
     .regex(/^[\d+\s()-]+$/, "Invalid phone number format"),
 });
 
-interface DeliveryEstimate {
-  provider: string;
-  estimated_fee: number;
-  estimated_eta_minutes: number;
-  distance_km: number;
-  status: string;
-}
-
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const { items, couponItems, upgradeItem, getTotalPrice, getProductSubtotal, getCouponSubtotal, getUpgradeSubtotal, clearCart, removeItem, removeCoupon, updateCouponRecipient, setUpgrade, hasItems } = useCartStore();
-  const [paymentMethod, setPaymentMethod] = useState("card");
+  const [paymentMethod, setPaymentMethod] = useState("gcash");
   const [isProcessing, setIsProcessing] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [internalBalance, setInternalBalance] = useState<number>(0);
-  const [loadingWallet, setLoadingWallet] = useState(true);
-  
-  const [selectedDeliveryProvider, setSelectedDeliveryProvider] = useState<string>("");
-  const [deliveryEstimate, setDeliveryEstimate] = useState<DeliveryEstimate | null>(null);
 
   const hasProducts = items.length > 0;
   const hasCoupons = couponItems.length > 0;
   const hasUpgrade = upgradeItem !== null;
   const isDigitalOnly = !hasProducts && (hasCoupons || hasUpgrade);
-
-  useEffect(() => {
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
-          .from("wallets")
-          .select("internal_balance")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (data) setInternalBalance(Number(data.internal_balance) || 0);
-      }
-      setLoadingWallet(false);
-    })();
-  }, []);
   
   const [formData, setFormData] = useState({
     firstName: "",
@@ -100,35 +74,20 @@ const CheckoutPage = () => {
     phone: "",
     address: "",
     city: "",
+    province: "Benguet",
     zip: "",
   });
 
   const productSubtotal = getProductSubtotal();
   const couponSubtotal = getCouponSubtotal();
   const upgradeSubtotal = getUpgradeSubtotal();
-  const platformFeePercent = 0.20;
-  const commissionPercent = 0.10;
-  const vatPercent = 0.12;
-  const platformFee = productSubtotal * platformFeePercent;
-  const commission = productSubtotal * commissionPercent;
-  const subtotalBeforeVAT = productSubtotal + platformFee + commission;
-  const vat = subtotalBeforeVAT * vatPercent;
-  const deliveryFee = (hasProducts && deliveryEstimate?.estimated_fee) ? deliveryEstimate.estimated_fee : 0;
-  const total = subtotalBeforeVAT + vat + deliveryFee + couponSubtotal + upgradeSubtotal;
-
-  const defaultPickupLat = 14.5547;
-  const defaultPickupLng = 121.0244;
-  const defaultDeliveryLat = 14.5995;
-  const defaultDeliveryLng = 120.9842;
+  // Simplified pricing for MVP
+  const deliveryFee = hasProducts && productSubtotal < 500 ? 50 : 0;
+  const total = productSubtotal + deliveryFee + couponSubtotal + upgradeSubtotal;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const handleDeliveryProviderSelect = (provider: string, estimate: DeliveryEstimate) => {
-    setSelectedDeliveryProvider(provider);
-    setDeliveryEstimate(estimate);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -150,85 +109,62 @@ const CheckoutPage = () => {
       return;
     }
 
-    if (hasProducts && !selectedDeliveryProvider) {
-      toast({
-        title: "Select Delivery Service",
-        description: "Please choose a delivery provider for your product order.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsProcessing(true);
     
     try {
-      // Process coupon purchases via edge function
-      if (hasCoupons) {
-        for (const coupon of couponItems) {
-          const { data, error } = await supabase.functions.invoke("purchase-coupon", {
-            body: { 
-              package_id: coupon.packageId,
-              recipient: coupon.recipient,
-              recipient_details: coupon.recipientDetails || {},
-            },
-          });
-          if (error) throw new Error(error.message);
-          if (!data?.success) throw new Error(data?.error || "Coupon purchase failed");
-        }
-      }
-
-      // Process rank upgrade via edge function
-      if (hasUpgrade && upgradeItem) {
-        const { data, error } = await supabase.functions.invoke("process-upgrade", {
-          body: { target_tier: upgradeItem.targetTier },
-        });
-        if (error) throw new Error(error.message);
-        if (!data?.success) throw new Error(data?.error || "Upgrade failed");
-      }
-
-      // Process product order via create-order
+      // For product orders, use our backend API
       if (hasProducts) {
-        const orderItems = items.map((item) => ({
-          id: item.product.id,
-          name: item.product.name,
-          quantity: item.quantity,
-          price: item.product.price,
-          farmId: item.product.farmId,
-          farmName: item.product.farmName,
-        }));
+        const userId = user?.id || 'guest';
+        
+        // First, sync cart items to backend
+        const API_URL = import.meta.env.REACT_APP_BACKEND_URL || '';
+        
+        // Clear backend cart first
+        await fetch(`${API_URL}/api/cart/${userId}`, { method: 'DELETE' });
+        
+        // Add items to backend cart
+        for (const item of items) {
+          await fetch(`${API_URL}/api/cart/add`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_id: userId,
+              product_id: item.product.id,
+              quantity: item.quantity,
+            }),
+          });
+        }
 
-        const { data, error } = await supabase.functions.invoke('create-order', {
-          body: {
-            customer_name: `${formData.firstName} ${formData.lastName}`.trim(),
-            customer_phone: formData.phone,
-            customer_email: formData.email || null,
-            delivery_address: `${formData.address}, ${formData.city} ${formData.zip}`.trim(),
-            items: orderItems,
-            payment_method: paymentMethod,
-            delivery_provider: selectedDeliveryProvider,
-            delivery_fee: deliveryFee,
-            notes: null,
-          },
+        // Create order via backend API
+        const deliveryAddress: DeliveryAddress = {
+          full_name: `${formData.firstName} ${formData.lastName}`.trim(),
+          phone: formData.phone,
+          address_line1: formData.address,
+          city: formData.city,
+          province: formData.province,
+          postal_code: formData.zip,
+        };
+
+        const order = await orderApi.create({
+          user_id: userId,
+          delivery_address: deliveryAddress,
+          payment_method: paymentMethod as any,
         });
-
-        if (error) throw new Error(error.message || 'Failed to create order');
-        if (!data?.success || !data?.order) throw new Error(data?.error || 'Order creation failed');
 
         clearCart();
         navigate("/order-confirmation", { 
           state: { 
-            orderId: data.order.order_number,
-            total: data.order.total,
+            orderId: order.id,
+            total: order.total,
             paymentMethod,
-            deliveryProvider: selectedDeliveryProvider,
             items: items.length,
-            coupons: couponItems.length,
             customerName: `${formData.firstName} ${formData.lastName}`,
             deliveryAddress: `${formData.address}, ${formData.city} ${formData.zip}`,
+            orderDetails: order,
           } 
         });
       } else {
-        // Coupon-only completion
+        // Coupon-only completion (mock for now)
         clearCart();
         navigate("/order-confirmation", {
           state: {
@@ -243,9 +179,9 @@ const CheckoutPage = () => {
 
       toast({
         title: "Order placed successfully!",
-        description: hasCoupons 
-          ? `${couponItems.length} coupon(s) activated. BV credited to your account.`
-          : "Your order has been confirmed.",
+        description: hasProducts 
+          ? "Your order has been confirmed. You'll receive updates on delivery."
+          : `${couponItems.length} coupon(s) activated.`,
       });
 
     } catch (error) {
@@ -393,18 +329,6 @@ const CheckoutPage = () => {
                 )}
               </div>
 
-              {/* Delivery Provider Selection – only for product orders */}
-              {hasProducts && (
-                <DeliveryProviderSelector
-                  pickupLat={defaultPickupLat}
-                  pickupLng={defaultPickupLng}
-                  deliveryLat={defaultDeliveryLat}
-                  deliveryLng={defaultDeliveryLng}
-                  onProviderSelect={handleDeliveryProviderSelect}
-                  selectedProvider={selectedDeliveryProvider}
-                />
-              )}
-
               {/* Payment Method */}
               <div className="glass-card p-6 rounded-2xl space-y-4">
                 <h2 className="font-display text-lg font-semibold flex items-center gap-2">
@@ -413,6 +337,30 @@ const CheckoutPage = () => {
                 </h2>
 
                 <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
+                  <label className={cn(
+                    "flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover",
+                    paymentMethod === "gcash" ? "border-2 border-primary bg-primary/10 shadow-glow-primary" : "border border-glass-border glass-card"
+                  )}>
+                    <RadioGroupItem value="gcash" id="gcash" />
+                    <Smartphone className="h-5 w-5 text-blue-500" />
+                    <div className="flex-1">
+                      <p className="font-medium">GCash</p>
+                      <p className="text-sm text-muted-foreground">Pay with your GCash wallet</p>
+                    </div>
+                  </label>
+
+                  <label className={cn(
+                    "flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover",
+                    paymentMethod === "maya" ? "border-2 border-primary bg-primary/10 shadow-glow-primary" : "border border-glass-border glass-card"
+                  )}>
+                    <RadioGroupItem value="maya" id="maya" />
+                    <Wallet className="h-5 w-5 text-green-500" />
+                    <div className="flex-1">
+                      <p className="font-medium">Maya</p>
+                      <p className="text-sm text-muted-foreground">Pay with Maya</p>
+                    </div>
+                  </label>
+
                   <label className={cn(
                     "flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover",
                     paymentMethod === "card" ? "border-2 border-primary bg-primary/10 shadow-glow-primary" : "border border-glass-border glass-card"
@@ -427,101 +375,22 @@ const CheckoutPage = () => {
 
                   <label className={cn(
                     "flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover",
-                    paymentMethod === "gcash" ? "border-2 border-primary bg-primary/10 shadow-glow-primary" : "border border-glass-border glass-card"
+                    paymentMethod === "cod" ? "border-2 border-primary bg-primary/10 shadow-glow-primary" : "border border-glass-border glass-card"
                   )}>
-                    <RadioGroupItem value="gcash" id="gcash" />
-                    <Smartphone className="h-5 w-5 text-primary" />
+                    <RadioGroupItem value="cod" id="cod" />
+                    <Banknote className="h-5 w-5 text-emerald-600" />
                     <div className="flex-1">
-                      <p className="font-medium">GCash</p>
-                      <p className="text-sm text-muted-foreground">Pay with your GCash wallet</p>
-                    </div>
-                  </label>
-
-                  <label className={cn(
-                    "flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover",
-                    paymentMethod === "internal_wallet" ? "border-2 border-primary bg-primary/10 shadow-glow-primary" : "border border-glass-border glass-card"
-                  )}>
-                    <RadioGroupItem value="internal_wallet" id="internal_wallet" />
-                    <Wallet className="h-5 w-5 text-emerald-600" />
-                    <div className="flex-1">
-                      <p className="font-medium">Internal Wallet</p>
-                      <p className="text-sm text-muted-foreground">
-                        {loadingWallet ? "Loading..." : `Balance: ₱${internalBalance.toLocaleString()}`}
-                      </p>
-                    </div>
-                  </label>
-
-                  <label className={cn(
-                    "flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all glass-hover",
-                    paymentMethod === "crypto" ? "border-2 border-primary bg-primary/10 shadow-glow-primary" : "border border-glass-border glass-card"
-                  )}>
-                    <RadioGroupItem value="crypto" id="crypto" />
-                    <Bitcoin className="h-5 w-5 text-accent" />
-                    <div className="flex-1">
-                      <p className="font-medium">Cryptocurrency</p>
-                      <p className="text-sm text-muted-foreground">BTC, ETH, USDC</p>
+                      <p className="font-medium">Cash on Delivery</p>
+                      <p className="text-sm text-muted-foreground">Pay when you receive your order</p>
                     </div>
                   </label>
                 </RadioGroup>
-
-                {/* Internal Wallet Balance Preview */}
-                {paymentMethod === "internal_wallet" && (
-                  <div className="mt-3 p-4 rounded-xl glass-card border border-emerald-500/30 space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Wallet Balance</span>
-                      <span className="font-semibold text-emerald-600">₱{internalBalance.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Order Total</span>
-                      <span className="font-semibold">₱{total.toFixed(2)}</span>
-                    </div>
-                    <Separator className="bg-glass-border" />
-                    {internalBalance >= total ? (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Remaining After Purchase</span>
-                        <span className="font-semibold text-emerald-600">₱{(internalBalance - total).toFixed(2)}</span>
-                      </div>
-                    ) : (
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">From Wallet</span>
-                          <span className="font-semibold text-emerald-600">₱{internalBalance.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-destructive">Remaining to Pay</span>
-                          <span className="font-semibold text-destructive">₱{(total - internalBalance).toFixed(2)}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">Insufficient balance. Top up via Coupons or choose another method.</p>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
-
-              {/* Card Details */}
-              {paymentMethod === "card" && (
-                <div className="space-y-4 p-5 rounded-xl glass-card border border-glass-border">
-                  <div className="space-y-2">
-                    <Label htmlFor="cardNumber">Card Number</Label>
-                    <Input id="cardNumber" placeholder="4242 4242 4242 4242" maxLength={19} className="glass-card border-glass-border focus:border-primary" required />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="expiry">Expiry Date</Label>
-                      <Input id="expiry" placeholder="MM/YY" maxLength={5} className="glass-card border-glass-border focus:border-primary" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="cvc">CVC</Label>
-                      <Input id="cvc" placeholder="123" maxLength={4} className="glass-card border-glass-border focus:border-primary" required />
-                    </div>
-                  </div>
-                </div>
-              )}
 
               <Button 
                 type="submit" 
                 className="w-full btn-liquid-accent h-14 rounded-xl text-lg font-semibold"
-                disabled={isProcessing || (hasProducts && !selectedDeliveryProvider)}
+                disabled={isProcessing}
               >
                 {isProcessing ? (
                   <span className="flex items-center gap-2">
@@ -531,14 +400,14 @@ const CheckoutPage = () => {
                 ) : (
                   <span className="flex items-center gap-2">
                     <Lock className="h-5 w-5" />
-                    Pay ₱{total.toFixed(2)}
+                    Place Order — ₱{total.toFixed(2)}
                   </span>
                 )}
               </Button>
 
               <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground glass-badge-primary px-4 py-2 rounded-full mx-auto w-fit">
                 <ShieldCheck className="h-4 w-4 text-primary" />
-                Secure checkout powered by Stripe
+                Secure checkout
               </div>
             </form>
           </div>
@@ -645,27 +514,18 @@ const CheckoutPage = () => {
                 {hasProducts && (
                   <>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Products Subtotal</span>
+                      <span className="text-muted-foreground">Subtotal</span>
                       <span className="font-medium">₱{productSubtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Platform Fee</span>
-                      <span className="font-medium text-accent">₱{platformFee.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Commission</span>
-                      <span className="font-medium text-accent">₱{commission.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Tax</span>
-                      <span className="font-medium">₱{vat.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Transportation</span>
+                      <span className="text-muted-foreground">Delivery Fee</span>
                       <span className="font-medium">
-                        {deliveryFee > 0 ? `₱${deliveryFee.toFixed(2)}` : "Select provider"}
+                        {deliveryFee > 0 ? `₱${deliveryFee.toFixed(2)}` : <span className="text-emerald-600">Free</span>}
                       </span>
                     </div>
+                    {deliveryFee === 0 && productSubtotal > 0 && (
+                      <p className="text-xs text-emerald-600">Free delivery on orders ₱500+</p>
+                    )}
                   </>
                 )}
 
@@ -685,7 +545,7 @@ const CheckoutPage = () => {
 
                 <Separator className="bg-glass-border" />
                 <div className="flex justify-between text-base pt-2">
-                  <span className="font-semibold">Total Payable</span>
+                  <span className="font-semibold">Total</span>
                   <span className="font-bold text-primary text-lg">₱{total.toFixed(2)}</span>
                 </div>
               </div>
@@ -694,13 +554,10 @@ const CheckoutPage = () => {
                 <div className="p-4 rounded-xl glass-card-accent border border-primary/30 text-sm shadow-glow-primary">
                   <div className="flex items-center gap-2 text-primary font-medium mb-1">
                     <Truck className="h-4 w-4" />
-                    Estimated Delivery
+                    Delivery Estimate
                   </div>
                   <p className="text-muted-foreground">
-                    {deliveryEstimate 
-                      ? `~${deliveryEstimate.estimated_eta_minutes} minutes via ${selectedDeliveryProvider}`
-                      : "Select a delivery provider to see estimate"
-                    }
+                    45-60 minutes from nearby farms
                   </p>
                 </div>
               )}
@@ -730,7 +587,7 @@ const CheckoutPage = () => {
         <Button 
           type="submit" form="checkout-form"
           className="btn-liquid-accent h-11 rounded-xl font-semibold px-6"
-          disabled={isProcessing || (hasProducts && !selectedDeliveryProvider)}
+          disabled={isProcessing}
         >
           {isProcessing ? "Processing..." : "Place Order"}
         </Button>
