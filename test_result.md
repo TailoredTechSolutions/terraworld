@@ -183,19 +183,22 @@ backend:
 frontend:
   - task: "Shop page using backend API"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/hooks/useAggregatedProducts.ts"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Updated useAggregatedProducts hook to fetch from backend API instead of Supabase"
+      - working: true
+        agent: "main"
+        comment: "Verified via screenshot - shop page displays 32 products from backend API"
 
   - task: "API Service Layer"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/services/api.ts"
     stuck_count: 0
     priority: "high"

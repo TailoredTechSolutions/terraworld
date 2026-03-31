@@ -31,6 +31,12 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    allowedHosts: [
+      'localhost',
+      '.preview.emergentagent.com',
+      '.preview.emergentcf.cloud',
+      '.cluster-12.preview.emergentcf.cloud',
+    ],
   },
   plugins: [
     react(),
