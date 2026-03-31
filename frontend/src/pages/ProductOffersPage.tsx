@@ -58,8 +58,9 @@ const ProductOffersPage = () => {
     if (!product) return;
     const qty = getQuantity(offer.farmProductId);
     // Create a Product-compatible object for the cart
+    // Use the farmProductId which is the actual backend product ID
     const cartProduct = {
-      id: `${product.productId}-${offer.farmId}`,
+      id: offer.farmProductId,
       name: product.name,
       price: offer.price,
       unit: product.unit,
