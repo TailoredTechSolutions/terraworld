@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { LOGO as terraLogo } from "@/lib/siteImages";
 import ThemeToggle from "@/components/ThemeToggle";
+import NotificationBell from "@/components/NotificationBell";
 import { DesktopNav, MobileMenuDrawer } from "@/components/navigation";
 import {
   DropdownMenu,
@@ -131,6 +132,9 @@ const Header = () => {
               </Link>)
 
             }
+
+          {/* Notification Bell */}
+          <NotificationBell />
 
           <Button variant="ghost" size="icon" className="relative" onClick={toggleCart} aria-label="Shopping cart">
             <ShoppingCart className="h-5 w-5" />

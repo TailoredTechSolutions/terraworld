@@ -40,6 +40,7 @@ const CheckoutPage = lazyRetry(() => import("@/pages/CheckoutPage"));
 const OrderConfirmation = lazyRetry(() => import("@/pages/OrderConfirmation"));
 const OrderHistoryPage = lazyRetry(() => import("@/pages/OrderHistoryPage"));
 const OrderDetailPage = lazyRetry(() => import("@/pages/OrderDetailPage"));
+const DriverDashboardPage = lazyRetry(() => import("@/pages/DriverDashboardPage"));
 const DriverDashboard = lazyRetry(() => import("@/pages/DriverDashboard"));
 const AdminDashboard = lazyRetry(() => import("@/pages/AdminDashboard"));
 const AdminBackOffice = lazyRetry(() => import("@/pages/AdminBackOffice"));
@@ -95,6 +96,7 @@ const AnimatedRoutes = () => {
           <Route path="/order-confirmation" element={<P><OrderConfirmation /></P>} />
           <Route path="/orders" element={<ProtectedRoute><P><OrderHistoryPage /></P></ProtectedRoute>} />
           <Route path="/order/:orderId" element={<ProtectedRoute><P><OrderDetailPage /></P></ProtectedRoute>} />
+          <Route path="/driver-portal" element={<ProtectedRoute><P><DriverDashboardPage /></P></ProtectedRoute>} />
           <Route path="/auth" element={<P><AuthPage /></P>} />
           <Route path="/reset-password" element={<P><ResetPasswordPage /></P>} />
           <Route path="/kyc" element={<P><KYCPage /></P>} />

@@ -396,3 +396,177 @@ export const farmerApi = {
     return apiCall<FarmerOrder[]>(`/farmer/${farmId}/orders`);
   },
 };
+
+// ==================== PAYMENT API (MOCK) ====================
+
+export interface PaymentInitResponse {
+  id: string;
+  reference_number: string;
+  amount: number;
+  payment_method: string;
+  status: string;
+  qr_code: string;
+  message: string;
+  instructions: string[];
+}
+
+export interface PaymentStatus {
+  id: string;
+  status: string;
+  amount: number;
+  reference_number: string;
+  payment_method: string;
+}
+
+export const paymentApi = {
+  initiate: async (orderId: string, paymentMethod: string, phoneNumber?: string): Promise<PaymentInitResponse> => {
+    return apiCall<PaymentInitResponse>('/payments/initiate', {
+      method: 'POST',
+      body: JSON.stringify({
+        order_id: orderId,
+        payment_method: paymentMethod,
+        phone_number: phoneNumber,
+      }),
+    });
+  },
+
+  confirm: async (paymentId: string): Promise<{ status: string; message: string }> => {
+    return apiCall(`/payments/${paymentId}/confirm`, { method: 'POST' });
+  },
+
+  getStatus: async (orderId: string): Promise<PaymentStatus> => {
+    return apiCall<PaymentStatus>(`/payments/${orderId}/status`);
+  },
+};
+
+// ==================== NOTIFICATION API ====================
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  message: string;
+  data?: Record<string, unknown>;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface NotificationsResponse {
+  notifications: Notification[];
+  unread_count: number;
+}
+
+export const notificationApi = {
+  getAll: async (userId: string): Promise<NotificationsResponse> => {
+    return apiCall<NotificationsResponse>(`/notifications/${userId}`);
+  },
+
+  markAsRead: async (notificationId: string): Promise<void> => {
+    return apiCall(`/notifications/${notificationId}/read`, { method: 'PUT' });
+  },
+
+  markAllAsRead: async (userId: string): Promise<void> => {
+    return apiCall(`/notifications/${userId}/read-all`, { method: 'PUT' });
+  },
+};
+
+// ==================== DRIVER API ====================
+
+export interface Driver {
+  id: string;
+  user_id: string;
+  name: string;
+  phone: string;
+  vehicle_type: string;
+  vehicle_plate: string;
+  status: 'available' | 'on_delivery' | 'offline';
+  current_location?: { lat: number; lng: number };
+  rating: number;
+  total_deliveries: number;
+  created_at: string;
+}
+
+export interface DriverStats {
+  driver: Driver;
+  total_deliveries: number;
+  active_deliveries: number;
+  total_earnings: number;
+  rating: number;
+}
+
+export interface Delivery {
+  id: string;
+  order_id: string;
+  driver_id: string;
+  driver_name: string;
+  driver_phone: string;
+  status: string;
+  pickup_location: { lat: number; lng: number };
+  delivery_location: { address: string };
+  picked_up_at?: string;
+  delivered_at?: string;
+  created_at: string;
+  order?: {
+    id: string;
+    total: number;
+    items_count: number;
+    customer_name: string;
+    customer_phone: string;
+    delivery_address: DeliveryAddress;
+  };
+}
+
+export interface AvailableDelivery {
+  order_id: string;
+  total: number;
+  items_count: number;
+  customer_name: string;
+  delivery_address: DeliveryAddress;
+  created_at: string;
+}
+
+export const driverApi = {
+  register: async (userId: string, name: string, phone: string, vehicleType: string, vehiclePlate: string): Promise<Driver> => {
+    const params = new URLSearchParams({
+      user_id: userId,
+      name,
+      phone,
+      vehicle_type: vehicleType,
+      vehicle_plate: vehiclePlate,
+    });
+    return apiCall<Driver>(`/drivers/register?${params}`, { method: 'POST' });
+  },
+
+  getDriver: async (driverId: string): Promise<Driver> => {
+    return apiCall<Driver>(`/drivers/${driverId}`);
+  },
+
+  getStats: async (driverId: string): Promise<DriverStats> => {
+    return apiCall<DriverStats>(`/drivers/${driverId}/stats`);
+  },
+
+  getDeliveries: async (driverId: string, status?: string): Promise<Delivery[]> => {
+    const params = status ? `?status=${status}` : '';
+    return apiCall<Delivery[]>(`/drivers/${driverId}/deliveries${params}`);
+  },
+
+  getAvailableDeliveries: async (): Promise<AvailableDelivery[]> => {
+    return apiCall<AvailableDelivery[]>('/drivers/available-deliveries');
+  },
+
+  acceptDelivery: async (driverId: string, orderId: string): Promise<{ message: string; delivery_id: string }> => {
+    return apiCall(`/drivers/${driverId}/accept-delivery/${orderId}`, { method: 'POST' });
+  },
+
+  updateDeliveryStatus: async (driverId: string, deliveryId: string, status: string): Promise<{ message: string }> => {
+    return apiCall(`/drivers/${driverId}/delivery/${deliveryId}/status?status=${status}`, { method: 'PUT' });
+  },
+
+  updateLocation: async (driverId: string, latitude: number, longitude: number): Promise<{ message: string }> => {
+    return apiCall(`/drivers/${driverId}/location`, {
+      method: 'PUT',
+      body: JSON.stringify({ latitude, longitude }),
+    });
+  },
+};

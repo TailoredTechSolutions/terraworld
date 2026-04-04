@@ -258,6 +258,57 @@ backend:
         agent: "testing"
         comment: "✅ FARMER ORDERS API WORKING - Successfully tested GET /api/farmer/saymayat-vegetable/orders. Found 4 orders containing this farm's products. Response correctly filters items to show only this farm's products and calculates farm-specific subtotals."
 
+  - task: "Payment API - Mock payment processing"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented mock payment processing with initiate, confirm, and status endpoints for GCash/Maya integration"
+      - working: true
+        agent: "testing"
+        comment: "✅ PAYMENT API WORKING - Successfully tested all payment endpoints: POST /api/payments/initiate (creates mock payment with QR code), POST /api/payments/{payment_id}/confirm (confirms payment and updates order status), GET /api/payments/{order_id}/status (returns payment status). Mock payment flow working correctly with proper order status updates and notification creation."
+
+  - task: "Notification API - User notifications"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented notification system with get notifications, mark as read, and mark all as read endpoints"
+      - working: false
+        agent: "testing"
+        comment: "❌ NOTIFICATION API FAILED - GET /api/notifications/{user_id} returning 500 Internal Server Error due to MongoDB ObjectId serialization issue"
+      - working: true
+        agent: "testing"
+        comment: "✅ NOTIFICATION API WORKING - Fixed ObjectId serialization issue by converting notifications to Pydantic models. Successfully tested: GET /api/notifications/test-user-123 (returns notifications list with unread_count), PUT /api/notifications/{notification_id}/read (marks single notification as read), PUT /api/notifications/{user_id}/read-all (marks all notifications as read). All endpoints working correctly."
+
+  - task: "Driver API - Driver management and delivery tracking"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented driver registration, statistics, delivery management, and location tracking endpoints"
+      - working: false
+        agent: "testing"
+        comment: "❌ DRIVER API PARTIALLY FAILED - Driver registration working but available deliveries endpoint returning 404 'Driver not found' due to route ordering conflict"
+      - working: true
+        agent: "testing"
+        comment: "✅ DRIVER API WORKING - Fixed route ordering issue by moving /drivers/available-deliveries before parameterized routes. Successfully tested: POST /api/drivers/register (registers new driver), GET /api/drivers/available-deliveries (lists orders ready for pickup), GET /api/drivers/{driver_id}/stats (returns driver statistics), GET /api/drivers/{driver_id}/deliveries (lists driver's deliveries), POST /api/drivers/{driver_id}/accept-delivery/{order_id} (accepts delivery assignment), PUT /api/drivers/{driver_id}/delivery/{delivery_id}/status (updates delivery status), PUT /api/drivers/{driver_id}/location (updates driver location). All endpoints working correctly with proper business logic."
+
 frontend:
   - task: "Shop page using backend API"
     implemented: true
@@ -310,7 +361,7 @@ frontend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 3
+  test_sequence: 4
   run_ui: false
 
 test_plan:
@@ -332,3 +383,5 @@ agent_communication:
     message: "✅ CHECKOUT FLOW TEST PASSED - Complete end-to-end checkout flow now working perfectly after the product ID fix. Successfully tested: product page load → add to cart → cart drawer → checkout form → order placement → order confirmation. All API calls returning 200 status. Order created successfully with proper cart sync. The Terra Farming MVP is now fully functional with working backend APIs and complete checkout flow. Ready for production."
   - agent: "testing"
     message: "✅ NEW ADMIN & FARMER API ENDPOINTS TESTING COMPLETE - All 30 backend API tests passed with 100% success rate. Successfully tested all NEW endpoints: Admin Stats API (returns total_orders, pending_orders, total_products, total_farms, total_revenue, recent_orders), Admin Orders API (list all orders, filter by status, update order status), Farmer Stats API for saymayat-vegetable farm (returns farm info, product_count, total_orders, total_revenue), Farmer Products API (list, create, update, delete products), and Farmer Orders API (list orders containing farm's products). Fixed one minor issue with FarmerProductCreate model. All endpoints returning proper JSON responses with correct data as specified in review request."
+  - agent: "testing"
+    message: "✅ NEW PAYMENT, NOTIFICATION & DRIVER API ENDPOINTS TESTING COMPLETE - All 44 backend API tests passed with 100% success rate. Successfully tested all NEW endpoints: Payment API (initiate mock payment with GCash/Maya, confirm payment, check payment status), Notification API (get user notifications with unread count, mark single notification as read, mark all notifications as read), Driver API (register driver, get driver statistics, list available deliveries, accept delivery assignment, list driver deliveries, update delivery status, update driver location). Fixed two critical issues: ObjectId serialization in notifications endpoint and route ordering conflict in driver endpoints. All payment, notification, and driver features working correctly with proper business logic and data flow. Terra Farming backend now includes complete payment processing, notification system, and delivery management capabilities."

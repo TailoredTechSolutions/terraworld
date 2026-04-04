@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { 
   CreditCard, 
   Smartphone, 
-  Bitcoin, 
   ArrowLeft, 
   Truck, 
   ShieldCheck,
@@ -26,6 +25,7 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import PaymentModal from "@/components/PaymentModal";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
@@ -61,6 +61,9 @@ const CheckoutPage = () => {
   const [paymentMethod, setPaymentMethod] = useState("gcash");
   const [isProcessing, setIsProcessing] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
+  const [pendingOrderTotal, setPendingOrderTotal] = useState<number>(0);
 
   const hasProducts = items.length > 0;
   const hasCoupons = couponItems.length > 0;
@@ -151,6 +154,16 @@ const CheckoutPage = () => {
           payment_method: paymentMethod as any,
         });
 
+        // For GCash/Maya, show payment modal
+        if (paymentMethod === "gcash" || paymentMethod === "maya") {
+          setPendingOrderId(order.id);
+          setPendingOrderTotal(order.total);
+          setShowPaymentModal(true);
+          setIsProcessing(false);
+          return;
+        }
+
+        // For other payment methods, go directly to confirmation
         clearCart();
         navigate("/order-confirmation", { 
           state: { 
@@ -595,6 +608,41 @@ const CheckoutPage = () => {
       <div className="lg:hidden h-20" />
 
       <Footer />
+
+      {/* Payment Modal for GCash/Maya */}
+      {pendingOrderId && (
+        <PaymentModal
+          open={showPaymentModal}
+          onClose={() => {
+            setShowPaymentModal(false);
+            // Order was created but payment cancelled - navigate to order confirmation
+            clearCart();
+            navigate("/order-confirmation", {
+              state: {
+                orderId: pendingOrderId,
+                total: pendingOrderTotal,
+                paymentMethod,
+                paymentPending: true,
+              }
+            });
+          }}
+          orderId={pendingOrderId}
+          amount={pendingOrderTotal}
+          paymentMethod={paymentMethod as "gcash" | "maya"}
+          onPaymentSuccess={() => {
+            setShowPaymentModal(false);
+            clearCart();
+            navigate("/order-confirmation", {
+              state: {
+                orderId: pendingOrderId,
+                total: pendingOrderTotal,
+                paymentMethod,
+                paymentComplete: true,
+              }
+            });
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Query
+from fastapi import FastAPI, APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,10 +6,12 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Dict
 import uuid
 from datetime import datetime
 from enum import Enum
+import json
+import asyncio
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -56,6 +58,60 @@ class PaymentStatus(str, Enum):
     PAID = "paid"
     FAILED = "failed"
     REFUNDED = "refunded"
+
+
+class NotificationType(str, Enum):
+    ORDER_STATUS = "order_status"
+    PAYMENT = "payment"
+    DELIVERY = "delivery"
+    SYSTEM = "system"
+    PROMOTION = "promotion"
+
+
+class DriverStatus(str, Enum):
+    AVAILABLE = "available"
+    ON_DELIVERY = "on_delivery"
+    OFFLINE = "offline"
+
+
+# ==================== WEBSOCKET CONNECTION MANAGER ====================
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: Dict[str, List[WebSocket]] = {}
+    
+    async def connect(self, websocket: WebSocket, user_id: str):
+        await websocket.accept()
+        if user_id not in self.active_connections:
+            self.active_connections[user_id] = []
+        self.active_connections[user_id].append(websocket)
+        logger.info(f"WebSocket connected for user: {user_id}")
+    
+    def disconnect(self, websocket: WebSocket, user_id: str):
+        if user_id in self.active_connections:
+            self.active_connections[user_id].remove(websocket)
+            if not self.active_connections[user_id]:
+                del self.active_connections[user_id]
+        logger.info(f"WebSocket disconnected for user: {user_id}")
+    
+    async def send_personal_message(self, message: dict, user_id: str):
+        if user_id in self.active_connections:
+            for connection in self.active_connections[user_id]:
+                try:
+                    await connection.send_json(message)
+                except Exception as e:
+                    logger.error(f"Error sending message: {e}")
+    
+    async def broadcast(self, message: dict):
+        for user_id, connections in self.active_connections.items():
+            for connection in connections:
+                try:
+                    await connection.send_json(message)
+                except Exception as e:
+                    logger.error(f"Error broadcasting: {e}")
+
+
+manager = ConnectionManager()
 
 
 # ==================== MODELS ====================
@@ -246,6 +302,69 @@ class Category(BaseModel):
     id: str
     name: str
     icon: str
+
+
+# Notification Model
+class Notification(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    type: NotificationType
+    title: str
+    message: str
+    data: Optional[dict] = None
+    is_read: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+# Payment Models
+class PaymentRequest(BaseModel):
+    order_id: str
+    payment_method: PaymentMethod
+    phone_number: Optional[str] = None  # For GCash/Maya
+
+
+class PaymentResponse(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    order_id: str
+    payment_method: PaymentMethod
+    amount: float
+    status: PaymentStatus
+    reference_number: str
+    qr_code: Optional[str] = None
+    redirect_url: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+# Driver Models
+class Driver(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    name: str
+    phone: str
+    vehicle_type: str
+    vehicle_plate: str
+    status: DriverStatus = DriverStatus.AVAILABLE
+    current_location: Optional[dict] = None
+    rating: float = 5.0
+    total_deliveries: int = 0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class DeliveryAssignment(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    order_id: str
+    driver_id: str
+    pickup_location: dict
+    delivery_location: dict
+    status: str = "assigned"
+    picked_up_at: Optional[datetime] = None
+    delivered_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class DriverLocationUpdate(BaseModel):
+    latitude: float
+    longitude: float
 
 
 # ==================== ROUTES ====================
@@ -833,6 +952,424 @@ async def get_farmer_orders(farm_id: str):
     return farm_orders
 
 
+# ==================== WEBSOCKET ROUTES ====================
+
+@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
+    """WebSocket endpoint for real-time updates"""
+    await manager.connect(websocket, user_id)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            # Handle incoming messages if needed
+            message = json.loads(data)
+            if message.get("type") == "ping":
+                await websocket.send_json({"type": "pong"})
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, user_id)
+
+
+async def notify_order_update(order_id: str, user_id: str, status: str, message: str):
+    """Send order update notification via WebSocket"""
+    await manager.send_personal_message({
+        "type": "order_update",
+        "order_id": order_id,
+        "status": status,
+        "message": message,
+        "timestamp": datetime.utcnow().isoformat()
+    }, user_id)
+
+
+# ==================== PAYMENT ROUTES (MOCK) ====================
+
+@api_router.post("/payments/initiate")
+async def initiate_payment(request: PaymentRequest):
+    """Initiate a mock payment for GCash/Maya"""
+    order = await db.orders.find_one({"id": request.order_id})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Generate mock reference number
+    import random
+    ref_number = f"TF{datetime.now().strftime('%Y%m%d')}{random.randint(100000, 999999)}"
+    
+    payment = {
+        "id": str(uuid.uuid4()),
+        "order_id": request.order_id,
+        "payment_method": request.payment_method,
+        "amount": order["total"],
+        "status": "pending",
+        "reference_number": ref_number,
+        "phone_number": request.phone_number,
+        "created_at": datetime.utcnow(),
+    }
+    
+    await db.payments.insert_one(payment)
+    
+    # Generate mock QR code URL (in real app, this would be from GCash/Maya API)
+    qr_code = f"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PAY:{ref_number}"
+    
+    return {
+        "id": payment["id"],
+        "reference_number": ref_number,
+        "amount": order["total"],
+        "payment_method": request.payment_method,
+        "status": "pending",
+        "qr_code": qr_code,
+        "message": f"Please complete payment of ₱{order['total']:.2f} using {request.payment_method.upper()}",
+        "instructions": [
+            f"Open your {request.payment_method.upper()} app",
+            "Go to Pay QR or Pay Bills",
+            f"Enter reference number: {ref_number}",
+            f"Confirm payment of ₱{order['total']:.2f}",
+        ]
+    }
+
+
+@api_router.post("/payments/{payment_id}/confirm")
+async def confirm_payment(payment_id: str):
+    """Simulate payment confirmation (in real app, this would be a webhook)"""
+    payment = await db.payments.find_one({"id": payment_id})
+    if not payment:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    
+    # Update payment status
+    await db.payments.update_one(
+        {"id": payment_id},
+        {"$set": {"status": "paid", "paid_at": datetime.utcnow()}}
+    )
+    
+    # Update order payment status
+    order = await db.orders.find_one({"id": payment["order_id"]})
+    await db.orders.update_one(
+        {"id": payment["order_id"]},
+        {"$set": {"payment_status": "paid", "order_status": "confirmed", "updated_at": datetime.utcnow()}}
+    )
+    
+    # Create notification
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": order["user_id"],
+        "type": "payment",
+        "title": "Payment Successful",
+        "message": f"Your payment of ₱{payment['amount']:.2f} for order #{payment['order_id'][:8]} has been confirmed.",
+        "data": {"order_id": payment["order_id"], "amount": payment["amount"]},
+        "is_read": False,
+        "created_at": datetime.utcnow(),
+    }
+    await db.notifications.insert_one(notification)
+    
+    # Send WebSocket notification
+    await notify_order_update(
+        payment["order_id"],
+        order["user_id"],
+        "confirmed",
+        "Payment confirmed! Your order is being prepared."
+    )
+    
+    return {"status": "paid", "message": "Payment confirmed successfully"}
+
+
+@api_router.get("/payments/{order_id}/status")
+async def get_payment_status(order_id: str):
+    """Get payment status for an order"""
+    payment = await db.payments.find_one({"order_id": order_id})
+    if not payment:
+        return {"status": "not_found", "message": "No payment initiated for this order"}
+    
+    return {
+        "id": payment["id"],
+        "status": payment["status"],
+        "amount": payment["amount"],
+        "reference_number": payment["reference_number"],
+        "payment_method": payment["payment_method"],
+    }
+
+
+# ==================== NOTIFICATION ROUTES ====================
+
+@api_router.get("/notifications/{user_id}")
+async def get_user_notifications(user_id: str, skip: int = 0, limit: int = 50):
+    """Get all notifications for a user"""
+    notifications = await db.notifications.find(
+        {"user_id": user_id}
+    ).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    unread_count = await db.notifications.count_documents({"user_id": user_id, "is_read": False})
+    
+    # Convert to Notification models to ensure proper serialization
+    notification_models = [Notification(**notification) for notification in notifications]
+    
+    return {
+        "notifications": notification_models,
+        "unread_count": unread_count
+    }
+
+
+@api_router.put("/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str):
+    """Mark a notification as read"""
+    result = await db.notifications.update_one(
+        {"id": notification_id},
+        {"$set": {"is_read": True}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return {"message": "Notification marked as read"}
+
+
+@api_router.put("/notifications/{user_id}/read-all")
+async def mark_all_notifications_read(user_id: str):
+    """Mark all notifications as read for a user"""
+    await db.notifications.update_many(
+        {"user_id": user_id, "is_read": False},
+        {"$set": {"is_read": True}}
+    )
+    return {"message": "All notifications marked as read"}
+
+
+@api_router.post("/notifications/create")
+async def create_notification(user_id: str, notification_type: str, title: str, message: str, data: Optional[dict] = None):
+    """Create a new notification"""
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "type": notification_type,
+        "title": title,
+        "message": message,
+        "data": data,
+        "is_read": False,
+        "created_at": datetime.utcnow(),
+    }
+    await db.notifications.insert_one(notification)
+    
+    # Send via WebSocket
+    await manager.send_personal_message({
+        "type": "notification",
+        "notification": notification
+    }, user_id)
+    
+    return notification
+
+
+# ==================== DRIVER ROUTES ====================
+
+@api_router.post("/drivers/register")
+async def register_driver(user_id: str, name: str, phone: str, vehicle_type: str, vehicle_plate: str):
+    """Register a new driver"""
+    existing = await db.drivers.find_one({"user_id": user_id})
+    if existing:
+        raise HTTPException(status_code=400, detail="Driver already registered")
+    
+    driver = Driver(
+        user_id=user_id,
+        name=name,
+        phone=phone,
+        vehicle_type=vehicle_type,
+        vehicle_plate=vehicle_plate,
+    )
+    await db.drivers.insert_one(driver.dict())
+    return driver
+
+
+@api_router.get("/drivers/available-deliveries")
+async def get_available_deliveries():
+    """Get orders ready for delivery pickup"""
+    orders = await db.orders.find({
+        "order_status": {"$in": ["confirmed", "preparing"]},
+    }).sort("created_at", 1).to_list(50)
+    
+    # Check if already assigned
+    available = []
+    for order in orders:
+        existing = await db.deliveries.find_one({"order_id": order["id"]})
+        if not existing:
+            available.append({
+                "order_id": order["id"],
+                "total": order["total"],
+                "items_count": len(order["items"]),
+                "customer_name": order["delivery_address"]["full_name"],
+                "delivery_address": order["delivery_address"],
+                "created_at": order["created_at"],
+            })
+    
+    return available
+
+
+@api_router.get("/drivers/{driver_id}")
+async def get_driver(driver_id: str):
+    """Get driver details"""
+    driver = await db.drivers.find_one({"id": driver_id})
+    if not driver:
+        raise HTTPException(status_code=404, detail="Driver not found")
+    return Driver(**driver)
+
+
+@api_router.get("/drivers/{driver_id}/stats")
+async def get_driver_stats(driver_id: str):
+    """Get driver statistics"""
+    driver = await db.drivers.find_one({"id": driver_id})
+    if not driver:
+        raise HTTPException(status_code=404, detail="Driver not found")
+    
+    # Get delivery stats
+    total_deliveries = await db.deliveries.count_documents({"driver_id": driver_id, "status": "delivered"})
+    active_deliveries = await db.deliveries.count_documents({"driver_id": driver_id, "status": {"$in": ["assigned", "picked_up", "in_transit"]}})
+    
+    # Calculate earnings (mock: ₱50 per delivery)
+    total_earnings = total_deliveries * 50
+    
+    return {
+        "driver": Driver(**driver),
+        "total_deliveries": total_deliveries,
+        "active_deliveries": active_deliveries,
+        "total_earnings": total_earnings,
+        "rating": driver.get("rating", 5.0),
+    }
+
+
+@api_router.get("/drivers/{driver_id}/deliveries")
+async def get_driver_deliveries(driver_id: str, status: Optional[str] = None):
+    """Get deliveries for a driver"""
+    query = {"driver_id": driver_id}
+    if status:
+        query["status"] = status
+    
+    deliveries = await db.deliveries.find(query).sort("created_at", -1).to_list(100)
+    
+    # Enrich with order details
+    result = []
+    for delivery in deliveries:
+        order = await db.orders.find_one({"id": delivery["order_id"]})
+        if order:
+            result.append({
+                **delivery,
+                "order": {
+                    "id": order["id"],
+                    "total": order["total"],
+                    "items_count": len(order["items"]),
+                    "customer_name": order["delivery_address"]["full_name"],
+                    "customer_phone": order["delivery_address"]["phone"],
+                    "delivery_address": order["delivery_address"],
+                }
+            })
+    
+    return result
+
+
+@api_router.post("/drivers/{driver_id}/accept-delivery/{order_id}")
+async def accept_delivery(driver_id: str, order_id: str):
+    """Driver accepts a delivery"""
+    driver = await db.drivers.find_one({"id": driver_id})
+    if not driver:
+        raise HTTPException(status_code=404, detail="Driver not found")
+    
+    order = await db.orders.find_one({"id": order_id})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Check if already assigned
+    existing = await db.deliveries.find_one({"order_id": order_id})
+    if existing:
+        raise HTTPException(status_code=400, detail="Delivery already assigned")
+    
+    # Create delivery assignment
+    delivery = {
+        "id": str(uuid.uuid4()),
+        "order_id": order_id,
+        "driver_id": driver_id,
+        "driver_name": driver["name"],
+        "driver_phone": driver["phone"],
+        "status": "assigned",
+        "pickup_location": {"lat": 16.455, "lng": 120.587},  # Farm location (mock)
+        "delivery_location": {
+            "address": f"{order['delivery_address']['address_line1']}, {order['delivery_address']['city']}",
+        },
+        "created_at": datetime.utcnow(),
+    }
+    await db.deliveries.insert_one(delivery)
+    
+    # Update order status
+    await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {"order_status": "preparing", "updated_at": datetime.utcnow()}}
+    )
+    
+    # Notify customer
+    await notify_order_update(
+        order_id,
+        order["user_id"],
+        "preparing",
+        f"Your order is being prepared. Driver {driver['name']} will pick it up soon."
+    )
+    
+    return {"message": "Delivery accepted", "delivery_id": delivery["id"]}
+
+
+@api_router.put("/drivers/{driver_id}/delivery/{delivery_id}/status")
+async def update_delivery_status(driver_id: str, delivery_id: str, status: str):
+    """Update delivery status (picked_up, in_transit, delivered)"""
+    delivery = await db.deliveries.find_one({"id": delivery_id, "driver_id": driver_id})
+    if not delivery:
+        raise HTTPException(status_code=404, detail="Delivery not found")
+    
+    update_data = {"status": status, "updated_at": datetime.utcnow()}
+    
+    if status == "picked_up":
+        update_data["picked_up_at"] = datetime.utcnow()
+        order_status = "out_for_delivery"
+        message = "Your order has been picked up and is on its way!"
+    elif status == "delivered":
+        update_data["delivered_at"] = datetime.utcnow()
+        order_status = "delivered"
+        message = "Your order has been delivered. Enjoy your fresh produce!"
+    else:
+        order_status = "out_for_delivery"
+        message = "Your order is on its way!"
+    
+    await db.deliveries.update_one({"id": delivery_id}, {"$set": update_data})
+    
+    # Update order
+    order = await db.orders.find_one({"id": delivery["order_id"]})
+    await db.orders.update_one(
+        {"id": delivery["order_id"]},
+        {"$set": {"order_status": order_status, "updated_at": datetime.utcnow()}}
+    )
+    
+    # Notify customer
+    await notify_order_update(delivery["order_id"], order["user_id"], order_status, message)
+    
+    return {"message": f"Delivery status updated to {status}"}
+
+
+@api_router.put("/drivers/{driver_id}/location")
+async def update_driver_location(driver_id: str, location: DriverLocationUpdate):
+    """Update driver's current location"""
+    result = await db.drivers.update_one(
+        {"id": driver_id},
+        {"$set": {"current_location": {"lat": location.latitude, "lng": location.longitude}, "updated_at": datetime.utcnow()}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Driver not found")
+    
+    # Get active deliveries and notify customers
+    deliveries = await db.deliveries.find({
+        "driver_id": driver_id,
+        "status": {"$in": ["picked_up", "in_transit"]}
+    }).to_list(10)
+    
+    for delivery in deliveries:
+        order = await db.orders.find_one({"id": delivery["order_id"]})
+        if order:
+            await manager.send_personal_message({
+                "type": "driver_location",
+                "order_id": delivery["order_id"],
+                "location": {"lat": location.latitude, "lng": location.longitude},
+            }, order["user_id"])
+    
+    return {"message": "Location updated"}
+
+
 # ==================== DATA SEEDING ====================
 
 @api_router.post("/seed")
@@ -894,6 +1431,21 @@ async def startup_db_client():
     await db.orders.create_index("id", unique=True)
     await db.orders.create_index("user_id")
     await db.orders.create_index("created_at")
+    
+    # New indexes for payments, notifications, drivers, deliveries
+    await db.payments.create_index("id", unique=True)
+    await db.payments.create_index("order_id")
+    
+    await db.notifications.create_index("id", unique=True)
+    await db.notifications.create_index("user_id")
+    await db.notifications.create_index([("user_id", 1), ("is_read", 1)])
+    
+    await db.drivers.create_index("id", unique=True)
+    await db.drivers.create_index("user_id", unique=True)
+    
+    await db.deliveries.create_index("id", unique=True)
+    await db.deliveries.create_index("order_id")
+    await db.deliveries.create_index("driver_id")
     
     logger.info("Database indexes created")
 
