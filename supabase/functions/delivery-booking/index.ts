@@ -225,6 +225,17 @@ async function handleCancelBooking(supabase: any, body: any, userId: string, isA
 
   const activeBooking = bookings[0];
 
+  // Verify ownership if we only had booking_id (not order_id)
+  if (!checkOrderId) {
+    const ownsOrder = await verifyOrderOwnership(supabase, activeBooking.order_id, userId, isAdmin);
+    if (!ownsOrder) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
+
   // Mock: call provider cancellation API
   // In production: call Lalamove/Grab cancel endpoint
 
