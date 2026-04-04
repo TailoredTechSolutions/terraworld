@@ -10,7 +10,7 @@ import sys
 from typing import Dict, Any, List
 
 # Get backend URL from frontend .env
-BACKEND_URL = "https://app-constructor-45.preview.emergentagent.com/api"
+BACKEND_URL = "https://play-auth-app.preview.emergentagent.com/api"
 TEST_USER_ID = "test-user-123"
 
 class APITester:
