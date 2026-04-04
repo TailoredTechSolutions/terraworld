@@ -260,12 +260,21 @@ async function handleCancelBooking(supabase: any, body: any, userId: string, isA
   );
 }
 
-async function handleGetStatus(supabase: any, body: any) {
+async function handleGetStatus(supabase: any, body: any, userId: string, isAdmin: boolean) {
   const { order_id } = body;
 
   if (!order_id) {
     return new Response(JSON.stringify({ error: "Missing order_id" }), {
       status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Verify ownership
+  const ownsOrder = await verifyOrderOwnership(supabase, order_id, userId, isAdmin);
+  if (!ownsOrder) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 403,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

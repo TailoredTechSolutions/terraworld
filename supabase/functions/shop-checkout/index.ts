@@ -103,14 +103,12 @@ Deno.serve(async (req) => {
       const product = productMap.get(item.shop_product_id);
       if (!product) continue;
 
-      // Check stock for merchandise
-      if (product.product_type === "merchandise" && product.stock_quantity !== null) {
-        if (product.stock_quantity < item.quantity) {
-          return new Response(JSON.stringify({ error: `Insufficient stock for ${product.name}` }), {
-            status: 400,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
+      // Check stock for all product types that have stock tracking
+      if (product.stock_quantity !== null && product.stock_quantity < item.quantity) {
+        return new Response(JSON.stringify({ error: `Insufficient stock for ${product.name}` }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
       const totalPrice = Math.round(product.price * item.quantity * 100) / 100;
