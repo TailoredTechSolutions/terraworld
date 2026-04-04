@@ -25,6 +25,7 @@ function cssPreloadPlugin(): Plugin {
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  envPrefix: ['VITE_', 'REACT_APP_'],
   server: {
     host: "::",
     port: 8080,

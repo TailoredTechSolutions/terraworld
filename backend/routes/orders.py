@@ -16,11 +16,16 @@ async def create_order(request: CreateOrderRequest):
     if not cart or not cart.get("items"):
         raise HTTPException(status_code=400, detail="Cart is empty")
 
+    # Batch fetch all products in one query
+    product_ids = [item["product_id"] for item in cart["items"]]
+    products_cursor = await db.products.find({"id": {"$in": product_ids}}).to_list(len(product_ids))
+    products_map = {p["id"]: p for p in products_cursor}
+
     items = []
     subtotal = 0
 
     for cart_item in cart["items"]:
-        product = await db.products.find_one({"id": cart_item["product_id"]})
+        product = products_map.get(cart_item["product_id"])
         if not product:
             raise HTTPException(status_code=400, detail=f"Product {cart_item['product_name']} no longer available")
         if product["stock"] < cart_item["quantity"]:
