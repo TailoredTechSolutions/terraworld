@@ -279,6 +279,122 @@ class APITester:
         else:
             self.log_test("POST /api/seed - Database seeding", False, str(data))
     
+    def test_admin_api(self):
+        """Test Admin API endpoints"""
+        print("\n=== ADMIN API TESTS ===")
+        
+        # Test admin stats
+        success, data = self.make_request("GET", "/admin/stats")
+        if success and isinstance(data, dict):
+            required_fields = ['total_orders', 'pending_orders', 'total_products', 'total_farms', 'total_revenue', 'recent_orders']
+            has_all_fields = all(field in data for field in required_fields)
+            if has_all_fields:
+                self.log_test("GET /api/admin/stats - Admin dashboard stats", True, 
+                            f"Orders: {data['total_orders']}, Products: {data['total_products']}, Farms: {data['total_farms']}, Revenue: ₱{data['total_revenue']}")
+                # Store for later use
+                self.admin_stats = data
+            else:
+                missing = [field for field in required_fields if field not in data]
+                self.log_test("GET /api/admin/stats - Admin dashboard stats", False, f"Missing fields: {missing}")
+        else:
+            self.log_test("GET /api/admin/stats - Admin dashboard stats", False, str(data))
+        
+        # Test admin orders list
+        success, data = self.make_request("GET", "/admin/orders")
+        if success and isinstance(data, list):
+            self.log_test("GET /api/admin/orders - List all orders", True, f"Found {len(data)} orders")
+            if len(data) > 0:
+                self.sample_order_id = data[0].get('id')
+        else:
+            self.log_test("GET /api/admin/orders - List all orders", False, str(data))
+        
+        # Test admin orders filter by status
+        success, data = self.make_request("GET", "/admin/orders?status=pending")
+        if success and isinstance(data, list):
+            pending_count = len(data)
+            self.log_test("GET /api/admin/orders?status=pending - Filter by status", True, f"Found {pending_count} pending orders")
+        else:
+            self.log_test("GET /api/admin/orders?status=pending - Filter by status", False, str(data))
+        
+        # Test admin update order status (if we have an order)
+        if hasattr(self, 'sample_order_id') and self.sample_order_id:
+            success, data = self.make_request("PUT", f"/admin/orders/{self.sample_order_id}/status?status=confirmed")
+            if success and isinstance(data, dict) and data.get('status') == 'confirmed':
+                self.log_test(f"PUT /api/admin/orders/{self.sample_order_id}/status - Update order status", True, "Status updated to confirmed")
+            else:
+                self.log_test(f"PUT /api/admin/orders/{self.sample_order_id}/status - Update order status", False, str(data))
+    
+    def test_farmer_api(self):
+        """Test Farmer API endpoints"""
+        print("\n=== FARMER API TESTS ===")
+        
+        farm_id = "saymayat-vegetable"
+        
+        # Test farmer stats
+        success, data = self.make_request("GET", f"/farmer/{farm_id}/stats")
+        if success and isinstance(data, dict):
+            required_fields = ['farm', 'product_count', 'total_orders', 'total_revenue']
+            has_all_fields = all(field in data for field in required_fields)
+            if has_all_fields:
+                farm_name = data['farm'].get('name', 'Unknown')
+                self.log_test(f"GET /api/farmer/{farm_id}/stats - Farmer dashboard stats", True, 
+                            f"Farm: {farm_name}, Products: {data['product_count']}, Orders: {data['total_orders']}, Revenue: ₱{data['total_revenue']}")
+            else:
+                missing = [field for field in required_fields if field not in data]
+                self.log_test(f"GET /api/farmer/{farm_id}/stats - Farmer dashboard stats", False, f"Missing fields: {missing}")
+        else:
+            self.log_test(f"GET /api/farmer/{farm_id}/stats - Farmer dashboard stats", False, str(data))
+        
+        # Test farmer products list
+        success, data = self.make_request("GET", f"/farmer/{farm_id}/products")
+        if success and isinstance(data, list):
+            self.log_test(f"GET /api/farmer/{farm_id}/products - List farm's products", True, f"Found {len(data)} products")
+        else:
+            self.log_test(f"GET /api/farmer/{farm_id}/products - List farm's products", False, str(data))
+        
+        # Test add new product
+        new_product = {
+            "name": "Test Spinach",
+            "price": 45,
+            "unit": "kg",
+            "image": "/images/test.jpg",
+            "category": "Vegetables",
+            "stock": 50,
+            "organic": True,
+            "description": "Fresh test spinach"
+        }
+        
+        success, data = self.make_request("POST", f"/farmer/{farm_id}/products", json=new_product)
+        if success and isinstance(data, dict) and data.get('name') == 'Test Spinach':
+            new_product_id = data.get('id')
+            self.log_test(f"POST /api/farmer/{farm_id}/products - Add new product", True, f"Created product: {new_product_id}")
+            self.new_product_id = new_product_id
+        else:
+            self.log_test(f"POST /api/farmer/{farm_id}/products - Add new product", False, str(data))
+        
+        # Test update product (if we created one)
+        if hasattr(self, 'new_product_id') and self.new_product_id:
+            update_data = {"stock": 100}
+            success, data = self.make_request("PUT", f"/farmer/{farm_id}/products/{self.new_product_id}", json=update_data)
+            if success and isinstance(data, dict) and data.get('stock') == 100:
+                self.log_test(f"PUT /api/farmer/{farm_id}/products/{self.new_product_id} - Update product", True, "Stock updated to 100")
+            else:
+                self.log_test(f"PUT /api/farmer/{farm_id}/products/{self.new_product_id} - Update product", False, str(data))
+            
+            # Test delete product
+            success, data = self.make_request("DELETE", f"/farmer/{farm_id}/products/{self.new_product_id}")
+            if success:
+                self.log_test(f"DELETE /api/farmer/{farm_id}/products/{self.new_product_id} - Delete product", True, "Product deleted successfully")
+            else:
+                self.log_test(f"DELETE /api/farmer/{farm_id}/products/{self.new_product_id} - Delete product", False, str(data))
+        
+        # Test farmer orders
+        success, data = self.make_request("GET", f"/farmer/{farm_id}/orders")
+        if success and isinstance(data, list):
+            self.log_test(f"GET /api/farmer/{farm_id}/orders - List farm's orders", True, f"Found {len(data)} orders containing this farm's products")
+        else:
+            self.log_test(f"GET /api/farmer/{farm_id}/orders - List farm's orders", False, str(data))
+    
     def run_all_tests(self):
         """Run all test suites"""
         print(f"🧪 Testing Terra Farming Backend API at {self.base_url}")
@@ -292,6 +408,8 @@ class APITester:
         self.test_cart_api()
         self.test_order_api()
         self.test_categories_api()
+        self.test_admin_api()
+        self.test_farmer_api()
         
         # Summary
         print("\n" + "=" * 60)

@@ -309,3 +309,90 @@ export const seedDatabase = async (): Promise<{ message: string; farms: number; 
 export const healthCheck = async (): Promise<{ status: string; database: string }> => {
   return apiCall('/health');
 };
+
+// ==================== ADMIN API ====================
+
+export interface AdminStats {
+  total_orders: number;
+  pending_orders: number;
+  total_products: number;
+  total_farms: number;
+  total_revenue: number;
+  recent_orders: Order[];
+}
+
+export const adminApi = {
+  getStats: async (): Promise<AdminStats> => {
+    return apiCall<AdminStats>('/admin/stats');
+  },
+
+  getAllOrders: async (params?: {
+    status?: string;
+    skip?: number;
+    limit?: number;
+  }): Promise<Order[]> => {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.skip !== undefined) searchParams.set('skip', String(params.skip));
+    if (params?.limit !== undefined) searchParams.set('limit', String(params.limit));
+    
+    const queryString = searchParams.toString();
+    return apiCall<Order[]>(`/admin/orders${queryString ? `?${queryString}` : ''}`);
+  },
+
+  updateOrderStatus: async (orderId: string, status: Order['order_status']): Promise<void> => {
+    return apiCall(`/admin/orders/${orderId}/status?status=${status}`, {
+      method: 'PUT',
+    });
+  },
+};
+
+// ==================== FARMER API ====================
+
+export interface FarmerStats {
+  farm: Farm;
+  product_count: number;
+  total_orders: number;
+  total_revenue: number;
+}
+
+export interface FarmerOrder {
+  order_id: string;
+  order_status: string;
+  created_at: string;
+  items: OrderItem[];
+  farm_subtotal: number;
+  delivery_address: DeliveryAddress;
+}
+
+export const farmerApi = {
+  getStats: async (farmId: string): Promise<FarmerStats> => {
+    return apiCall<FarmerStats>(`/farmer/${farmId}/stats`);
+  },
+
+  getProducts: async (farmId: string): Promise<Product[]> => {
+    return apiCall<Product[]>(`/farmer/${farmId}/products`);
+  },
+
+  addProduct: async (farmId: string, product: Omit<Product, 'id' | 'farm_id' | 'farm_name' | 'created_at' | 'updated_at'>): Promise<Product> => {
+    return apiCall<Product>(`/farmer/${farmId}/products`, {
+      method: 'POST',
+      body: JSON.stringify(product),
+    });
+  },
+
+  updateProduct: async (farmId: string, productId: string, product: Partial<Product>): Promise<Product> => {
+    return apiCall<Product>(`/farmer/${farmId}/products/${productId}`, {
+      method: 'PUT',
+      body: JSON.stringify(product),
+    });
+  },
+
+  deleteProduct: async (farmId: string, productId: string): Promise<void> => {
+    return apiCall(`/farmer/${farmId}/products/${productId}`, { method: 'DELETE' });
+  },
+
+  getOrders: async (farmId: string): Promise<FarmerOrder[]> => {
+    return apiCall<FarmerOrder[]>(`/farmer/${farmId}/orders`);
+  },
+};

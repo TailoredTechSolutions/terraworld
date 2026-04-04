@@ -101,6 +101,17 @@ class ProductUpdate(BaseModel):
     description: Optional[str] = None
 
 
+class FarmerProductCreate(BaseModel):
+    name: str
+    price: float
+    unit: str
+    image: str
+    category: str
+    stock: int
+    organic: bool = False
+    description: str
+
+
 # Farm Models
 class Farm(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -643,6 +654,183 @@ async def get_categories():
         Category(id="dairy", name="Dairy & Eggs", icon="Egg"),
         Category(id="pantry", name="Pantry", icon="Package"),
     ]
+
+
+# ==================== ADMIN ROUTES ====================
+
+@api_router.get("/admin/stats")
+async def get_admin_stats():
+    """Get admin dashboard statistics"""
+    total_orders = await db.orders.count_documents({})
+    pending_orders = await db.orders.count_documents({"order_status": "pending"})
+    total_products = await db.products.count_documents({})
+    total_farms = await db.farms.count_documents({})
+    
+    # Calculate revenue
+    revenue_pipeline = [
+        {"$match": {"order_status": {"$ne": "cancelled"}}},
+        {"$group": {"_id": None, "total": {"$sum": "$total"}}}
+    ]
+    revenue_result = await db.orders.aggregate(revenue_pipeline).to_list(1)
+    total_revenue = revenue_result[0]["total"] if revenue_result else 0
+    
+    # Get recent orders
+    recent_orders = await db.orders.find().sort("created_at", -1).limit(10).to_list(10)
+    
+    return {
+        "total_orders": total_orders,
+        "pending_orders": pending_orders,
+        "total_products": total_products,
+        "total_farms": total_farms,
+        "total_revenue": total_revenue,
+        "recent_orders": [Order(**order) for order in recent_orders]
+    }
+
+
+@api_router.get("/admin/orders", response_model=List[Order])
+async def get_all_orders(
+    status: Optional[str] = None,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=100)
+):
+    """Get all orders for admin"""
+    query = {}
+    if status:
+        query["order_status"] = status
+    
+    orders = await db.orders.find(query).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    return [Order(**order) for order in orders]
+
+
+@api_router.put("/admin/orders/{order_id}/status")
+async def admin_update_order_status(order_id: str, status: OrderStatus):
+    """Admin update order status"""
+    result = await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {"order_status": status, "updated_at": datetime.utcnow()}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return {"message": "Order status updated", "status": status}
+
+
+# ==================== FARMER ROUTES ====================
+
+@api_router.get("/farmer/{farm_id}/stats")
+async def get_farmer_stats(farm_id: str):
+    """Get farmer dashboard statistics"""
+    farm = await db.farms.find_one({"id": farm_id})
+    if not farm:
+        raise HTTPException(status_code=404, detail="Farm not found")
+    
+    # Get product count
+    product_count = await db.products.count_documents({"farm_id": farm_id})
+    
+    # Get orders containing this farm's products
+    orders_pipeline = [
+        {"$match": {"items.farm_name": farm["name"]}},
+        {"$group": {
+            "_id": None,
+            "total_orders": {"$sum": 1},
+            "total_revenue": {"$sum": {
+                "$reduce": {
+                    "input": {"$filter": {
+                        "input": "$items",
+                        "cond": {"$eq": ["$$this.farm_name", farm["name"]]}
+                    }},
+                    "initialValue": 0,
+                    "in": {"$add": ["$$value", "$$this.subtotal"]}
+                }
+            }}
+        }}
+    ]
+    order_stats = await db.orders.aggregate(orders_pipeline).to_list(1)
+    
+    stats = order_stats[0] if order_stats else {"total_orders": 0, "total_revenue": 0}
+    
+    return {
+        "farm": Farm(**farm),
+        "product_count": product_count,
+        "total_orders": stats.get("total_orders", 0),
+        "total_revenue": stats.get("total_revenue", 0),
+    }
+
+
+@api_router.get("/farmer/{farm_id}/products", response_model=List[Product])
+async def get_farmer_products(farm_id: str):
+    """Get all products for a specific farm"""
+    products = await db.products.find({"farm_id": farm_id}).to_list(100)
+    return [Product(**product) for product in products]
+
+
+@api_router.post("/farmer/{farm_id}/products", response_model=Product)
+async def add_farmer_product(farm_id: str, product: FarmerProductCreate):
+    """Add a new product for a farm"""
+    farm = await db.farms.find_one({"id": farm_id})
+    if not farm:
+        raise HTTPException(status_code=404, detail="Farm not found")
+    
+    product_obj = Product(
+        **product.dict(),
+        farm_id=farm_id,
+        farm_name=farm["name"]
+    )
+    await db.products.insert_one(product_obj.dict())
+    return product_obj
+
+
+@api_router.put("/farmer/{farm_id}/products/{product_id}", response_model=Product)
+async def update_farmer_product(farm_id: str, product_id: str, product_update: ProductUpdate):
+    """Update a farmer's product"""
+    existing = await db.products.find_one({"id": product_id, "farm_id": farm_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Product not found or doesn't belong to this farm")
+    
+    update_data = {k: v for k, v in product_update.dict().items() if v is not None}
+    if update_data:
+        update_data["updated_at"] = datetime.utcnow()
+        await db.products.update_one({"id": product_id}, {"$set": update_data})
+    
+    product = await db.products.find_one({"id": product_id})
+    return Product(**product)
+
+
+@api_router.delete("/farmer/{farm_id}/products/{product_id}")
+async def delete_farmer_product(farm_id: str, product_id: str):
+    """Delete a farmer's product"""
+    result = await db.products.delete_one({"id": product_id, "farm_id": farm_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Product not found or doesn't belong to this farm")
+    return {"message": "Product deleted successfully"}
+
+
+@api_router.get("/farmer/{farm_id}/orders")
+async def get_farmer_orders(farm_id: str):
+    """Get orders containing this farm's products"""
+    farm = await db.farms.find_one({"id": farm_id})
+    if not farm:
+        raise HTTPException(status_code=404, detail="Farm not found")
+    
+    # Find orders with products from this farm
+    orders = await db.orders.find(
+        {"items.farm_name": farm["name"]}
+    ).sort("created_at", -1).to_list(100)
+    
+    # Filter items to only show this farm's products
+    farm_orders = []
+    for order in orders:
+        farm_items = [item for item in order["items"] if item["farm_name"] == farm["name"]]
+        farm_subtotal = sum(item["subtotal"] for item in farm_items)
+        farm_orders.append({
+            "order_id": order["id"],
+            "order_status": order["order_status"],
+            "created_at": order["created_at"],
+            "items": farm_items,
+            "farm_subtotal": farm_subtotal,
+            "delivery_address": order["delivery_address"],
+        })
+    
+    return farm_orders
 
 
 # ==================== DATA SEEDING ====================

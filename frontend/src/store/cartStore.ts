@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Product } from '@/data/products';
 
 export interface CartItem {
@@ -40,6 +41,8 @@ interface CartStore {
   couponItems: CouponCartItem[];
   upgradeItem: UpgradeCartItem | null;
   isOpen: boolean;
+  userId: string | null;
+  setUserId: (userId: string | null) => void;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -58,98 +61,114 @@ interface CartStore {
   hasItems: () => boolean;
 }
 
-export const useCartStore = create<CartStore>((set, get) => ({
-  items: [],
-  couponItems: [],
-  upgradeItem: null,
-  isOpen: false,
+export const useCartStore = create<CartStore>()(
+  persist(
+    (set, get) => ({
+      items: [],
+      couponItems: [],
+      upgradeItem: null,
+      isOpen: false,
+      userId: null,
+
+      setUserId: (userId) => set({ userId }),
   
-  addItem: (product, quantity = 1) => {
-    set((state) => {
-      const existingItem = state.items.find(item => item.product.id === product.id);
-      if (existingItem) {
-        return {
+      addItem: (product, quantity = 1) => {
+        set((state) => {
+          const existingItem = state.items.find(item => item.product.id === product.id);
+          if (existingItem) {
+            return {
+              items: state.items.map(item =>
+                item.product.id === product.id
+                  ? { ...item, quantity: item.quantity + quantity }
+                  : item
+              ),
+            };
+          }
+          return { items: [...state.items, { product, quantity }] };
+        });
+      },
+  
+      removeItem: (productId) => {
+        set((state) => ({
+          items: state.items.filter(item => item.product.id !== productId),
+        }));
+      },
+  
+      updateQuantity: (productId, quantity) => {
+        if (quantity <= 0) {
+          get().removeItem(productId);
+          return;
+        }
+        set((state) => ({
           items: state.items.map(item =>
-            item.product.id === product.id
-              ? { ...item, quantity: item.quantity + quantity }
-              : item
+            item.product.id === productId ? { ...item, quantity } : item
           ),
-        };
-      }
-      return { items: [...state.items, { product, quantity }] };
-    });
-  },
+        }));
+      },
+
+      addCoupon: (coupon) => {
+        set((state) => ({
+          couponItems: [...state.couponItems, coupon],
+        }));
+      },
+
+      removeCoupon: (id) => {
+        set((state) => ({
+          couponItems: state.couponItems.filter(c => c.id !== id),
+        }));
+      },
+
+      updateCouponRecipient: (id, recipient, details) => {
+        set((state) => ({
+          couponItems: state.couponItems.map(c =>
+            c.id === id ? { ...c, recipient, recipientDetails: details } : c
+          ),
+        }));
+      },
   
-  removeItem: (productId) => {
-    set((state) => ({
-      items: state.items.filter(item => item.product.id !== productId),
-    }));
-  },
+      setUpgrade: (upgrade) => set({ upgradeItem: upgrade }),
+
+      clearCart: () => set({ items: [], couponItems: [], upgradeItem: null }),
   
-  updateQuantity: (productId, quantity) => {
-    if (quantity <= 0) {
-      get().removeItem(productId);
-      return;
+      toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
+  
+      setCartOpen: (open) => set({ isOpen: open }),
+  
+      getTotalItems: () => {
+        return get().items.reduce((sum, item) => sum + item.quantity, 0) + get().couponItems.length;
+      },
+  
+      getTotalPrice: () => {
+        return get().items.reduce(
+          (sum, item) => sum + item.product.price * item.quantity,
+          0
+        );
+      },
+
+      getProductSubtotal: () => {
+        return get().items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+      },
+
+      getCouponSubtotal: () => {
+        return get().couponItems.reduce((sum, c) => sum + c.price, 0);
+      },
+
+      getUpgradeSubtotal: () => {
+        return get().upgradeItem?.upgradeCost || 0;
+      },
+
+      hasItems: () => {
+        return get().items.length > 0 || get().couponItems.length > 0 || get().upgradeItem !== null;
+      },
+    }),
+    {
+      name: 'terra-cart-storage',
+      partialize: (state) => ({
+        items: state.items,
+        couponItems: state.couponItems,
+        upgradeItem: state.upgradeItem,
+        userId: state.userId,
+      }),
     }
-    set((state) => ({
-      items: state.items.map(item =>
-        item.product.id === productId ? { ...item, quantity } : item
-      ),
-    }));
-  },
-
-  addCoupon: (coupon) => {
-    set((state) => ({
-      couponItems: [...state.couponItems, coupon],
-    }));
-  },
-
-  removeCoupon: (id) => {
-    set((state) => ({
-      couponItems: state.couponItems.filter(c => c.id !== id),
-    }));
-  },
-
-  updateCouponRecipient: (id, recipient, details) => {
-    set((state) => ({
-      couponItems: state.couponItems.map(c =>
-        c.id === id ? { ...c, recipient, recipientDetails: details } : c
-      ),
-    }));
-  },
-  
-  setUpgrade: (upgrade) => set({ upgradeItem: upgrade }),
-
-  clearCart: () => set({ items: [], couponItems: [], upgradeItem: null }),
-  
-  toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
-  
-  setCartOpen: (open) => set({ isOpen: open }),
-  
-  getTotalItems: () => {
-    return get().items.reduce((sum, item) => sum + item.quantity, 0) + get().couponItems.length;
-  },
-  
-  getTotalPrice: () => {
-    return get().items.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
-      0
-    );
-  },
-
-  getProductSubtotal: () => {
-    return get().items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  },
-
-  getCouponSubtotal: () => {
-    return get().couponItems.reduce((sum, c) => sum + c.price, 0);
-  },
-
-  getUpgradeSubtotal: () => {
-    return get().upgradeItem?.upgradeCost || 0;
-  },
-
-  hasItems: () => {
-    return get().items.length > 0 || get().couponItems.length > 0 || get().upgradeItem !== null;
-  },
-}));
+  )
+);

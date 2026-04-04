@@ -180,6 +180,84 @@ backend:
         agent: "testing"
         comment: "✅ ALL TESTS PASSED - Database seeding working correctly. Database already seeded with 32 products and 10 farms. Seed endpoint properly prevents duplicate seeding."
 
+  - task: "Admin Stats API - GET /api/admin/stats"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented admin dashboard statistics endpoint returning total_orders, pending_orders, total_products, total_farms, total_revenue, recent_orders"
+      - working: true
+        agent: "testing"
+        comment: "✅ ADMIN STATS API WORKING - Returns all required fields: total_orders (4), total_products (32), total_farms (10), total_revenue (₱590), pending_orders, and recent_orders array. All data accurate and properly calculated."
+
+  - task: "Admin Orders API - GET /api/admin/orders"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented admin orders listing with status filtering and order status update functionality"
+      - working: true
+        agent: "testing"
+        comment: "✅ ADMIN ORDERS API WORKING - Successfully tested: GET /api/admin/orders (found 4 orders), GET /api/admin/orders?status=pending (found 3 pending orders), PUT /api/admin/orders/{order_id}/status?status=confirmed (status updated successfully). All endpoints working with proper filtering and status updates."
+
+  - task: "Farmer Stats API - GET /api/farmer/{farm_id}/stats"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented farmer dashboard statistics for farm_id saymayat-vegetable returning farm info, product_count, total_orders, total_revenue"
+      - working: true
+        agent: "testing"
+        comment: "✅ FARMER STATS API WORKING - Successfully tested with farm_id 'saymayat-vegetable'. Returns all required fields: farm object (Saymayat Vegetable Farming), product_count (5), total_orders (4), total_revenue (₱390). Revenue calculation correctly aggregates orders containing this farm's products."
+
+  - task: "Farmer Products API - CRUD operations"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented farmer product management: list products, add new product, update product, delete product for specific farm"
+      - working: false
+        agent: "testing"
+        comment: "❌ FARMER PRODUCT CREATION FAILED - POST /api/farmer/saymayat-vegetable/products returns 422 error requiring farm_id and farm_name fields in request body, but these should be set automatically by the endpoint."
+      - working: true
+        agent: "testing"
+        comment: "✅ FARMER PRODUCTS API WORKING - Fixed ProductCreate model issue by creating FarmerProductCreate model without farm_id/farm_name requirements. Successfully tested: GET /api/farmer/saymayat-vegetable/products (5 products), POST /api/farmer/saymayat-vegetable/products (created Test Spinach), PUT /api/farmer/saymayat-vegetable/products/{id} (updated stock to 100), DELETE /api/farmer/saymayat-vegetable/products/{id} (deleted successfully). All CRUD operations working correctly."
+
+  - task: "Farmer Orders API - GET /api/farmer/{farm_id}/orders"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented farmer orders listing showing orders containing products from specific farm with filtered items and farm subtotals"
+      - working: true
+        agent: "testing"
+        comment: "✅ FARMER ORDERS API WORKING - Successfully tested GET /api/farmer/saymayat-vegetable/orders. Found 4 orders containing this farm's products. Response correctly filters items to show only this farm's products and calculates farm-specific subtotals."
+
 frontend:
   - task: "Shop page using backend API"
     implemented: true
@@ -252,3 +330,5 @@ agent_communication:
     message: "Fixed product ID issue in ProductOffersPage.tsx line 63. Changed from composite ID to using offer.farmProductId directly. This ensures cart items use the actual backend product IDs. Please retest the complete checkout flow."
   - agent: "testing"
     message: "✅ CHECKOUT FLOW TEST PASSED - Complete end-to-end checkout flow now working perfectly after the product ID fix. Successfully tested: product page load → add to cart → cart drawer → checkout form → order placement → order confirmation. All API calls returning 200 status. Order created successfully with proper cart sync. The Terra Farming MVP is now fully functional with working backend APIs and complete checkout flow. Ready for production."
+  - agent: "testing"
+    message: "✅ NEW ADMIN & FARMER API ENDPOINTS TESTING COMPLETE - All 30 backend API tests passed with 100% success rate. Successfully tested all NEW endpoints: Admin Stats API (returns total_orders, pending_orders, total_products, total_farms, total_revenue, recent_orders), Admin Orders API (list all orders, filter by status, update order status), Farmer Stats API for saymayat-vegetable farm (returns farm info, product_count, total_orders, total_revenue), Farmer Products API (list, create, update, delete products), and Farmer Orders API (list orders containing farm's products). Fixed one minor issue with FarmerProductCreate model. All endpoints returning proper JSON responses with correct data as specified in review request."

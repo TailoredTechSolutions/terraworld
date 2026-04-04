@@ -7,7 +7,8 @@ import Footer from "@/components/Footer";
 import DetailedFarmCard from "@/components/DetailedFarmCard";
 import FarmMap from "@/components/maps/FarmMap";
 import DeliveryTracker from "@/components/maps/DeliveryTracker";
-import { farms, Farm } from "@/data/products";
+import { Farm as StaticFarm } from "@/data/products";
+import { useFarms } from "@/hooks/useApiData";
 import { useUserLocation, calculateDistance } from "@/hooks/useUserLocation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -28,8 +29,39 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import farmsHero from "@/assets/farms-hero.jpg";
+
+// Convert API Farm to UI Farm format
+interface Farm extends StaticFarm {}
+
+const convertApiFarmToUiFarm = (apiFarm: any): Farm => ({
+  id: apiFarm.id,
+  name: apiFarm.name,
+  owner: apiFarm.owner,
+  latitude: apiFarm.latitude,
+  longitude: apiFarm.longitude,
+  rating: apiFarm.rating || 0,
+  reviewCount: apiFarm.review_count || 0,
+  image: apiFarm.image || "/images/farms/default.jpg",
+  description: apiFarm.description || "",
+  products: apiFarm.products || [],
+  contact: apiFarm.contact,
+  farmType: apiFarm.farm_type,
+  certificate: apiFarm.certificate,
+  program: apiFarm.program,
+  municipality: apiFarm.municipality,
+  province: apiFarm.province,
+  elevation: apiFarm.elevation,
+  farmArea: apiFarm.farm_area,
+  established: apiFarm.established,
+  specialties: apiFarm.specialties || [],
+  categories: apiFarm.categories || [],
+  operatingHours: apiFarm.operating_hours,
+  deliveryAvailable: apiFarm.delivery_available || false,
+  organicCertified: apiFarm.organic_certified || false,
+});
 
 const cubicSmooth = [0.22, 1, 0.36, 1] as const;
 
@@ -57,6 +89,10 @@ const MapPage = () => {
   const heroScale = useTransform(scrollY, [0, 500], [1, 1.15]);
 
   const { location, error: locationError, loading: locationLoading, requestLocation } = useUserLocation();
+  
+  // Fetch farms from backend API
+  const { data: apiFarms, isLoading: farmsLoading } = useFarms();
+  const farms: Farm[] = (apiFarms || []).map(convertApiFarmToUiFarm);
 
   const handleCategoryClick = (catId: string) => {
     setActiveCategory(catId);
@@ -74,7 +110,7 @@ const MapPage = () => {
 
   useEffect(() => {
     const farmId = searchParams.get("farm");
-    if (farmId) {
+    if (farmId && farms.length > 0) {
       const farm = farms.find(f => f.id === farmId);
       if (farm) {
         setSelectedFarm(farm);

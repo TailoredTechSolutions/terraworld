@@ -197,6 +197,104 @@ export function useCancelOrder() {
     mutationFn: (orderId: string) => orderApi.cancel(orderId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
+    },
+  });
+}
+
+// ==================== ADMIN HOOKS ====================
+
+import { adminApi, farmerApi, AdminStats, FarmerStats, FarmerOrder } from '@/services/api';
+
+export function useAdminStats() {
+  return useQuery({
+    queryKey: ['admin-stats'],
+    queryFn: () => adminApi.getStats(),
+    staleTime: 1000 * 30, // 30 seconds
+  });
+}
+
+export function useAdminOrders(params?: { status?: string }) {
+  return useQuery({
+    queryKey: ['admin-orders', params],
+    queryFn: () => adminApi.getAllOrders(params),
+    staleTime: 1000 * 30, // 30 seconds
+  });
+}
+
+export function useAdminUpdateOrderStatus() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ orderId, status }: { orderId: string; status: Order['order_status'] }) =>
+      adminApi.updateOrderStatus(orderId, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+    },
+  });
+}
+
+// ==================== FARMER HOOKS ====================
+
+export function useFarmerStats(farmId: string) {
+  return useQuery({
+    queryKey: ['farmer-stats', farmId],
+    queryFn: () => farmerApi.getStats(farmId),
+    enabled: !!farmId,
+  });
+}
+
+export function useFarmerProducts(farmId: string) {
+  return useQuery({
+    queryKey: ['farmer-products', farmId],
+    queryFn: () => farmerApi.getProducts(farmId),
+    enabled: !!farmId,
+  });
+}
+
+export function useFarmerOrders(farmId: string) {
+  return useQuery({
+    queryKey: ['farmer-orders', farmId],
+    queryFn: () => farmerApi.getOrders(farmId),
+    enabled: !!farmId,
+  });
+}
+
+export function useAddFarmerProduct() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ farmId, product }: { farmId: string; product: Omit<Product, 'id' | 'farm_id' | 'farm_name' | 'created_at' | 'updated_at'> }) =>
+      farmerApi.addProduct(farmId, product),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['farmer-products', variables.farmId] });
+      queryClient.invalidateQueries({ queryKey: ['farmer-stats', variables.farmId] });
+    },
+  });
+}
+
+export function useUpdateFarmerProduct() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ farmId, productId, product }: { farmId: string; productId: string; product: Partial<Product> }) =>
+      farmerApi.updateProduct(farmId, productId, product),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['farmer-products', variables.farmId] });
+    },
+  });
+}
+
+export function useDeleteFarmerProduct() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ farmId, productId }: { farmId: string; productId: string }) =>
+      farmerApi.deleteProduct(farmId, productId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['farmer-products', variables.farmId] });
+      queryClient.invalidateQueries({ queryKey: ['farmer-stats', variables.farmId] });
     },
   });
 }
