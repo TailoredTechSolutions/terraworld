@@ -8,7 +8,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 import json
 import asyncio
@@ -365,6 +365,89 @@ class DeliveryAssignment(BaseModel):
 class DriverLocationUpdate(BaseModel):
     latitude: float
     longitude: float
+
+
+# Review Models
+class Review(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    user_name: str
+    product_id: Optional[str] = None
+    farm_id: Optional[str] = None
+    order_id: Optional[str] = None
+    rating: int = Field(ge=1, le=5)
+    comment: str
+    images: List[str] = []
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class ReviewCreate(BaseModel):
+    product_id: Optional[str] = None
+    farm_id: Optional[str] = None
+    order_id: Optional[str] = None
+    rating: int = Field(ge=1, le=5)
+    comment: str
+    images: List[str] = []
+
+
+# Coupon/Promotion Models
+class CouponType(str, Enum):
+    PERCENTAGE = "percentage"
+    FIXED = "fixed"
+    FREE_DELIVERY = "free_delivery"
+
+
+class Coupon(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    code: str
+    coupon_type: CouponType
+    value: float  # Percentage (0-100) or fixed amount
+    min_order: float = 0
+    max_discount: Optional[float] = None
+    usage_limit: Optional[int] = None
+    used_count: int = 0
+    valid_from: datetime = Field(default_factory=datetime.utcnow)
+    valid_until: Optional[datetime] = None
+    is_active: bool = True
+    description: str = ""
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class CouponCreate(BaseModel):
+    code: str
+    coupon_type: CouponType
+    value: float
+    min_order: float = 0
+    max_discount: Optional[float] = None
+    usage_limit: Optional[int] = None
+    valid_until: Optional[datetime] = None
+    description: str = ""
+
+
+class ApplyCouponRequest(BaseModel):
+    code: str
+    subtotal: float
+
+
+# Analytics Models
+class AnalyticsTimeframe(str, Enum):
+    DAY = "day"
+    WEEK = "week"
+    MONTH = "month"
+    YEAR = "year"
+
+
+# Email Notification Models (Mock)
+class EmailNotification(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    to_email: str
+    subject: str
+    body: str
+    template: str
+    data: dict = {}
+    status: str = "pending"
+    sent_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 # ==================== ROUTES ====================
@@ -1370,6 +1453,436 @@ async def update_driver_location(driver_id: str, location: DriverLocationUpdate)
     return {"message": "Location updated"}
 
 
+# ==================== REVIEWS & RATINGS ROUTES ====================
+
+@api_router.post("/reviews", response_model=Review)
+async def create_review(user_id: str, user_name: str, review: ReviewCreate):
+    """Create a new review"""
+    review_obj = Review(
+        user_id=user_id,
+        user_name=user_name,
+        **review.dict()
+    )
+    await db.reviews.insert_one(review_obj.dict())
+    
+    # Update product/farm rating
+    if review.product_id:
+        await update_product_rating(review.product_id)
+    if review.farm_id:
+        await update_farm_rating(review.farm_id)
+    
+    return review_obj
+
+
+async def update_product_rating(product_id: str):
+    """Recalculate and update product average rating"""
+    pipeline = [
+        {"$match": {"product_id": product_id}},
+        {"$group": {"_id": None, "avg_rating": {"$avg": "$rating"}, "count": {"$sum": 1}}}
+    ]
+    result = await db.reviews.aggregate(pipeline).to_list(1)
+    if result:
+        await db.products.update_one(
+            {"id": product_id},
+            {"$set": {"rating": result[0]["avg_rating"], "review_count": result[0]["count"]}}
+        )
+
+
+async def update_farm_rating(farm_id: str):
+    """Recalculate and update farm average rating"""
+    pipeline = [
+        {"$match": {"farm_id": farm_id}},
+        {"$group": {"_id": None, "avg_rating": {"$avg": "$rating"}, "count": {"$sum": 1}}}
+    ]
+    result = await db.reviews.aggregate(pipeline).to_list(1)
+    if result:
+        await db.farms.update_one(
+            {"id": farm_id},
+            {"$set": {"rating": result[0]["avg_rating"], "review_count": result[0]["count"]}}
+        )
+
+
+@api_router.get("/reviews/product/{product_id}")
+async def get_product_reviews(product_id: str, skip: int = 0, limit: int = 20):
+    """Get reviews for a product"""
+    reviews = await db.reviews.find({"product_id": product_id}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    total = await db.reviews.count_documents({"product_id": product_id})
+    
+    # Calculate rating distribution
+    pipeline = [
+        {"$match": {"product_id": product_id}},
+        {"$group": {"_id": "$rating", "count": {"$sum": 1}}}
+    ]
+    distribution = {i: 0 for i in range(1, 6)}
+    async for doc in db.reviews.aggregate(pipeline):
+        distribution[doc["_id"]] = doc["count"]
+    
+    avg_pipeline = [
+        {"$match": {"product_id": product_id}},
+        {"$group": {"_id": None, "avg": {"$avg": "$rating"}}}
+    ]
+    avg_result = await db.reviews.aggregate(avg_pipeline).to_list(1)
+    avg_rating = avg_result[0]["avg"] if avg_result else 0
+    
+    return {
+        "reviews": reviews,
+        "total": total,
+        "average_rating": avg_rating,
+        "distribution": distribution
+    }
+
+
+@api_router.get("/reviews/farm/{farm_id}")
+async def get_farm_reviews(farm_id: str, skip: int = 0, limit: int = 20):
+    """Get reviews for a farm"""
+    reviews = await db.reviews.find({"farm_id": farm_id}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    total = await db.reviews.count_documents({"farm_id": farm_id})
+    
+    avg_pipeline = [
+        {"$match": {"farm_id": farm_id}},
+        {"$group": {"_id": None, "avg": {"$avg": "$rating"}}}
+    ]
+    avg_result = await db.reviews.aggregate(avg_pipeline).to_list(1)
+    avg_rating = avg_result[0]["avg"] if avg_result else 0
+    
+    return {
+        "reviews": reviews,
+        "total": total,
+        "average_rating": avg_rating
+    }
+
+
+# ==================== COUPONS & PROMOTIONS ROUTES ====================
+
+@api_router.post("/coupons", response_model=Coupon)
+async def create_coupon(coupon: CouponCreate):
+    """Create a new coupon (admin)"""
+    # Check if code already exists
+    existing = await db.coupons.find_one({"code": coupon.code.upper()})
+    if existing:
+        raise HTTPException(status_code=400, detail="Coupon code already exists")
+    
+    coupon_obj = Coupon(
+        code=coupon.code.upper(),
+        **{k: v for k, v in coupon.dict().items() if k != "code"}
+    )
+    await db.coupons.insert_one(coupon_obj.dict())
+    return coupon_obj
+
+
+@api_router.get("/coupons")
+async def get_all_coupons():
+    """Get all coupons (admin)"""
+    coupons = await db.coupons.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return coupons
+
+
+@api_router.post("/coupons/validate")
+async def validate_coupon(request: ApplyCouponRequest):
+    """Validate and calculate coupon discount"""
+    coupon = await db.coupons.find_one({"code": request.code.upper(), "is_active": True})
+    
+    if not coupon:
+        raise HTTPException(status_code=404, detail="Invalid coupon code")
+    
+    # Check validity period
+    now = datetime.utcnow()
+    if coupon.get("valid_until") and now > coupon["valid_until"]:
+        raise HTTPException(status_code=400, detail="Coupon has expired")
+    
+    # Check usage limit
+    if coupon.get("usage_limit") and coupon.get("used_count", 0) >= coupon["usage_limit"]:
+        raise HTTPException(status_code=400, detail="Coupon usage limit reached")
+    
+    # Check minimum order
+    if request.subtotal < coupon.get("min_order", 0):
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Minimum order of ₱{coupon['min_order']} required for this coupon"
+        )
+    
+    # Calculate discount
+    if coupon["coupon_type"] == "percentage":
+        discount = request.subtotal * (coupon["value"] / 100)
+        if coupon.get("max_discount"):
+            discount = min(discount, coupon["max_discount"])
+    elif coupon["coupon_type"] == "fixed":
+        discount = min(coupon["value"], request.subtotal)
+    elif coupon["coupon_type"] == "free_delivery":
+        discount = 50  # Standard delivery fee
+    else:
+        discount = 0
+    
+    return {
+        "valid": True,
+        "code": coupon["code"],
+        "coupon_type": coupon["coupon_type"],
+        "discount": discount,
+        "description": coupon.get("description", ""),
+        "message": f"Coupon applied! You save ₱{discount:.2f}"
+    }
+
+
+@api_router.post("/coupons/apply")
+async def apply_coupon(code: str):
+    """Mark coupon as used (increment usage count)"""
+    result = await db.coupons.update_one(
+        {"code": code.upper(), "is_active": True},
+        {"$inc": {"used_count": 1}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Coupon not found")
+    return {"message": "Coupon applied successfully"}
+
+
+@api_router.delete("/coupons/{coupon_id}")
+async def delete_coupon(coupon_id: str):
+    """Delete a coupon (admin)"""
+    result = await db.coupons.delete_one({"id": coupon_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Coupon not found")
+    return {"message": "Coupon deleted"}
+
+
+# ==================== ANALYTICS ROUTES ====================
+
+@api_router.get("/analytics/overview")
+async def get_analytics_overview():
+    """Get overall analytics overview"""
+    now = datetime.utcnow()
+    thirty_days_ago = now - timedelta(days=30)
+    seven_days_ago = now - timedelta(days=7)
+    
+    # Total revenue
+    revenue_pipeline = [
+        {"$match": {"order_status": {"$ne": "cancelled"}}},
+        {"$group": {"_id": None, "total": {"$sum": "$total"}, "count": {"$sum": 1}}}
+    ]
+    total_result = await db.orders.aggregate(revenue_pipeline).to_list(1)
+    total_revenue = total_result[0]["total"] if total_result else 0
+    total_orders = total_result[0]["count"] if total_result else 0
+    
+    # Last 30 days revenue
+    monthly_pipeline = [
+        {"$match": {"order_status": {"$ne": "cancelled"}, "created_at": {"$gte": thirty_days_ago}}},
+        {"$group": {"_id": None, "total": {"$sum": "$total"}, "count": {"$sum": 1}}}
+    ]
+    monthly_result = await db.orders.aggregate(monthly_pipeline).to_list(1)
+    monthly_revenue = monthly_result[0]["total"] if monthly_result else 0
+    monthly_orders = monthly_result[0]["count"] if monthly_result else 0
+    
+    # Last 7 days revenue
+    weekly_pipeline = [
+        {"$match": {"order_status": {"$ne": "cancelled"}, "created_at": {"$gte": seven_days_ago}}},
+        {"$group": {"_id": None, "total": {"$sum": "$total"}, "count": {"$sum": 1}}}
+    ]
+    weekly_result = await db.orders.aggregate(weekly_pipeline).to_list(1)
+    weekly_revenue = weekly_result[0]["total"] if weekly_result else 0
+    weekly_orders = weekly_result[0]["count"] if weekly_result else 0
+    
+    # Average order value
+    avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
+    
+    # Product and farm counts
+    total_products = await db.products.count_documents({})
+    total_farms = await db.farms.count_documents({})
+    total_drivers = await db.drivers.count_documents({})
+    
+    return {
+        "total_revenue": total_revenue,
+        "total_orders": total_orders,
+        "monthly_revenue": monthly_revenue,
+        "monthly_orders": monthly_orders,
+        "weekly_revenue": weekly_revenue,
+        "weekly_orders": weekly_orders,
+        "average_order_value": avg_order_value,
+        "total_products": total_products,
+        "total_farms": total_farms,
+        "total_drivers": total_drivers,
+    }
+
+
+@api_router.get("/analytics/revenue-chart")
+async def get_revenue_chart(days: int = 30):
+    """Get revenue data for chart"""
+    from datetime import timedelta
+    
+    end_date = datetime.utcnow()
+    start_date = end_date - timedelta(days=days)
+    
+    pipeline = [
+        {"$match": {
+            "order_status": {"$ne": "cancelled"},
+            "created_at": {"$gte": start_date, "$lte": end_date}
+        }},
+        {"$group": {
+            "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$created_at"}},
+            "revenue": {"$sum": "$total"},
+            "orders": {"$sum": 1}
+        }},
+        {"$sort": {"_id": 1}}
+    ]
+    
+    result = await db.orders.aggregate(pipeline).to_list(100)
+    
+    # Fill in missing dates with zeros
+    chart_data = []
+    current_date = start_date
+    result_dict = {r["_id"]: r for r in result}
+    
+    while current_date <= end_date:
+        date_str = current_date.strftime("%Y-%m-%d")
+        if date_str in result_dict:
+            chart_data.append({
+                "date": date_str,
+                "revenue": result_dict[date_str]["revenue"],
+                "orders": result_dict[date_str]["orders"]
+            })
+        else:
+            chart_data.append({"date": date_str, "revenue": 0, "orders": 0})
+        current_date += timedelta(days=1)
+    
+    return chart_data
+
+
+@api_router.get("/analytics/top-products")
+async def get_top_products(limit: int = 10):
+    """Get top selling products"""
+    pipeline = [
+        {"$match": {"order_status": {"$ne": "cancelled"}}},
+        {"$unwind": "$items"},
+        {"$group": {
+            "_id": "$items.product_id",
+            "product_name": {"$first": "$items.product_name"},
+            "farm_name": {"$first": "$items.farm_name"},
+            "total_quantity": {"$sum": "$items.quantity"},
+            "total_revenue": {"$sum": "$items.subtotal"}
+        }},
+        {"$sort": {"total_revenue": -1}},
+        {"$limit": limit}
+    ]
+    
+    result = await db.orders.aggregate(pipeline).to_list(limit)
+    return result
+
+
+@api_router.get("/analytics/top-farms")
+async def get_top_farms(limit: int = 10):
+    """Get top performing farms"""
+    pipeline = [
+        {"$match": {"order_status": {"$ne": "cancelled"}}},
+        {"$unwind": "$items"},
+        {"$group": {
+            "_id": "$items.farm_name",
+            "total_orders": {"$sum": 1},
+            "total_revenue": {"$sum": "$items.subtotal"},
+            "total_items": {"$sum": "$items.quantity"}
+        }},
+        {"$sort": {"total_revenue": -1}},
+        {"$limit": limit}
+    ]
+    
+    result = await db.orders.aggregate(pipeline).to_list(limit)
+    return result
+
+
+@api_router.get("/analytics/order-status-distribution")
+async def get_order_status_distribution():
+    """Get distribution of order statuses"""
+    pipeline = [
+        {"$group": {"_id": "$order_status", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    
+    result = await db.orders.aggregate(pipeline).to_list(10)
+    return {r["_id"]: r["count"] for r in result}
+
+
+# ==================== EMAIL NOTIFICATIONS (MOCK) ====================
+
+async def send_email_notification(to_email: str, subject: str, template: str, data: dict):
+    """Mock email sender - logs to database"""
+    email = {
+        "id": str(uuid.uuid4()),
+        "to_email": to_email,
+        "subject": subject,
+        "template": template,
+        "data": data,
+        "body": generate_email_body(template, data),
+        "status": "sent",  # In mock, always "sent"
+        "sent_at": datetime.utcnow(),
+        "created_at": datetime.utcnow(),
+    }
+    await db.emails.insert_one(email)
+    logger.info(f"📧 Email sent to {to_email}: {subject}")
+    return email
+
+
+def generate_email_body(template: str, data: dict) -> str:
+    """Generate email body from template"""
+    templates = {
+        "order_confirmation": f"""
+Dear {data.get('customer_name', 'Customer')},
+
+Thank you for your order #{data.get('order_id', '')[:8]}!
+
+Order Total: ₱{data.get('total', 0):.2f}
+Items: {data.get('items_count', 0)} item(s)
+
+Your order is being prepared and will be delivered soon.
+
+Thank you for shopping with Terra Farming!
+        """,
+        "order_shipped": f"""
+Great news! Your order #{data.get('order_id', '')[:8]} is on its way!
+
+Driver: {data.get('driver_name', 'Our delivery partner')}
+Estimated arrival: {data.get('eta', '45-60 minutes')}
+
+Track your order in the Terra Farming app.
+        """,
+        "order_delivered": f"""
+Your order #{data.get('order_id', '')[:8]} has been delivered!
+
+We hope you enjoy your fresh produce from local farms.
+
+Please rate your experience in the app.
+
+Thank you for supporting local farmers!
+        """,
+        "payment_confirmed": f"""
+Payment Confirmed!
+
+Order: #{data.get('order_id', '')[:8]}
+Amount: ₱{data.get('amount', 0):.2f}
+Method: {data.get('payment_method', 'N/A')}
+
+Your order is now being prepared.
+        """,
+    }
+    return templates.get(template, f"Notification: {data}")
+
+
+@api_router.get("/emails")
+async def get_sent_emails(limit: int = 50):
+    """Get sent emails (admin view)"""
+    emails = await db.emails.find({}, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    return emails
+
+
+@api_router.post("/emails/send-test")
+async def send_test_email(to_email: str, template: str = "order_confirmation"):
+    """Send a test email"""
+    test_data = {
+        "customer_name": "Test Customer",
+        "order_id": "test-order-12345678",
+        "total": 500.00,
+        "items_count": 3,
+    }
+    email = await send_email_notification(to_email, f"Test: {template}", template, test_data)
+    return {"message": "Test email sent", "email_id": email["id"]}
+
+
 # ==================== DATA SEEDING ====================
 
 @api_router.post("/seed")
@@ -1446,6 +1959,18 @@ async def startup_db_client():
     await db.deliveries.create_index("id", unique=True)
     await db.deliveries.create_index("order_id")
     await db.deliveries.create_index("driver_id")
+    
+    # Indexes for reviews, coupons, emails
+    await db.reviews.create_index("id", unique=True)
+    await db.reviews.create_index("product_id")
+    await db.reviews.create_index("farm_id")
+    await db.reviews.create_index("user_id")
+    
+    await db.coupons.create_index("id", unique=True)
+    await db.coupons.create_index("code", unique=True)
+    
+    await db.emails.create_index("id", unique=True)
+    await db.emails.create_index("to_email")
     
     logger.info("Database indexes created")
 

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, Menu, X, LogOut, LogIn, ShoppingBag, Tractor, Truck, Shield, Crown, Users, Home, Briefcase } from "lucide-react";
+import { ShoppingCart, Menu, X, LogOut, LogIn, ShoppingBag, Tractor, Truck, Shield, Crown, Users, Home, Briefcase, BarChart3, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { useState } from "react";
@@ -44,13 +44,18 @@ const Header = () => {
     if (isAnyAdmin) {
       // Admins/Super Admins get access to ALL dashboards
       links.push({ path: "/admin", label: "Admin Dashboard", icon: Shield });
+      links.push({ path: "/analytics", label: "Analytics", icon: BarChart3 });
       links.push({ path: "/buyer", label: "Buyer Dashboard", icon: ShoppingBag });
       links.push({ path: "/farmer", label: "Farmer Dashboard", icon: Tractor });
+      links.push({ path: "/farmer/manage", label: "Farmer Management", icon: Leaf });
       links.push({ path: "/driver", label: "Driver Dashboard", icon: Truck });
       links.push({ path: "/business-centre", label: "Business Centre", icon: Briefcase });
     } else {
       if (isBuyer) links.push({ path: "/buyer", label: "Buyer Dashboard", icon: ShoppingBag });
-      if (isFarmer) links.push({ path: "/farmer", label: "Farmer Dashboard", icon: Tractor });
+      if (isFarmer) {
+        links.push({ path: "/farmer", label: "Farmer Dashboard", icon: Tractor });
+        links.push({ path: "/farmer/manage", label: "Farmer Management", icon: Leaf });
+      }
       if (isDriver) links.push({ path: "/driver", label: "Driver Dashboard", icon: Truck });
       if (isMember || isAffiliate) links.push({ path: "/business-centre", label: "Business Centre", icon: Briefcase });
       if (links.length === 0 && user) links.push({ path: "/buyer", label: "My Dashboard", icon: ShoppingBag });

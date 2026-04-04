@@ -29,8 +29,15 @@ import PaymentModal from "@/components/PaymentModal";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { orderApi, DeliveryAddress } from "@/services/api";
+import { orderApi, couponApi, CouponValidation, DeliveryAddress } from "@/services/api";
 import { useAuth } from "@/hooks/useAuth";
+
+interface AppliedCoupon {
+  code: string;
+  coupon_type: string;
+  discount: number;
+  description: string;
+}
 
 const checkoutSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(50, "First name too long"),
@@ -64,6 +71,10 @@ const CheckoutPage = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
   const [pendingOrderTotal, setPendingOrderTotal] = useState<number>(0);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState("");
 
   const hasProducts = items.length > 0;
   const hasCoupons = couponItems.length > 0;
@@ -86,7 +97,38 @@ const CheckoutPage = () => {
   const upgradeSubtotal = getUpgradeSubtotal();
   // Simplified pricing for MVP
   const deliveryFee = hasProducts && productSubtotal < 500 ? 50 : 0;
-  const total = productSubtotal + deliveryFee + couponSubtotal + upgradeSubtotal;
+  const couponDiscount = appliedCoupon?.discount || 0;
+  const total = Math.max(0, productSubtotal + deliveryFee + couponSubtotal + upgradeSubtotal - couponDiscount);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError("");
+    try {
+      const result = await couponApi.validate(couponCode.trim(), productSubtotal + couponSubtotal + upgradeSubtotal);
+      if (result.valid) {
+        setAppliedCoupon({
+          code: result.code,
+          coupon_type: result.coupon_type,
+          discount: result.discount,
+          description: result.description,
+        });
+        toast({ title: "Coupon applied!", description: result.message });
+      } else {
+        setCouponError(result.message || "Invalid coupon code");
+      }
+    } catch (error: any) {
+      setCouponError(error.message || "Failed to validate coupon");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponError("");
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -522,6 +564,55 @@ const CheckoutPage = () => {
 
               <Separator className="bg-glass-border" />
 
+              {/* Coupon Code Input */}
+              <div className="space-y-3" data-testid="coupon-section">
+                <p className="text-sm font-medium flex items-center gap-2">
+                  <Ticket className="h-4 w-4 text-primary" />
+                  Discount Code
+                </p>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-green-500/10 border border-green-500/20">
+                    <div>
+                      <p className="text-sm font-medium text-green-600">{appliedCoupon.code}</p>
+                      <p className="text-xs text-muted-foreground">{appliedCoupon.description}</p>
+                    </div>
+                    <button
+                      onClick={handleRemoveCoupon}
+                      className="text-muted-foreground hover:text-destructive transition-colors"
+                      data-testid="remove-coupon-btn"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter coupon code"
+                      value={couponCode}
+                      onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
+                      className="glass-card border-glass-border focus:border-primary flex-1 h-9 text-sm"
+                      data-testid="coupon-input"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleApplyCoupon}
+                      disabled={couponLoading || !couponCode.trim()}
+                      className="h-9"
+                      data-testid="apply-coupon-btn"
+                    >
+                      {couponLoading ? "..." : "Apply"}
+                    </Button>
+                  </div>
+                )}
+                {couponError && (
+                  <p className="text-xs text-destructive" data-testid="coupon-error">{couponError}</p>
+                )}
+              </div>
+
+              <Separator className="bg-glass-border" />
+
               {/* Price Breakdown */}
               <div className="space-y-2 text-sm">
                 {hasProducts && (
@@ -553,6 +644,13 @@ const CheckoutPage = () => {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Rank Upgrade</span>
                     <span className="font-medium text-primary">₱{upgradeSubtotal.toLocaleString()}</span>
+                  </div>
+                )}
+
+                {appliedCoupon && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Discount ({appliedCoupon.code})</span>
+                    <span className="font-medium">-₱{couponDiscount.toFixed(2)}</span>
                   </div>
                 )}
 

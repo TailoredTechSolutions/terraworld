@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { products as localProducts } from "@/data/products";
 import { getProductImage } from "@/data/productImageMap";
 import { useCartStore } from "@/store/cartStore";
+import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
@@ -12,8 +13,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Minus, Plus, Leaf, MapPin, Truck, Shield, Star, Info } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Minus, Plus, Leaf, MapPin, Truck, Shield, Star, Info, MessageSquare, Send } from "lucide-react";
 import { useState } from "react";
+import { reviewApi, Review } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 const PLATFORM_FEE_RATE = 0.20;
 const COMMISSION_RATE = 0.10;
@@ -22,7 +26,13 @@ const VAT_RATE = 0.12;
 const ProductDetail = () => {
   const { id } = useParams();
   const { addItem } = useCartStore();
+  const { user, profile } = useAuth();
+  const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
 
   // Try DB product first, fall back to local
   const { data: dbProduct, isLoading } = useQuery({
@@ -39,6 +49,36 @@ const ProductDetail = () => {
   });
 
   const localProduct = localProducts.find((p) => p.id === id);
+
+  // Fetch product reviews
+  const { data: reviewsData, refetch: refetchReviews } = useQuery({
+    queryKey: ["product-reviews", id],
+    queryFn: () => reviewApi.getProductReviews(id!, 0, 20),
+    enabled: !!id,
+  });
+
+  const handleSubmitReview = async () => {
+    if (!user || !id || reviewRating === 0) {
+      toast({ title: "Please select a rating", variant: "destructive" });
+      return;
+    }
+    setReviewSubmitting(true);
+    try {
+      await reviewApi.createReview(user.id, profile?.full_name || user.email || "User", {
+        product_id: id,
+        rating: reviewRating,
+        comment: reviewComment,
+      });
+      toast({ title: "Review submitted!", description: "Thanks for your feedback" });
+      setReviewRating(0);
+      setReviewComment("");
+      refetchReviews();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message || "Failed to submit review", variant: "destructive" });
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
   // Normalize to a unified shape
   const product = dbProduct
@@ -345,6 +385,147 @@ const ProductDetail = () => {
                   <p className="text-xs text-muted-foreground">Freshness guaranteed</p>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-12" data-testid="reviews-section">
+          <h2 className="font-display text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+            <MessageSquare className="h-6 w-6 text-primary" />
+            Customer Reviews
+            {reviewsData && reviewsData.total > 0 && (
+              <Badge variant="secondary" className="ml-2">{reviewsData.total}</Badge>
+            )}
+          </h2>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Review Summary */}
+            <div className="lg:col-span-1">
+              <Card>
+                <CardContent className="p-6 text-center">
+                  {reviewsData && reviewsData.total > 0 ? (
+                    <>
+                      <p className="text-4xl font-bold text-primary">{reviewsData.average_rating.toFixed(1)}</p>
+                      <div className="flex items-center justify-center gap-1 my-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`h-5 w-5 ${star <= Math.round(reviewsData.average_rating) ? "fill-warning text-warning" : "text-muted"}`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-sm text-muted-foreground">{reviewsData.total} review{reviewsData.total !== 1 ? 's' : ''}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-lg font-medium text-muted-foreground mb-1">No reviews yet</p>
+                      <p className="text-sm text-muted-foreground">Be the first to review!</p>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Write Review Form */}
+              {user && (
+                <Card className="mt-4">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Write a Review</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center gap-1" data-testid="review-stars">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setReviewRating(star)}
+                          onMouseEnter={() => setHoverRating(star)}
+                          onMouseLeave={() => setHoverRating(0)}
+                          className="p-0.5"
+                          data-testid={`review-star-${star}`}
+                        >
+                          <Star
+                            className={`h-6 w-6 transition-colors ${
+                              star <= (hoverRating || reviewRating)
+                                ? "fill-warning text-warning"
+                                : "text-muted hover:text-warning/50"
+                            }`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    <Textarea
+                      placeholder="Share your experience..."
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      rows={3}
+                      className="text-sm"
+                      data-testid="review-comment"
+                    />
+                    <Button
+                      size="sm"
+                      onClick={handleSubmitReview}
+                      disabled={reviewSubmitting || reviewRating === 0}
+                      className="w-full"
+                      data-testid="submit-review-btn"
+                    >
+                      {reviewSubmitting ? "Submitting..." : (
+                        <>
+                          <Send className="h-4 w-4 mr-2" />
+                          Submit Review
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
+              {!user && (
+                <Card className="mt-4">
+                  <CardContent className="p-6 text-center">
+                    <p className="text-sm text-muted-foreground mb-3">Sign in to write a review</p>
+                    <Link to="/auth">
+                      <Button size="sm" variant="outline">Sign In</Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Reviews List */}
+            <div className="lg:col-span-2 space-y-4">
+              {reviewsData?.reviews && reviewsData.reviews.length > 0 ? (
+                reviewsData.reviews.map((review) => (
+                  <Card key={review.id} data-testid="review-item">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <p className="font-medium text-sm">{review.user_name}</p>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`h-3.5 w-3.5 ${star <= review.rating ? "fill-warning text-warning" : "text-muted"}`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(review.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      {review.comment && (
+                        <p className="text-sm text-muted-foreground leading-relaxed">{review.comment}</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <MessageSquare className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="text-muted-foreground">No reviews yet. Be the first to share your thoughts!</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

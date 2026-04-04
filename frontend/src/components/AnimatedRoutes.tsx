@@ -46,6 +46,9 @@ const AdminDashboard = lazyRetry(() => import("@/pages/AdminDashboard"));
 const AdminBackOffice = lazyRetry(() => import("@/pages/AdminBackOffice"));
 const FarmerDashboard = lazyRetry(() => import("@/pages/FarmerDashboard"));
 const BuyerDashboard = lazyRetry(() => import("@/pages/BuyerDashboard"));
+const FarmerManagementPage = lazyRetry(() => import("@/pages/FarmerManagementPage"));
+const AnalyticsDashboardPage = lazyRetry(() => import("@/pages/AnalyticsDashboardPage"));
+const LiveTrackingPage = lazyRetry(() => import("@/pages/LiveTrackingPage"));
 const AuthPage = lazyRetry(() => import("@/pages/AuthPage"));
 const ResetPasswordPage = lazyRetry(() => import("@/pages/ResetPasswordPage"));
 const KYCPage = lazyRetry(() => import("@/pages/KYCPage"));
@@ -108,6 +111,9 @@ const AnimatedRoutes = () => {
           <Route path="/admin/legacy" element={<RoleProtectedRoute allowedRoles={['admin']}><P><AdminDashboard /></P></RoleProtectedRoute>} />
           <Route path="/member" element={<Navigate to="/business-centre" replace />} />
           <Route path="/farmer" element={<RoleProtectedRoute allowedRoles={['farmer']}><P><FarmerDashboard /></P></RoleProtectedRoute>} />
+          <Route path="/farmer/manage" element={<P><FarmerManagementPage /></P>} />
+          <Route path="/analytics" element={<P><AnalyticsDashboardPage /></P>} />
+          <Route path="/tracking/:orderId" element={<ProtectedRoute><P><LiveTrackingPage /></P></ProtectedRoute>} />
 
           {/* Terra / Company */}
           <Route path="/about" element={<P><AboutPage /></P>} />

@@ -570,3 +570,199 @@ export const driverApi = {
     });
   },
 };
+
+// ==================== REVIEWS API ====================
+
+export interface Review {
+  id: string;
+  user_id: string;
+  user_name: string;
+  product_id?: string;
+  farm_id?: string;
+  order_id?: string;
+  rating: number;
+  comment: string;
+  images: string[];
+  created_at: string;
+}
+
+export interface ReviewsResponse {
+  reviews: Review[];
+  total: number;
+  average_rating: number;
+  distribution?: Record<number, number>;
+}
+
+export const reviewApi = {
+  createReview: async (userId: string, userName: string, review: {
+    product_id?: string;
+    farm_id?: string;
+    order_id?: string;
+    rating: number;
+    comment: string;
+    images?: string[];
+  }): Promise<Review> => {
+    const params = new URLSearchParams({ user_id: userId, user_name: userName });
+    return apiCall<Review>(`/reviews?${params}`, {
+      method: 'POST',
+      body: JSON.stringify(review),
+    });
+  },
+
+  getProductReviews: async (productId: string, skip?: number, limit?: number): Promise<ReviewsResponse> => {
+    const params = new URLSearchParams();
+    if (skip !== undefined) params.set('skip', String(skip));
+    if (limit !== undefined) params.set('limit', String(limit));
+    const query = params.toString();
+    return apiCall<ReviewsResponse>(`/reviews/product/${productId}${query ? `?${query}` : ''}`);
+  },
+
+  getFarmReviews: async (farmId: string, skip?: number, limit?: number): Promise<ReviewsResponse> => {
+    const params = new URLSearchParams();
+    if (skip !== undefined) params.set('skip', String(skip));
+    if (limit !== undefined) params.set('limit', String(limit));
+    const query = params.toString();
+    return apiCall<ReviewsResponse>(`/reviews/farm/${farmId}${query ? `?${query}` : ''}`);
+  },
+};
+
+// ==================== COUPON API ====================
+
+export interface Coupon {
+  id: string;
+  code: string;
+  coupon_type: 'percentage' | 'fixed' | 'free_delivery';
+  value: number;
+  min_order: number;
+  max_discount?: number;
+  usage_limit?: number;
+  used_count: number;
+  valid_until?: string;
+  is_active: boolean;
+  description: string;
+  created_at: string;
+}
+
+export interface CouponValidation {
+  valid: boolean;
+  code: string;
+  coupon_type: string;
+  discount: number;
+  description: string;
+  message: string;
+}
+
+export const couponApi = {
+  validate: async (code: string, subtotal: number): Promise<CouponValidation> => {
+    return apiCall<CouponValidation>('/coupons/validate', {
+      method: 'POST',
+      body: JSON.stringify({ code, subtotal }),
+    });
+  },
+
+  apply: async (code: string): Promise<{ message: string }> => {
+    return apiCall(`/coupons/apply?code=${encodeURIComponent(code)}`, { method: 'POST' });
+  },
+
+  getAll: async (): Promise<Coupon[]> => {
+    return apiCall<Coupon[]>('/coupons');
+  },
+
+  create: async (coupon: Omit<Coupon, 'id' | 'used_count' | 'created_at'>): Promise<Coupon> => {
+    return apiCall<Coupon>('/coupons', {
+      method: 'POST',
+      body: JSON.stringify(coupon),
+    });
+  },
+
+  delete: async (couponId: string): Promise<void> => {
+    return apiCall(`/coupons/${couponId}`, { method: 'DELETE' });
+  },
+};
+
+// ==================== ANALYTICS API ====================
+
+export interface AnalyticsOverview {
+  total_revenue: number;
+  total_orders: number;
+  monthly_revenue: number;
+  monthly_orders: number;
+  weekly_revenue: number;
+  weekly_orders: number;
+  average_order_value: number;
+  total_products: number;
+  total_farms: number;
+  total_drivers: number;
+}
+
+export interface RevenueChartData {
+  date: string;
+  revenue: number;
+  orders: number;
+}
+
+export interface TopProduct {
+  _id: string;
+  product_name: string;
+  farm_name: string;
+  total_quantity: number;
+  total_revenue: number;
+}
+
+export interface TopFarm {
+  _id: string;
+  total_orders: number;
+  total_revenue: number;
+  total_items: number;
+}
+
+export const analyticsApi = {
+  getOverview: async (): Promise<AnalyticsOverview> => {
+    return apiCall<AnalyticsOverview>('/analytics/overview');
+  },
+
+  getRevenueChart: async (days?: number): Promise<RevenueChartData[]> => {
+    const params = days ? `?days=${days}` : '';
+    return apiCall<RevenueChartData[]>(`/analytics/revenue-chart${params}`);
+  },
+
+  getTopProducts: async (limit?: number): Promise<TopProduct[]> => {
+    const params = limit ? `?limit=${limit}` : '';
+    return apiCall<TopProduct[]>(`/analytics/top-products${params}`);
+  },
+
+  getTopFarms: async (limit?: number): Promise<TopFarm[]> => {
+    const params = limit ? `?limit=${limit}` : '';
+    return apiCall<TopFarm[]>(`/analytics/top-farms${params}`);
+  },
+
+  getOrderStatusDistribution: async (): Promise<Record<string, number>> => {
+    return apiCall<Record<string, number>>('/analytics/order-status-distribution');
+  },
+};
+
+// ==================== EMAIL API (MOCK) ====================
+
+export interface Email {
+  id: string;
+  to_email: string;
+  subject: string;
+  body: string;
+  template: string;
+  status: string;
+  sent_at?: string;
+  created_at: string;
+}
+
+export const emailApi = {
+  getSentEmails: async (limit?: number): Promise<Email[]> => {
+    const params = limit ? `?limit=${limit}` : '';
+    return apiCall<Email[]>(`/emails${params}`);
+  },
+
+  sendTestEmail: async (toEmail: string, template?: string): Promise<{ message: string; email_id: string }> => {
+    const params = new URLSearchParams({ to_email: toEmail });
+    if (template) params.set('template', template);
+    return apiCall(`/emails/send-test?${params}`, { method: 'POST' });
+  },
+};

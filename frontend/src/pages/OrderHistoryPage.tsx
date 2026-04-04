@@ -56,6 +56,7 @@ const OrderCard = ({ order, onCancel }: { order: Order; onCancel: (id: string) =
   const status = statusConfig[order.order_status] || statusConfig.pending;
   const StatusIcon = status.icon;
   const canCancel = order.order_status === "pending" || order.order_status === "confirmed";
+  const canTrack = order.order_status !== "cancelled" && order.order_status !== "delivered";
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const formatDate = (dateStr: string) => {
@@ -148,12 +149,24 @@ const OrderCard = ({ order, onCancel }: { order: Order; onCancel: (id: string) =
 
         {/* Actions */}
         <div className="flex items-center justify-between pt-2 border-t border-glass-border">
-          <Link 
-            to={`/order/${order.id}`}
-            className="text-sm text-primary hover:underline flex items-center gap-1"
-          >
-            View Details <ChevronRight className="h-4 w-4" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link 
+              to={`/order/${order.id}`}
+              className="text-sm text-primary hover:underline flex items-center gap-1"
+            >
+              View Details <ChevronRight className="h-4 w-4" />
+            </Link>
+            {canTrack && (
+              <Link 
+                to={`/tracking/${order.id}`}
+                className="text-sm text-purple-600 hover:underline flex items-center gap-1"
+                data-testid="track-order-btn"
+              >
+                <Truck className="h-3.5 w-3.5 mr-1" />
+                Track
+              </Link>
+            )}
+          </div>
           {canCancel && (
             <Button 
               variant="ghost" 
