@@ -179,7 +179,7 @@ async function handleCreateBooking(supabase: any, body: any, userId: string, isA
   );
 }
 
-async function handleCancelBooking(supabase: any, body: any, userId: string) {
+async function handleCancelBooking(supabase: any, body: any, userId: string, isAdmin: boolean) {
   const { booking_id, order_id, reason } = body;
 
   if (!booking_id && !order_id) {
@@ -187,6 +187,18 @@ async function handleCancelBooking(supabase: any, body: any, userId: string) {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  }
+
+  // Verify ownership - need to determine the order_id first
+  const checkOrderId = order_id || null;
+  if (checkOrderId) {
+    const ownsOrder = await verifyOrderOwnership(supabase, checkOrderId, userId, isAdmin);
+    if (!ownsOrder) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
   }
 
   // Find the active booking
