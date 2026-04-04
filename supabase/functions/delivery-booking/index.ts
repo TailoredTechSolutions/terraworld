@@ -36,12 +36,15 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { action } = body;
 
+    // Check if user is admin
+    const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
+
     if (action === "create") {
-      return await handleCreateBooking(supabase, body, user.id);
+      return await handleCreateBooking(supabase, body, user.id, !!isAdmin);
     } else if (action === "cancel") {
-      return await handleCancelBooking(supabase, body, user.id);
+      return await handleCancelBooking(supabase, body, user.id, !!isAdmin);
     } else if (action === "status") {
-      return await handleGetStatus(supabase, body);
+      return await handleGetStatus(supabase, body, user.id, !!isAdmin);
     } else {
       return new Response(JSON.stringify({ error: "Invalid action" }), {
         status: 400,
