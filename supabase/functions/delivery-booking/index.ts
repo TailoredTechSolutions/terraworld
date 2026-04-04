@@ -36,12 +36,15 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { action } = body;
 
+    // Check if user is admin
+    const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
+
     if (action === "create") {
-      return await handleCreateBooking(supabase, body, user.id);
+      return await handleCreateBooking(supabase, body, user.id, !!isAdmin);
     } else if (action === "cancel") {
-      return await handleCancelBooking(supabase, body, user.id);
+      return await handleCancelBooking(supabase, body, user.id, !!isAdmin);
     } else if (action === "status") {
-      return await handleGetStatus(supabase, body);
+      return await handleGetStatus(supabase, body, user.id, !!isAdmin);
     } else {
       return new Response(JSON.stringify({ error: "Invalid action" }), {
         status: 400,
@@ -57,7 +60,23 @@ Deno.serve(async (req) => {
   }
 });
 
-async function handleCreateBooking(supabase: any, body: any, userId: string) {
+async function verifyOrderOwnership(supabase: any, orderId: string, userId: string, isAdmin: boolean) {
+  if (isAdmin) return true;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("email")
+    .eq("user_id", userId)
+    .single();
+  if (!profile) return false;
+  const { data: order } = await supabase
+    .from("orders")
+    .select("customer_email")
+    .eq("id", orderId)
+    .single();
+  return order?.customer_email === profile.email;
+}
+
+async function handleCreateBooking(supabase: any, body: any, userId: string, isAdmin: boolean) {
   const {
     order_id,
     provider_type,
@@ -75,6 +94,15 @@ async function handleCreateBooking(supabase: any, body: any, userId: string) {
   if (!order_id || !provider_type) {
     return new Response(JSON.stringify({ error: "Missing order_id or provider_type" }), {
       status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Verify order ownership
+  const ownsOrder = await verifyOrderOwnership(supabase, order_id, userId, isAdmin);
+  if (!ownsOrder) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 403,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
@@ -151,7 +179,7 @@ async function handleCreateBooking(supabase: any, body: any, userId: string) {
   );
 }
 
-async function handleCancelBooking(supabase: any, body: any, userId: string) {
+async function handleCancelBooking(supabase: any, body: any, userId: string, isAdmin: boolean) {
   const { booking_id, order_id, reason } = body;
 
   if (!booking_id && !order_id) {
@@ -159,6 +187,18 @@ async function handleCancelBooking(supabase: any, body: any, userId: string) {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  }
+
+  // Verify ownership - need to determine the order_id first
+  const checkOrderId = order_id || null;
+  if (checkOrderId) {
+    const ownsOrder = await verifyOrderOwnership(supabase, checkOrderId, userId, isAdmin);
+    if (!ownsOrder) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
   }
 
   // Find the active booking
@@ -184,6 +224,17 @@ async function handleCancelBooking(supabase: any, body: any, userId: string) {
   }
 
   const activeBooking = bookings[0];
+
+  // Verify ownership if we only had booking_id (not order_id)
+  if (!checkOrderId) {
+    const ownsOrder = await verifyOrderOwnership(supabase, activeBooking.order_id, userId, isAdmin);
+    if (!ownsOrder) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
 
   // Mock: call provider cancellation API
   // In production: call Lalamove/Grab cancel endpoint
@@ -220,12 +271,21 @@ async function handleCancelBooking(supabase: any, body: any, userId: string) {
   );
 }
 
-async function handleGetStatus(supabase: any, body: any) {
+async function handleGetStatus(supabase: any, body: any, userId: string, isAdmin: boolean) {
   const { order_id } = body;
 
   if (!order_id) {
     return new Response(JSON.stringify({ error: "Missing order_id" }), {
       status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Verify ownership
+  const ownsOrder = await verifyOrderOwnership(supabase, order_id, userId, isAdmin);
+  if (!ownsOrder) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 403,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
