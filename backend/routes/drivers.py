@@ -26,10 +26,17 @@ async def register_driver(user_id: str, name: str, phone: str, vehicle_type: str
 @router.get("/drivers/available-deliveries")
 async def get_available_deliveries():
     orders = await db.orders.find({"order_status": "confirmed"}).to_list(50)
+    if not orders:
+        return []
+
+    # Batch fetch existing deliveries
+    order_ids = [o["id"] for o in orders]
+    existing_deliveries = await db.deliveries.find({"order_id": {"$in": order_ids}}).to_list(len(order_ids))
+    assigned_order_ids = {d["order_id"] for d in existing_deliveries}
+
     deliveries = []
     for order in orders:
-        existing = await db.deliveries.find_one({"order_id": order["id"]})
-        if not existing:
+        if order["id"] not in assigned_order_ids:
             deliveries.append({
                 "order_id": order["id"],
                 "total": order["total"],
@@ -60,9 +67,11 @@ async def get_driver_stats(driver_id: str):
 
     deliveries = await db.deliveries.find({"driver_id": driver_id, "status": "delivered"}).to_list(1000)
     total_earnings = 0
-    for d in deliveries:
-        order = await db.orders.find_one({"id": d["order_id"]})
-        if order:
+    if deliveries:
+        # Batch fetch all orders for earnings calculation
+        del_order_ids = [d["order_id"] for d in deliveries]
+        orders_list = await db.orders.find({"id": {"$in": del_order_ids}}).to_list(len(del_order_ids))
+        for order in orders_list:
             total_earnings += order["total"] * 0.15
 
     return {
@@ -81,10 +90,16 @@ async def get_driver_deliveries(driver_id: str, status: Optional[str] = None):
         query["status"] = status
 
     deliveries = await db.deliveries.find(query).sort("created_at", -1).to_list(100)
+
+    # Batch fetch all related orders
+    order_ids = [d["order_id"] for d in deliveries]
+    orders_list = await db.orders.find({"id": {"$in": order_ids}}).to_list(len(order_ids)) if order_ids else []
+    orders_map = {o["id"]: o for o in orders_list}
+
     result = []
     for d in deliveries:
         d.pop("_id", None)
-        order = await db.orders.find_one({"id": d["order_id"]})
+        order = orders_map.get(d["order_id"])
         if order:
             d["order"] = {
                 "id": order["id"],
@@ -188,13 +203,20 @@ async def update_driver_location(driver_id: str, location: DriverLocationUpdate)
         raise HTTPException(status_code=404, detail="Driver not found")
 
     deliveries = await db.deliveries.find({"driver_id": driver_id, "status": {"$in": ["assigned", "picked_up"]}}).to_list(10)
-    for delivery in deliveries:
-        order = await db.orders.find_one({"id": delivery["order_id"]})
-        if order:
-            await manager.send_personal_message({
-                "type": "driver_location",
-                "order_id": delivery["order_id"],
-                "location": {"lat": location.latitude, "lng": location.longitude},
-            }, order["user_id"])
+
+    # Batch fetch orders for all active deliveries
+    if deliveries:
+        del_order_ids = [d["order_id"] for d in deliveries]
+        orders_list = await db.orders.find({"id": {"$in": del_order_ids}}).to_list(len(del_order_ids))
+        orders_map = {o["id"]: o for o in orders_list}
+
+        for delivery in deliveries:
+            order = orders_map.get(delivery["order_id"])
+            if order:
+                await manager.send_personal_message({
+                    "type": "driver_location",
+                    "order_id": delivery["order_id"],
+                    "location": {"lat": location.latitude, "lng": location.longitude},
+                }, order["user_id"])
 
     return {"message": "Location updated"}
