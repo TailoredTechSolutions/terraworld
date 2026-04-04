@@ -56,6 +56,22 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Validate item quantities
+    for (const item of items) {
+      if (!item.shop_product_id || typeof item.shop_product_id !== 'string') {
+        return new Response(JSON.stringify({ error: "Invalid product ID" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 100) {
+        return new Response(JSON.stringify({ error: `Invalid quantity for item ${item.shop_product_id}. Must be between 1 and 100.` }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // Fetch shop products
     const productIds = items.map((i: any) => i.shop_product_id);
     const { data: shopProducts, error: prodError } = await supabaseService
