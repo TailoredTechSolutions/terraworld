@@ -30,6 +30,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import ImageUpload from "@/components/ImageUpload";
 import {
   Leaf,
   Package,
@@ -543,6 +544,12 @@ const FarmerManagementPage = () => {
                 onCheckedChange={(checked) => setProductForm({ ...productForm, organic: checked })}
               />
             </div>
+
+            <ImageUpload
+              label="Product Image"
+              currentImage={productForm.image !== "/images/products/default.jpg" ? productForm.image : undefined}
+              onUpload={(result) => setProductForm({ ...productForm, image: result.url })}
+            />
           </div>
 
           <DialogFooter>

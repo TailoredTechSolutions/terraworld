@@ -766,3 +766,48 @@ export const emailApi = {
     return apiCall(`/emails/send-test?${params}`, { method: 'POST' });
   },
 };
+
+// ==================== UPLOADS ====================
+
+export interface UploadResult {
+  filename: string;
+  url: string;
+  size: number;
+  content_type: string;
+}
+
+export const uploadApi = {
+  uploadImage: async (file: File): Promise<UploadResult> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch(`${API_URL}/api/uploads/image`, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.detail || 'Upload failed');
+    }
+    return response.json();
+  },
+
+  uploadMultipleImages: async (files: File[]): Promise<{ uploaded: UploadResult[]; count: number }> => {
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file));
+    const response = await fetch(`${API_URL}/api/uploads/images`, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.detail || 'Upload failed');
+    }
+    return response.json();
+  },
+
+  getImageUrl: (url: string): string => {
+    if (url.startsWith('http')) return url;
+    return `${API_URL}${url}`;
+  },
+};
+

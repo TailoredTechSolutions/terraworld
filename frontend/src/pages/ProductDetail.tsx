@@ -14,9 +14,9 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Minus, Plus, Leaf, MapPin, Truck, Shield, Star, Info, MessageSquare, Send } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Leaf, MapPin, Truck, Shield, Star, Info, MessageSquare, Send, ImageIcon, X } from "lucide-react";
 import { useState } from "react";
-import { reviewApi, Review } from "@/services/api";
+import { reviewApi, Review, uploadApi } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
 const PLATFORM_FEE_RATE = 0.20;
@@ -33,6 +33,8 @@ const ProductDetail = () => {
   const [reviewComment, setReviewComment] = useState("");
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [hoverRating, setHoverRating] = useState(0);
+  const [reviewImages, setReviewImages] = useState<string[]>([]);
+  const [uploadingReviewImage, setUploadingReviewImage] = useState(false);
 
   // Try DB product first, fall back to local
   const { data: dbProduct, isLoading } = useQuery({
@@ -68,10 +70,12 @@ const ProductDetail = () => {
         product_id: id,
         rating: reviewRating,
         comment: reviewComment,
+        images: reviewImages,
       });
       toast({ title: "Review submitted!", description: "Thanks for your feedback" });
       setReviewRating(0);
       setReviewComment("");
+      setReviewImages([]);
       refetchReviews();
     } catch (error: any) {
       toast({ title: "Error", description: error.message || "Failed to submit review", variant: "destructive" });
@@ -462,6 +466,52 @@ const ProductDetail = () => {
                       className="text-sm"
                       data-testid="review-comment"
                     />
+                    {/* Review Image Upload */}
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap gap-2">
+                        {reviewImages.map((img, idx) => (
+                          <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border">
+                            <img src={uploadApi.getImageUrl(img)} alt="" className="w-full h-full object-cover" />
+                            <button
+                              onClick={() => setReviewImages(reviewImages.filter((_, i) => i !== idx))}
+                              className="absolute top-0.5 right-0.5 p-0.5 bg-black/60 rounded-full text-white"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                        {reviewImages.length < 3 && (
+                          <label className="w-16 h-16 rounded-lg border-2 border-dashed border-glass-border flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
+                            {uploadingReviewImage ? (
+                              <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <ImageIcon className="h-5 w-5 text-muted-foreground/50" />
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              data-testid="review-image-input"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                setUploadingReviewImage(true);
+                                try {
+                                  const result = await uploadApi.uploadImage(file);
+                                  setReviewImages([...reviewImages, result.url]);
+                                } catch {
+                                  toast({ title: "Upload failed", variant: "destructive" });
+                                } finally {
+                                  setUploadingReviewImage(false);
+                                  e.target.value = "";
+                                }
+                              }}
+                            />
+                          </label>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Add up to 3 photos</p>
+                    </div>
                     <Button
                       size="sm"
                       onClick={handleSubmitReview}
@@ -516,6 +566,18 @@ const ProductDetail = () => {
                       </div>
                       {review.comment && (
                         <p className="text-sm text-muted-foreground leading-relaxed">{review.comment}</p>
+                      )}
+                      {review.images && review.images.length > 0 && (
+                        <div className="flex gap-2 mt-2">
+                          {review.images.map((img, idx) => (
+                            <img
+                              key={idx}
+                              src={uploadApi.getImageUrl(img)}
+                              alt=""
+                              className="w-16 h-16 rounded-lg object-cover border"
+                            />
+                          ))}
+                        </div>
                       )}
                     </CardContent>
                   </Card>
