@@ -60,7 +60,23 @@ Deno.serve(async (req) => {
   }
 });
 
-async function handleCreateBooking(supabase: any, body: any, userId: string) {
+async function verifyOrderOwnership(supabase: any, orderId: string, userId: string, isAdmin: boolean) {
+  if (isAdmin) return true;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("email")
+    .eq("user_id", userId)
+    .single();
+  if (!profile) return false;
+  const { data: order } = await supabase
+    .from("orders")
+    .select("customer_email")
+    .eq("id", orderId)
+    .single();
+  return order?.customer_email === profile.email;
+}
+
+async function handleCreateBooking(supabase: any, body: any, userId: string, isAdmin: boolean) {
   const {
     order_id,
     provider_type,
@@ -78,6 +94,15 @@ async function handleCreateBooking(supabase: any, body: any, userId: string) {
   if (!order_id || !provider_type) {
     return new Response(JSON.stringify({ error: "Missing order_id or provider_type" }), {
       status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Verify order ownership
+  const ownsOrder = await verifyOrderOwnership(supabase, order_id, userId, isAdmin);
+  if (!ownsOrder) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 403,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
