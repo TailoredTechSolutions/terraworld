@@ -12,6 +12,7 @@ from websocket_manager import manager
 # Route modules
 from routes import products, farms, cart, orders, payments, notifications
 from routes import drivers, reviews, coupons, analytics, admin, farmer, emails, uploads
+from routes import google_auth
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ app.include_router(admin.router, prefix=PREFIX, tags=["Admin"])
 app.include_router(farmer.router, prefix=PREFIX, tags=["Farmer"])
 app.include_router(emails.router, prefix=PREFIX, tags=["Emails"])
 app.include_router(uploads.router, prefix=PREFIX, tags=["Uploads"])
+app.include_router(google_auth.router, prefix=PREFIX, tags=["Google Auth"])
 
 
 # ==================== ROOT & HEALTH ====================
